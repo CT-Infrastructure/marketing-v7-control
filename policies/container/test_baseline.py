@@ -1,6 +1,9 @@
 """Constructed, offline F06 tests; no container runtime, network or site data."""
 import copy
 import json
+import os
+import subprocess
+import sys
 from pathlib import Path
 import tempfile
 import unittest
@@ -13,10 +16,10 @@ def fixture():
     return dict(schema_version='1.0',component_id='synthetic-app',
         image='fixture.example.invalid/synthetic-app@sha256:'+'a'*64,rootless=True,
         process=dict(uid=10001,gid=10001),
-        filesystem=dict(read_only=True,mounts=[dict(type='named_volume',name='synthetic-state',target='/var/lib/synthetic',uid=10001,gid=10001,mode='0700',backup_ref='synthetic-backup',restore_ref='synthetic-held-restore')],tmpfs=[dict(target='/tmp',size_mib=64,noexec=True,nosuid=True,nodev=True)]),
+        filesystem=dict(read_only=True,read_only_tmpfs=False,mounts=[dict(type='named_volume',name='synthetic-state',target='/var/lib/synthetic',uid=10001,gid=10001,mode='0700',backup_ref='synthetic-backup',restore_ref='synthetic-held-restore')],tmpfs=[dict(target='/tmp',size_mib=64,noexec=True,nosuid=True,nodev=True)]),
         isolation=dict(privileged=False,network='none',pid='private',ipc='private',capabilities=[],no_new_privileges=True,seccomp='runtime-default',lsm='host-enforcing-default',devices=[],sockets=[]),
         resources=dict(memory_mib=512,cpu_percent=100,pids=128,disk_mib=512,runtime_seconds=3600),
-        lifecycle=dict(restart='on-failure',restart_seconds=10,start_seconds=180,stop_seconds=60,start_limit_interval_seconds=300,start_limit_burst=3,health=dict(argv=['/app/synthetic-health'],interval_seconds=30,timeout_seconds=5,retries=3,start_seconds=30),readiness_ref='synthetic-readiness',drain_ref='synthetic-drain',rollback_ref='synthetic-rollback'),
+        lifecycle=dict(restart='no',restart_seconds=10,start_seconds=180,stop_seconds=60,start_limit_interval_seconds=300,start_limit_burst=3,health=dict(argv=['/app/synthetic-health'],interval_seconds=30,timeout_seconds=5,retries=3,start_seconds=30),readiness_ref='synthetic-readiness',drain_ref='synthetic-drain',rollback_ref='synthetic-rollback'),
         dependencies=[],secret_refs=[],environment={'OUTBOUND_EFFECTS':'HOLD'},external_effects='disabled')
 
 def quadlet():
@@ -108,7 +111,7 @@ class BaselineTests(unittest.TestCase):
             with self.assertRaises(v.PolicyError): v.validate_quadlet(quadlet().replace('[Service]',line+'\n[Service]'))
         with self.assertRaises(v.PolicyError): v.validate_quadlet(quadlet()+'\n[Install]\nWantedBy=default.target\n')
     def test_quadlet_hardening_mutations_rejected(self):
-        for before,after in [('ReadOnly=true','ReadOnly=false'),('NoNewPrivileges=true','NoNewPrivileges=false'),('Network=none','Network=host'),('User=10001:10001','User=0:0'),('DropCapability=all','DropCapability=none'),('Restart=on-failure','Restart=always'),('TasksMax=128','TasksMax=infinity'),('MemoryMax=512M','MemoryMax=infinity'),('HealthTimeout=5s','HealthTimeout=0'),('RuntimeMaxSec=3600','RuntimeMaxSec=infinity'),('Environment=OUTBOUND_EFFECTS=HOLD','Environment=OUTBOUND_EFFECTS=ENABLE')]:
+        for before,after in [('ReadOnly=true','ReadOnly=false'),('NoNewPrivileges=true','NoNewPrivileges=false'),('Network=none','Network=host'),('User=10001:10001','User=0:0'),('DropCapability=all','DropCapability=none'),('Restart=no','Restart=always'),('TasksMax=128','TasksMax=infinity'),('MemoryMax=512M','MemoryMax=infinity'),('HealthTimeout=5s','HealthTimeout=0'),('RuntimeMaxSec=3600','RuntimeMaxSec=infinity'),('Environment=OUTBOUND_EFFECTS=HOLD','Environment=OUTBOUND_EFFECTS=ENABLE')]:
             with self.assertRaises(v.PolicyError): v.validate_quadlet(quadlet().replace(before,after))
     def test_native_exceptions_are_placement_not_approval(self):
         doc=json.loads((ROOT/'policies/container/native-exceptions.json').read_text(encoding='utf-8-sig'))
@@ -181,4 +184,57 @@ class BaselineTests(unittest.TestCase):
             source = quadlet().replace('User=10001:10001',
                                        'User=%s:%s' % (value, value))
             self.assertFalse(v.validate_quadlet(source)['launch_authorized'])
+    def test_implicit_writable_tmpfs_rejected(self):
+        self.changed('filesystem','read_only_tmpfs',True)
+        self.changed('filesystem','read_only_tmpfs',None)
+        for source in (quadlet().replace('ReadOnlyTmpfs=false','ReadOnlyTmpfs=true'),
+                       quadlet().replace('ReadOnlyTmpfs=false\n','')):
+            with self.assertRaises(v.PolicyError):v.validate_quadlet(source)
+
+    def test_json_exec_health_only(self):
+        for command in ('/app/synthetic-health', '"/app/synthetic-health"',
+                        '["CMD-SHELL", "/app/synthetic-health"]',
+                        '["/bin/sh", "-c", "true"]', '["/app/synthetic-health", "extra"]',
+                        '[]', '{"cmd":"/app/synthetic-health"}'):
+            source=quadlet().replace('["/app/synthetic-health"]',command)
+            with self.subTest(command=command),self.assertRaises(v.PolicyError):v.validate_quadlet(source)
+        self.assertTrue(v.validate_quadlet(quadlet())['valid'])
+
+    def test_runtime_timeout_cannot_restart_forever(self):
+        for restart in ('on-failure','always','on-abnormal','on-watchdog'):
+            self.changed('lifecycle','restart',restart)
+            with self.subTest(restart=restart),self.assertRaises(v.PolicyError):
+                v.validate_quadlet(quadlet().replace('Restart=no','Restart='+restart))
+
+    def test_unqualified_registry_rejected_by_both_entrypoints(self):
+        for host in ('team','registry','docker','example'):
+            with self.subTest(host=host):
+                self.check_image_in_both_formats(host+'/app@sha256:'+'a'*64,False)
+        for host in ('localhost','localhost:5000','registry:5000','registry.example'):
+            with self.subTest(host=host):
+                self.check_image_in_both_formats(host+'/app@sha256:'+'a'*64,True)
+
+    def test_nonphysical_separator_smuggling_rejected(self):
+        for separator in ('\v','\f','\x1c','\x1d','\x1e','\x85','\u2028','\u2029','\r'):
+            source=quadlet().replace('Network=none','#'+separator+'Network=none')
+            with self.subTest(separator=repr(separator)),self.assertRaises(v.PolicyError):v.validate_quadlet(source)
+        self.assertTrue(v.validate_quadlet(quadlet().replace('\n','\r\n'))['valid'])
+        self.assertTrue(v.validate_quadlet(quadlet().replace('Network=none','\tNetwork=none'))['valid'])
+
+    def test_cli_preserves_raw_separators(self):
+        with tempfile.TemporaryDirectory() as td:
+            path=Path(td)/'synthetic.container'
+            for separator in ('\r','\v','\f','\x85','\u2028','\u2029'):
+                source=quadlet().replace('Network=none','#'+separator+'Network=none')
+                path.write_bytes(source.encode('utf-8'))
+                self.assertEqual(v.load_quadlet(path),source)
+                result=subprocess.run([sys.executable,'-B',str(ROOT/'policies/container/validate.py'),'--quadlet',str(path)],capture_output=True,text=True,timeout=15)
+                with self.subTest(separator=repr(separator)):
+                    self.assertEqual(result.returncode,2,result.stdout)
+                    self.assertFalse(json.loads(result.stdout)['valid'])
+            path.write_bytes(quadlet().replace('\n','\r\n').encode('utf-8'))
+            self.assertIn('\r\n',v.load_quadlet(path))
+            result=subprocess.run([sys.executable,'-B',str(ROOT/'policies/container/validate.py'),'--quadlet',str(path)],capture_output=True,text=True,timeout=15)
+            self.assertEqual(result.returncode,0,result.stdout)
+
 if __name__=='__main__': unittest.main(verbosity=2)

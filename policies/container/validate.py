@@ -49,6 +49,7 @@ def image_reference(value):
         re.fullmatch(r'[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?', label)
         for label in host.split('.')), 'invalid registry hostname')
     port = match['port']
+    require('.' in host or port is not None or host == 'localhost', 'explicit registry required')
     require(port is None or 1 <= int(port) <= 65535, 'invalid registry port')
     require(len(match['repo']) <= 255 and all(
         re.fullmatch(r'[a-z0-9]+(?:(?:[._]|__|-+)[a-z0-9]+)*', part)
@@ -65,7 +66,8 @@ def validate_manifest(m):
     for key in ('uid', 'gid'):
         integer(m['process'][key], IDENTITY_MIN, IDENTITY_MAX, key)
     fs = m['filesystem']
-    shape(fs, 'read_only mounts tmpfs', 'filesystem')
+    shape(fs, 'read_only read_only_tmpfs mounts tmpfs', 'filesystem')
+    require(fs['read_only_tmpfs'] is False, 'implicit writable tmpfs forbidden')
     require(fs['read_only'] is True, 'read-only root required; exceptions need separate review')
     require(type(fs['mounts']) is list and type(fs['tmpfs']) is list, 'mount lists required')
     targets = set()
@@ -97,7 +99,7 @@ def validate_manifest(m):
         integer(r[key], *bounds, key)
     require(sum(t['size_mib'] for t in fs['tmpfs']) <= r['memory_mib'], 'tmpfs exceeds memory limit')
     lc=m['lifecycle']; shape(lc, 'restart restart_seconds start_seconds stop_seconds start_limit_interval_seconds start_limit_burst health readiness_ref drain_ref rollback_ref', 'lifecycle')
-    require(lc['restart'] == 'on-failure', 'bounded on-failure restart required')
+    require(lc['restart'] == 'no', 'bounded one-shot must not automatically restart')
     for key, bounds in {'restart_seconds':(1,60),'start_seconds':(1,300),'stop_seconds':(1,120),'start_limit_interval_seconds':(60,3600),'start_limit_burst':(1,5)}.items():
         integer(lc[key], *bounds, key)
     h=lc['health']; shape(h, 'argv interval_seconds timeout_seconds retries start_seconds', 'health')
@@ -121,15 +123,17 @@ def validate_manifest(m):
 # Deliberately restricted offline syntax; not a replacement for the installed generator.
 KEYS = {
  'Unit':set('Description StartLimitIntervalSec StartLimitBurst'.split()),
- 'Container':set('Image ContainerName User ReadOnly NoNewPrivileges DropCapability Network Tmpfs Environment HealthCmd HealthInterval HealthTimeout HealthRetries HealthStartPeriod'.split()),
+ 'Container':set('Image ContainerName User ReadOnly ReadOnlyTmpfs NoNewPrivileges DropCapability Network Tmpfs Environment HealthCmd HealthInterval HealthTimeout HealthRetries HealthStartPeriod'.split()),
  'Service':set('Restart RestartSec TimeoutStartSec TimeoutStopSec MemoryMax CPUQuota TasksMax RuntimeMaxSec'.split())}
 
 def validate_quadlet(source):
     require(type(source) is str and len(source) <= 32768, 'bounded source required')
     require('UNRESOLVED' not in source and '{{' not in source and '${' not in source, 'unresolved template is not installable')
+    require(not any((ord(c) < 32 and c not in '\t\r\n') or 127 <= ord(c) <= 159 or c in '\u2028\u2029' for c in source), 'unsupported control or line separator')
+    require(re.search(r'\r(?!\n)', source) is None, 'bare carriage return unsupported')
     parsed={}; section=None
-    for line in source.splitlines():
-        line=line.strip()
+    for line in source.replace('\r\n', '\n').split('\n'):
+        line=line.strip(' \t')
         if not line or line.startswith('#'):
             continue
         if line.startswith('[') and line.endswith(']'):
@@ -147,14 +151,24 @@ def validate_quadlet(source):
     require(re.fullmatch(r'[1-9][0-9]{0,9}:[1-9][0-9]{0,9}',c['User']), 'nonroot UID:GID required')
     for key, value in zip(('uid', 'gid'), c['User'].split(':')):
         integer(int(value), IDENTITY_MIN, IDENTITY_MAX, key)
-    require(all(c[k]==v for k,v in {'ReadOnly':'true','NoNewPrivileges':'true','DropCapability':'all','Network':'none'}.items()), 'hardening required')
+    require(all(c[k]==v for k,v in {'ReadOnly':'true','ReadOnlyTmpfs':'false','NoNewPrivileges':'true','DropCapability':'all','Network':'none'}.items()), 'hardening required')
     require(c['Environment']=='OUTBOUND_EFFECTS=HOLD', 'fixed held environment required')
     require(c['Tmpfs']=='/tmp:rw,nosuid,nodev,noexec,size=64m', 'bounded hardened tmpfs required')
-    require(re.fullmatch(r'/app/[a-z][a-z0-9-]*',c['HealthCmd']), 'fixed health executable required')
+    try:
+        health_argv=json.loads(c['HealthCmd'])
+    except (ValueError,TypeError) as exc:
+        raise PolicyError('JSON exec-form health command required') from exc
+    require(type(health_argv) is list and len(health_argv)==1 and type(health_argv[0]) is str and re.fullmatch(r'/app/[a-z][a-z0-9-]*',health_argv[0]), 'fixed JSON exec-form health executable required')
     require(c['HealthInterval']=='30s' and c['HealthTimeout']=='5s' and c['HealthRetries']=='3' and c['HealthStartPeriod']=='30s','bounded health checks required')
     require(u['StartLimitIntervalSec']=='300' and u['StartLimitBurst']=='3','restart rate limit required')
-    require(s=={'Restart':'on-failure','RestartSec':'10','TimeoutStartSec':'180','TimeoutStopSec':'60','MemoryMax':'512M','CPUQuota':'100%','TasksMax':'128','RuntimeMaxSec':'3600'},'bounded service policy required')
+    require(s=={'Restart':'no','RestartSec':'10','TimeoutStartSec':'180','TimeoutStopSec':'60','MemoryMax':'512M','CPUQuota':'100%','TasksMax':'128','RuntimeMaxSec':'3600'},'bounded service policy required')
     return {'valid':True,'evidence_level':'offline_syntax_subset_only','installed_generator':'NOT_RUN','launch_authorized':False}
+
+def load_quadlet(path):
+    # Preserve physical line endings so CR/VT/Unicode separator checks cannot be bypassed.
+    with Path(path).open('r', encoding='utf-8-sig', newline='') as stream:
+        return stream.read()
+
 
 def load_json(path):
     def unique(pairs):
@@ -169,7 +183,7 @@ if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('path'); parser.add_argument('--quadlet',action='store_true'); args=parser.parse_args()
     try:
-        result=validate_quadlet(Path(args.path).read_text(encoding='utf-8-sig')) if args.quadlet else validate_manifest(load_json(args.path))
+        result=validate_quadlet(load_quadlet(args.path)) if args.quadlet else validate_manifest(load_json(args.path))
         print(json.dumps(result)); raise SystemExit(0)
     except (PolicyError,ValueError,TypeError,KeyError,OSError) as exc:
         print(json.dumps({'valid':False,'launch_authorized':False,'reason':str(exc)})); raise SystemExit(2)

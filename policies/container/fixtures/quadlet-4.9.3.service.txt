@@ -1,6 +1,6 @@
 ---synthetic.service---
-# INERT F06 TEMPLATE. No installer is provided. Resolve and independently qualify first.
-# .container.in is not a Quadlet installation file. No [Install] target is enabled.
+# SYNTHETIC GENERATOR INPUT ONLY. Never install, pull or run this fixture.
+# Resolved fictitious .invalid image/digest; no [Install] target is enabled.
 [Unit]
 Description=synthetic held
 StartLimitIntervalSec=300
@@ -13,19 +13,20 @@ Image=fixture.example.invalid/synthetic-app@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 ContainerName=synthetic-app
 User=10001:10001
 ReadOnly=true
+ReadOnlyTmpfs=false
 NoNewPrivileges=true
 DropCapability=all
 Network=none
 Environment=OUTBOUND_EFFECTS=HOLD
 Tmpfs=/tmp:rw,nosuid,nodev,noexec,size=64m
-HealthCmd=/app/synthetic-health
+HealthCmd=["/app/synthetic-health"]
 HealthInterval=30s
 HealthTimeout=5s
 HealthRetries=3
 HealthStartPeriod=30s
 
 [Service]
-Restart=on-failure
+Restart=no
 RestartSec=10
 TimeoutStartSec=180
 TimeoutStopSec=60
@@ -41,5 +42,5 @@ Delegate=yes
 Type=notify
 NotifyAccess=all
 SyslogIdentifier=%N
-ExecStart=/usr/bin/podman run --name=synthetic-app --cidfile=%t/%N.cid --replace --rm --cgroups=split --network=none --sdnotify=conmon -d --security-opt=no-new-privileges --cap-drop=all --read-only --user 10001:10001 --tmpfs /tmp:rw,nosuid,nodev,noexec,size=64m --env OUTBOUND_EFFECTS=HOLD --health-cmd /app/synthetic-health --health-interval 30s --health-retries 3 --health-start-period 30s --health-timeout 5s fixture.example.invalid/synthetic-app@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+ExecStart=/usr/bin/podman run --name=synthetic-app --cidfile=%t/%N.cid --replace --rm --cgroups=split --network=none --sdnotify=conmon -d --security-opt=no-new-privileges --cap-drop=all --read-only --read-only-tmpfs=false --user 10001:10001 --tmpfs /tmp:rw,nosuid,nodev,noexec,size=64m --env OUTBOUND_EFFECTS=HOLD --health-cmd "[\"/app/synthetic-health\"]" --health-interval 30s --health-retries 3 --health-start-period 30s --health-timeout 5s fixture.example.invalid/synthetic-app@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 

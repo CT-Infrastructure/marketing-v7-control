@@ -10,19 +10,20 @@ Image=UNRESOLVED_REGISTRY/UNRESOLVED_IMAGE@sha256:UNRESOLVED_DIGEST
 ContainerName=UNRESOLVED_COMPONENT
 User=UNRESOLVED_UID:UNRESOLVED_GID
 ReadOnly=true
+ReadOnlyTmpfs=false
 NoNewPrivileges=true
 DropCapability=all
 Network=none
 Environment=OUTBOUND_EFFECTS=HOLD
 Tmpfs=/tmp:rw,nosuid,nodev,noexec,size=64m
-HealthCmd=/app/UNRESOLVED_HEALTH_EXECUTABLE
+HealthCmd=["/app/UNRESOLVED_HEALTH_EXECUTABLE"]
 HealthInterval=30s
 HealthTimeout=5s
 HealthRetries=3
 HealthStartPeriod=30s
 
 [Service]
-Restart=on-failure
+Restart=no
 RestartSec=10
 TimeoutStartSec=180
 TimeoutStopSec=60

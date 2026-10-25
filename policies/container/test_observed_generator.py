@@ -13,7 +13,7 @@ class ObservedGeneratorTests(unittest.TestCase):
         self.config.read_string(text.split('\n',1)[1])
         self.argv=shlex.split(self.config['Service']['ExecStart'])
     def test_observed_command_has_expected_hardening(self):
-        for item in ('--network=none','--security-opt=no-new-privileges','--cap-drop=all','--read-only','--cgroups=split'):
+        for item in ('--network=none','--security-opt=no-new-privileges','--cap-drop=all','--read-only','--read-only-tmpfs=false','--cgroups=split'):
             self.assertIn(item,self.argv)
         for flag,value in (('--user','10001:10001'),('--tmpfs','/tmp:rw,nosuid,nodev,noexec,size=64m'),('--env','OUTBOUND_EFFECTS=HOLD')):
             self.assertEqual(self.argv[self.argv.index(flag)+1],value)
@@ -25,11 +25,11 @@ class ObservedGeneratorTests(unittest.TestCase):
         self.assertNotIn('Install',self.config.sections())
     def test_observed_resource_lifecycle_and_health_settings(self):
         service=self.config['Service']
-        for key,value in {'Restart':'on-failure','RestartSec':'10','TimeoutStartSec':'180','TimeoutStopSec':'60','MemoryMax':'512M','CPUQuota':'100%','TasksMax':'128','RuntimeMaxSec':'3600','Delegate':'yes'}.items():
+        for key,value in {'Restart':'no','RestartSec':'10','TimeoutStartSec':'180','TimeoutStopSec':'60','MemoryMax':'512M','CPUQuota':'100%','TasksMax':'128','RuntimeMaxSec':'3600','Delegate':'yes'}.items():
             self.assertEqual(service[key],value)
         for key,value in {'StartLimitIntervalSec':'300','StartLimitBurst':'3'}.items():
             self.assertEqual(self.config['Unit'][key],value)
-        for flag,value in (('--health-cmd','/app/synthetic-health'),('--health-interval','30s'),('--health-timeout','5s'),('--health-retries','3'),('--health-start-period','30s')):
+        for flag,value in (('--health-cmd','["/app/synthetic-health"]'),('--health-interval','30s'),('--health-timeout','5s'),('--health-retries','3'),('--health-start-period','30s')):
             self.assertEqual(self.argv[self.argv.index(flag)+1],value)
 
 if __name__=='__main__': unittest.main(verbosity=2)

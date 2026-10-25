@@ -1,0 +1,33 @@
+# SYNTHETIC GENERATOR INPUT ONLY. Never install, pull or run this fixture.
+# Resolved fictitious .invalid image/digest; no [Install] target is enabled.
+[Unit]
+Description=synthetic held
+StartLimitIntervalSec=300
+StartLimitBurst=3
+
+[Container]
+Image=fixture.example.invalid/synthetic-app@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+ContainerName=synthetic-app
+User=10001:10001
+ReadOnly=true
+ReadOnlyTmpfs=false
+NoNewPrivileges=true
+DropCapability=all
+Network=none
+Environment=OUTBOUND_EFFECTS=HOLD
+Tmpfs=/tmp:rw,nosuid,nodev,noexec,size=64m
+HealthCmd=["/app/synthetic-health"]
+HealthInterval=30s
+HealthTimeout=5s
+HealthRetries=3
+HealthStartPeriod=30s
+
+[Service]
+Restart=no
+RestartSec=10
+TimeoutStartSec=180
+TimeoutStopSec=60
+MemoryMax=512M
+CPUQuota=100%
+TasksMax=128
+RuntimeMaxSec=3600
