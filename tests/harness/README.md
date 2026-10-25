@@ -64,3 +64,9 @@ Before resolving a reserved receipt to OCCURRED, direct readback must match the 
 ## Fractional fake-clock precision
 
 FakeClock preserves supported fractional UTC instants to microsecond precision. Its UTC output uses six fractional digits when nonzero and retains the original whole-second Z format when the fraction is zero. Integer-second advances preserve the fractional part. Approval expiry remains exclusive and callback timestamps are compared without truncating now: a future microsecond rejects, exactly300 seconds of age is allowed, and300 seconds plus one microsecond rejects. Four new regression methods cover these boundaries while keeping all28 earlier methods unchanged. This is synthetic time behavior, not a host-clock or runtime timing qualification.
+
+## Probe setup denials
+
+The opt-in TEST-NET probe now handles OSError from socket creation and timeout setup as well as connect. EPERM, EACCES, ENETUNREACH and EHOSTUNREACH retain DENY_OBSERVED classification; other OS errors remain INCONCLUSIVE. The JSON includes the phase so a denied socket syscall is not represented as an actual connection attempt or full network qualification. A successful connection remains DENY_FAILED even if cleanup subsequently errors.
+
+Both the explicit flag and F07_NETWORK_NAMESPACE_EXPECTED=1 are still mandatory. Seven new unit tests mock all socket calls and cover creation/setup denial, other errno handling, no-opt-in behavior, connect outcomes and cleanup. The original 32 harness tests are unchanged. Real TEST-NET execution remains restricted to the trusted isolated runner; this change does not itself run that probe or establish DNS/IPv6/production isolation.
