@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "component_id": "UNRESOLVED_COMPONENT",
+  "image": "UNRESOLVED_REGISTRY/UNRESOLVED_IMAGE@sha256:UNRESOLVED_DIGEST",
+  "rootless": true,
+  "process": {"uid": "UNRESOLVED_NONROOT_UID", "gid": "UNRESOLVED_NONROOT_GID"},
+  "filesystem": {"read_only": true, "read_only_tmpfs": false, "image_volumes": "ignore", "mounts": [], "tmpfs": [{"target": "/tmp", "size_mib": 64, "noexec": true, "nosuid": true, "nodev": true}]},
+  "isolation": {"privileged": false, "network": "none", "pid": "private", "ipc": "private", "capabilities": [], "no_new_privileges": true, "seccomp": "runtime-default", "lsm": "host-enforcing-default", "devices": [], "sockets": []},
+  "resources": {"memory_mib": 512, "cpu_percent": 100, "pids": 128, "disk_mib": 512, "runtime_seconds": 3600},
+  "lifecycle": {"restart": "no", "restart_seconds": 10, "start_seconds": 180, "stop_seconds": 60, "start_limit_interval_seconds": 300, "start_limit_burst": 3, "health": {"argv": ["/app/UNRESOLVED_HEALTH_EXECUTABLE"], "interval_seconds": 30, "timeout_seconds": 5, "retries": 3, "start_seconds": 30}, "readiness_ref": "UNRESOLVED_READINESS_CONTRACT", "drain_ref": "UNRESOLVED_DRAIN_CONTRACT", "rollback_ref": "UNRESOLVED_ROLLBACK_CONTRACT"},
+  "dependencies": [],
+  "secret_refs": [],
+  "environment": {"OUTBOUND_EFFECTS": "HOLD"},
+  "external_effects": "disabled"
+}
+
