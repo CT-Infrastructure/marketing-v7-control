@@ -125,8 +125,6 @@
       "environments": [
         {
           "name": "production",
-          "created_at": "2026-10-25T21:22:44Z",
-          "updated_at": "2026-10-25T21:22:44Z",
           "can_admins_bypass": true,
           "deployment_branch_policy": {
             "protected_branches": true,
@@ -136,15 +134,17 @@
             {
               "prevent_self_review": true,
               "reviewers": [
-                "CompleteDotTech"
+                {
+                  "login": "CompleteDotTech",
+                  "id": 5861166,
+                  "type": "User"
+                }
               ]
             }
           ]
         },
         {
           "name": "staging",
-          "created_at": "2026-10-25T21:22:42Z",
-          "updated_at": "2026-10-25T21:22:42Z",
           "can_admins_bypass": true,
           "deployment_branch_policy": {
             "protected_branches": true,
@@ -154,7 +154,11 @@
             {
               "prevent_self_review": true,
               "reviewers": [
-                "CompleteDotTech"
+                {
+                  "login": "CompleteDotTech",
+                  "id": 5861166,
+                  "type": "User"
+                }
               ]
             }
           ]
@@ -176,7 +180,8 @@
         "review_rule_restored": true,
         "evidence_level": "BOOTSTRAP_MERGED_ONLY",
         "production_actions": 0
-      }
+      },
+      "other_environment_names_observed": []
     },
     {
       "repository": "CT-Infrastructure/marketing-v7-control",
@@ -281,8 +286,6 @@
       "environments": [
         {
           "name": "production",
-          "created_at": "2026-10-25T21:22:13Z",
-          "updated_at": "2026-10-25T21:22:13Z",
           "can_admins_bypass": true,
           "deployment_branch_policy": {
             "protected_branches": true,
@@ -292,15 +295,17 @@
             {
               "prevent_self_review": true,
               "reviewers": [
-                "CompleteDotTech"
+                {
+                  "login": "CompleteDotTech",
+                  "id": 5861166,
+                  "type": "User"
+                }
               ]
             }
           ]
         },
         {
           "name": "staging",
-          "created_at": "2026-10-25T21:22:12Z",
-          "updated_at": "2026-10-25T21:22:12Z",
           "can_admins_bypass": true,
           "deployment_branch_policy": {
             "protected_branches": true,
@@ -310,7 +315,11 @@
             {
               "prevent_self_review": true,
               "reviewers": [
-                "CompleteDotTech"
+                {
+                  "login": "CompleteDotTech",
+                  "id": 5861166,
+                  "type": "User"
+                }
               ]
             }
           ]
@@ -332,7 +341,10 @@
         "review_rule_restored": true,
         "evidence_level": "BOOTSTRAP_MERGED_ONLY",
         "production_actions": 0
-      }
+      },
+      "other_environment_names_observed": [
+        "copilot"
+      ]
     },
     {
       "repository": "CT-Infrastructure/marketing-v7-email",
@@ -437,8 +449,6 @@
       "environments": [
         {
           "name": "production",
-          "created_at": "2026-10-25T21:22:54Z",
-          "updated_at": "2026-10-25T21:22:54Z",
           "can_admins_bypass": true,
           "deployment_branch_policy": {
             "protected_branches": true,
@@ -448,15 +458,17 @@
             {
               "prevent_self_review": true,
               "reviewers": [
-                "CompleteDotTech"
+                {
+                  "login": "CompleteDotTech",
+                  "id": 5861166,
+                  "type": "User"
+                }
               ]
             }
           ]
         },
         {
           "name": "staging",
-          "created_at": "2026-10-25T21:22:52Z",
-          "updated_at": "2026-10-25T21:22:52Z",
           "can_admins_bypass": true,
           "deployment_branch_policy": {
             "protected_branches": true,
@@ -466,7 +478,11 @@
             {
               "prevent_self_review": true,
               "reviewers": [
-                "CompleteDotTech"
+                {
+                  "login": "CompleteDotTech",
+                  "id": 5861166,
+                  "type": "User"
+                }
               ]
             }
           ]
@@ -488,7 +504,8 @@
         "review_rule_restored": true,
         "evidence_level": "BOOTSTRAP_MERGED_ONLY",
         "production_actions": 0
-      }
+      },
+      "other_environment_names_observed": []
     },
     {
       "repository": "CT-Infrastructure/marketing-v7-infrastructure",
@@ -593,8 +610,6 @@
       "environments": [
         {
           "name": "production",
-          "created_at": "2026-10-25T21:22:23Z",
-          "updated_at": "2026-10-25T21:22:23Z",
           "can_admins_bypass": true,
           "deployment_branch_policy": {
             "protected_branches": true,
@@ -604,15 +619,17 @@
             {
               "prevent_self_review": true,
               "reviewers": [
-                "CompleteDotTech"
+                {
+                  "login": "CompleteDotTech",
+                  "id": 5861166,
+                  "type": "User"
+                }
               ]
             }
           ]
         },
         {
           "name": "staging",
-          "created_at": "2026-10-25T21:22:22Z",
-          "updated_at": "2026-10-25T21:22:22Z",
           "can_admins_bypass": true,
           "deployment_branch_policy": {
             "protected_branches": true,
@@ -622,7 +639,11 @@
             {
               "prevent_self_review": true,
               "reviewers": [
-                "CompleteDotTech"
+                {
+                  "login": "CompleteDotTech",
+                  "id": 5861166,
+                  "type": "User"
+                }
               ]
             }
           ]
@@ -644,7 +665,8 @@
         "review_rule_restored": true,
         "evidence_level": "BOOTSTRAP_MERGED_ONLY",
         "production_actions": 0
-      }
+      },
+      "other_environment_names_observed": []
     },
     {
       "repository": "CT-Infrastructure/marketing-v7-integrations",
@@ -749,8 +771,6 @@
       "environments": [
         {
           "name": "production",
-          "created_at": "2026-10-25T21:22:34Z",
-          "updated_at": "2026-10-25T21:22:34Z",
           "can_admins_bypass": true,
           "deployment_branch_policy": {
             "protected_branches": true,
@@ -760,15 +780,17 @@
             {
               "prevent_self_review": true,
               "reviewers": [
-                "CompleteDotTech"
+                {
+                  "login": "CompleteDotTech",
+                  "id": 5861166,
+                  "type": "User"
+                }
               ]
             }
           ]
         },
         {
           "name": "staging",
-          "created_at": "2026-10-25T21:22:32Z",
-          "updated_at": "2026-10-25T21:22:32Z",
           "can_admins_bypass": true,
           "deployment_branch_policy": {
             "protected_branches": true,
@@ -778,7 +800,11 @@
             {
               "prevent_self_review": true,
               "reviewers": [
-                "CompleteDotTech"
+                {
+                  "login": "CompleteDotTech",
+                  "id": 5861166,
+                  "type": "User"
+                }
               ]
             }
           ]
@@ -800,7 +826,8 @@
         "review_rule_restored": true,
         "evidence_level": "BOOTSTRAP_MERGED_ONLY",
         "production_actions": 0
-      }
+      },
+      "other_environment_names_observed": []
     },
     {
       "repository": "CT-Infrastructure/marketing-v7-legacy",
@@ -905,8 +932,6 @@
       "environments": [
         {
           "name": "production",
-          "created_at": "2026-10-25T21:23:25Z",
-          "updated_at": "2026-10-25T21:23:25Z",
           "can_admins_bypass": true,
           "deployment_branch_policy": {
             "protected_branches": true,
@@ -916,15 +941,17 @@
             {
               "prevent_self_review": true,
               "reviewers": [
-                "CompleteDotTech"
+                {
+                  "login": "CompleteDotTech",
+                  "id": 5861166,
+                  "type": "User"
+                }
               ]
             }
           ]
         },
         {
           "name": "staging",
-          "created_at": "2026-10-25T21:23:23Z",
-          "updated_at": "2026-10-25T21:23:23Z",
           "can_admins_bypass": true,
           "deployment_branch_policy": {
             "protected_branches": true,
@@ -934,7 +961,11 @@
             {
               "prevent_self_review": true,
               "reviewers": [
-                "CompleteDotTech"
+                {
+                  "login": "CompleteDotTech",
+                  "id": 5861166,
+                  "type": "User"
+                }
               ]
             }
           ]
@@ -956,7 +987,8 @@
         "review_rule_restored": true,
         "evidence_level": "BOOTSTRAP_MERGED_ONLY",
         "production_actions": 0
-      }
+      },
+      "other_environment_names_observed": []
     },
     {
       "repository": "CT-Infrastructure/marketing-v7-marketing",
@@ -1061,8 +1093,6 @@
       "environments": [
         {
           "name": "production",
-          "created_at": "2026-10-25T21:23:14Z",
-          "updated_at": "2026-10-25T21:23:14Z",
           "can_admins_bypass": true,
           "deployment_branch_policy": {
             "protected_branches": true,
@@ -1072,15 +1102,17 @@
             {
               "prevent_self_review": true,
               "reviewers": [
-                "CompleteDotTech"
+                {
+                  "login": "CompleteDotTech",
+                  "id": 5861166,
+                  "type": "User"
+                }
               ]
             }
           ]
         },
         {
           "name": "staging",
-          "created_at": "2026-10-25T21:23:13Z",
-          "updated_at": "2026-10-25T21:23:13Z",
           "can_admins_bypass": true,
           "deployment_branch_policy": {
             "protected_branches": true,
@@ -1090,7 +1122,11 @@
             {
               "prevent_self_review": true,
               "reviewers": [
-                "CompleteDotTech"
+                {
+                  "login": "CompleteDotTech",
+                  "id": 5861166,
+                  "type": "User"
+                }
               ]
             }
           ]
@@ -1112,7 +1148,8 @@
         "review_rule_restored": true,
         "evidence_level": "BOOTSTRAP_MERGED_ONLY",
         "production_actions": 0
-      }
+      },
+      "other_environment_names_observed": []
     },
     {
       "repository": "CT-Infrastructure/marketing-v7-voice",
@@ -1217,8 +1254,6 @@
       "environments": [
         {
           "name": "production",
-          "created_at": "2026-10-25T21:23:04Z",
-          "updated_at": "2026-10-25T21:23:04Z",
           "can_admins_bypass": true,
           "deployment_branch_policy": {
             "protected_branches": true,
@@ -1228,15 +1263,17 @@
             {
               "prevent_self_review": true,
               "reviewers": [
-                "CompleteDotTech"
+                {
+                  "login": "CompleteDotTech",
+                  "id": 5861166,
+                  "type": "User"
+                }
               ]
             }
           ]
         },
         {
           "name": "staging",
-          "created_at": "2026-10-25T21:23:02Z",
-          "updated_at": "2026-10-25T21:23:02Z",
           "can_admins_bypass": true,
           "deployment_branch_policy": {
             "protected_branches": true,
@@ -1246,7 +1283,11 @@
             {
               "prevent_self_review": true,
               "reviewers": [
-                "CompleteDotTech"
+                {
+                  "login": "CompleteDotTech",
+                  "id": 5861166,
+                  "type": "User"
+                }
               ]
             }
           ]
@@ -1268,7 +1309,8 @@
         "review_rule_restored": true,
         "evidence_level": "BOOTSTRAP_MERGED_ONLY",
         "production_actions": 0
-      }
+      },
+      "other_environment_names_observed": []
     }
   ],
   "project": {
@@ -1454,5 +1496,11 @@
     "Environment administrators can bypass reviewers; approval policy must still be followed.",
     "GitHub branch rulesets have no bypass actors in supplied readback; environment bypass is distinct.",
     "Independent review, trusted integration and applicable human gate receipts remain required."
-  ]
+  ],
+  "environment_identity_readback": {
+    "captured_at": "2026-10-25T21:56:13.901676+00:00",
+    "source": "authenticated GitHub REST environments readback",
+    "scope": "Only environment reviewer identity, self-review, branch restrictions and admin bypass were refreshed. Other snapshot fields retain their stated dates.",
+    "evidence_sha256": "b8120b02d06a5b6d1454f1ff4623380c2bb96ea683f873a611f26278ce34afd4"
+  }
 }
