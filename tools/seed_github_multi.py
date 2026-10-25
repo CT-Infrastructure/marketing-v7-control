@@ -246,6 +246,12 @@ def project_projection(gh, layout, issues, model):
             if cache in gh.state["field_values"]:
                 continue
             field = fields[name]
+            if value == "" and field["dataType"] == "TEXT":
+                # A newly attached item has no value. Do not issue an ambiguous
+                # empty-value update or erase a later human-supplied value.
+                gh.state["field_values"][cache] = ""
+                gh.save()
+                continue
             val = {"singleSelectOptionId": next(o["id"] for o in field["options"] if o["name"] == value)} if field["dataType"] == "SINGLE_SELECT" else {"text": value}
             gh.graphql("mutation($project:ID!,$item:ID!,$field:ID!,$value:ProjectV2FieldValue!){updateProjectV2ItemFieldValue(input:{projectId:$project,itemId:$item,fieldId:$field,value:$value}){projectV2Item{id}}}", {"project": project["id"], "item": attached[content], "field": field["id"], "value": val}, key="field-value:" + cache)
             gh.state["field_values"][cache] = value
@@ -253,11 +259,59 @@ def project_projection(gh, layout, issues, model):
     return {"project_membership_readback": len(project_items(gh, project["id"]))}
 
 
+def verify_projection(gh, layout, issues):
+    found = inventory_issues(gh, layout)
+    if set(found) != {x["key"] for x in issues}:
+        raise ValueError("Remote issue-key coverage differs from the frozen catalog")
+    parents = edges = 0
+    for spec in issues:
+        actual = found[spec["key"]]
+        if actual["title"] != spec["title"]:
+            raise ValueError("Issue title drift: " + spec["key"])
+        source = (ROOT / spec["body_path"]).read_text()
+        if preserve_human_notes(actual["body"], source) != actual["body"]:
+            raise ValueError("Issue brief drift: " + spec["key"])
+        prefix = f"/repos/{actual['repository_full_name']}/issues/{actual['number']}"
+        if spec["parent_key"]:
+            parent = gh.api(prefix + "/parent")
+            if parent["id"] != found[spec["parent_key"]]["id"]:
+                raise ValueError("Parent mismatch: " + spec["key"])
+            parents += 1
+        if spec["depends_on"]:
+            deps = gh.api(prefix + "/dependencies/blocked_by?per_page=100", paginate=True)
+            if {x["id"] for x in deps} != {found[x]["id"] for x in spec["depends_on"]}:
+                raise ValueError("Dependency mismatch: " + spec["key"])
+            edges += len(deps)
+    project = gh.state["project"]
+    q = "query($id:ID!,$after:String){node(id:$id){... on ProjectV2{public items(first:100,after:$after){nodes{id content{... on Issue{id}} fieldValues(first:100){nodes{... on ProjectV2ItemFieldTextValue{text field{... on ProjectV2Field{name}}} ... on ProjectV2ItemFieldSingleSelectValue{name field{... on ProjectV2SingleSelectField{name}}}}}} pageInfo{hasNextPage endCursor}}}}}"
+    cursor = None
+    records = {}
+    while True:
+        node = gh.graphql(q, {"id": project["id"], "after": cursor})["node"]
+        if node["public"]:
+            raise ValueError("Project must remain private")
+        page = node["items"]
+        for item in page["nodes"]:
+            if not item.get("content", {}).get("id"):
+                continue
+            records[item["content"]["id"]] = {v["field"]["name"]: v.get("text", v.get("name")) for v in item["fieldValues"]["nodes"] if v.get("field")}
+        if not page["pageInfo"]["hasNextPage"]:
+            break
+        cursor = page["pageInfo"]["endCursor"]
+    for spec in issues:
+        values = records.get(found[spec["key"]]["node_id"], {})
+        for name in ["Package Key", "Execution", "Priority", "Phase", "Risk", "Workstream", "Evidence level"]:
+            if values.get(name) != gh.state["field_values"].get(spec["key"] + ":" + name):
+                raise ValueError("Project field mismatch: " + spec["key"] + ":" + name)
+    return {"status": "VERIFIED", "issues": len(found), "parent_links": parents,
+            "dependency_links": edges, "project_items": len(records), "production_actions": 0}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", required=True)
     parser.add_argument("--layout", default=str(ROOT / "config/repositories.json"))
-    parser.add_argument("--phase", choices=["workspace", "issues", "relationships", "project", "inventory"], default="workspace")
+    parser.add_argument("--phase", choices=["workspace", "issues", "relationships", "project", "inventory", "verify"], default="workspace")
     parser.add_argument("--apply", action="store_true")
     parser.add_argument("--plan", action="store_true")
     parser.add_argument("--confirm")
@@ -294,6 +348,8 @@ def main():
                 report = relationships(gh, layout, issues)
             elif args.phase == "project":
                 report = project_projection(gh, layout, issues, model)
+            elif args.phase == "verify":
+                report = verify_projection(gh, layout, issues)
             else:
                 report = {"managed_issues": len(inventory_issues(gh, layout)), "project": gh.state.get("project")}
             gh.state["last_report"] = report
