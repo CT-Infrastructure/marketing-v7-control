@@ -77,6 +77,18 @@ class Lifecycle:
 
 
 @dataclass(frozen=True)
+class ReplayReceipt:
+    """Caller-authenticated replay evidence for one exact restore and checkpoint."""
+    client_ref: str
+    subject_ref: str
+    restore_epoch: str
+    generation: int
+    completed: bool
+    authority_available: bool
+    observed_at: str
+    evidence_ref: str
+
+@dataclass(frozen=True)
 class AssetRight:
     asset_ref: str
     client_ref: str
@@ -119,7 +131,7 @@ def binding_matches(record, request, fields):
 BINDINGS = ('client_ref', 'channel', 'purpose', 'account_ref', 'jurisdiction', 'provider_ref')
 
 
-def evaluate(request, permission, lifecycle, reviews=(), rights=()):
+def evaluate(request, permission, lifecycle, reviews=(), rights=(), *, replay_receipt=None):
     """Consume caller-authenticated current snapshots; never fetch or invent them.
 
     Snapshot classes alone are not authentication. A trusted caller must verify
@@ -157,11 +169,23 @@ def evaluate(request, permission, lifecycle, reviews=(), rights=()):
         if lifecycle.replay_evidence_ref is not None and not identifier(lifecycle.replay_evidence_ref):
             return deny('INVALID_REPLAY_REFERENCE')
         if lifecycle.restore_epoch is None:
-            if lifecycle.replay_complete is not False or lifecycle.replay_evidence_ref is not None:
+            if lifecycle.replay_complete is not False or lifecycle.replay_evidence_ref is not None or replay_receipt is not None:
                 return deny('ORPHANED_REPLAY_STATE')
         else:
             if not identifier(lifecycle.restore_epoch) or lifecycle.replay_complete is not True or not identifier(lifecycle.replay_evidence_ref):
                 return deny('RESTORE_REPLAY_REQUIRED')
+            if type(replay_receipt) is not ReplayReceipt:
+                return deny('RESTORE_REPLAY_RECEIPT_REQUIRED')
+            if (not binding_matches(replay_receipt, lifecycle, ('client_ref', 'subject_ref', 'restore_epoch'))
+                    or type(replay_receipt.generation) is not int
+                    or replay_receipt.generation != lifecycle.authority_generation
+                    or replay_receipt.generation != lifecycle.applied_generation
+                    or replay_receipt.evidence_ref != lifecycle.replay_evidence_ref):
+                return deny('RESTORE_REPLAY_BINDING_MISMATCH')
+            if (replay_receipt.completed is not True or replay_receipt.authority_available is not True
+                    or not identifier(replay_receipt.evidence_ref)
+                    or not fresh(replay_receipt.observed_at, now, request.max_age_seconds)):
+                return deny('RESTORE_REPLAY_UNAVAILABLE_OR_STALE')
         if lifecycle.retention_until is None:
             return Decision('HOLD', 'RETENTION_POLICY_UNKNOWN', 'privacy_reviewer')
         if now >= instant(lifecycle.retention_until):

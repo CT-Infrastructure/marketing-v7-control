@@ -51,3 +51,11 @@ Root-only commands: `python -B contracts/privacy/test_eligibility.py` and `pytho
 Before live use: the trusted owner must identify actual reviewers/authorities, approve jurisdiction/provider requirements and freshness/retention policies, qualify source authentication and final-boundary race handling, prove propagation and post-backup replay on isolated systems, and obtain independent review plus required human gates. These are unresolved inputs, not permission to bypass DENY/HOLD.
 
 Absent restore epoch requires replay_complete=False and replay_evidence_ref=null. Orphaned replay markers never qualify, and a non-null replay reference must have the identifier string type even before epoch-specific checks. This preserves the ordinary no-restore positive case while rejecting stale or malformed restore evidence.
+
+## Restore replay receipt binding
+
+A restored lifecycle now requires a separate caller-authenticated `ReplayReceipt` passed as the keyword `replay_receipt`. It carries client, subject, restore epoch, generation, completion/authority availability, observation time and evidence reference. The exact receipt epoch must match the current lifecycle, and its generation must match both current authority_generation and applied_generation. Its evidence reference must match the lifecycle replay reference. Changing only the lifecycle epoch or advancing both generations therefore invalidates the old receipt.
+
+The receipt must be complete, currently available and fresh under the request's policy. A missing/malformed receipt denies restored-state eligibility. A lifecycle with no restore epoch must have no replay flags/reference or receipt. As with the existing permission/review snapshots, constructing a dataclass is not authentication: the trusted caller verifies the authoritative replay record before passing it. No provider, replay service or cryptographic authority is created by this contract.
+
+The previous fifteen tests remain, with the restore-positive fixture supplying the newly required explicit receipt. Five regressions cover matching current epoch, old epoch, old generation, malformed/binding/stale receipts and replay evidence without an active restore. Every result still leaves outbound_state=HOLD; actual business permissions and final dispatch guards remain separate.

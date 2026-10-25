@@ -5,7 +5,7 @@ from pathlib import Path
 import unittest
 
 from eligibility import (AssetRight, AUTHORITIES, CHANNELS, Lifecycle, Permission,
-                         Request, Review, REVIEW_ROLES, evaluate)
+                         Request, Review, ReplayReceipt, REVIEW_ROLES, evaluate)
 
 FIXTURE = json.loads(Path(__file__).with_name('synthetic-fixture.json').read_text(encoding='utf-8-sig'))
 
@@ -26,6 +26,11 @@ def make(channel='email'):
                     for kind, role in REVIEW_ROLES.items())
     return request, permission, lifecycle, reviews
 
+
+def replay(lifecycle):
+    return ReplayReceipt(lifecycle.client_ref,lifecycle.subject_ref,lifecycle.restore_epoch,
+                         lifecycle.authority_generation,True,True,FIXTURE['observed_at'],
+                         lifecycle.replay_evidence_ref)
 
 class PrivacyTests(unittest.TestCase):
     def test_each_channel_requires_its_own_complete_evidence(self):
@@ -91,10 +96,10 @@ class PrivacyTests(unittest.TestCase):
         restored=replace(lifecycle,restore_epoch='synthetic-restore')
         self.assertEqual('DENY',evaluate(request,permission,restored,reviews).status)
         replayed=replace(restored,replay_complete=True,replay_evidence_ref='synthetic-replay')
-        self.assertEqual('ELIGIBLE_OFFLINE',evaluate(request,permission,replayed,reviews).status)
+        self.assertEqual('ELIGIBLE_OFFLINE',evaluate(request,permission,replayed,reviews,replay_receipt=replay(replayed)).status)
         for changes in ({'applied_generation':2},{'authority_generation':4},{'replay_complete':'true'},
                         {'replay_evidence_ref':None},{'suppressed':True},{'deleted':True}):
-            self.assertEqual('DENY',evaluate(request,permission,replace(replayed,**changes),reviews).status)
+            self.assertEqual('DENY',evaluate(request,permission,replace(replayed,**changes),reviews,replay_receipt=replay(replayed)).status)
 
     def test_no_restore_rejects_orphaned_replay_markers(self):
         request, permission, lifecycle, reviews=make()
@@ -148,4 +153,44 @@ class PrivacyTests(unittest.TestCase):
         self.assertEqual('DENY',evaluate(request,permission,lifecycle,list(reviews)).status)
 
 
+    def test_current_restore_epoch_receipt_is_eligible_but_held(self):
+        request,permission,lifecycle,reviews=make()
+        current=replace(lifecycle,restore_epoch='synthetic-restore-A',replay_complete=True,replay_evidence_ref='synthetic-replay-A')
+        decision=evaluate(request,permission,current,reviews,replay_receipt=replay(current))
+        self.assertEqual(decision.status,'ELIGIBLE_OFFLINE');self.assertEqual(decision.outbound_state,'HOLD')
+        self.assertEqual(evaluate(request,permission,current,reviews).status,'DENY')
+
+    def test_previous_restore_epoch_receipt_cannot_qualify_new_epoch(self):
+        request,permission,lifecycle,reviews=make()
+        restored=replace(lifecycle,restore_epoch='synthetic-restore-A',replay_complete=True,replay_evidence_ref='synthetic-replay-A')
+        previous_receipt=replay(restored)
+        changed=replace(restored,restore_epoch='synthetic-restore-B')
+        decision=evaluate(request,permission,changed,reviews,replay_receipt=previous_receipt)
+        self.assertEqual(decision.status,'DENY');self.assertEqual(decision.reason,'RESTORE_REPLAY_BINDING_MISMATCH')
+        self.assertEqual(decision.outbound_state,'HOLD')
+
+    def test_previous_generation_receipt_cannot_qualify_new_generation(self):
+        request,permission,lifecycle,reviews=make()
+        restored=replace(lifecycle,restore_epoch='synthetic-restore-A',replay_complete=True,replay_evidence_ref='synthetic-replay-A')
+        old=replay(restored)
+        changed=replace(restored,authority_generation=4,applied_generation=4)
+        self.assertEqual(evaluate(request,permission,changed,reviews,replay_receipt=old).status,'DENY')
+        self.assertEqual(evaluate(request,permission,changed,reviews,replay_receipt=replay(changed)).status,'ELIGIBLE_OFFLINE')
+
+    def test_replay_receipt_bindings_types_and_freshness_fail_closed(self):
+        request,permission,lifecycle,reviews=make()
+        current=replace(lifecycle,restore_epoch='synthetic-restore-A',replay_complete=True,replay_evidence_ref='synthetic-replay-A')
+        receipt=replay(current)
+        for changes in ({'generation':True},{'generation':'3'},{'client_ref':'other'},{'subject_ref':'other'},
+                        {'evidence_ref':'other'},{'completed':False},{'authority_available':False},
+                        {'observed_at':'2026-10-25T11:00:00Z'}):
+            with self.subTest(changes=changes):
+                self.assertEqual(evaluate(request,permission,current,reviews,replay_receipt=replace(receipt,**changes)).status,'DENY')
+        self.assertEqual(evaluate(request,permission,current,reviews,replay_receipt={}).status,'DENY')
+
+    def test_absent_restore_epoch_cannot_carry_replay_receipt(self):
+        request,permission,lifecycle,reviews=make()
+        restored=replace(lifecycle,restore_epoch='synthetic-restore-A',replay_complete=True,replay_evidence_ref='synthetic-replay-A')
+        decision=evaluate(request,permission,lifecycle,reviews,replay_receipt=replay(restored))
+        self.assertEqual(decision.status,'DENY');self.assertEqual(decision.reason,'ORPHANED_REPLAY_STATE')
 if __name__ == '__main__': unittest.main()
