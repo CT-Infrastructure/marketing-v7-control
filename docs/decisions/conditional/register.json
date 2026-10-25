@@ -1,0 +1,2582 @@
+{
+  "schema_version": "1.0",
+  "task_key": "F19",
+  "base_revision": "11f7a5f0aab4b41966e9d6134215b1a3823a8e95",
+  "input_sha256": "5a9de3688de0bd6d06740f2402b74a326a942620340f55acc0b7b49085235ab3",
+  "expected_count": 40,
+  "default_decision": "DEFERRED",
+  "sources": [
+    {
+      "path": "orchestration/task_graph.json",
+      "sha256": "63bcaafb8a535ebb62688cf544c41b5bb74ffdaf1f760996af0873aa45f8f4a8"
+    },
+    {
+      "path": "reference/components/component_registry.json",
+      "sha256": "de49779855eabdd7f5defc5ff6157d6a3e875f6164d64278c4a70338d029899e"
+    },
+    {
+      "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+      "sha256": "0e4bedeac7c6158cc2997d00a60b7a01109052ff66fcb1e03245211be83e3de4"
+    },
+    {
+      "path": "reference/architecture/Integration_Contracts.md",
+      "sha256": "143a7a5844659dd7c0f36955ce3dea9b4480bd87d6544263b9ffd4f2d3bbbf37"
+    },
+    {
+      "path": "reference/mermaid/A00.mmd",
+      "sha256": "9aefd6f8d606f9d029caff1d2d2642dd5cd8913644ba9ca50f44ab5c8259f866"
+    },
+    {
+      "path": "reference/mermaid/V07.mmd",
+      "sha256": "980130570f66d73db519c5f5c620385cae86a066605e0716eb317711615cd7f0"
+    },
+    {
+      "path": "reference/workflows/V07.json",
+      "sha256": "8dce9b37be78f3fec7f4cd4344f14e8c19a4a0a4bb6ccb71856abcfc56ce8450"
+    },
+    {
+      "path": "LICENSING.md",
+      "sha256": "95872a5481fa99412eb45a7f929a95732db3589fffc288d75b51e713370a190e"
+    },
+    {
+      "path": "backlog/issues/F19.md",
+      "sha256": "9421bf8a5bf92bfd2c10445951add6d7c54f82aab1cce12b4f5eace923956c8d"
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "13ce4806ef5c61791e394b2bcd6a6a835acb010a2004efcdd995aa336798aba4"
+    },
+    {
+      "path": "docs/orchestration/EXECUTION_PROTOCOL.md",
+      "sha256": "a207180b67b1f906305e5f2745aec3ec143f707f75d8ffc833bd57661c97d08a"
+    }
+  ],
+  "decisions": [
+    {
+      "task_key": "CP099",
+      "name": "RabbitMQ",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Advanced brokering/throughput not met by native queues and PostgreSQL state",
+      "candidate_type": "service",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "Advanced brokering/throughput not met by native queues and PostgreSQL state",
+      "baseline_alternative": "Use existing application queues and bounded workers",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP099.md",
+          "sha256": "c9c0f3ae26b2a6c11fb4f17740338060a0eb9676dd5eaae93a0fb7f7712b06df"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| RabbitMQ | Advanced brokering/throughput not met by native queues and PostgreSQL state | Use existing application queues and bounded workers |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP100",
+      "name": "General-purpose Temporal usage",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Independent long-running, durable workflows requiring it",
+      "candidate_type": "service",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "Independent long-running, durable workflows requiring it",
+      "baseline_alternative": "Activepieces remains business orchestrator; Postiz's internal Temporal is already required",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP100.md",
+          "sha256": "e9bb1f3f688ded72a1c7028789b58f1076a8dad8d0ec4fe15b4cb36bb412bf01"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| General-purpose Temporal usage | Independent long-running, durable workflows requiring it | Activepieces remains business orchestrator; Postiz's internal Temporal is already required |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP101",
+      "name": "OpenBao",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Dynamic secrets / centralized machine API",
+      "candidate_type": "service",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "Dynamic secrets / centralized machine API",
+      "baseline_alternative": "SOPS + age and Keycloak where sufficient",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP101.md",
+          "sha256": "4828f2c201c2ed0dc7e5906e50e78554ca6d41f48f9652362b099aa06b136710"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| OpenBao | Dynamic secrets / centralized machine API | SOPS + age and Keycloak where sufficient |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP102",
+      "name": "ClickHouse",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "High-volume event analytics beyond relational reporting",
+      "candidate_type": "service",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "High-volume event analytics beyond relational reporting",
+      "baseline_alternative": "PostgreSQL first",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP102.md",
+          "sha256": "d495ff8b5e39a08f1fc27b40029e99311bd39fcac1f6f29a6c3092123dc6d722"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| ClickHouse | High-volume event analytics beyond relational reporting | PostgreSQL first |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP103",
+      "name": "Metabase",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Business-facing self-service BI beyond Grafana",
+      "candidate_type": "service",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "Business-facing self-service BI beyond Grafana",
+      "baseline_alternative": "Grafana for operations and simpler metrics",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP103.md",
+          "sha256": "46e5190d6f9ffca84d0561cf1fbc11725885fe92e78ecb824cf7121226eed4f1"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| Metabase | Business-facing self-service BI beyond Grafana | Grafana for operations and simpler metrics |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP104",
+      "name": "Healthchecks",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Independent cron/job heartbeat monitoring",
+      "candidate_type": "service",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "Independent cron/job heartbeat monitoring",
+      "baseline_alternative": "Existing Prometheus/blackbox_exporter",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP104.md",
+          "sha256": "126ad632c808c5485178d7177190825d25e45cd19ddfec2952b986a30dc68d3e"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| Healthchecks | Independent cron/job heartbeat monitoring | Existing Prometheus/blackbox_exporter |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP105",
+      "name": "ntfy",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Dedicated user push notifications",
+      "candidate_type": "service",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "Dedicated user push notifications",
+      "baseline_alternative": "Existing Grafana/alerting workflow",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP105.md",
+          "sha256": "0f2136900783268846f1aece87a4b58b50350025e8fbcd9114a9e3cfc643c6e5"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| ntfy | Dedicated user push notifications | Existing Grafana/alerting workflow |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP106",
+      "name": "Samba",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [
+        "L07"
+      ],
+      "source_function": "SMB network file sharing",
+      "candidate_type": "native-service",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "SMB network file sharing",
+      "baseline_alternative": "Existing object/asset storage for marketing workloads",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP106.md",
+          "sha256": "d6e4695fe746367720905b3bf08a62434a984a1d81ae258df5cd65c84afa25ba"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| Samba | SMB network file sharing | Existing object/asset storage for marketing workloads |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP107",
+      "name": "mcp-searxng",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [
+        "L07"
+      ],
+      "source_function": "MCP search interface needed",
+      "candidate_type": "adapter",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "MCP search interface needed",
+      "baseline_alternative": "Call existing SearXNG API directly otherwise",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP107.md",
+          "sha256": "b13e5f19e1502868f0a49797eb8e573c14aee8108fe66db6b26ec0f6b7993005"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| mcp-searxng | MCP search interface needed | Call existing SearXNG API directly otherwise |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP108",
+      "name": "softflowd + netflow2ng + ntopng",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Network traffic analytics requirements",
+      "candidate_type": "service-bundle",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "Network traffic analytics requirements",
+      "baseline_alternative": "Baseline monitoring otherwise",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP108.md",
+          "sha256": "24269b869fcf21c213af1b9242a22eea114656d8356b59b315aeb2a5dee2bac0"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| softflowd + netflow2ng + ntopng | Network traffic analytics requirements | Baseline monitoring otherwise |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP109",
+      "name": "rsyslog / Vector",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Log pipelines that OTel/Loki do not satisfy",
+      "candidate_type": "native-service-alternatives",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "Log pipelines that OTel/Loki do not satisfy",
+      "baseline_alternative": "Existing selected pipeline",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP109.md",
+          "sha256": "c364fbd06b9c8ea5e07e3d1466f181aa883188b2386874f7f749b48157b85527"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| rsyslog / Vector | Log pipelines that OTel/Loki do not satisfy | Existing selected pipeline |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP110",
+      "name": "LiveKit Server + SIP + Agents",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "WebRTC rooms/browser calling justify voice architecture change",
+      "candidate_type": "architecture-alternative",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "WebRTC rooms/browser calling justify voice architecture change",
+      "baseline_alternative": "Asterisk/Pipecat selected; architectural alternative, not add-on",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP110.md",
+          "sha256": "9ac9660cd47c3ecd7b2ae3c584ad364100f5f38ab8b1a607016ed16897505092"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| LiveKit Server + SIP + Agents | WebRTC rooms/browser calling justify voice architecture change | Asterisk/Pipecat selected; architectural alternative, not add-on |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP111",
+      "name": "FreeSWITCH",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Specialized telephony/media switching",
+      "candidate_type": "service",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "Specialized telephony/media switching",
+      "baseline_alternative": "Asterisk selected",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP111.md",
+          "sha256": "7bb7d17828b83e0c9f58261e1ef5b66c508c8c16f9dcf1d174b5d0258b8361bf"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| FreeSWITCH | Specialized telephony/media switching | Asterisk selected |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP112",
+      "name": "Speaches",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Independently scaled/shared STT/TTS APIs",
+      "candidate_type": "service",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "Independently scaled/shared STT/TTS APIs",
+      "baseline_alternative": "Embedded Pipecat audio services",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP112.md",
+          "sha256": "fc3f04e3051d2ecf7971875ff896ccf4d40c4f6b6a981c7e914ffed37eb5e10b"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| Speaches | Independently scaled/shared STT/TTS APIs | Embedded Pipecat audio services |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP113",
+      "name": "Piper",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Voice/language/performance gap in Kokoro",
+      "candidate_type": "model-runtime",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "Voice/language/performance gap in Kokoro",
+      "baseline_alternative": "Reuse Kokoro first; check licenses",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP113.md",
+          "sha256": "e130c2ecca9caf829fce531d818f09cb30923182fb3c43645cff6a74f5d64ebf"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| Piper | Voice/language/performance gap in Kokoro | Reuse Kokoro first; check licenses |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP114",
+      "name": "SIPp",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "SIP/load protocol testing",
+      "candidate_type": "test-cli",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "SIP/load protocol testing",
+      "baseline_alternative": "Testing only, not a persistent service",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP114.md",
+          "sha256": "5406c069abc453e50f7654bad19b9ad6cd95db0d60e0d92f75378162e363ae99"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| SIPp | SIP/load protocol testing | Testing only, not a persistent service |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP115",
+      "name": "Easy!Appointments",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [
+        "V07"
+      ],
+      "source_function": "Self-service sales booking needed",
+      "candidate_type": "service",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "Self-service sales booking needed",
+      "baseline_alternative": "Mautic lead intake + OpenProject human follow-up",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP115.md",
+          "sha256": "72dc372693fedea840c67ee591fe613d22569808bd8c5e5bbcc0ab9a1d6f88d0"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| Easy!Appointments | Self-service sales booking needed | Mautic lead intake + OpenProject human follow-up |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP116",
+      "name": "Alternative speech recognition",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Proven live latency/quality gap",
+      "candidate_type": "model-runtime",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "Proven live latency/quality gap",
+      "baseline_alternative": "Current Faster-Whisper integration",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP116.md",
+          "sha256": "10dfee928d9e37c7c4878418cbe358ccde1f6b29ee08462262782ef8f46af8e2"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| Alternative speech recognition | Proven live latency/quality gap | Current Faster-Whisper integration |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP117",
+      "name": "Postal",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Managed SMTP inadequate, self-hosting justified",
+      "candidate_type": "service",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "Managed SMTP inadequate, self-hosting justified",
+      "baseline_alternative": "Managed SMTP default",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP117.md",
+          "sha256": "f14242064ea487f29d9c6785f99c82b5067cf0a078567f0f27fdfdff89a42a7a"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| Postal | Managed SMTP inadequate, self-hosting justified | Managed SMTP default |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP118",
+      "name": "mailcow or Mailu",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Self-hosting business IMAP/reply mailboxes necessary",
+      "candidate_type": "service-alternatives",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "Self-hosting business IMAP/reply mailboxes necessary",
+      "baseline_alternative": "Existing external mailbox default; select one only",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP118.md",
+          "sha256": "7e65a6cda8748cfdfda8339947c76cb7845b2394dd7bbcfc03e105e4d8d619e2"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| mailcow or Mailu | Self-hosting business IMAP/reply mailboxes necessary | Existing external mailbox default; select one only |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP119",
+      "name": "DNSControl",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "DNS configuration-as-code beyond Ansible/provider API",
+      "candidate_type": "cli",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "DNS configuration-as-code beyond Ansible/provider API",
+      "baseline_alternative": "Ansible and Forgejo first",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP119.md",
+          "sha256": "989a21c230907009a72dd2fdbc4c8bac907afbabc259ceacbfb3314304d1cb08"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| DNSControl | DNS configuration-as-code beyond Ansible/provider API | Ansible and Forgejo first |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP120",
+      "name": "python-email-validator",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Additional import/validation quality",
+      "candidate_type": "library",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "Additional import/validation quality",
+      "baseline_alternative": "Embed as library, not server",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP120.md",
+          "sha256": "f147ca7eb85c2a5a03dca415c2de513adea1bdbbec89cb36a4515a3b5bcb1373"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| python-email-validator | Additional import/validation quality | Embed as library, not server |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP121",
+      "name": "Dedicated email IP / alternate SMTP relay",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Reputation/throughput or provider constraints",
+      "candidate_type": "external-provider",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "Reputation/throughput or provider constraints",
+      "baseline_alternative": "Existing managed transport first",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP121.md",
+          "sha256": "531f34c76afaba6f69fe0969a02a3a778d7c54017f5c60380f75b3356ad75433"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| Dedicated email IP / alternate SMTP relay | Reputation/throughput or provider constraints | Existing managed transport first |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP122",
+      "name": "Custom email transport adapter",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Missing Mautic/provider callback behavior",
+      "candidate_type": "adapter",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "Missing Mautic/provider callback behavior",
+      "baseline_alternative": "Small bounded adapter only",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP122.md",
+          "sha256": "1e595f5b304755b5b829562dca3ad862c97c959d724b4bff00615f1f533ac4fb"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| Custom email transport adapter | Missing Mautic/provider callback behavior | Small bounded adapter only |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP123",
+      "name": "Typst CLI",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Professionally typeset PDF output required",
+      "candidate_type": "cli",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "Professionally typeset PDF output required",
+      "baseline_alternative": "Pandoc alone for conversions; Typst for layout",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP123.md",
+          "sha256": "4e34c6c24e02b3a9f121ecb1c84bb64e856405427ab7d2fe616a258dfe0ac07a"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| Typst CLI | Professionally typeset PDF output required | Pandoc alone for conversions; Typst for layout |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP124",
+      "name": "Kdenlive",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Human nonlinear video editing required",
+      "candidate_type": "desktop-application",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "Human nonlinear video editing required",
+      "baseline_alternative": "FFmpeg automation first",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP124.md",
+          "sha256": "831812a494d3261caafaf7591d4df7f98c32c50fed8262da8e2c2e2d39cff646"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| Kdenlive | Human nonlinear video editing required | FFmpeg automation first |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP125",
+      "name": "ComfyUI video models/nodes",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Approved video motion generation required",
+      "candidate_type": "model-plugin-bundle",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "Approved video motion generation required",
+      "baseline_alternative": "Existing imagery, audio, FFmpeg first",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP125.md",
+          "sha256": "f573dd848071c09740d4cd3874c53641195e31ef3f7b84d8803c1b035df17e84"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| ComfyUI video models/nodes | Approved video motion generation required | Existing imagery, audio, FFmpeg first |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP126",
+      "name": "Embedding/reranking/specialized model checkpoints",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Measured RAG, language, visual or output quality gaps",
+      "candidate_type": "model-checkpoints",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "Measured RAG, language, visual or output quality gaps",
+      "baseline_alternative": "Existing llama.cpp + OmniRoute + compatible models first",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP126.md",
+          "sha256": "c5c182d59a6ab20a68d5fb8151fb6a5688b72b032a2ee0ef6421c56f8d9aa707"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| Embedding/reranking/specialized model checkpoints | Measured RAG, language, visual or output quality gaps | Existing llama.cpp + OmniRoute + compatible models first |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP127",
+      "name": "Additional rendering libraries",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Required format, layout, accessibility, codec cannot be met",
+      "candidate_type": "library",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "Required format, layout, accessibility, codec cannot be met",
+      "baseline_alternative": "FFmpeg/Pandoc/Vale/Lighthouse/Playwright first",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP127.md",
+          "sha256": "6d31358f15987645dc1b1106cde4e4fc3a9c8d9078d074a84777e0ff4c1ded64"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| Additional rendering libraries | Required format, layout, accessibility, codec cannot be met | FFmpeg/Pandoc/Vale/Lighthouse/Playwright first |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP128",
+      "name": "Dedicated render capacity",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Batch media demand exceeds limits without harming real-time voice",
+      "candidate_type": "capacity",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "Batch media demand exceeds limits without harming real-time voice",
+      "baseline_alternative": "Resource limits and schedules first",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP128.md",
+          "sha256": "c0251c6ca094d627503b9f4edefd54b274bdc407dfda56284c3e7613a8bb82cd"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| Dedicated render capacity | Batch media demand exceeds limits without harming real-time voice | Resource limits and schedules first |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP129",
+      "name": "Publishing API adapter",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Destination cannot be safely reached by Activepieces/native APIs",
+      "candidate_type": "adapter",
+      "type_basis": "Named role and Section 2.1; interpretation for review, not a deployment decision",
+      "adoption_trigger": "Destination cannot be safely reached by Activepieces/native APIs",
+      "baseline_alternative": "Small adapter, not platform",
+      "source_license_claim": null,
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP129.md",
+          "sha256": "12da44f6225c9668e5383714962455b3bbb0d195392407fbc83a23599212eef6"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.1",
+          "source_row": "| Publishing API adapter | Destination cannot be safely reached by Activepieces/native APIs | Small adapter, not platform |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP130",
+      "name": "WooCommerce",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Shopping cart, checkout, products, orders, purchase webhooks",
+      "candidate_type": "plugin",
+      "type_basis": "WordPress plugin, GPL-2.0",
+      "adoption_trigger": "Own-site ecommerce is activated",
+      "baseline_alternative": "WordPress + existing permitted external commerce API, if already present",
+      "source_license_claim": "WordPress plugin, GPL-2.0",
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP130.md",
+          "sha256": "ac818eee846368d9121ca9a1d9ab80dbc83a3cab00c42a9d21fb42d50f70cffd"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.2",
+          "source_row": "| **WooCommerce** — https://github.com/woocommerce/woocommerce | Shopping cart, checkout, products, orders, purchase webhooks | WordPress + existing permitted external commerce API, if already present | WordPress plugin, GPL-2.0 | Own-site ecommerce is activated |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP131",
+      "name": "GrowthBook (OSS core)",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Assignment, statistics and management for controlled web experiments",
+      "candidate_type": "service",
+      "type_basis": "Independent open-core application",
+      "adoption_trigger": "More complex/frequent webpage experimentation is needed; verify edition and terms",
+      "baseline_alternative": "Mautic native email A/B; limited custom WordPress + Matomo experiment",
+      "source_license_claim": "Independent open-core application",
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP131.md",
+          "sha256": "823482f628eef4030e4f943f84d0c85b4ad73cc51749b47c7a55132a636ef3c9"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.2",
+          "source_row": "| **GrowthBook (OSS core)** — https://github.com/growthbook/growthbook | Assignment, statistics and management for controlled web experiments | Mautic native email A/B; limited custom WordPress + Matomo experiment | Independent open-core application | More complex/frequent webpage experimentation is needed; verify edition and terms |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP132",
+      "name": "changedetection.io",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Targeted public competitor/page change detection",
+      "candidate_type": "service",
+      "type_basis": "Additional service",
+      "adoption_trigger": "Custom monitoring becomes too labor-intensive or unreliable",
+      "baseline_alternative": "SearXNG + Playwright periodic comparison + PostgreSQL/Activepieces",
+      "source_license_claim": "Additional service",
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP132.md",
+          "sha256": "61516981163509d13587b4338e043b7da0f4cca25870452197872bd26a327232"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.2",
+          "source_row": "| **changedetection.io** — https://github.com/dgtlmoon/changedetection.io | Targeted public competitor/page change detection | SearXNG + Playwright periodic comparison + PostgreSQL/Activepieces | Additional service | Custom monitoring becomes too labor-intensive or unreliable |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP133",
+      "name": "Chatwoot",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Shared customer/conversation inbox across supported channels",
+      "candidate_type": "service",
+      "type_basis": "Additional open-core service",
+      "adoption_trigger": "High-volume omnichannel interactions and team routing needed",
+      "baseline_alternative": "Mautic + OpenProject human tasks + existing business mailbox",
+      "source_license_claim": "Additional open-core service",
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP133.md",
+          "sha256": "5ec139c030e5f194c2204f24b7ff557659b6159ae7e1abac052278898865489b"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.2",
+          "source_row": "| **Chatwoot** — https://github.com/chatwoot/chatwoot | Shared customer/conversation inbox across supported channels | Mautic + OpenProject human tasks + existing business mailbox | Additional open-core service | High-volume omnichannel interactions and team routing needed |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP134",
+      "name": "Jitsi Meet",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Meetings and webinars",
+      "candidate_type": "service-bundle",
+      "type_basis": "Additional RTC services",
+      "adoption_trigger": "First-party hosted webinars or group video calls required",
+      "baseline_alternative": "Existing legally/contractually suitable meeting provider",
+      "source_license_claim": "Additional RTC services",
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP134.md",
+          "sha256": "806cf9e75d291d1e8acd1b5cfb6dac066287b8305a39fc621ff49d5736cd905e"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.2",
+          "source_row": "| **Jitsi Meet** — https://github.com/jitsi/jitsi-meet | Meetings and webinars | Existing legally/contractually suitable meeting provider | Additional RTC services | First-party hosted webinars or group video calls required |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP135",
+      "name": "pretix",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Ticket inventory, registration, payment and attendee operations",
+      "candidate_type": "service",
+      "type_basis": "Additional application",
+      "adoption_trigger": "Paid/capacity-controlled events; review license/additional terms",
+      "baseline_alternative": "WordPress + Mautic registration for simple free events",
+      "source_license_claim": "Additional application",
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP135.md",
+          "sha256": "a2314d7b64b2e4772934f43dde9ba5f874ea59e6421f205dbd1755fbe74344cb"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.2",
+          "source_row": "| **pretix** — https://github.com/pretix/pretix | Ticket inventory, registration, payment and attendee operations | WordPress + Mautic registration for simple free events | Additional application | Paid/capacity-controlled events; review license/additional terms |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP136",
+      "name": "Site Reviews",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "First-party reviews, moderation, structured display",
+      "candidate_type": "plugin",
+      "type_basis": "WordPress plugin",
+      "adoption_trigger": "Public testimonial/product-service review site required",
+      "baseline_alternative": "WordPress comments / approved simple intake",
+      "source_license_claim": "WordPress plugin",
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP136.md",
+          "sha256": "cb73a858aad5a639fe686a91a4a26fee40b21cb027e711309b30db9c59261cd4"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.2",
+          "source_row": "| **Site Reviews** — https://github.com/pryley/site-reviews | First-party reviews, moderation, structured display | WordPress comments / approved simple intake | WordPress plugin | Public testimonial/product-service review site required |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP137",
+      "name": "CookieConsent",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Browser-side tracking permission UI and script gating",
+      "candidate_type": "library",
+      "type_basis": "JavaScript library, MIT",
+      "adoption_trigger": "Applicable privacy rules/trackers require granular consent controls",
+      "baseline_alternative": "Existing WordPress compliant consent handling and Matomo controls where sufficient",
+      "source_license_claim": "JavaScript library, MIT",
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP137.md",
+          "sha256": "bc40690f1405934f0053d946c67c18d40a74613c1e605290ed5e71237a8eda68"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.2",
+          "source_row": "| **CookieConsent** — https://github.com/orestbida/cookieconsent | Browser-side tracking permission UI and script gating | Existing WordPress compliant consent handling and Matomo controls where sufficient | JavaScript library, MIT | Applicable privacy rules/trackers require granular consent controls |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    },
+    {
+      "task_key": "CP138",
+      "name": "Google Ads API client library",
+      "decision": "DEFERRED",
+      "selected": false,
+      "installed": false,
+      "enabled": false,
+      "production_authorized": false,
+      "source_classification": "CONDITIONAL_NOT_INSTALLED",
+      "source_deployment_mode": "conditional-no-install",
+      "source_supports_workflows": [],
+      "source_function": "Optional typed API client for ads reporting/control",
+      "candidate_type": "library",
+      "type_basis": "Python library, Apache-2.0",
+      "adoption_trigger": "API integration requires more than maintained HTTP adapter",
+      "baseline_alternative": "Activepieces HTTP/API integration",
+      "source_license_claim": "Python library, Apache-2.0",
+      "rights": {
+        "verification": "UNKNOWN",
+        "license": "UNKNOWN",
+        "edition": "UNKNOWN",
+        "version": "UNKNOWN",
+        "dependencies": "UNKNOWN",
+        "model_weights": "UNKNOWN",
+        "datasets": "UNKNOWN",
+        "fonts_media": "UNKNOWN",
+        "provider_terms": "UNKNOWN",
+        "evidence": []
+      },
+      "owner": {
+        "accountable_role": "Human technology selection owner",
+        "named_person": null,
+        "unblock_role": "Human technology selection owner with legal/security and component maintainer"
+      },
+      "rationale": "No demonstrated unmet need or reviewed rights/dependency/budget/rollback approval supplied. Preserve existing stack; deferred does not mean implemented.",
+      "evidence": [
+        {
+          "path": "backlog/issues/CP138.md",
+          "sha256": "28cd482ddf8ebf6a678d45a830b81f9ed265a2dbbbfdf5f0c2b375b1ead53584"
+        },
+        {
+          "path": "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md",
+          "section": "2.2",
+          "source_row": "| **Google Ads API client library** — https://github.com/googleads/google-ads-python | Optional typed API client for ads reporting/control | Activepieces HTTP/API integration | Python library, Apache-2.0 | API integration requires more than maintained HTTP adapter |"
+        }
+      ],
+      "review": {
+        "recorded_on": "2026-10-25",
+        "reviewed_on": null,
+        "next_review_on": null,
+        "trigger": "Before any selection or on changed unmet need, upstream terms, dependencies or risk",
+        "approval_ref": null,
+        "independent_review_ref": null
+      },
+      "unresolved": [
+        "Named accountable owner and measured gap evidence",
+        "Exact upstream version/edition and complete dependency/runtime/DB/cache/worker inventory",
+        "License, distribution, network-use, model and provider rights evidence as applicable",
+        "Resource budget, threat model, rollback drill and separately authorized gates"
+      ],
+      "adoption_process_ref": "policy.json#/adoption",
+      "rollback_process_ref": "policy.json#/rollback"
+    }
+  ]
+}
