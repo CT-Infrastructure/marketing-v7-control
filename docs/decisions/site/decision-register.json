@@ -1,0 +1,181 @@
+{
+  "schema_version": "1.0",
+  "decisions": [
+    {
+      "id": "SITE-01",
+      "field": "domains",
+      "value": null,
+      "status": "UNSET",
+      "owner_role": "DNS owner",
+      "blocker": "Missing approved domains; blocks production use of this input, not offline mocks.",
+      "evidence_ref": null,
+      "approved_by_role": null,
+      "approved_at": null
+    },
+    {
+      "id": "SITE-02",
+      "field": "cidrs",
+      "value": null,
+      "status": "UNSET",
+      "owner_role": "Network owner",
+      "blocker": "Missing approved cidrs; blocks production use of this input, not offline mocks.",
+      "evidence_ref": null,
+      "approved_by_role": null,
+      "approved_at": null
+    },
+    {
+      "id": "SITE-03",
+      "field": "hardware",
+      "value": null,
+      "status": "UNSET",
+      "owner_role": "Infrastructure owner",
+      "blocker": "Missing approved hardware; blocks production use of this input, not offline mocks.",
+      "evidence_ref": null,
+      "approved_by_role": null,
+      "approved_at": null
+    },
+    {
+      "id": "SITE-04",
+      "field": "accounts",
+      "value": null,
+      "status": "UNSET",
+      "owner_role": "Service owner",
+      "blocker": "Missing approved accounts; blocks production use of this input, not offline mocks.",
+      "evidence_ref": null,
+      "approved_by_role": null,
+      "approved_at": null
+    },
+    {
+      "id": "SITE-05",
+      "field": "supported_versions",
+      "value": null,
+      "status": "UNSET",
+      "owner_role": "Platform owner",
+      "blocker": "Missing approved supported_versions; blocks production use of this input, not offline mocks.",
+      "evidence_ref": null,
+      "approved_by_role": null,
+      "approved_at": null
+    },
+    {
+      "id": "SITE-06",
+      "field": "native_workers",
+      "value": null,
+      "status": "UNSET",
+      "owner_role": "Platform owner",
+      "blocker": "Missing approved native_workers; blocks production use of this input, not offline mocks.",
+      "evidence_ref": null,
+      "approved_by_role": null,
+      "approved_at": null
+    },
+    {
+      "id": "SITE-07",
+      "field": "timezone",
+      "value": null,
+      "status": "UNSET",
+      "owner_role": "Business operations owner",
+      "blocker": "Missing approved timezone; blocks production use of this input, not offline mocks.",
+      "evidence_ref": null,
+      "approved_by_role": null,
+      "approved_at": null
+    },
+    {
+      "id": "SITE-08",
+      "field": "client_owners",
+      "value": null,
+      "status": "UNSET",
+      "owner_role": "Client governance owner",
+      "blocker": "Missing approved client_owners; blocks production use of this input, not offline mocks.",
+      "evidence_ref": null,
+      "approved_by_role": null,
+      "approved_at": null
+    },
+    {
+      "id": "SITE-09",
+      "field": "rpo_seconds",
+      "value": null,
+      "status": "UNSET",
+      "owner_role": "Business continuity owner",
+      "blocker": "Missing approved rpo_seconds; blocks production use of this input, not offline mocks.",
+      "evidence_ref": null,
+      "approved_by_role": null,
+      "approved_at": null
+    },
+    {
+      "id": "SITE-10",
+      "field": "rto_seconds",
+      "value": null,
+      "status": "UNSET",
+      "owner_role": "Business continuity owner",
+      "blocker": "Missing approved rto_seconds; blocks production use of this input, not offline mocks.",
+      "evidence_ref": null,
+      "approved_by_role": null,
+      "approved_at": null
+    },
+    {
+      "id": "SITE-11",
+      "field": "provider_approvals",
+      "value": null,
+      "status": "UNSET",
+      "owner_role": "Provider governance owner",
+      "blocker": "Missing approved provider_approvals; blocks production use of this input, not offline mocks.",
+      "evidence_ref": null,
+      "approved_by_role": null,
+      "approved_at": null
+    },
+    {
+      "id": "SITE-12",
+      "field": "secret_references",
+      "value": null,
+      "status": "UNSET",
+      "owner_role": "Security owner",
+      "blocker": "Missing approved secret_references; blocks production use of this input, not offline mocks.",
+      "evidence_ref": null,
+      "approved_by_role": null,
+      "approved_at": null
+    },
+    {
+      "id": "SITE-13",
+      "field": "backup_restore",
+      "value": null,
+      "status": "UNSET",
+      "owner_role": "Backup owner",
+      "blocker": "Missing approved backup_restore; blocks production use of this input, not offline mocks.",
+      "evidence_ref": null,
+      "approved_by_role": null,
+      "approved_at": null
+    },
+    {
+      "id": "SITE-14",
+      "field": "data_residency",
+      "value": null,
+      "status": "UNSET",
+      "owner_role": "Privacy owner",
+      "blocker": "Missing approved data_residency; blocks production use of this input, not offline mocks.",
+      "evidence_ref": null,
+      "approved_by_role": null,
+      "approved_at": null
+    },
+    {
+      "id": "SITE-15",
+      "field": "channel_permissions",
+      "value": null,
+      "status": "UNSET",
+      "owner_role": "Channel compliance owner",
+      "blocker": "Missing approved channel_permissions; blocks production use of this input, not offline mocks.",
+      "evidence_ref": null,
+      "approved_by_role": null,
+      "approved_at": null
+    },
+    {
+      "id": "SITE-16",
+      "field": "budget_limits",
+      "value": null,
+      "status": "UNSET",
+      "owner_role": "Budget owner",
+      "blocker": "Missing approved budget_limits; blocks production use of this input, not offline mocks.",
+      "evidence_ref": null,
+      "approved_by_role": null,
+      "approved_at": null
+    }
+  ]
+}
