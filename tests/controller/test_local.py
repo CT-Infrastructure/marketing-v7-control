@@ -1,5 +1,8 @@
 """Execute only in root's isolated test environment; all DBs are temporary fixtures."""
 import concurrent.futures
+import contextlib
+import sqlite3
+from unittest.mock import patch
 import copy
 import json
 from pathlib import Path
@@ -10,7 +13,7 @@ import unittest
 
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'orchestration/controller'))
-from local import LocalController, canonical_hash, result_digest, AUTHORITY
+from local import LocalController, canonical_hash, result_digest, AUTHORITY, F11_SCHEMA_VERSION, _REFERENCE
 
 BASE='a'*40
 HEAD='b'*40
@@ -263,6 +266,48 @@ class ControllerTests(unittest.TestCase):
         with self.assertRaises(ValueError):self.make()
         self.tasks=[task('A',kind='foundation',evidence_level='SANDBOX_QUALIFIED_ONLY')]
         with self.assertRaises(ValueError):self.make()
+    def ledger_snapshot(self):
+        with contextlib.closing(sqlite3.connect(self.path.resolve().as_uri()+'?mode=ro',uri=True)) as db:
+            schema=db.execute("SELECT type,name,sql FROM sqlite_master ORDER BY type,name").fetchall()
+            tasks=db.execute('SELECT * FROM tasks ORDER BY key').fetchall()
+            metadata=db.execute('SELECT * FROM metadata ORDER BY key').fetchall()
+        return self.path.read_bytes(),schema,tasks,metadata,self.path.stat().st_mode
+    def test_unmarked_reference_ledger_is_rejected_without_any_mutation(self):
+        for active in (False,True):
+            self.path=Path(self.tmp.name)/('legacy-active.sqlite3' if active else 'legacy-idle.sqlite3')
+            legacy=_REFERENCE.Scheduler(self.path,self.tasks,self.pol,clock=lambda:self.now[0])
+            if active:legacy.claim('synthetic-old-worker',BASE,'A')
+            before=self.ledger_snapshot()
+            with patch.object(_REFERENCE.Scheduler,'__init__',side_effect=RuntimeError('must not initialize')) as initialize:
+                with self.assertRaises(ValueError):self.make()
+                initialize.assert_not_called()
+            self.assertEqual(before,self.ledger_snapshot())
+            self.assertEqual(legacy.record('A')['state'],'RUNNING' if active else 'BACKLOG')
+    def test_existing_empty_file_is_not_silently_initialized(self):
+        self.path.write_bytes(b'')
+        with patch.object(_REFERENCE.Scheduler,'__init__',side_effect=RuntimeError('must not initialize')) as initialize:
+            with self.assertRaises(ValueError):self.make()
+            initialize.assert_not_called()
+        self.assertEqual(self.path.read_bytes(),b'')
+    def test_old_or_missing_wrapper_version_rejected_without_mutation(self):
+        for bad_version in (None,'unsupported-version'):
+            self.path=Path(self.tmp.name)/('missing-version.sqlite3' if bad_version is None else 'wrong-version.sqlite3')
+            self.make()
+            with contextlib.closing(sqlite3.connect(self.path)) as db:
+                if bad_version is None:db.execute("DELETE FROM metadata WHERE key='f11_schema_version'")
+                else:db.execute("UPDATE metadata SET value=? WHERE key='f11_schema_version'",(bad_version,))
+                db.commit()
+            before=self.ledger_snapshot()
+            with self.assertRaises(ValueError):self.make()
+            self.assertEqual(before,self.ledger_snapshot())
+    def test_new_versioned_ledger_reopens_and_preserves_active_attempt(self):
+        s=self.make();p=self.claim(s)
+        with contextlib.closing(sqlite3.connect(self.path)) as db:
+            self.assertEqual(db.execute("SELECT value FROM metadata WHERE key='f11_schema_version'").fetchone()[0],F11_SCHEMA_VERSION)
+        reopened=self.make()
+        self.assertEqual(reopened.record('A')['state'],'RUNNING')
+        self.assertEqual(reopened.record('A')['fence'],p['fence'])
+        self.assertIsNone(self.claim(reopened))
     def test_stop_prevents_dispatch_and_preserves_active(self):
         s=self.make();p=self.claim(s);s.stop('synthetic-stop');self.assertIsNone(self.claim(s));self.assertEqual(s.record('A')['state'],'RUNNING')
 

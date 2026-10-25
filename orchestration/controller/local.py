@@ -11,6 +11,7 @@ import json
 import math
 from pathlib import Path
 import re
+import sqlite3
 import time
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -99,10 +100,36 @@ def validate_result(result, task):
     require(len(json.dumps(result, allow_nan=False)) <= 1024 * 1024, 'Oversized result')
 
 
+F11_SCHEMA_VERSION = '2'
+
+
+def preflight_existing_ledger(database, fixture_only):
+    """Read-only refusal precedes reference schema setup, mkdir, chmod or writes."""
+    path = Path(database)
+    require(not path.is_symlink() and not getattr(path, 'is_junction', lambda: False)(), 'Linked ledger is forbidden')
+    if not path.exists():
+        return
+    require(path.is_file(), 'Existing ledger must be a regular file')
+    expected_mode = 'offline-fixture' if fixture_only else 'trusted-live-admission'
+    try:
+        with contextlib.closing(sqlite3.connect(path.resolve().as_uri() + '?mode=ro', uri=True)) as db:
+            db.execute('PRAGMA query_only=ON')
+            table = db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='metadata'").fetchone()
+            require(table is not None, 'Unmarked ledger requires reviewed migration')
+            mode = db.execute("SELECT value FROM metadata WHERE key='f11_mode'").fetchone()
+            version = db.execute("SELECT value FROM metadata WHERE key='f11_schema_version'").fetchone()
+            require(mode is not None and mode[0] == expected_mode, 'Unmarked or incompatible ledger mode requires reviewed migration')
+            require(version is not None and version[0] == F11_SCHEMA_VERSION, 'Unmarked or incompatible ledger version requires reviewed migration')
+            columns = {row[1] for row in db.execute('PRAGMA table_info(f11_attempts)')}
+            require('launch_ref' in columns, 'Missing durable launch schema requires reviewed migration')
+    except sqlite3.DatabaseError:
+        raise ValueError('Unreadable or incompatible ledger requires reviewed migration') from None
+
 class LocalController(_REFERENCE.Scheduler):
     """Reuse the bundled ledger, graph, claim ordering and atomic reservations."""
     def __init__(self, database, tasks, policy, clock=time.time, *, fixture_only=False, dispatch_inputs=None, measurements=None, trusted_admission_ref=None):
         require(type(fixture_only) is bool, 'Fixture mode must be Boolean')
+        preflight_existing_ledger(database, fixture_only)
         self.fixture_only = fixture_only
         self.dispatch_inputs = copy.deepcopy(dispatch_inputs)
         self.measurements = copy.deepcopy(measurements)
@@ -149,6 +176,7 @@ class LocalController(_REFERENCE.Scheduler):
             prior = db.execute("SELECT value FROM metadata WHERE key='f11_mode'").fetchone()
             require(prior is None or prior[0] == mode, 'Fixture/live ledger mode cannot change')
             db.execute("INSERT OR IGNORE INTO metadata VALUES ('f11_mode', ?)", (mode,))
+            db.execute("INSERT OR IGNORE INTO metadata VALUES ('f11_schema_version', ?)", (F11_SCHEMA_VERSION,))
             db.commit()
 
     def _config(self):
