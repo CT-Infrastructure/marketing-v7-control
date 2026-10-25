@@ -1,0 +1,35 @@
+# INERT F06 TEMPLATE. No installer is provided. Resolve and independently qualify first.
+# .container.in is not a Quadlet installation file. No [Install] target is enabled.
+[Unit]
+Description=UNRESOLVED_COMPONENT_HELD
+StartLimitIntervalSec=300
+StartLimitBurst=3
+
+[Container]
+Image=UNRESOLVED_REGISTRY/UNRESOLVED_IMAGE@sha256:UNRESOLVED_DIGEST
+ContainerName=UNRESOLVED_COMPONENT
+User=UNRESOLVED_UID:UNRESOLVED_GID
+ReadOnly=true
+ReadOnlyTmpfs=false
+PodmanArgs=--image-volume=ignore
+NoNewPrivileges=true
+DropCapability=all
+Network=none
+Environment=OUTBOUND_EFFECTS=HOLD
+Tmpfs=/tmp:rw,nosuid,nodev,noexec,size=64m
+HealthCmd=["/app/UNRESOLVED_HEALTH_EXECUTABLE"]
+HealthInterval=30s
+HealthTimeout=5s
+HealthRetries=3
+HealthStartPeriod=30s
+
+[Service]
+Restart=no
+RestartSec=10
+TimeoutStartSec=180
+TimeoutStopSec=60
+MemoryMax=512M
+CPUQuota=100%
+TasksMax=128
+RuntimeMaxSec=3600
+
