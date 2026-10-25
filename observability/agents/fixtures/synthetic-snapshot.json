@@ -48,7 +48,7 @@
       "lease_until": null,
       "queued_at": "2026-10-25T12:00:00Z",
       "task_ref": "task:F17-SYNTHETIC-A",
-      "evidence_at": null,
+      "evidence_at": "2026-10-25T12:00:00Z",
       "input_ref": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       "base_ref": "git:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
     },
@@ -87,6 +87,18 @@
       "evidence_at": null,
       "input_ref": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
       "base_ref": "git:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    {
+      "evidence_at": null,
+      "lease_until": null,
+      "state": "ACCEPTED",
+      "queued_at": "2026-10-24T11:30:00Z",
+      "base_ref": "git:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "task_ref": "task:F17-SYNTHETIC-E",
+      "agent_ref": "agent:synthetic-completed",
+      "merge_wait_since": null,
+      "input_ref": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+      "result_ref": "artifact:9999999999999999999999999999999999999999999999999999999999999999"
     }
   ],
   "resources": {

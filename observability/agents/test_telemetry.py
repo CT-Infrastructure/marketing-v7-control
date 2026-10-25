@@ -190,5 +190,76 @@ class TelemetryTests(unittest.TestCase):
             self.assertNotIn('synthetic-private-sentinel',result.stdout+result.stderr)
             self.assertFalse(json.loads(result.stdout)['dispatch_authorized'])
 
+    def test_required_zero_capacity_holds_but_unused_gpu_is_allowed(self):
+        for resource in ('cpu','memory_mib','slots'):
+            data=snapshot();data['resources'][resource]={'capacity':0,'allocated':0}
+            with self.subTest(resource=resource):
+                report=t.render(data,NOW)
+                self.assertFalse(report['admission_signal'])
+                self.assertIn('required_resource_capacity_unavailable',report['admission_hold_reasons'])
+        self.assertTrue(t.render(snapshot(),NOW)['admission_signal'])
+
+    def test_requested_tasks_fit_free_execution_slots(self):
+        data=snapshot();data['resources']['slots']={'capacity':2,'allocated':1}
+        data['accounting']['requested_subscription_tasks']=2
+        report=t.render(data,NOW)
+        self.assertFalse(report['admission_signal'])
+        self.assertIn('insufficient_execution_slots',report['admission_hold_reasons'])
+        data['resources']['slots']['capacity']=3
+        self.assertTrue(t.render(data,NOW)['admission_signal'])
+
+    def test_active_prerequisite_evidence_missing_and_expired_hold(self):
+        for index in (0,1,2):
+            for value in (None,'2026-10-24T12:00:00Z'):
+                data=snapshot();data['tasks'][index]['evidence_at']=value
+                with self.subTest(index=index,value=value):
+                    self.assertFalse(t.render(data,NOW)['admission_signal'])
+        data=snapshot();data['tasks'][0]['evidence_at']='2026-10-25T11:59:00Z'
+        self.assertTrue(t.render(data,NOW)['admission_signal'])
+        data['tasks'][0]['evidence_at']='2026-10-25T11:58:59Z'
+        self.assertFalse(t.render(data,NOW)['admission_signal'])
+
+    def test_historical_completed_evidence_does_not_block_new_work(self):
+        data=snapshot()
+        completed=next(task for task in data['tasks'] if task['state']=='ACCEPTED')
+        completed['evidence_at']='2026-10-24T12:00:00Z'
+        report=t.render(data,NOW)
+        self.assertGreater(report['evidence_oldest_age_seconds'],t.FRESHNESS_SECONDS)
+        self.assertTrue(report['admission_signal'])
+
+    def test_attempt_binding_cannot_change_after_higher_sequence(self):
+        data=snapshot();cursor=t.render(data,NOW)['cursor']
+        for field,value in [('input_ref','sha256:'+'1'*64),('base_ref','git:'+'2'*40)]:
+            altered=copy.deepcopy(data);altered['sequence']=2;altered['tasks'][1][field]=value
+            with self.subTest(field=field),self.assertRaises(ValueError):t.render(altered,NOW,cursor)
+
+    def test_retry_requires_new_attempt_ref_and_retains_prior_binding(self):
+        data=snapshot();cursor=t.render(data,NOW)['cursor'];old=data['tasks'][0]['task_ref']
+        data['sequence']=2;data['tasks'][0]['task_ref']='task:F17-SYNTHETIC-A-RETRY-2'
+        data['tasks'][0]['input_ref']='sha256:'+'1'*64
+        report=t.render(data,NOW,cursor)
+        self.assertTrue(report['admission_signal'])
+        self.assertIn(old,report['cursor']['attempt_bindings'])
+        self.assertIn(data['tasks'][0]['task_ref'],report['cursor']['attempt_bindings'])
+
+    def test_disappeared_attempt_cannot_reappear_with_new_identity(self):
+        original=snapshot();cursor=t.render(original,NOW)['cursor']
+        missing=copy.deepcopy(original);missing['sequence']=2;missing['tasks'].pop(0)
+        cursor=t.render(missing,NOW,cursor)['cursor']
+        revived=copy.deepcopy(original);revived['sequence']=3;revived['tasks'][0]['base_ref']='git:'+'2'*40
+        with self.assertRaises(ValueError):t.render(revived,NOW,cursor)
+
+    def test_attempt_history_bound_and_old_cursor_fail_closed(self):
+        data=snapshot();cursor=t.render(data,NOW)['cursor']
+        binding=copy.deepcopy(next(iter(cursor['attempt_bindings'].values())))
+        for index in range(t.MAX_ATTEMPTS-len(cursor['attempt_bindings'])):
+            cursor['attempt_bindings']['task:HISTORICAL-'+str(index)]=copy.deepcopy(binding)
+        data['sequence']=2
+        self.assertEqual(len(t.render(data,NOW,cursor)['cursor']['attempt_bindings']),t.MAX_ATTEMPTS)
+        data['tasks'][0]['task_ref']='task:ONE-MORE-ATTEMPT'
+        with self.assertRaises(ValueError):t.render(data,NOW,cursor)
+        old_cursor={key:value for key,value in cursor.items() if key!='attempt_bindings'}
+        with self.assertRaises(ValueError):t.render(data,NOW,old_cursor)
 if __name__=='__main__':unittest.main(verbosity=2)
+
 

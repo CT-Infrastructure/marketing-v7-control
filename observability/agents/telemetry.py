@@ -28,6 +28,9 @@ ROLES=('implementation','review')
 MEASURES=('calls','input_tokens','output_tokens')
 MAX_BYTES=524288
 MAX_TASKS=128
+MAX_ATTEMPTS=512
+CRITICAL_EVIDENCE_STATES=('READY','RUNNING','REVIEW')
+FRESHNESS_SECONDS=120
 
 
 def require(condition):
@@ -126,12 +129,25 @@ def validate(snapshot,now):
 def render(snapshot,now,previous=None):
     current,observed,dispatch_blockers=validate(snapshot,now)
     digest=hashlib.sha256(canonical(snapshot).encode()).hexdigest()
-    cursor={'sequence':snapshot['sequence'],'snapshot_sha256':digest,'observed_at':snapshot['observed_at']}
+    attempt_bindings={}
     if previous is not None:
-        shape(previous,('sequence','snapshot_sha256','observed_at'))
+        shape(previous,('sequence','snapshot_sha256','observed_at','attempt_bindings'))
         count(previous['sequence']);safe_ref('sha256:'+previous['snapshot_sha256'],'input')
         require(snapshot['sequence']>=previous['sequence'] and observed>=time(previous['observed_at']))
         if snapshot['sequence']==previous['sequence']:require(digest==previous['snapshot_sha256'])
+        require(type(previous['attempt_bindings']) is dict and len(previous['attempt_bindings'])<=MAX_ATTEMPTS)
+        for attempt_ref,binding in previous['attempt_bindings'].items():
+            safe_ref(attempt_ref,'task');shape(binding,('input_ref','base_ref'))
+            safe_ref(binding['input_ref'],'input');safe_ref(binding['base_ref'],'base')
+            attempt_bindings[attempt_ref]=dict(binding)
+    for task in snapshot['tasks']:
+        binding={key:task[key] for key in ('input_ref','base_ref')}
+        previous_binding=attempt_bindings.get(task['task_ref'])
+        require(previous_binding is None or previous_binding==binding)
+        attempt_bindings[task['task_ref']]=binding
+    require(len(attempt_bindings)<=MAX_ATTEMPTS)
+    cursor={'sequence':snapshot['sequence'],'snapshot_sha256':digest,'observed_at':snapshot['observed_at'],
+            'attempt_bindings':attempt_bindings}
     counts={state:0 for state in STATES}
     details=[];active_leases=0;expired_running=0;queue_ages=[];merge_ages=[];evidence_ages=[];missing_evidence=0
     for task in snapshot['tasks']:
@@ -156,7 +172,20 @@ def render(snapshot,now,previous=None):
     reasons=[]
     if dispatch_blockers:reasons.append('capacity_inputs_held')
     if snapshot['emergency_stop']:reasons.append('emergency_stop')
-    if (current-observed).total_seconds()>120:reasons.append('stale_snapshot')
+    if (current-observed).total_seconds()>FRESHNESS_SECONDS:reasons.append('stale_snapshot')
+    for task in snapshot['tasks']:
+        if task['state'] in CRITICAL_EVIDENCE_STATES:
+            if task['evidence_at'] is None:
+                reasons.append('prerequisite_evidence_missing')
+            elif (current-time(task['evidence_at'])).total_seconds()>FRESHNESS_SECONDS:
+                reasons.append('prerequisite_evidence_stale')
+    for resource in ('cpu','memory_mib','slots'):
+        capacity=snapshot['resources'][resource]['capacity']
+        if capacity is None or capacity<=0:reasons.append('required_resource_capacity_unavailable')
+    slots=snapshot['resources']['slots']
+    if (slots['capacity'] is not None and slots['allocated'] is not None and
+            accounting['requested_subscription_tasks']>slots['capacity']-slots['allocated']):
+        reasons.append('insufficient_execution_slots')
     if counts['ORPHANED'] or expired_running:reasons.append('reconciliation_required')
     if any(value is None for value in pressure.values()):reasons.append('resource_observation_unset')
     if any(value is not None and value>=1 for value in pressure.values()):reasons.append('resource_pressure')
@@ -210,6 +239,7 @@ def prometheus(report):
     gauge('agent_dispatch_authorized',0)
     result='\n'.join(lines)+'\n';require(len(result.encode())<=32768)
     return result
+
 
 
 
