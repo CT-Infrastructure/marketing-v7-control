@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:marketing-v7:runtime:evidence-manifest:1.0",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "task_key": {
+      "$ref": "urn:marketing-v7:runtime:common:1.0#/$defs/id"
+    },
+    "tested_commit": {
+      "$ref": "urn:marketing-v7:runtime:common:1.0#/$defs/id"
+    },
+    "environment": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_level": {
+      "enum": [
+        "CODE_MERGED",
+        "SANDBOX_QUALIFIED",
+        "STAGING_QUALIFIED",
+        "PRODUCTION_APPROVED"
+      ]
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "urn:marketing-v7:runtime:common:1.0#/$defs/id"
+          },
+          "status": {
+            "enum": [
+              "PASS",
+              "FAIL",
+              "NOT_RUN",
+              "NOT_APPLICABLE"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "reason"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "independent_executor": {
+      "$ref": "urn:marketing-v7:runtime:common:1.0#/$defs/id"
+    },
+    "artifact_hashes": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "urn:marketing-v7:runtime:common:1.0#/$defs/sha256"
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "producer_ref": {
+      "$ref": "urn:marketing-v7:runtime:common:1.0#/$defs/id"
+    },
+    "recorded_at": {
+      "$ref": "urn:marketing-v7:runtime:common:1.0#/$defs/datetime"
+    },
+    "production_authorization_ref": {
+      "anyOf": [
+        {
+          "$ref": "urn:marketing-v7:runtime:common:1.0#/$defs/id"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "task_key",
+    "tested_commit",
+    "environment",
+    "evidence_level",
+    "cases",
+    "independent_executor",
+    "artifact_hashes",
+    "limitations",
+    "producer_ref",
+    "recorded_at",
+    "production_authorization_ref"
+  ],
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "evidence_level": {
+            "const": "PRODUCTION_APPROVED"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "production_authorization_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ]
+}
