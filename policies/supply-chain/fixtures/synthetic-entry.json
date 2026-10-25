@@ -1,0 +1,77 @@
+{
+  "id": "CP033",
+  "component_id": "CP033",
+  "name": "llama.cpp",
+  "source_classification": "RUNTIME_OR_SELECTED_V7_COMPONENT",
+  "deployment_mode": "restricted-worker-container",
+  "artifact_type": "APPLICATION",
+  "state": "CANDIDATE",
+  "purpose": "component-plan",
+  "origin": "synthetic-origin",
+  "release": "synthetic-1.0",
+  "digest": {
+    "algorithm": "sha256",
+    "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "architecture": "synthetic-arch",
+  "license": {
+    "expression": "LicenseRef-Synthetic-Test",
+    "review_state": "REVIEWED",
+    "evidence_ref": "synthetic-license"
+  },
+  "model_rights": {
+    "state": "NOT_APPLICABLE",
+    "evidence_ref": "synthetic-disposition"
+  },
+  "provenance": {
+    "status": "VERIFIED",
+    "source_ref": "synthetic-origin",
+    "attestation_ref": "synthetic-attestation",
+    "issuer_ref": "synthetic-issuer"
+  },
+  "sbom": {
+    "status": "RECORDED",
+    "format": "SPDX",
+    "subject_digest": {
+      "algorithm": "sha256",
+      "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "document_ref": "synthetic-sbom",
+    "document_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "scans": [
+    {
+      "kind": "vulnerability",
+      "status": "PASS",
+      "tool": "synthetic-scanner",
+      "tool_release": "synthetic-1.0",
+      "database_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "scanned_at": "2026-10-25T12:00:00Z",
+      "subject_digest": {
+        "algorithm": "sha256",
+        "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "report_ref": "synthetic-report",
+      "report_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "findings": []
+    },
+    {
+      "kind": "secret",
+      "status": "PASS",
+      "tool": "synthetic-scanner",
+      "tool_release": "synthetic-1.0",
+      "database_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "scanned_at": "2026-10-25T12:00:00Z",
+      "subject_digest": {
+        "algorithm": "sha256",
+        "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "report_ref": "synthetic-report",
+      "report_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "findings": []
+    }
+  ],
+  "dependencies": [],
+  "review_ref": "synthetic-review",
+  "rollback_ref": "synthetic-rollback"
+}
