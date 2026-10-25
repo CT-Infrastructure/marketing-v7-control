@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "base_revision": "30f56e90e1fc103eaf0491838b53ba07f9ab732c",
+  "hash_semantics": "Raw exported bytes and reversible LF text bytes; no JSON reserialization.",
+  "sources": {
+    "reference/workflow_catalog.json": {
+      "sha256_raw": "096fcc538f755fc055c9842e84352bf46d43b45251d206cfd203310659b6e98c",
+      "sha256_lf": "096fcc538f755fc055c9842e84352bf46d43b45251d206cfd203310659b6e98c",
+      "bytes": 765065
+    },
+    "reference/components/component_registry.json": {
+      "sha256_raw": "de49779855eabdd7f5defc5ff6157d6a3e875f6164d64278c4a70338d029899e",
+      "sha256_lf": "de49779855eabdd7f5defc5ff6157d6a3e875f6164d64278c4a70338d029899e",
+      "bytes": 120061
+    },
+    "reference/acceptance/Original_Acceptance_Matrix.csv": {
+      "sha256_raw": "bb646bb34d992437a6912f30649effcacf36c23b2e668717ff4d298fe68787bb",
+      "sha256_lf": "bb646bb34d992437a6912f30649effcacf36c23b2e668717ff4d298fe68787bb",
+      "bytes": 142175
+    },
+    "backlog/acceptance_traceability.csv": {
+      "sha256_raw": "98f4859c21eebbba6bbb68c80342e1942346d27758ae014f0496bf631f240c22",
+      "sha256_lf": "98f4859c21eebbba6bbb68c80342e1942346d27758ae014f0496bf631f240c22",
+      "bytes": 67110
+    },
+    "backlog/issues.json": {
+      "sha256_raw": "b655da3025feda286daf723cd0aa4fb38f9ec2340cfb817b4611533bfdd604d7",
+      "sha256_lf": "b655da3025feda286daf723cd0aa4fb38f9ec2340cfb817b4611533bfdd604d7",
+      "bytes": 861419
+    },
+    "orchestration/task_graph.json": {
+      "sha256_raw": "63bcaafb8a535ebb62688cf544c41b5bb74ffdaf1f760996af0873aa45f8f4a8",
+      "sha256_lf": "63bcaafb8a535ebb62688cf544c41b5bb74ffdaf1f760996af0873aa45f8f4a8",
+      "bytes": 839287
+    },
+    "config/repositories.json": {
+      "sha256_raw": "e8829958114b3aafa34d7304ebdf587e9f5f7596acf259b4d1ba771d4b84c375",
+      "sha256_lf": "e8829958114b3aafa34d7304ebdf587e9f5f7596acf259b4d1ba771d4b84c375",
+      "bytes": 36280
+    },
+    "reference/architecture/Integration_Contracts.md": {
+      "sha256_raw": "143a7a5844659dd7c0f36955ce3dea9b4480bd87d6544263b9ffd4f2d3bbbf37",
+      "sha256_lf": "143a7a5844659dd7c0f36955ce3dea9b4480bd87d6544263b9ffd4f2d3bbbf37",
+      "bytes": 8728
+    }
+  }
+}
