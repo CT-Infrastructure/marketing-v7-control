@@ -3,15 +3,23 @@
 Do not feed real secrets to this fixture. Unknown unlabeled secret formats cannot
 be detected reliably; allowlisted structured output is the primary boundary.
 """
+import json
 import re
 
 MARKER = "[REDACTED]"
-# Keep the shared vocabulary separate from the structured key's substring policy.
+# Match recognized label components, not words such as client_secretary.
 SENSITIVE_LABEL = (r"password|passwd|authorization|private[_-]?key|api[_-]?key|"
                    r"client[_-]?secret|access[_-]?token|refresh[_-]?token|"
                    r"smtp[_-]?credential|sip[_-]?credential|payment[_-]?credential|"
-                   r"deploy[_-]?token")
-SENSITIVE_KEY = re.compile(r"(?i)(?:" + SENSITIVE_LABEL + r"|^token$|^secret$)")
+                   r"deploy[_-]?token|payment[_-]?token")
+SENSITIVE_KEY = re.compile(r"(?i)(?<![A-Za-z0-9])(?:" + SENSITIVE_LABEL + r"|token|secret)(?![A-Za-z0-9])")
+# The same recognized assignment labels drive scalar and composite handling.
+ASSIGNMENT_LABEL = (SENSITIVE_LABEL + r"|token|secret|smtp[_-]?password|sip[_-]?password")
+COMPOSITE_ASSIGNMENT = re.compile(
+    r"(?i)\b(?:" + ASSIGNMENT_LABEL + r")(?:\\?[\"'])?\s*[=:]\s*[\[{]")
+# Inspect standard JSON-quoted assignment keys even if the enclosing message is
+# truncated or embedded. Decode only each bounded key, never guess nested values.
+MAX_JSON_TEXT = 65536
 PATTERNS = [
     re.compile(r"-----BEGIN (?:[A-Z0-9 ]*PRIVATE KEY)-----.*?-----END (?:[A-Z0-9 ]*PRIVATE KEY)-----", re.S),
     re.compile(r"AGE-SECRET-KEY-[A-Z0-9]+", re.I),
@@ -20,10 +28,48 @@ PATTERNS = [
     re.compile(r"\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b"),
     re.compile(r"(?i)\b(?:Bearer|Basic)\s+[A-Za-z0-9+/_.~=:-]+"),
     re.compile(r"(?i)(?:postgres(?:ql)?|mysql|smtp|sips?)://[^\s/@:]+:[^\s/@]+@"),
-    re.compile(r"(?i)\b(?:" + SENSITIVE_LABEL + r"|token|secret|smtp[_-]?password|sip[_-]?password|payment[_-]?token)[\"']?\s*[=:]\s*(?:\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*'|[^\s,;]+)"),
+    re.compile(r"(?i)\b(?:" + ASSIGNMENT_LABEL + r")[\"']?\s*[=:]\s*(?:\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*'|[^\s,;]+)"),
 ]
 
 
+
+def _invalid_json_constant(value):
+    raise ValueError("not standard JSON")
+
+def _has_sensitive_json_key(value):
+    # One forward scan avoids repeatedly rescanning unterminated quoted text.
+    index = 0
+    while index < len(value):
+        if value[index] != '"':
+            index += 1
+            continue
+        start = index
+        index += 1
+        while index < len(value):
+            if value[index] == '\\':
+                index += 2
+            elif value[index] == '"':
+                index += 1
+                break
+            else:
+                index += 1
+        else:
+            return False
+        end = index
+        while index < len(value) and value[index] in ' \t\r\n':
+            index += 1
+        if index < len(value) and value[index] == ':':
+            try:
+                key = json.loads(value[start:end])
+            except (ValueError, TypeError, RecursionError):
+                key = None
+            if type(key) is str and SENSITIVE_KEY.search(key):
+                return True
+        # Always reconsider the closing boundary, even when the preceding
+        # candidate had a colon or was invalid/non-sensitive. Each span's
+        # interior is visited once; end-1 strictly advances beyond start.
+        index = end - 1
+    return False
 
 def redact(value, *, depth=0):
     if depth > 12:
@@ -39,9 +85,31 @@ def redact(value, *, depth=0):
     if isinstance(value, (list, tuple)):
         return [redact(item, depth=depth + 1) for item in value]
     if type(value) is str:
+        if len(value) > MAX_JSON_TEXT:
+            return MARKER
+        if value.lstrip().startswith(("{", "[")):
+            try:
+                parsed = json.loads(value, parse_constant=_invalid_json_constant)
+            except RecursionError:
+                return MARKER
+            except (ValueError, TypeError):
+                pass  # Keep the existing text path for non-JSON text.
+            else:
+                if type(parsed) in (dict, list):
+                    return json.dumps(redact(parsed, depth=depth + 1), ensure_ascii=False)
+        # A scalar regex cannot delimit a nested object/array safely. Discard
+        # the entire unparseable/embedded message rather than leak its tail.
+        if COMPOSITE_ASSIGNMENT.search(value) or _has_sensitive_json_key(value):
+            return MARKER
         for pattern in PATTERNS:
             value = pattern.sub(MARKER, value)
         return value
     if value is None or type(value) in (bool, int, float):
         return value
     return MARKER  # Never stringify opaque objects/bytes into logs.
+
+
+
+
+
+

@@ -164,7 +164,7 @@ class RedactionTests(unittest.TestCase):
         # JSON serialization introduces escapes for both quote and backslash.
         for value in ('synthetic-"SYNTHETIC_TAIL', 'synthetic-\\"SYNTHETIC_TAIL'):
             payload = json.dumps({"password": value, "status": "ok"})
-            self.assertEqual(redact(payload), '{"' + MARKER + ', "status": "ok"}')
+            self.assertEqual(json.loads(redact(payload)), {"password": MARKER, "status": "ok"})
 
     def test_bearer_complete_alphabet_and_surrounding_text(self):
         token = "SYNTHETIC-._~+/0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz=="
@@ -179,7 +179,7 @@ class RedactionTests(unittest.TestCase):
         for parts in (("private", "key"), ("api", "key"), ("client", "secret"),
                       ("access", "token"), ("refresh", "token"),
                       ("smtp", "credential"), ("sip", "credential"),
-                      ("payment", "credential"), ("deploy", "token")):
+                      ("payment", "credential"), ("payment", "token"), ("deploy", "token")):
             labels.extend(separator.join(parts) for separator in ("", "_", "-"))
         for label in labels:
             for spelling in (label, label.upper()):
@@ -192,7 +192,7 @@ class RedactionTests(unittest.TestCase):
                     for surface in ("prompt", "log", "artifact"):
                         self.assertEqual(redact({"surface": surface, "message": payload}),
                                          {"surface": surface,
-                                          "message": '{"' + MARKER + ', "status": "ok"}'})
+                                          "message": json.dumps({spelling: MARKER, "status": "ok"})})
 
     def test_ordinary_assignment_words_are_preserved(self):
         for label in ("secretary", "tokenizer", "secretion", "private", "access",
@@ -202,6 +202,48 @@ class RedactionTests(unittest.TestCase):
                 self.assertEqual(redact(payload), payload)
                 payload = json.dumps({label: "synthetic-public"})
                 self.assertEqual(redact({"message": payload}), {"message": payload})
+
+    def test_serialized_composites_redact_recursively(self):
+        marker = "SYNTHETIC_COMPOSITE_VALUE"
+        for label in ("api_key", "password", "payment_token", "PAYMENT-TOKEN"):
+            for composite in ({"nested": marker, "items": [marker]}, [marker, {"nested": marker}]):
+                value = {label: composite, "status": "ok", "count": 2}
+                with self.subTest(label=label, composite_type=type(composite).__name__):
+                    self.assertEqual(json.loads(redact(json.dumps(value))), {label: MARKER, "status": "ok", "count": 2})
+                    self.assertEqual(redact(value), {label: MARKER, "status": "ok", "count": 2})
+        payload = [{"api_key": {"nested": marker}}, {"public": [1, 2]}]
+        self.assertEqual(json.loads(redact(json.dumps(payload))), [{"api_key": MARKER}, {"public": [1, 2]}])
+
+    def test_embedded_json_message_is_redacted(self):
+        marker = "SYNTHETIC_EMBEDDED_VALUE"
+        message = json.dumps({"password": [marker, {"nested": marker}], "status": "ok"})
+        for surface in ("prompt", "log", "artifact"):
+            payload = json.dumps({"surface": surface, "message": message})
+            safe = json.loads(redact(payload))
+            self.assertEqual(safe["surface"], surface)
+            self.assertEqual(json.loads(safe["message"]), {"password": MARKER, "status": "ok"})
+            self.assertNotIn(marker, json.dumps(safe))
+
+    def test_unparseable_sensitive_composites_fail_closed(self):
+        marker = "SYNTHETIC_UNPARSED_VALUE"
+        for message in ('prefix api_key={"nested":"' + marker + '","tail":1}; suffix',
+                        'password=["' + marker + '", {"tail":1}] trailing text',
+                        "'payment_token': {'nested': '" + marker + "'}",
+                        '{"api_key": {"nested": "' + marker + '"',
+                        '[{"password": ["' + marker + '"]}] extra'):
+            for surface in ("prompt", "log", "artifact"):
+                with self.subTest(surface=surface, message=message):
+                    self.assertEqual(redact({"surface": surface, "message": message}),
+                                     {"surface": surface, "message": MARKER})
+
+    def test_json_recursion_bounds_and_ordinary_data(self):
+        ordinary = {"client_secretary": "public", "status": "ok", "items": [1, False, None, {"name": "public"}]}
+        self.assertEqual(json.loads(redact(json.dumps(ordinary))), ordinary)
+        self.assertEqual(redact(ordinary), ordinary)
+        nested = "SYNTHETIC_DEEP_VALUE"
+        for _ in range(20): nested = [nested]
+        self.assertNotIn("SYNTHETIC_DEEP_VALUE", redact(json.dumps(nested)))
+        self.assertEqual(redact("x" * 65537), MARKER)
 
     def test_nested_sensitive_fields_and_opaque_values(self):
         data = {"safe_ref": "sops:synthetic-service", "records": [{"SMTP_PASSWORD": "fake"},
@@ -219,5 +261,59 @@ class RedactionTests(unittest.TestCase):
                          {"count": 1, "enabled": False, "none": None, "message": "synthetic normal text"})
 
 
+    def test_malformed_json_unicode_escaped_keys_are_not_leaked(self):
+        marker='SYNTHETIC_ESCAPED_KEY_COMPOSITE'
+        for key in (r'payment_\u0074oken', r'paym\u0065nt_token', r'\u0070assword', r'api_\u006bey'):
+            for message in ('{"'+key+'":{"nested":["'+marker+'"]},broken',
+                            '{"'+key+'":["'+marker+'", {"tail":[',
+                            'prefix {"'+key+'":"'+marker+'"} suffix'):
+                for surface in ('prompt','log','artifact'):
+                    with self.subTest(key=key,surface=surface):
+                        self.assertEqual(redact({'surface':surface,'message':message}),
+                                         {'surface':surface,'message':MARKER})
+        ordinary=r'prefix {"client_\u0073ecretary":[1,2]} suffix'
+        self.assertEqual(redact(ordinary),ordinary)
+    def test_unterminated_quoted_text_stays_within_input_bound(self):
+        text='"'+('\\"'*16000)
+        self.assertLess(len(text),65536)
+        self.assertEqual(redact(text),text)
+    def test_stray_quote_prefix_does_not_hide_escaped_sensitive_keys(self):
+        payloads=(r'prefix "broken {"\u0070assword":{"nested":["SYNTHETIC_REVIEW_VALUE"]}} suffix',
+                  r'prefix "broken {"api_\u006bey":["SYNTHETIC_REVIEW_VALUE"]} suffix')
+        for payload in payloads:
+            for surface in ('prompt','log','artifact'):
+                with self.subTest(surface=surface,payload=payload):
+                    self.assertEqual(redact({'surface':surface,'message':payload}),
+                                     {'surface':surface,'message':MARKER})
+        ordinary=r'prefix "broken {"client_\u0073ecretary":["synthetic-public"]} suffix'
+        self.assertEqual(redact(ordinary),ordinary)
+        long_payload=('"ordinary" '*5000)+payloads[0]
+        self.assertLess(len(long_payload),65536)
+        self.assertEqual(redact(long_payload),MARKER)
+    def test_all_adjacent_quote_boundaries_detect_sensitive_component_keys(self):
+        keys=(r':\u0070assword',r':api_\u006bey',r'ops:payment_\u0074oken')
+        prefixes=('prefix "broken {', 'prefix "broken [ ', r'prefix "\q {')
+        for prefix in prefixes:
+            for key in keys:
+                for separator in (':',' : ','\t:\n'):
+                    payload=prefix+'"'+key+'"'+separator+'{"nested":["SYNTHETIC_ADJACENT_QUOTE_VALUE"]}} suffix'
+                    for surface in ('prompt','log','artifact'):
+                        with self.subTest(prefix=prefix,key=key,separator=separator,surface=surface):
+                            self.assertEqual(redact({'surface':surface,'message':payload}),
+                                             {'surface':surface,'message':MARKER})
+        ordinary=r'prefix "broken {":client_\u0073ecretary":{"nested":["synthetic-public"]}} suffix'
+        self.assertEqual(redact(ordinary),ordinary)
+
+    def test_many_nonsensitive_quote_colon_boundaries_remain_bounded(self):
+        prefix='"ordinary": '*4000
+        payload=prefix+r'prefix "broken {":\u0070assword":{"nested":["SYNTHETIC_ADJACENT_QUOTE_VALUE"]}} suffix'
+        self.assertLess(len(payload),65536)
+        self.assertEqual(redact(payload),MARKER)
+        ordinary=prefix+r'prefix "broken {":client_\u0073ecretary":[1,2]} suffix'
+        self.assertEqual(redact(ordinary),ordinary)
 if __name__ == "__main__":
     unittest.main()
+
+
+
+
