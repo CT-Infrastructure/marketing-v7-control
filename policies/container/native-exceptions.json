@@ -1,0 +1,12 @@
+{
+  "version": "1.0",
+  "qualification": "NOT_RUN",
+  "container_privilege_exception": false,
+  "placements": [
+    {"components": ["OpenWrt", "firewall4", "dnsmasq", "odhcpd", "LuCI", "uHTTPd", "Dropbear"], "placement": "supported firmware-native services", "reason": "Router and firewall lifecycle belongs to supported firmware, not a privileged omnibus container.", "owner": "I05/I07 component owners", "deployment_authorized": false, "required_evidence": ["exact hardware and supported firmware", "backup and console recovery", "segmentation and private administration tests"]},
+    {"components": ["Proxmox VE", "QEMU"], "placement": "supported hypervisor-native installation", "reason": "Host virtualization and management require their supported host environment.", "owner": "infrastructure component owners", "deployment_authorized": false, "required_evidence": ["exact host version and hardware compatibility", "private management identity", "guest isolation and recovery drill"]},
+    {"components": ["Debian host services", "systemd", "networkd", "SSH", "time", "disk", "UPS"], "placement": "supported native operating-system services", "reason": "Host boot, storage, network and power responsibilities must not be hidden in application containers.", "owner": "host operations owner", "deployment_authorized": false, "required_evidence": ["service configuration review", "access and resource boundaries", "tested rollback and power-loss recovery"]},
+    {"components": ["Asterisk", "PJSIP", "ARI"], "placement": "dedicated Debian voice VM preferred", "reason": "SIP/RTP/NAT and voice availability require a separately qualified media boundary; ARI remains private.", "owner": "V01/V12 voice owners", "deployment_authorized": false, "required_evidence": ["exact supported voice module versions", "private ARI and scoped carrier paths", "authorized owned-number media tests and fail-closed policy"]},
+    {"components": ["KeePassXC"], "placement": "offline custodian workstation", "reason": "Recovery keys remain outside general agents and application containers.", "owner": "I12 recovery custodian", "deployment_authorized": false, "required_evidence": ["offline key custody", "authorized recovery drill", "no secret material in agent context"]}
+  ]
+}
