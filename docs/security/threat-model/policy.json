@@ -1,0 +1,47 @@
+{
+  "version": "1.1",
+  "evidence_level": "offline_synthetic_policy_only",
+  "production_enabled": false,
+  "classes": [
+    "public",
+    "internal",
+    "confidential",
+    "restricted"
+  ],
+  "capabilities": {
+    "coding_agent": [
+      "read_synthetic",
+      "write_owned_candidate"
+    ],
+    "build_job": [
+      "read_synthetic",
+      "write_owned_candidate"
+    ],
+    "model": [
+      "read_synthetic"
+    ],
+    "scoped_app": [
+      "private_read"
+    ],
+    "event_adapter": [
+      "verify_webhook"
+    ],
+    "dispatch_guard": [
+      "evaluate_dispatch"
+    ],
+    "egress_broker": [
+      "fetch_mock"
+    ]
+  },
+  "mock_targets": [
+    "https://fixture.example.invalid:443/approved"
+  ],
+  "webhook_max_bytes": 2048,
+  "webhook_max_age_seconds": 300,
+  "supported_channels": [
+    "web",
+    "social",
+    "email",
+    "voice"
+  ]
+}
