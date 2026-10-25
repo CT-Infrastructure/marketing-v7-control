@@ -311,6 +311,68 @@ class RedactionTests(unittest.TestCase):
         self.assertEqual(redact(payload),MARKER)
         ordinary=prefix+r'prefix "broken {":client_\u0073ecretary":[1,2]} suffix'
         self.assertEqual(redact(ordinary),ordinary)
+    def test_unterminated_quoted_assignments_consume_complete_remaining_value(self):
+        labels=('password','PASSWD','api_key','CLIENT_SECRET','DB_PASSWORD','APP_ACCESS_TOKEN')
+        tails=('SYNTHETIC_HEAD SYNTHETIC_TAIL',
+               'SYNTHETIC_HEAD,; \nSYNTHETIC_TAIL',
+               'SYNTHETIC_HEAD \\ SYNTHETIC_TAIL\\',
+               'SYNTHETIC_HEAD \\" SYNTHETIC_TAIL')
+        for label in labels:
+            for quote in ('"',"'"):
+                for separator in ('=',': ', ' = '):
+                    for tail in tails:
+                        # Quote characters inside the synthetic value are escaped.
+                        value=tail.replace('\\','\\\\').replace(quote,'\\'+quote)
+                        # A final unmatched escape is deliberately appended after
+                        # escaping literal content, so this never closes the value.
+                        for ending in ('','\\'):
+                            message='before '+label+separator+quote+value+ending
+                            for surface in ('prompt','log','artifact'):
+                                with self.subTest(label=label,quote=quote,separator=separator,surface=surface,ending=ending):
+                                    result=redact({'surface':surface,'message':message})
+                                    self.assertIn(MARKER,result['message'])
+                                    self.assertNotIn('SYNTHETIC_HEAD',result['message'])
+                                    self.assertNotIn('SYNTHETIC_TAIL',result['message'])
+
+    def test_component_boundary_matches_scalar_and_composite_assignment_labels(self):
+        for prefix in ('DB_','APP-','runtime.','OPS_'):
+            for label in ('PASSWORD','API_KEY','CLIENT_SECRET','ACCESS_TOKEN','PAYMENT_TOKEN'):
+                for separator in ('=',': '):
+                    key=prefix+label
+                    scalar='before '+key+separator+'SYNTHETIC_BOUNDARY_VALUE; after'
+                    self.assertNotIn('SYNTHETIC_BOUNDARY_VALUE',redact(scalar))
+                    self.assertIn(MARKER,redact(scalar))
+                    for composite in ('["SYNTHETIC_BOUNDARY_VALUE",{"nested":1}]',
+                                      '{"value":"SYNTHETIC_BOUNDARY_VALUE"}'):
+                        for surface in ('prompt','log','artifact'):
+                            with self.subTest(key=key,separator=separator,surface=surface):
+                                message='before '+key+separator+composite+' after'
+                                self.assertEqual(redact({'surface':surface,'message':message}),
+                                                 {'surface':surface,'message':MARKER})
+
+    def test_closed_prefixed_quote_keeps_following_public_fields(self):
+        for quote in ('"',"'"):
+            value='SYNTHETIC_HEAD '+('\\'+quote)+' SYNTHETIC_TAIL'
+            payload='before DB_PASSWORD='+quote+value+quote+'; status=ok'
+            safe=redact(payload)
+            self.assertTrue(safe.endswith('; status=ok'))
+            self.assertNotIn('SYNTHETIC_TAIL',safe)
+        for embedded in ('"',"'"):
+            token='SYNTHETIC_HEAD'+embedded+'SYNTHETIC_TAIL'
+            safe=redact('DB_PASSWORD='+token+'; status=ok')
+            self.assertNotIn('SYNTHETIC_TAIL',safe)
+            self.assertTrue(safe.endswith('; status=ok'))
+        payload='DB_PASSWORD="'+('x '*30000)+'SYNTHETIC_LONG_TAIL\\'
+        self.assertLess(len(payload),65536)
+        self.assertNotIn('SYNTHETIC_LONG_TAIL',redact(payload))
+
+    def test_prefixed_ordinary_component_words_still_survive(self):
+        for key in ('DB_SECRETARY','APP_TOKENIZER','DB_CLIENT_SECRETARY','MY_PASSWORDLESS',
+                    'runtime.deployment','runtime.private','mysecret','passwordish'):
+            for value in ('synthetic-public','[1,2]','{"public":true}'):
+                message='before '+key+'='+value+'; status=ok'
+                with self.subTest(key=key,value=value):
+                    self.assertEqual(redact(message),message)
 if __name__ == "__main__":
     unittest.main()
 

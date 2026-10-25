@@ -16,7 +16,7 @@ SENSITIVE_KEY = re.compile(r"(?i)(?<![A-Za-z0-9])(?:" + SENSITIVE_LABEL + r"|tok
 # The same recognized assignment labels drive scalar and composite handling.
 ASSIGNMENT_LABEL = (SENSITIVE_LABEL + r"|token|secret|smtp[_-]?password|sip[_-]?password")
 COMPOSITE_ASSIGNMENT = re.compile(
-    r"(?i)\b(?:" + ASSIGNMENT_LABEL + r")(?:\\?[\"'])?\s*[=:]\s*[\[{]")
+    r"(?i)(?<![A-Za-z0-9])(?:" + ASSIGNMENT_LABEL + r")(?![A-Za-z0-9])(?:\\?[\"'])?\s*[=:]\s*[\[{]")
 # Inspect standard JSON-quoted assignment keys even if the enclosing message is
 # truncated or embedded. Decode only each bounded key, never guess nested values.
 MAX_JSON_TEXT = 65536
@@ -28,7 +28,11 @@ PATTERNS = [
     re.compile(r"\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b"),
     re.compile(r"(?i)\b(?:Bearer|Basic)\s+[A-Za-z0-9+/_.~=:-]+"),
     re.compile(r"(?i)(?:postgres(?:ql)?|mysql|smtp|sips?)://[^\s/@:]+:[^\s/@]+@"),
-    re.compile(r"(?i)\b(?:" + ASSIGNMENT_LABEL + r")[\"']?\s*[=:]\s*(?:\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*'|[^\s,;]+)"),
+    # A quoted assignment either closes normally or consumes through end of
+    # input, including a dangling escape. It must not fall back to one token.
+    re.compile(r"(?i)(?<![A-Za-z0-9])(?:" + ASSIGNMENT_LABEL + r")(?![A-Za-z0-9])[\"']?\s*[=:]\s*"
+               r"(?:\"(?:\\[\s\S]|[^\"\\])*(?:\"|\\?\Z)"
+               r"|'(?:\\[\s\S]|[^'\\])*(?:'|\\?\Z)|(?![\"'])[^\s,;]+)"),
 ]
 
 
