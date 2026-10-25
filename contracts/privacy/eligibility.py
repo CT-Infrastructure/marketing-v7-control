@@ -154,7 +154,12 @@ def evaluate(request, permission, lifecycle, reviews=(), rights=()):
             return deny('UNAPPLIED_REVOCATION_OR_DELETION')
         if type(lifecycle.replay_complete) is not bool:
             return deny('INVALID_REPLAY_STATE')
-        if lifecycle.restore_epoch is not None:
+        if lifecycle.replay_evidence_ref is not None and not identifier(lifecycle.replay_evidence_ref):
+            return deny('INVALID_REPLAY_REFERENCE')
+        if lifecycle.restore_epoch is None:
+            if lifecycle.replay_complete is not False or lifecycle.replay_evidence_ref is not None:
+                return deny('ORPHANED_REPLAY_STATE')
+        else:
             if not identifier(lifecycle.restore_epoch) or lifecycle.replay_complete is not True or not identifier(lifecycle.replay_evidence_ref):
                 return deny('RESTORE_REPLAY_REQUIRED')
         if lifecycle.retention_until is None:

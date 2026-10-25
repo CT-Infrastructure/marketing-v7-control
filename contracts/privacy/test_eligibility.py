@@ -96,6 +96,27 @@ class PrivacyTests(unittest.TestCase):
                         {'replay_evidence_ref':None},{'suppressed':True},{'deleted':True}):
             self.assertEqual('DENY',evaluate(request,permission,replace(replayed,**changes),reviews).status)
 
+    def test_no_restore_rejects_orphaned_replay_markers(self):
+        request, permission, lifecycle, reviews=make()
+        self.assertIsNone(lifecycle.restore_epoch)
+        self.assertFalse(lifecycle.replay_complete)
+        self.assertIsNone(lifecycle.replay_evidence_ref)
+        self.assertEqual('ELIGIBLE_OFFLINE',evaluate(request,permission,lifecycle,reviews).status)
+        for changes in ({'replay_complete':True}, {'replay_evidence_ref':'synthetic-old-replay'},
+                        {'replay_complete':True,'replay_evidence_ref':'synthetic-old-replay'}):
+            with self.subTest(changes=changes):
+                decision=evaluate(request,permission,replace(lifecycle,**changes),reviews)
+                self.assertEqual('DENY',decision.status)
+                self.assertEqual('HOLD',decision.outbound_state)
+
+    def test_replay_reference_types_reject_with_and_without_restore(self):
+        request, permission, lifecycle, reviews=make()
+        for epoch in (None,'synthetic-restore'):
+            for reference in (123, True, False, [], {}, '', 'bad reference'):
+                with self.subTest(epoch=epoch,reference=reference):
+                    candidate=replace(lifecycle,restore_epoch=epoch,replay_complete=(epoch is not None),
+                                      replay_evidence_ref=reference)
+                    self.assertEqual('DENY',evaluate(request,permission,candidate,reviews).status)
     def test_revocation_generation_malformed_types_deny(self):
         request, permission, lifecycle, reviews=make()
         for changes in ({'applied_generation':True},{'authority_generation':'3'}, {'applied_generation':-1},
