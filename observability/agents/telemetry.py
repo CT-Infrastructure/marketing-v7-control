@@ -2,7 +2,7 @@
 from __future__ import annotations
 from datetime import timedelta
 import copy
-from decimal import Decimal, InvalidOperation
+from decimal import Context, Decimal, InvalidOperation, localcontext
 import hashlib
 import importlib.util
 import json
@@ -71,7 +71,41 @@ def safe_ref(value,kind,nullable=False):
     require(type(value) is str and re.fullmatch(patterns[kind],value) is not None)
 
 def canonical(value):
+    """Canonical JSON with exact Decimal numeric tokens, never binary-float coercion."""
+    if type(value) is Decimal:
+        require(value.is_finite())
+        return str(value)
+    if type(value) is dict:
+        require(all(type(key) is str for key in value))
+        return '{'+','.join(json.dumps(key,ensure_ascii=True)+':'+canonical(value[key]) for key in sorted(value))+'}'
+    if type(value) in (list,tuple):
+        return '['+','.join(canonical(item) for item in value)+']'
     return json.dumps(value,sort_keys=True,separators=(',',':'),ensure_ascii=True,allow_nan=False)
+
+
+def numeric_view_for_f08(value):
+    """Adapt only F08's structural input view; exact budget values stay in snapshot."""
+    if type(value) is Decimal:
+        projected=float(value)
+        # Underflow must not turn an invalid negative input into accepted -0.0.
+        return -1.0 if value<0 and projected==0 else projected
+    if type(value) is dict:return {key:numeric_view_for_f08(item) for key,item in value.items()}
+    if type(value) is list:return [numeric_view_for_f08(item) for item in value]
+    return value
+
+
+def budget_number(value):
+    if type(value) is Decimal:
+        return value.is_finite() and 0<=value<=Decimal('1000000000')
+    return f08.number(value) and value<=1000000000
+
+def exact_json_float(value):
+    try:
+        result=Decimal(value)
+    except (InvalidOperation,ValueError,OverflowError):
+        raise ValueError('invalid numeric literal') from None
+    require(result.is_finite())
+    return result
 
 def check_json_depth(text):
     """Bound containers before decoding, ignoring braces in escaped JSON strings."""
@@ -103,7 +137,7 @@ def read_snapshot(path):
     text=raw.decode(json.detect_encoding(raw), 'surrogatepass')
     check_json_depth(text)
     try:
-        return json.loads(text,object_pairs_hook=unique,parse_constant=lambda _: (_ for _ in ()).throw(ValueError('invalid numeric constant')))
+        return json.loads(text,object_pairs_hook=unique,parse_float=exact_json_float,parse_constant=lambda _: (_ for _ in ()).throw(ValueError('invalid numeric constant')))
     except RecursionError:
         raise ValueError('input nesting exceeds supported depth') from None
 
@@ -116,10 +150,14 @@ def validate(snapshot,now):
     shape(snapshot['dispatch_inputs'],DISPATCH_KEYS)
     require(len(canonical(snapshot['dispatch_inputs']))<8192)
     # Reuse F08's checks; their static blocker names are never raw source values.
-    dispatch_blockers=f08.blockers(snapshot['dispatch_inputs'])
+    dispatch_blockers=f08.blockers(numeric_view_for_f08(snapshot['dispatch_inputs']))
     for key in ('total_spend_usd','per_task_spend_usd'):
         value=snapshot['dispatch_inputs'][key]
-        if value is not None:require(f08.number(value) and value<=1000000000)
+        if value is not None:require(budget_number(value))
+    budget=snapshot['dispatch_inputs']
+    if all(budget_number(budget[key]) for key in ('total_spend_usd','per_task_spend_usd')):
+        if Decimal(str(budget['per_task_spend_usd']))>Decimal(str(budget['total_spend_usd'])):
+            dispatch_blockers.append('per_task_spend_exceeds_total')
     tasks=snapshot['tasks'];require(type(tasks) is list and len(tasks)<=MAX_TASKS)
     refs=set()
     for task in tasks:
@@ -151,9 +189,12 @@ def validate(snapshot,now):
     return current,observed,dispatch_blockers
 
 def sum_exceeds(left,right,limit):
-    """Exact rational comparison, independent of ambient Decimal precision/traps."""
-    ln,ld=left.as_integer_ratio();rn,rd=right.as_integer_ratio();cn,cd=limit.as_integer_ratio()
-    return (ln*rd+rn*ld)*cd>cn*ld*rd
+    """Exact bounded accounting sum; avoid expanding an arbitrarily tiny ceiling."""
+    # Each accounting input is a <=64-character ordinary decimal, bounded to 1e9.
+    # 144 digits cover both operands and their carry, independent of ambient context.
+    with localcontext(Context(prec=144)):
+        total=left+right
+    return total>limit
 
 
 def unavailable_report(now):
@@ -238,7 +279,7 @@ def render(snapshot,now,previous=None):
     if any(value is not None and value>=1 for value in pressure.values()):reasons.append('resource_pressure')
     if any(row['capacity']==0 and row['allocated'] not in (0,None) for row in snapshot['resources'].values()):reasons.append('resource_overallocated')
     cap=snapshot['dispatch_inputs']['total_spend_usd']
-    if spent is None or reserved is None or not f08.number(cap):reasons.append('api_accounting_unset')
+    if spent is None or reserved is None or not budget_number(cap):reasons.append('api_accounting_unset')
     elif sum_exceeds(spent,reserved,Decimal(str(cap))):reasons.append('api_budget_exceeded')
     sub=[accounting[k] for k in ('subscription_task_limit','subscription_tasks_used','subscription_tasks_reserved')]
     if any(value is None for value in sub):reasons.append('subscription_quota_unset')
@@ -255,7 +296,7 @@ def render(snapshot,now,previous=None):
             'queue_oldest_age_seconds':max(queue_ages,default=0),'merge_wait_oldest_seconds':max(merge_ages,default=0),
             'evidence_oldest_age_seconds':max(evidence_ages) if evidence_ages else None,'missing_evidence_count':missing_evidence,
             'resource_pressure_ratio':pressure,'model_usage':copy.deepcopy(snapshot['model_usage']),
-            'accounting':copy.deepcopy(accounting),'billing_mode':'ChatGPT subscription','api_budget_authorized_usd':cap if f08.number(cap) else None,
+            'accounting':copy.deepcopy(accounting),'billing_mode':'ChatGPT subscription','api_budget_authorized_usd':cap if budget_number(cap) else None,
             'admission_signal':not reasons,'admission_hold_reasons':sorted(set(reasons)),
             'dispatch_authorized':False,'next_step':'trusted_admission_required','tasks':details}
     require(len(canonical(report).encode())<=MAX_BYTES)
@@ -269,7 +310,7 @@ def prometheus(report):
     def gauge(name,value,labels=''):
         if value is None:return
         require(type(value) in (int,float,Decimal) and math.isfinite(value) and 0<=value<=10**12)
-        lines.append(name+labels+' '+format(value,'f') if isinstance(value,Decimal) else name+labels+' '+str(value))
+        lines.append(name+labels+' '+str(value) if isinstance(value,Decimal) else name+labels+' '+str(value))
     gauge('agent_export_available',1)
     gauge('agent_export_timestamp_seconds',time(report['rendered_at']).timestamp())
     gauge('agent_export_valid_until_timestamp_seconds',time(report['valid_until']).timestamp())

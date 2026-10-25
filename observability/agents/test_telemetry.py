@@ -2,7 +2,7 @@
 import copy
 import contextlib
 import io
-from decimal import localcontext
+from decimal import Decimal, localcontext
 from unittest.mock import patch
 import json
 from pathlib import Path
@@ -396,6 +396,58 @@ class TelemetryTests(unittest.TestCase):
             self.assertNotIn('Traceback',output.getvalue())
             self.assertFalse(json.loads((root/'agents.json').read_text())['export_available'])
             self.assertIn('agent_export_available 0',(root/'agents.prom').read_text())
+    def read_raw_budget(self,ceiling,spent='0.00',reserved='0.00',headroom_cpu=None):
+        data=snapshot();data['dispatch_inputs']['total_spend_usd']='RAW_CEILING'
+        data['accounting']['api_spent_usd']=spent;data['accounting']['api_reserved_usd']=reserved
+        if headroom_cpu is not None:data['dispatch_inputs']['approved_headroom']['cpu']='RAW_HEADROOM'
+        raw=json.dumps(data).replace('"RAW_CEILING"',ceiling)
+        if headroom_cpu is not None:raw=raw.replace('"RAW_HEADROOM"',headroom_cpu)
+        with tempfile.TemporaryDirectory(prefix='f17-precise-json-') as directory:
+            path=Path(directory)/'snapshot.json';path.write_text(raw)
+            return t.read_snapshot(path)
+
+    def test_raw_fractional_ceiling_cannot_round_up_before_comparison(self):
+        data=self.read_raw_budget('0.100000000000000015','0.100000000000000017')
+        self.assertEqual(data['dispatch_inputs']['total_spend_usd'],Decimal('0.100000000000000015'))
+        report=t.render(data,NOW)
+        self.assertFalse(report['admission_signal']);self.assertIn('api_budget_exceeded',report['admission_hold_reasons'])
+
+    def test_raw_fractional_equal_and_below_ceiling_remain_valid(self):
+        for spent in ('0.100000000000000015','0.100000000000000014'):
+            data=self.read_raw_budget('0.100000000000000015',spent)
+            self.assertNotIn('api_budget_exceeded',t.render(data,NOW)['admission_hold_reasons'])
+
+    def test_exact_ceiling_is_preserved_in_numeric_json_and_snapshot_hash(self):
+        first=self.read_raw_budget('0.100000000000000015')
+        second=self.read_raw_budget('0.100000000000000016')
+        report=t.render(first,NOW)
+        encoded=t.canonical(report)
+        parsed=json.loads(encoded,parse_float=Decimal)
+        self.assertEqual(parsed['api_budget_authorized_usd'],Decimal('0.100000000000000015'))
+        self.assertNotIsInstance(parsed['api_budget_authorized_usd'],str)
+        self.assertNotEqual(report['cursor']['snapshot_sha256'],t.render(second,NOW)['cursor']['snapshot_sha256'])
+
+    def test_ordinary_numeric_budgets_serialize_and_validate_normally(self):
+        for ceiling in ('1','1.25','0.1'):
+            data=self.read_raw_budget(ceiling)
+            report=t.render(data,NOW)
+            self.assertTrue(report['admission_signal'])
+            self.assertEqual(json.loads(t.canonical(report),parse_float=Decimal)['api_budget_authorized_usd'],Decimal(ceiling))
+            self.assertIn('agent_api_budget_authorized_usd ',t.prometheus(report))
+
+    def test_negative_underflow_does_not_weaken_f08_structural_validation(self):
+        data=self.read_raw_budget('1',headroom_cpu='-1e-1000000')
+        report=t.render(data,NOW)
+        self.assertFalse(report['admission_signal']);self.assertIn('capacity_inputs_held',report['admission_hold_reasons'])
+
+    def test_tiny_numeric_ceiling_does_not_expand_exponent_or_lose_budget(self):
+        data=self.read_raw_budget('1e-1000000','0.000000000000000001')
+        report=t.render(data,NOW)
+        self.assertIn('api_budget_exceeded',report['admission_hold_reasons'])
+        self.assertLess(len(t.canonical(report)),t.MAX_BYTES)
+        self.assertLess(len(t.prometheus(report)),32768)
+        with self.assertRaises(ValueError):
+            self.read_raw_budget('1e999999999999999999999999999999999999')
 if __name__=='__main__':unittest.main(verbosity=2)
 
 
