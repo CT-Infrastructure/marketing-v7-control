@@ -74,11 +74,11 @@
   "artifact_hashes": {
     "config/site/site.example.json": "73cbfee640e9578064376b7919035ea94a843fc779cd798199746e1a75db317a",
     "config/site/test_validate_site.py": "f3c4f7c77e243b3f18eeb834c09f208d769abe72c95e283fdf1f064c9021ffdb",
-    "config/site/test_verify_evidence.py": "a50307c91fc0f73f718f855a0fa9b6291d79ef08b3e349d648c45ac36cea2d03",
+    "config/site/test_verify_evidence.py": "b27409559b986e30de8dd686a5ca2c26dca5c81944d5db4471d9492de7d5e3f4",
     "config/site/validate_site.py": "70f03a9208e20a89c32ab2b719c0d332db84640c4199a987d754cbf8ad9d7870",
-    "config/site/verify_evidence.py": "29097a36586874a913964a78fb3ebe34baf14a4056ce824bb94af504a4b6c9fe",
+    "config/site/verify_evidence.py": "7f090f121e5aba57f6d20d34152739fa88f430810cd909e3b526a37df4cf4e5d",
     "docs/decisions/site/README.md": "4e116a77af935e74258c69444508f97b9abe4928a6c720f1c21ad02bbeb93972",
-    "docs/decisions/site/RUNBOOK.md": "a8110b5d40600d2cf8ae70d6f802ef0cecedf5447b7b716b7d132531f62b2ce5",
+    "docs/decisions/site/RUNBOOK.md": "c7fab7f867a6af1296ee6f86cdc0a752a82fc7b68c96b17820a0d62af8ead3d0",
     "docs/decisions/site/decision-register.json": "3c8d7e028e98ba382398d568e417b5d0269f2f2653e8e9f62670bbae719b8de7"
   },
   "manifest_excludes_itself": true,
