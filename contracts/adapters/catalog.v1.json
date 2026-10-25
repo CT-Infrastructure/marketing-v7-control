@@ -1,0 +1,361 @@
+{
+  "schema_version": "1.0",
+  "kind": "adapter_design_contract_not_runtime_configuration",
+  "core_envelope_ref": "urn:marketing-v7:runtime:event-envelope:1.0",
+  "core_receipt_ref": "urn:marketing-v7:runtime:action-receipt:1.0",
+  "native_state_authoritative": true,
+  "orchestrator": "Activepieces",
+  "operational_ledger": "PostgreSQL receipts only; never native application tables",
+  "adapters": [
+    {
+      "adapter": "mautic",
+      "component": "CP058",
+      "native_owner": "Contacts, permission/suppression state, campaigns and email queues",
+      "api_boundary": "Supported Mautic application API and native campaign/queue workers",
+      "native_dependencies": "MariaDB and supported PHP/runtime; native scheduler and queue workers; secret encryption",
+      "release": null,
+      "qualification": "UNVERIFIED",
+      "direct_native_table_writes": false,
+      "outbound_state": "HOLD",
+      "guard": "E11 final transport guard and E12 atomic quota reservation apply to immediate/manual/queued/restarted sends",
+      "actions": [
+        {
+          "name": "contact.read",
+          "owner": "mautic",
+          "mode": "read",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Native contact ID and scoped external mapping; suppression state and native queue/message ID; never retry uncertain queueing"
+        },
+        {
+          "name": "contact.upsert",
+          "owner": "mautic",
+          "mode": "write",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Native contact ID and scoped external mapping; suppression state and native queue/message ID; never retry uncertain queueing"
+        },
+        {
+          "name": "suppression.record",
+          "owner": "mautic",
+          "mode": "write",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Native contact ID and scoped external mapping; suppression state and native queue/message ID; never retry uncertain queueing"
+        },
+        {
+          "name": "campaign.queue",
+          "owner": "mautic",
+          "mode": "write",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Native contact ID and scoped external mapping; suppression state and native queue/message ID; never retry uncertain queueing"
+        }
+      ]
+    },
+    {
+      "adapter": "wordpress",
+      "component": "CP057",
+      "native_owner": "Web posts, revisions, publication status and media attachments",
+      "api_boundary": "Supported WordPress REST API and allowlisted native plugin APIs",
+      "native_dependencies": "Supported PHP/web runtime, MariaDB, uploads and allowlisted plugins",
+      "release": null,
+      "qualification": "UNVERIFIED",
+      "direct_native_table_writes": false,
+      "outbound_state": "HOLD",
+      "guard": "Draft is default; publish requires separate reviewed action and fresh business approval",
+      "actions": [
+        {
+          "name": "post.read",
+          "owner": "wordpress",
+          "mode": "read",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Native post ID and revision/content digest; read publication status after uncertain update"
+        },
+        {
+          "name": "post.draft",
+          "owner": "wordpress",
+          "mode": "write",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Native post ID and revision/content digest; read publication status after uncertain update"
+        },
+        {
+          "name": "post.update",
+          "owner": "wordpress",
+          "mode": "write",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Native post ID and revision/content digest; read publication status after uncertain update"
+        },
+        {
+          "name": "post.withdraw",
+          "owner": "wordpress",
+          "mode": "write",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Native post ID and revision/content digest; read publication status after uncertain update"
+        }
+      ]
+    },
+    {
+      "adapter": "postiz",
+      "component": "CP060",
+      "native_owner": "Social accounts, schedules and native publication jobs",
+      "api_boundary": "Supported Postiz application API and native scheduling workers",
+      "native_dependencies": "Pinned release app/workers, Temporal, persistence and visibility databases, cache, encryption keys, uploads and OAuth scopes",
+      "release": null,
+      "qualification": "UNVERIFIED",
+      "direct_native_table_writes": false,
+      "outbound_state": "HOLD",
+      "guard": "Restored/test instances hold schedules; no independent social publisher",
+      "actions": [
+        {
+          "name": "schedule.read",
+          "owner": "postiz",
+          "mode": "read",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Native schedule/job ID plus downstream provider ID; uncertain publication remains UNKNOWN until provider readback"
+        },
+        {
+          "name": "schedule.create",
+          "owner": "postiz",
+          "mode": "write",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Native schedule/job ID plus downstream provider ID; uncertain publication remains UNKNOWN until provider readback"
+        },
+        {
+          "name": "schedule.cancel",
+          "owner": "postiz",
+          "mode": "write",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Native schedule/job ID plus downstream provider ID; uncertain publication remains UNKNOWN until provider readback"
+        },
+        {
+          "name": "publication.reconcile",
+          "owner": "postiz",
+          "mode": "read",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Native schedule/job ID plus downstream provider ID; uncertain publication remains UNKNOWN until provider readback"
+        }
+      ]
+    },
+    {
+      "adapter": "openproject",
+      "component": "CP056",
+      "native_owner": "Business, editorial, campaign, budget and publication approvals",
+      "api_boundary": "Supported OpenProject application API",
+      "native_dependencies": "Supported release runtime/database/API and native background workers",
+      "release": null,
+      "qualification": "UNVERIFIED",
+      "direct_native_table_writes": false,
+      "outbound_state": "HOLD",
+      "guard": "Adapter may record a proposal; it cannot grant human approval or interpret issue closure as approval",
+      "actions": [
+        {
+          "name": "approval.read",
+          "owner": "openproject",
+          "mode": "read",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Native work item ID and revision/lock token; compare recorded approval identity and expiry"
+        },
+        {
+          "name": "work_item.create",
+          "owner": "openproject",
+          "mode": "write",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Native work item ID and revision/lock token; compare recorded approval identity and expiry"
+        },
+        {
+          "name": "work_item.update",
+          "owner": "openproject",
+          "mode": "write",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Native work item ID and revision/lock token; compare recorded approval identity and expiry"
+        }
+      ]
+    },
+    {
+      "adapter": "resourcespace",
+      "component": "CP059",
+      "native_owner": "Original assets, derivatives, metadata, rights and approved asset state",
+      "api_boundary": "Supported ResourceSpace native API",
+      "native_dependencies": "Supported PHP/MySQL, original asset storage; release-required ImageMagick/Ghostscript/ExifTool/FFmpeg/Inkscape jobs",
+      "release": null,
+      "qualification": "UNVERIFIED",
+      "direct_native_table_writes": false,
+      "outbound_state": "HOLD",
+      "guard": "Untrusted formats sandboxed; asset availability alone is not rights approval",
+      "actions": [
+        {
+          "name": "asset.read",
+          "owner": "resourcespace",
+          "mode": "read",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Native resource ID, content digest and rights revision; reconcile metadata and original file together"
+        },
+        {
+          "name": "asset.ingest",
+          "owner": "resourcespace",
+          "mode": "write",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Native resource ID, content digest and rights revision; reconcile metadata and original file together"
+        },
+        {
+          "name": "metadata.update",
+          "owner": "resourcespace",
+          "mode": "write",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Native resource ID, content digest and rights revision; reconcile metadata and original file together"
+        },
+        {
+          "name": "rights.read",
+          "owner": "resourcespace",
+          "mode": "read",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Native resource ID, content digest and rights revision; reconcile metadata and original file together"
+        }
+      ]
+    },
+    {
+      "adapter": "matomo",
+      "component": "CP061",
+      "native_owner": "Website analytics, goals and privacy configuration",
+      "api_boundary": "Supported Matomo reporting/tracking APIs and native archive jobs",
+      "native_dependencies": "Supported PHP and MySQL/MariaDB; archive workers; consent/anonymization configuration",
+      "release": null,
+      "qualification": "UNVERIFIED",
+      "direct_native_table_writes": false,
+      "outbound_state": "HOLD",
+      "guard": "No invented attribution plugin; missing or stale feed is UNKNOWN, not zero",
+      "actions": [
+        {
+          "name": "report.read",
+          "owner": "matomo",
+          "mode": "read",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Site ID, report period/timezone and freshness; synthetic event correlation and archive status"
+        },
+        {
+          "name": "goal.read",
+          "owner": "matomo",
+          "mode": "read",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Site ID, report period/timezone and freshness; synthetic event correlation and archive status"
+        },
+        {
+          "name": "synthetic_event.record",
+          "owner": "matomo",
+          "mode": "write",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Site ID, report period/timezone and freshness; synthetic event correlation and archive status"
+        }
+      ]
+    },
+    {
+      "adapter": "serpbear",
+      "component": "CP055",
+      "native_owner": "Rank observations, tracked domains and keywords",
+      "api_boundary": "Supported SerpBear release API/native jobs after capability verification",
+      "native_dependencies": "Exact release runtime/database, native rank jobs and selected search provider remain to be inventoried",
+      "release": null,
+      "qualification": "UNVERIFIED",
+      "direct_native_table_writes": false,
+      "outbound_state": "HOLD",
+      "guard": "No assumed API route or search provider; changes/refresh may incur cost",
+      "actions": [
+        {
+          "name": "rank.read",
+          "owner": "serpbear",
+          "mode": "read",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Native domain/keyword ID, location/device and observation timestamp; reconcile refresh job/provider request"
+        },
+        {
+          "name": "keyword.configure",
+          "owner": "serpbear",
+          "mode": "write",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Native domain/keyword ID, location/device and observation timestamp; reconcile refresh job/provider request"
+        },
+        {
+          "name": "rank.refresh",
+          "owner": "serpbear",
+          "mode": "write",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Native domain/keyword ID, location/device and observation timestamp; reconcile refresh job/provider request"
+        }
+      ]
+    },
+    {
+      "adapter": "asterisk",
+      "component": "CP063",
+      "native_owner": "Call channels, bridges, dialplan execution and telephony session state",
+      "api_boundary": "Private Asterisk ARI and approved native dialplan/PJSIP interfaces",
+      "native_dependencies": "Dedicated Debian VM preferred; SIP/RTP/NAT policy; PJSIP/chan_websocket are native modules",
+      "release": null,
+      "qualification": "UNVERIFIED",
+      "direct_native_table_writes": false,
+      "outbound_state": "HOLD",
+      "guard": "No real call without fresh channel consent, destination/account binding, limits and authorization",
+      "actions": [
+        {
+          "name": "channel.read",
+          "owner": "asterisk",
+          "mode": "read",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Native channel/bridge IDs, linked call identity and carrier receipt; reconcile live channels and ended-call evidence"
+        },
+        {
+          "name": "call.originate",
+          "owner": "asterisk",
+          "mode": "write",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Native channel/bridge IDs, linked call identity and carrier receipt; reconcile live channels and ended-call evidence"
+        },
+        {
+          "name": "call.hangup",
+          "owner": "asterisk",
+          "mode": "write",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Native channel/bridge IDs, linked call identity and carrier receipt; reconcile live channels and ended-call evidence"
+        },
+        {
+          "name": "bridge.control",
+          "owner": "asterisk",
+          "mode": "write",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Native channel/bridge IDs, linked call identity and carrier receipt; reconcile live channels and ended-call evidence"
+        }
+      ]
+    },
+    {
+      "adapter": "providers",
+      "component": "CP141/CP144/CP147",
+      "native_owner": "External delivery, carrier, search and payment receipts in each selected provider account",
+      "api_boundary": "Selected provider documented API/protocol through owning native app or reviewed transport guard",
+      "native_dependencies": "Provider/account/API version, credentials/scopes, pricing, limits, callback scheme and sandbox are unresolved",
+      "release": null,
+      "qualification": "UNVERIFIED",
+      "direct_native_table_writes": false,
+      "outbound_state": "HOLD",
+      "guard": "Selection and charge authority absent; no direct social send bypassing Postiz or email bypassing Mautic/E11/E12",
+      "actions": [
+        {
+          "name": "receipt.read",
+          "owner": "providers",
+          "mode": "read",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Account-scoped provider request/object ID and native parent job; query provider status before any uncertain retry"
+        },
+        {
+          "name": "transport.submit",
+          "owner": "providers",
+          "mode": "write",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Account-scoped provider request/object ID and native parent job; query provider status before any uncertain retry"
+        },
+        {
+          "name": "transport.cancel",
+          "owner": "providers",
+          "mode": "write",
+          "idempotency": "account+client+source_event+action_scope+approved_revision; identical intent reuses one action key",
+          "reconciliation": "Account-scoped provider request/object ID and native parent job; query provider status before any uncertain retry"
+        }
+      ]
+    }
+  ]
+}
