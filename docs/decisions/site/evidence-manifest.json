@@ -72,12 +72,14 @@
     }
   ],
   "artifact_hashes": {
-    "config/site/site.example.json": "2655acc25df5b5cf2ec8ee4ee661176f975d4cadc66104fd343acbb737e7399d",
-    "config/site/validate_site.py": "f6a1685919d1089b17373335a2a7435978d62afdcaae76667ef191698f560881",
-    "config/site/test_validate_site.py": "346a601347eb94415ceaa91811c7f4726d7fe26ba8740de735b6357809bc1eda",
-    "docs/decisions/site/decision-register.json": "7aea0dec49e65614d2ce220f588413b36413e58a3edfb9eaa1970a08346c025a",
-    "docs/decisions/site/README.md": "cf4d47d7179b79b3bc7a4bcc115ba81dd5e25cb9e7aef944a5e44624e09ab7ce",
-    "docs/decisions/site/RUNBOOK.md": "bd99d94f7ba97ca7aaee6bc7f421e105bdbfdc2ac5f1293fd0275f88d750924c"
+    "config/site/site.example.json": "73cbfee640e9578064376b7919035ea94a843fc779cd798199746e1a75db317a",
+    "config/site/test_validate_site.py": "f3c4f7c77e243b3f18eeb834c09f208d769abe72c95e283fdf1f064c9021ffdb",
+    "config/site/test_verify_evidence.py": "a50307c91fc0f73f718f855a0fa9b6291d79ef08b3e349d648c45ac36cea2d03",
+    "config/site/validate_site.py": "70f03a9208e20a89c32ab2b719c0d332db84640c4199a987d754cbf8ad9d7870",
+    "config/site/verify_evidence.py": "29097a36586874a913964a78fb3ebe34baf14a4056ce824bb94af504a4b6c9fe",
+    "docs/decisions/site/README.md": "4e116a77af935e74258c69444508f97b9abe4928a6c720f1c21ad02bbeb93972",
+    "docs/decisions/site/RUNBOOK.md": "a8110b5d40600d2cf8ae70d6f802ef0cecedf5447b7b716b7d132531f62b2ce5",
+    "docs/decisions/site/decision-register.json": "3c8d7e028e98ba382398d568e417b5d0269f2f2653e8e9f62670bbae719b8de7"
   },
   "manifest_excludes_itself": true,
   "independent_executor": null,
@@ -88,5 +90,13 @@
     "No deployment, network, installation, secrets access, agent launch or host change performed.",
     "Initial relative-path reads failed because shell started at C:/; absolute permitted file paths were then used. No denied data was read."
   ],
-  "unblock_owner": "Trusted integration controller for exact-candidate Python execution and independent review; production roles in decision-register.json for site facts."
+  "unblock_owner": "Trusted integration controller for exact-candidate Python execution and independent review; production roles in decision-register.json for site facts.",
+  "hash_policy": {
+    "algorithm": "SHA-256",
+    "encoding": "UTF-8 without BOM",
+    "line_endings": "LF",
+    "normalization": "Only uniform CRLF may be explicitly converted to LF; mixed endings and lone CR reject; all other bytes preserved",
+    "default_verification": "raw canonical LF bytes",
+    "windows_verification_flag": "--normalize-crlf"
+  }
 }
