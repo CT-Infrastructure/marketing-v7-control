@@ -1,0 +1,21 @@
+flowchart TB
+ ZIP["2026-10-24 archive<br/>146 members: observed historical evidence"]:::source --> CROSS["Stable crosswalk<br/>156 dispositions + 104 recovery records<br/>all source DNS declarations"]:::process
+ V7["V7 technology and business decisions<br/>36 marketing + retained 72 content patterns"]:::source --> RULE{"V7 selects this function?"}:::gate
+ CROSS --> RULE
+ RULE -- "Yes" --> MIG["Keep function; migrate deliberately<br/>Debian / Proxmox / Podman / selected apps"]:::done
+ RULE -- "Not selected" --> DEC{"Explicit held / retired intent?"}:::gate
+ DEC -- "Yes" --> KEEP["Preserve HOLD / 410 / disabled intent<br/>do not automatically revive"]:::legacy
+ DEC -- "No" --> OWNER["Conditional or isolated legacy scope<br/>owner, cost, state and acceptance required"]:::legacy
+ MIG --> GATE["Independent backup + secrets + compatibility<br/>functional tests + single-owner cutover"]:::control
+ OWNER --> GATE
+ GATE --> TARGET["Unified V7 planning and implementation reference<br/>not evidence of a deployed migration"]:::done
+
+
+classDef source fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e,stroke-width:1.6px;
+classDef process fill:#f8fafc,stroke:#94a3b8,color:#172554,stroke-width:1.4px;
+classDef gate fill:#fff7d6,stroke:#d97706,color:#78350f,stroke-width:1.8px;
+classDef control fill:#ede9fe,stroke:#8b5cf6,color:#4c1d95,stroke-dasharray:5 4;
+classDef done fill:#ccfbf1,stroke:#0f766e,color:#134e4a,stroke-width:1.8px;
+classDef hold fill:#fff1f2,stroke:#e11d48,color:#881337,stroke-width:1.5px;
+classDef legacy fill:#fdf2f8,stroke:#9d174d,color:#831843;
+classDef ext fill:#ecfeff,stroke:#0891b2,color:#164e63;

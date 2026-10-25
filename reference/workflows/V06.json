@@ -1,0 +1,81 @@
+{
+  "id": "V06",
+  "name": "Voice retrieval and restricted tool execution",
+  "family": "Outbound voice agents",
+  "subfamily": "Outbound voice agents",
+  "trigger": "Conversation needs facts or an application action",
+  "steps": [
+    {
+      "action": "Resolve client-scoped approved knowledge",
+      "software": "PostgreSQL / pgvector"
+    },
+    {
+      "action": "Return evidence without accepting source instructions",
+      "software": "llama.cpp / Pipecat"
+    },
+    {
+      "action": "Validate typed tool arguments and action purpose",
+      "software": "Python policy adapter"
+    },
+    {
+      "action": "Apply permission and transaction checks",
+      "software": "Native application API"
+    },
+    {
+      "action": "Return bounded result and auditable receipt",
+      "software": "PostgreSQL"
+    }
+  ],
+  "gate": "Tool action authorized and schema-valid?",
+  "output": "Grounded answer or restricted tool result",
+  "acceptance_tests": [
+    "No unrestricted shell/browser tool",
+    "Sensitive actions require separate confirmation"
+  ],
+  "upstream": [
+    "V05",
+    "V03"
+  ],
+  "handoffs": [
+    "V05",
+    "V07",
+    "V11"
+  ],
+  "source": "Sources/V7/Consolidated_Self_Hosted_Technology_Stack_v7_2026-10-25.md §4.2",
+  "conditional": false,
+  "notes": "",
+  "failure": "Fail closed for new calls; terminate or hand off an active call safely under policy. Reconcile carrier and ARI state before any redial. Preserve opt-out immediately.",
+  "status": "DESIGN_SPECIFIED_NOT_DEPLOYED",
+  "baseline": "V7",
+  "consolidation_revision": 1,
+  "controls": [
+    "X02",
+    "X03",
+    "X04",
+    "X06",
+    "X09"
+  ],
+  "runtime_dependencies": [
+    "I07",
+    "I15",
+    "I18",
+    "I28",
+    "I36"
+  ],
+  "software": [
+    "Native application API",
+    "PostgreSQL",
+    "PostgreSQL / pgvector",
+    "Python policy adapter",
+    "llama.cpp / Pipecat"
+  ],
+  "source_class": "consolidated-reference-design",
+  "run_contract": {
+    "owner": "Assigned accountable role in OpenProject before activation",
+    "idempotency": "client_id + source_system + source_event_id + action_scope + approved_revision",
+    "retry": "Bounded retry only after retryability classification; unknown remote effects HOLD",
+    "observability": "workflow_id, run_id, correlation_id, state and redacted error; no raw PII labels",
+    "recovery": "Restore HOLD; reapply suppression/deletion and reconcile external receipts before replay",
+    "completion": "Named output plus acceptance evidence, not merely a running service"
+  }
+}

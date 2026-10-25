@@ -1,0 +1,25 @@
+{
+  "graph_sha256": "240bfc59615c0e058b08e1955325dc3e5bb7411fc7216e3be97cbc25eba4070e",
+  "policy_sha256": "0fdc1b8c1c61f65e7a59cd1324bbe5b9c4f6f25f853d023b6c73be890b3848c1",
+  "stopped": false,
+  "counts": {
+    "BACKLOG": 707,
+    "DEFERRED": 40,
+    "MANUAL_HOLD": 12
+  },
+  "ready": [
+    "F01",
+    "F02",
+    "F08"
+  ],
+  "resources_reserved": {
+    "cpu": 0,
+    "memory_mib": 0,
+    "gpu": 0,
+    "slots": 0,
+    "integration": 0
+  },
+  "spent_usd": 0.0,
+  "reserved_usd": 0.0,
+  "note": "Readiness projection only; this command launches no agents and accepts no work."
+}

@@ -1,0 +1,21 @@
+flowchart TD
+  HUMAN["Human owners<br/>Destination + security + activation approval"]:::gate --> CONTROL["Trusted control plane<br/>Graph, ledger, leases, policy, budget"]:::controller
+  CONTROL --> BROKER["Scoped credential broker<br/>GitHub metadata / integrator identities"]:::controller
+  CONTROL --> AGENT["Untrusted agent container<br/>Rootless, read-only base, scoped writes"]:::worker
+  AGENT --> OUTPUT["Candidate files + result manifest<br/>Untrusted until independently checked"]:::worker
+  OUTPUT --> REVIEW["Independent verifier and reviewer<br/>No self-approval"]:::gate
+  REVIEW --> CI["Isolated CI<br/>No production secrets or LAN reach"]:::controller
+  CI --> INTEGRATOR["Trusted integrator<br/>Reviewed PR + exact revision receipt"]:::controller
+  INTEGRATOR --> GATE{"Separate deployment approval"}:::gate
+  GATE --> APPS["Application workloads<br/>Podman + Quadlet + systemd"]:::pass
+  GATE --> NATIVE["Native exceptions<br/>OpenWrt, Proxmox, OS and Asterisk VM"]:::pass
+  APPS --> DATA["Supported databases and storage<br/>Least privilege + tested backup/restore"]:::pass
+  NATIVE --> DATA
+  BLOCK["Always denied to agents<br/>Production tokens, engine sockets,<br/>management LAN and recovery keys"]:::hold -.-> AGENT
+  EGRESS["Default network: none<br/>Approved provider path only after proof"]:::gate -.-> AGENT
+
+classDef controller fill:#e9e9ff,stroke:#7771bb,color:#282354,stroke-width:1.4px
+classDef worker fill:#eef7ff,stroke:#7a9abb,color:#173651,stroke-width:1.4px
+classDef gate fill:#fff3d7,stroke:#c09b43,color:#49380d,stroke-width:1.4px
+classDef pass fill:#def5ef,stroke:#3a9b87,color:#184b40,stroke-width:1.4px
+classDef hold fill:#fee8e8,stroke:#c87575,color:#672c2c,stroke-width:1.4px

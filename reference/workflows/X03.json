@@ -1,0 +1,74 @@
+{
+  "id": "X03",
+  "name": "Revision-bound human approval",
+  "family": "Shared integration and control",
+  "subfamily": "Shared integration and control",
+  "trigger": "Content, offer, spend or public action needs release",
+  "steps": [
+    {
+      "action": "Hash exact content, asset set and destination",
+      "software": "PostgreSQL / validators"
+    },
+    {
+      "action": "Submit evidence and intended action to accountable reviewer",
+      "software": "OpenProject"
+    },
+    {
+      "action": "Capture approver, scope, expiry and policy version",
+      "software": "OpenProject / integration ledger"
+    },
+    {
+      "action": "Invalidate approval on any material revision",
+      "software": "Activepieces"
+    },
+    {
+      "action": "Recheck matching approval at final action boundary",
+      "software": "Native destination adapter"
+    }
+  ],
+  "gate": "Exact revision and destination approved now?",
+  "output": "Narrow, auditable release authorization",
+  "acceptance_tests": [
+    "Stale or mismatched approval blocked",
+    "Model cannot approve its own publication"
+  ],
+  "upstream": [
+    "X02",
+    "X05"
+  ],
+  "handoffs": [
+    "M17",
+    "E11",
+    "V03",
+    "C09"
+  ],
+  "source": "Sources/V7/Consolidated_Self_Hosted_Technology_Stack_v7_2026-10-25.md",
+  "conditional": false,
+  "notes": "",
+  "failure": "Reject or HOLD the event/action, keep a redacted durable receipt, use bounded retries only for retry-safe failures, and send unresolved or ambiguous outcomes to human reconciliation.",
+  "status": "DESIGN_SPECIFIED_NOT_DEPLOYED",
+  "baseline": "V7",
+  "consolidation_revision": 1,
+  "controls": [],
+  "runtime_dependencies": [
+    "I10",
+    "I15",
+    "I19"
+  ],
+  "software": [
+    "Activepieces",
+    "Native destination adapter",
+    "OpenProject",
+    "OpenProject / integration ledger",
+    "PostgreSQL / validators"
+  ],
+  "source_class": "consolidated-reference-design",
+  "run_contract": {
+    "owner": "Assigned accountable role in OpenProject before activation",
+    "idempotency": "client_id + source_system + source_event_id + action_scope + approved_revision",
+    "retry": "Bounded retry only after retryability classification; unknown remote effects HOLD",
+    "observability": "workflow_id, run_id, correlation_id, state and redacted error; no raw PII labels",
+    "recovery": "Restore HOLD; reapply suppression/deletion and reconcile external receipts before replay",
+    "completion": "Named output plus acceptance evidence, not merely a running service"
+  }
+}

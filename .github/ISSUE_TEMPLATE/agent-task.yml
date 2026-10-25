@@ -1,0 +1,38 @@
+name: Scoped agent task
+description: Add a reviewed, independently verifiable work package
+title: "[NEW-KEY] "
+labels: ["type:implementation"]
+body:
+  - type: markdown
+    attributes:
+      value: "No credentials, personal data or raw production inventory. This form does not grant execution permission."
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome and authoritative source
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Owned paths and out-of-scope actions
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Hard prerequisites and interface contract
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Executable acceptance, negative tests and evidence
+    validations:
+      required: true
+  - type: textarea
+    id: security
+    attributes:
+      label: Security, container or native deployment, resources and rollback
+    validations:
+      required: true

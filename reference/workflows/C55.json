@@ -1,0 +1,80 @@
+{
+  "id": "C55",
+  "source_id": 55,
+  "name": "AI-generated motion scenes",
+  "family": "Content generation",
+  "subfamily": "G. Video & motion",
+  "trigger": "Reviewed storyboard and video checkpoint",
+  "steps": [
+    {
+      "action": "Produce compatible ComfyUI motion jobs",
+      "software": "ComfyUI / bounded integration"
+    },
+    {
+      "action": "inspect continuity",
+      "software": "ComfyUI / bounded integration"
+    },
+    {
+      "action": "finish in FFmpeg",
+      "software": "FFmpeg / bounded media job"
+    },
+    {
+      "action": "Validate facts, rights, format and exact revision",
+      "software": "Vale / validators / OpenProject"
+    },
+    {
+      "action": "Hand off approved artifact; recipient rechecks release controls",
+      "software": "ResourceSpace approved video"
+    }
+  ],
+  "gate": "Exact artifact, rights and intended handoff approved?",
+  "output": "Motion scene; GPU/license review",
+  "acceptance_tests": [
+    "Source-specific deliverable checked: Motion scene; GPU/license review",
+    "Material changes invalidate approval; destination remains staged until final release",
+    "Duplicate or uncertain external result uses X06, not blind retry"
+  ],
+  "upstream": [
+    "X05"
+  ],
+  "handoffs": [
+    "M12",
+    "M17"
+  ],
+  "source": "Sources/Library/Content_Generation_Workflow_Catalog_v6_2026-10-25.json #55",
+  "conditional": true,
+  "notes": "Original V6 identity, trigger, source procedure and deliverable retained. Stage role labels and common controls are V7 consolidation design refinements. This workflow does not itself authorize an external send, call or spend.",
+  "failure": "Keep the revision unpublished. Preserve evidence and failure status, request a new reviewed revision, and never retry an ambiguous publication without checking the destination.",
+  "status": "DESIGN_SPECIFIED_NOT_DEPLOYED",
+  "baseline": "V7",
+  "consolidation_revision": 1,
+  "source_procedure": "Produce compatible ComfyUI motion jobs; inspect continuity; finish in FFmpeg",
+  "source_software": "ComfyUI, FFmpeg, ResourceSpace",
+  "controls": [
+    "X02",
+    "X03",
+    "X05",
+    "X06"
+  ],
+  "runtime_dependencies": [
+    "I10",
+    "I15",
+    "I18",
+    "I28"
+  ],
+  "software": [
+    "ComfyUI / bounded integration",
+    "FFmpeg / bounded media job",
+    "ResourceSpace approved video",
+    "Vale / validators / OpenProject"
+  ],
+  "source_class": "retained-source-pattern",
+  "run_contract": {
+    "owner": "Assigned accountable role in OpenProject before activation",
+    "idempotency": "client_id + source_system + source_event_id + action_scope + approved_revision",
+    "retry": "Bounded retry only after retryability classification; unknown remote effects HOLD",
+    "observability": "workflow_id, run_id, correlation_id, state and redacted error; no raw PII labels",
+    "recovery": "Restore HOLD; reapply suppression/deletion and reconcile external receipts before replay",
+    "completion": "Named output plus acceptance evidence, not merely a running service"
+  }
+}

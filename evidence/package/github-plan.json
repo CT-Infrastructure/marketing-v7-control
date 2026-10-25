@@ -1,0 +1,16 @@
+{
+  "mode": "PLAN_ONLY_NO_NETWORK",
+  "target": "<OWNER>/marketing-v7-platform",
+  "visibility": "private",
+  "total_issue_records": 785,
+  "selected_batch": 785,
+  "labels": 25,
+  "milestones": 7,
+  "project_fields": 10,
+  "parent_links": 784,
+  "build_dependency_links": 4848,
+  "maximum_mutations_per_run": 100,
+  "requires_explicit_apply": true,
+  "live_agents_launched": 0,
+  "production_actions": 0
+}

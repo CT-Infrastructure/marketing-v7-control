@@ -1,0 +1,81 @@
+{
+  "id": "V03",
+  "name": "Voice script, knowledge and tool approval",
+  "family": "Outbound voice agents",
+  "subfamily": "Outbound voice agents",
+  "trigger": "New or revised voice campaign",
+  "steps": [
+    {
+      "action": "Prepare sourced script and approved knowledge",
+      "software": "C47 / OpenProject"
+    },
+    {
+      "action": "Pin prompt, model, retrieval corpus and disclosures",
+      "software": "llama.cpp / OmniRoute / pgvector"
+    },
+    {
+      "action": "Restrict tools to typed authorized APIs",
+      "software": "Python controller"
+    },
+    {
+      "action": "Test adversarial prompts and high-risk escalation",
+      "software": "MLflow / evaluation set"
+    },
+    {
+      "action": "Approve exact script and tool policy",
+      "software": "OpenProject"
+    }
+  ],
+  "gate": "Script, disclosures and tools approved?",
+  "output": "Versioned voice campaign configuration",
+  "acceptance_tests": [
+    "Retrieved text cannot expand tool scope",
+    "Material script change requires reapproval"
+  ],
+  "upstream": [
+    "X03",
+    "C47",
+    "V12"
+  ],
+  "handoffs": [
+    "V04",
+    "V06"
+  ],
+  "source": "Sources/V7/Consolidated_Self_Hosted_Technology_Stack_v7_2026-10-25.md §4.2",
+  "conditional": false,
+  "notes": "",
+  "failure": "Fail closed for new calls; terminate or hand off an active call safely under policy. Reconcile carrier and ARI state before any redial. Preserve opt-out immediately.",
+  "status": "DESIGN_SPECIFIED_NOT_DEPLOYED",
+  "baseline": "V7",
+  "consolidation_revision": 1,
+  "controls": [
+    "X02",
+    "X03",
+    "X04",
+    "X06",
+    "X09"
+  ],
+  "runtime_dependencies": [
+    "I07",
+    "I15",
+    "I18",
+    "I28",
+    "I36"
+  ],
+  "software": [
+    "C47 / OpenProject",
+    "MLflow / evaluation set",
+    "OpenProject",
+    "Python controller",
+    "llama.cpp / OmniRoute / pgvector"
+  ],
+  "source_class": "consolidated-reference-design",
+  "run_contract": {
+    "owner": "Assigned accountable role in OpenProject before activation",
+    "idempotency": "client_id + source_system + source_event_id + action_scope + approved_revision",
+    "retry": "Bounded retry only after retryability classification; unknown remote effects HOLD",
+    "observability": "workflow_id, run_id, correlation_id, state and redacted error; no raw PII labels",
+    "recovery": "Restore HOLD; reapply suppression/deletion and reconcile external receipts before replay",
+    "completion": "Named output plus acceptance evidence, not merely a running service"
+  }
+}

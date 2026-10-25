@@ -1,0 +1,20 @@
+name: Safe defect report
+description: Redacted reproducible failure without secrets or production data
+labels: ["needs-evidence"]
+body:
+  - type: textarea
+    id: failure
+    attributes:
+      label: Expected and actual behavior, affected task and acceptance IDs
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Synthetic reproduction, commit, versions and sanitized evidence
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact and safe hold or rollback

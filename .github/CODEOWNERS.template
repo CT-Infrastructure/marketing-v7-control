@@ -1,0 +1,10 @@
+# Generate actual CODEOWNERS only after F02 validates each username/team and access.
+# Do not commit unresolved placeholders as active protection.
+* @REVIEWED_MAINTAINER
+/.github/ @REVIEWED_SECURITY_OWNER
+/tools/ @REVIEWED_SECURITY_OWNER
+/orchestration/ @REVIEWED_SECURITY_OWNER
+/config/ @REVIEWED_SECURITY_OWNER
+/schemas/ @REVIEWED_CONTRACT_OWNER
+/locks/ @REVIEWED_SUPPLY_CHAIN_OWNER
+/deploy/ @REVIEWED_OPERATIONS_OWNER

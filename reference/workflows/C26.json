@@ -1,0 +1,83 @@
+{
+  "id": "C26",
+  "source_id": 26,
+  "name": "Welcome email sequence",
+  "family": "Content generation",
+  "subfamily": "D. Email content",
+  "trigger": "Lawful new opt-in",
+  "steps": [
+    {
+      "action": "Build approved onboarding series",
+      "software": "OpenProject / accountable reviewer"
+    },
+    {
+      "action": "map lifecycle",
+      "software": "Mautic / bounded integration"
+    },
+    {
+      "action": "test targeting",
+      "software": "Vale / Playwright / human QA"
+    },
+    {
+      "action": "Validate facts, rights, format and exact revision",
+      "software": "Vale / validators / OpenProject"
+    },
+    {
+      "action": "Hand off approved artifact; recipient rechecks release controls",
+      "software": "Mautic staged email content"
+    }
+  ],
+  "gate": "Exact artifact, rights and intended handoff approved?",
+  "output": "Welcome campaign; do not bypass suppression",
+  "acceptance_tests": [
+    "Source-specific deliverable checked: Welcome campaign; do not bypass suppression",
+    "Material changes invalidate approval; destination remains staged until final release",
+    "Duplicate or uncertain external result uses X06, not blind retry"
+  ],
+  "upstream": [
+    "X05"
+  ],
+  "handoffs": [
+    "E03",
+    "M02"
+  ],
+  "source": "Sources/Library/Content_Generation_Workflow_Catalog_v6_2026-10-25.json #26",
+  "conditional": false,
+  "notes": "Original V6 identity, trigger, source procedure and deliverable retained. Stage role labels and common controls are V7 consolidation design refinements. This workflow does not itself authorize an external send, call or spend.",
+  "failure": "Keep the revision unpublished. Preserve evidence and failure status, request a new reviewed revision, and never retry an ambiguous publication without checking the destination.",
+  "status": "DESIGN_SPECIFIED_NOT_DEPLOYED",
+  "baseline": "V7",
+  "consolidation_revision": 1,
+  "source_procedure": "Build approved onboarding series; map lifecycle; test targeting",
+  "source_software": "Mautic, llama.cpp, Activepieces",
+  "controls": [
+    "X02",
+    "X03",
+    "X05",
+    "X06",
+    "X04",
+    "E11"
+  ],
+  "runtime_dependencies": [
+    "I10",
+    "I15",
+    "I18",
+    "I28"
+  ],
+  "software": [
+    "Mautic / bounded integration",
+    "Mautic staged email content",
+    "OpenProject / accountable reviewer",
+    "Vale / Playwright / human QA",
+    "Vale / validators / OpenProject"
+  ],
+  "source_class": "retained-source-pattern",
+  "run_contract": {
+    "owner": "Assigned accountable role in OpenProject before activation",
+    "idempotency": "client_id + source_system + source_event_id + action_scope + approved_revision",
+    "retry": "Bounded retry only after retryability classification; unknown remote effects HOLD",
+    "observability": "workflow_id, run_id, correlation_id, state and redacted error; no raw PII labels",
+    "recovery": "Restore HOLD; reapply suppression/deletion and reconcile external receipts before replay",
+    "completion": "Named output plus acceptance evidence, not merely a running service"
+  }
+}

@@ -1,0 +1,29 @@
+[
+  {
+    "id": "O01",
+    "title": "Maximum useful parallelism",
+    "description": "Trusted coordination fills the eligible frontier; independent work runs concurrently while scarce resources and conflicting changes remain protected.",
+    "kind": "architecture",
+    "mmd": "diagrams/Mermaid/O01.mmd",
+    "png": "diagrams/PNG/O01.png",
+    "svg": "diagrams/SVG/O01.svg"
+  },
+  {
+    "id": "O02",
+    "title": "Build graph, not runtime feedback",
+    "description": "190 workflow implementations and 190 independent test-authoring tasks can progress concurrently once their interfaces are stable.",
+    "kind": "architecture",
+    "mmd": "diagrams/Mermaid/O02.mmd",
+    "png": "diagrams/PNG/O02.png",
+    "svg": "diagrams/SVG/O02.svg"
+  },
+  {
+    "id": "O03",
+    "title": "Security and deployment boundaries",
+    "description": "Engineering workers never receive production credentials, management-network access, host sockets or authority to approve their own output.",
+    "kind": "architecture",
+    "mmd": "diagrams/Mermaid/O03.mmd",
+    "png": "diagrams/PNG/O03.png",
+    "svg": "diagrams/SVG/O03.svg"
+  }
+]

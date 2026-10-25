@@ -1,0 +1,64 @@
+flowchart TB
+  CTL["Shared infrastructure and execution controls<br/>See each workflow for exact prerequisites"]:::control
+  V01["V01<br/>Voice carrier, Asterisk and<br/>media foundation"]:::process
+  CTL -. "supports" .-> V01
+  V02["V02<br/>Telephone authorization and<br/>final dial policy"]:::process
+  CTL -. "supports" .-> V02
+  V03["V03<br/>Voice script, knowledge and<br/>tool approval"]:::process
+  CTL -. "supports" .-> V03
+  V04["V04<br/>Durable call scheduling and<br/>origination"]:::process
+  CTL -. "supports" .-> V04
+  V05["V05<br/>Real-time conversation and<br/>interruption loop"]:::process
+  CTL -. "supports" .-> V05
+  V06["V06<br/>Voice retrieval and<br/>restricted tool execution"]:::process
+  CTL -. "supports" .-> V06
+  V07["V07<br/>Human handoff and appointment<br/>coordination"]:::process
+  CTL -. "supports" .-> V07
+  V08["V08<br/>Voice opt-out and recording<br/>controls"]:::process
+  CTL -. "supports" .-> V08
+  V09["V09<br/>Call termination, retries and<br/>exhausted attempts"]:::process
+  CTL -. "supports" .-> V09
+  V10["V10<br/>Call artifacts, access and<br/>retention"]:::process
+  CTL -. "supports" .-> V10
+  V11["V11<br/>Call outcome reconciliation<br/>and CRM handoff"]:::process
+  CTL -. "supports" .-> V11
+  V12["V12<br/>Voice quality qualification<br/>and incident recovery"]:::process
+  CTL -. "supports" .-> V12
+  V01 --> V02
+  V01 --> V05
+  V02 --> V04
+  V03 --> V04
+  V03 --> V06
+  V04 --> V05
+  V04 --> V11
+  V05 --> V06
+  V05 --> V07
+  V05 --> V08
+  V05 --> V09
+  V06 --> V05
+  V06 --> V07
+  V06 --> V11
+  V07 --> V11
+  V08 --> V09
+  V08 --> V10
+  V09 --> V10
+  V09 --> V11
+  V09 --> V02
+  V10 --> V11
+  V12 --> V01
+  V12 --> V03
+  V12 --> V04
+  OUT["Cross-domain handoffs<br/>I23, M03, M36, X08, X10"]:::done
+  V07 --> OUT
+  V08 --> OUT
+  V10 --> OUT
+  V11 --> OUT
+
+classDef source fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e,stroke-width:1.6px;
+classDef process fill:#f8fafc,stroke:#94a3b8,color:#172554,stroke-width:1.4px;
+classDef gate fill:#fff7d6,stroke:#d97706,color:#78350f,stroke-width:1.8px;
+classDef control fill:#ede9fe,stroke:#8b5cf6,color:#4c1d95,stroke-dasharray:5 4;
+classDef done fill:#ccfbf1,stroke:#0f766e,color:#134e4a,stroke-width:1.8px;
+classDef hold fill:#fff1f2,stroke:#e11d48,color:#881337,stroke-width:1.5px;
+classDef legacy fill:#fdf2f8,stroke:#9d174d,color:#831843;
+classDef ext fill:#ecfeff,stroke:#0891b2,color:#164e63;

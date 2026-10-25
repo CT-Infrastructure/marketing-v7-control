@@ -1,0 +1,76 @@
+flowchart TB
+  CTL["Shared infrastructure and execution controls<br/>See each workflow for exact prerequisites"]:::control
+  E01["E01<br/>Sending identity, DNS,<br/>mailbox and relay<br/>provisioning"]:::process
+  CTL -. "supports" .-> E01
+  E02["E02<br/>Contact permission, hygiene<br/>and segmentation"]:::process
+  CTL -. "supports" .-> E02
+  E03["E03<br/>Email content, landing pages<br/>and exact review"]:::process
+  CTL -. "supports" .-> E03
+  E04["E04<br/>Staging simulation and<br/>controlled real-mailbox QA"]:::process
+  CTL -. "supports" .-> E04
+  E05["E05<br/>CANARY, gradual ramp and<br/>production transition"]:::process
+  CTL -. "supports" .-> E05
+  E06["E06<br/>Delivery callbacks,<br/>deduplication and suppression"]:::process
+  CTL -. "supports" .-> E06
+  E07["E07<br/>Authentication, reputation<br/>and source-health monitoring"]:::process
+  CTL -. "supports" .-> E07
+  E08["E08<br/>Risk decisions and email<br/>incident handling"]:::process
+  CTL -. "supports" .-> E08
+  E09["E09<br/>Sender recovery and<br/>production requalification"]:::process
+  CTL -. "supports" .-> E09
+  E10["E10<br/>Routine email operations and<br/>periodic review"]:::process
+  CTL -. "supports" .-> E10
+  E11["E11<br/>Final per-recipient dispatch<br/>guard"]:::process
+  CTL -. "supports" .-> E11
+  E12["E12<br/>Atomic sender quota and<br/>warm-up reservations"]:::process
+  CTL -. "supports" .-> E12
+  E13["E13<br/>Inbound replies and human<br/>sales handoff"]:::process
+  CTL -. "supports" .-> E13
+  E14["E14<br/>DMARC and TLS report<br/>ingestion"]:::process
+  CTL -. "supports" .-> E14
+  E01 --> E02
+  E01 --> E04
+  E01 --> E07
+  E01 --> E14
+  E02 --> E03
+  E02 --> E05
+  E03 --> E04
+  E03 --> E11
+  E04 --> E05
+  E04 --> E11
+  E05 --> E11
+  E05 --> E06
+  E05 --> E08
+  E05 --> E09
+  E06 --> E07
+  E06 --> E08
+  E06 --> E11
+  E07 --> E08
+  E07 --> E05
+  E08 --> E09
+  E09 --> E05
+  E09 --> E10
+  E10 --> E01
+  E10 --> E02
+  E10 --> E07
+  E11 --> E06
+  E12 --> E11
+  E13 --> E02
+  E14 --> E07
+  OUT["Cross-domain handoffs<br/>I23, M03, M25, M36, X06, X07, X10"]:::done
+  E02 --> OUT
+  E06 --> OUT
+  E08 --> OUT
+  E10 --> OUT
+  E11 --> OUT
+  E13 --> OUT
+  E14 --> OUT
+
+classDef source fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e,stroke-width:1.6px;
+classDef process fill:#f8fafc,stroke:#94a3b8,color:#172554,stroke-width:1.4px;
+classDef gate fill:#fff7d6,stroke:#d97706,color:#78350f,stroke-width:1.8px;
+classDef control fill:#ede9fe,stroke:#8b5cf6,color:#4c1d95,stroke-dasharray:5 4;
+classDef done fill:#ccfbf1,stroke:#0f766e,color:#134e4a,stroke-width:1.8px;
+classDef hold fill:#fff1f2,stroke:#e11d48,color:#881337,stroke-width:1.5px;
+classDef legacy fill:#fdf2f8,stroke:#9d174d,color:#831843;
+classDef ext fill:#ecfeff,stroke:#0891b2,color:#164e63;

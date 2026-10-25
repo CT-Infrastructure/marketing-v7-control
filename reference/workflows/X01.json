@@ -1,0 +1,76 @@
+{
+  "id": "X01",
+  "name": "Authenticated event intake and normalization",
+  "family": "Shared integration and control",
+  "subfamily": "Shared integration and control",
+  "trigger": "Webhook, scheduled poll or human request",
+  "steps": [
+    {
+      "action": "Verify signature, timestamp, origin and schema",
+      "software": "Activepieces / bounded adapter"
+    },
+    {
+      "action": "Resolve client and authoritative object references",
+      "software": "Native APIs"
+    },
+    {
+      "action": "Apply payload size and secret/PII minimization",
+      "software": "Python validators"
+    },
+    {
+      "action": "Persist authenticated event receipt",
+      "software": "PostgreSQL"
+    },
+    {
+      "action": "Acknowledge only after durable intake",
+      "software": "Activepieces"
+    }
+  ],
+  "gate": "Event authenticity and scope valid?",
+  "output": "Normalized immutable event envelope",
+  "acceptance_tests": [
+    "Forged, stale or wrong-client webhook rejected",
+    "Duplicate delivery acknowledged without duplicate action"
+  ],
+  "upstream": [
+    "I14",
+    "I33",
+    "I36",
+    "X07"
+  ],
+  "handoffs": [
+    "X02",
+    "M36",
+    "E06",
+    "V11"
+  ],
+  "source": "Sources/V7/Consolidated_Self_Hosted_Technology_Stack_v7_2026-10-25.md",
+  "conditional": false,
+  "notes": "",
+  "failure": "Reject or HOLD the event/action, keep a redacted durable receipt, use bounded retries only for retry-safe failures, and send unresolved or ambiguous outcomes to human reconciliation.",
+  "status": "DESIGN_SPECIFIED_NOT_DEPLOYED",
+  "baseline": "V7",
+  "consolidation_revision": 1,
+  "controls": [],
+  "runtime_dependencies": [
+    "I10",
+    "I15",
+    "I19"
+  ],
+  "software": [
+    "Activepieces",
+    "Activepieces / bounded adapter",
+    "Native APIs",
+    "PostgreSQL",
+    "Python validators"
+  ],
+  "source_class": "consolidated-reference-design",
+  "run_contract": {
+    "owner": "Assigned accountable role in OpenProject before activation",
+    "idempotency": "client_id + source_system + source_event_id + action_scope + approved_revision",
+    "retry": "Bounded retry only after retryability classification; unknown remote effects HOLD",
+    "observability": "workflow_id, run_id, correlation_id, state and redacted error; no raw PII labels",
+    "recovery": "Restore HOLD; reapply suppression/deletion and reconcile external receipts before replay",
+    "completion": "Named output plus acceptance evidence, not merely a running service"
+  }
+}

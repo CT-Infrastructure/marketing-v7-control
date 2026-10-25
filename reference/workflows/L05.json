@@ -1,0 +1,75 @@
+{
+  "id": "L05",
+  "name": "Pod/store integrations and held-hosting reconciliation",
+  "family": "Legacy workload continuity",
+  "subfamily": "Legacy workload continuity",
+  "trigger": "Approved evaluation of retained business stack",
+  "steps": [
+    {
+      "action": "Separate live pod operations from explicitly held hosting",
+      "software": "Legacy register"
+    },
+    {
+      "action": "Inventory WordPress/orders, SeaweedFS, Temporal and mock overrides",
+      "software": "Authorized owner"
+    },
+    {
+      "action": "Preserve external Etsy/Printify/Woo credential references",
+      "software": "SOPS / provider owner"
+    },
+    {
+      "action": "Map owned data to selected V7 services without duplicate owners",
+      "software": "Mautic / WordPress / PostgreSQL"
+    },
+    {
+      "action": "Validate signatures and real-versus-mock event paths",
+      "software": "X01 / tests"
+    }
+  ],
+  "gate": "Owner, provider and non-mock acceptance passed?",
+  "output": "Approved integration migration or continued hold",
+  "acceptance_tests": [
+    "Existing secret reference is not proof of provider access",
+    "Held hosting stays held"
+  ],
+  "upstream": [
+    "I31"
+  ],
+  "handoffs": [
+    "M07",
+    "M08",
+    "M36"
+  ],
+  "source": "Sources/Legacy/docs/service-recovery-manifest.csv; Sources/Legacy/docs/service-disposition-register.csv",
+  "conditional": true,
+  "notes": "",
+  "failure": "Preserve the current held/stopped/retired intent. Do not start, delete, prune, extend an old run window, or reactivate a public route without a separate owner decision.",
+  "status": "DESIGN_SPECIFIED_NOT_DEPLOYED",
+  "baseline": "V7",
+  "consolidation_revision": 1,
+  "controls": [
+    "I02",
+    "I23",
+    "I30"
+  ],
+  "runtime_dependencies": [
+    "I09",
+    "I23"
+  ],
+  "software": [
+    "Authorized owner",
+    "Legacy register",
+    "Mautic / WordPress / PostgreSQL",
+    "SOPS / provider owner",
+    "X01 / tests"
+  ],
+  "source_class": "consolidated-reference-design",
+  "run_contract": {
+    "owner": "Assigned accountable role in OpenProject before activation",
+    "idempotency": "client_id + source_system + source_event_id + action_scope + approved_revision",
+    "retry": "Bounded retry only after retryability classification; unknown remote effects HOLD",
+    "observability": "workflow_id, run_id, correlation_id, state and redacted error; no raw PII labels",
+    "recovery": "Restore HOLD; reapply suppression/deletion and reconcile external receipts before replay",
+    "completion": "Named output plus acceptance evidence, not merely a running service"
+  }
+}

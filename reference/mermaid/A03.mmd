@@ -1,0 +1,697 @@
+flowchart LR
+  I01["I01<br/>Evidence inventory and<br/>source reconciliation"]:::process
+  I02["I02<br/>Architecture precedence and<br/>disposition approval"]:::process
+  I03["I03<br/>Offline recovery custody and<br/>bootstrap kit"]:::process
+  I04["I04<br/>Hardware, storage and<br/>hypervisor readiness"]:::process
+  I05["I05<br/>Isolated OpenWrt router<br/>replacement"]:::process
+  I06["I06<br/>DHCP, split DNS and hostname<br/>ownership"]:::process
+  I07["I07<br/>Network segmentation and<br/>ingress policy"]:::process
+  I08["I08<br/>Private access and distinct<br/>VPN control planes"]:::process
+  I09["I09<br/>Libvirt guest preservation<br/>and Proxmox migration"]:::process
+  I10["I10<br/>Debian application-host<br/>provisioning"]:::process
+  I11["I11<br/>Docker and mixed-Podman<br/>migration to Quadlet"]:::process
+  I12["I12<br/>Secrets, identity keys and<br/>credential rotation"]:::process
+  I13["I13<br/>SSO, local authentication<br/>and client isolation"]:::process
+  I14["I14<br/>Caddy, TLS issuance and<br/>certificate custody"]:::process
+  I15["I15<br/>PostgreSQL and pgvector<br/>service foundation"]:::process
+  I16["I16<br/>MariaDB application-state<br/>foundation"]:::process
+  I17["I17<br/>Valkey and native queue<br/>compatibility"]:::process
+  I18["I18<br/>SeaweedFS and approved-asset<br/>storage"]:::process
+  I19["I19<br/>Observability and actionable<br/>alerting"]:::process
+  I20["I20<br/>Router logfeed ownership and<br/>telemetry handover"]:::process
+  I21["I21<br/>Host snapshots and<br/>trigger-engine replacement"]:::process
+  I22["I22<br/>Patch, vulnerability and<br/>supply-chain release"]:::process
+  I23["I23<br/>Application-consistent<br/>backup and off-host<br/>protection"]:::process
+  I24["I24<br/>Isolated restore and<br/>recovery qualification"]:::process
+  I25["I25<br/>Controlled cutover and<br/>single-writer transfer"]:::process
+  I26["I26<br/>Rollback with<br/>external-side-effect<br/>reconciliation"]:::process
+  I27["I27<br/>UPS event and graceful power<br/>recovery"]:::process
+  I28["I28<br/>GPU and batch-workload<br/>admission"]:::process
+  I29["I29<br/>Workstation, SSH and tunnel<br/>dependency continuity"]:::process
+  I30["I30<br/>Active agent and controller<br/>handover"]:::process
+  I31["I31<br/>Non-core workload<br/>preservation and scope<br/>isolation"]:::process
+  I32["I32<br/>Retirement, orphan storage<br/>and endpoint tombstones"]:::process
+  I33["I33<br/>Dependency-aware boot and<br/>health reconciliation"]:::process
+  I34["I34<br/>Capacity, retention and<br/>reliability review"]:::process
+  I35["I35<br/>Break-glass access and<br/>account recovery"]:::process
+  I36["I36<br/>Time synchronization and<br/>scheduled-action correctness"]:::process
+  X01["X01<br/>Authenticated event intake<br/>and normalization"]:::process
+  X02["X02<br/>Durable inbox, outbox and<br/>idempotent execution"]:::process
+  X03["X03<br/>Revision-bound human<br/>approval"]:::process
+  X04["X04<br/>Independent channel<br/>eligibility and withdrawal"]:::process
+  X05["X05<br/>Bounded AI, browser and<br/>media jobs"]:::process
+  X06["X06<br/>Destination reconciliation<br/>and uncertain outcomes"]:::process
+  X07["X07<br/>Dead-letter, manual repair<br/>and controlled replay"]:::process
+  X08["X08<br/>Retention, deletion and<br/>consent propagation"]:::process
+  X09["X09<br/>Cross-domain monitoring and<br/>incident circuit breakers"]:::process
+  X10["X10<br/>Provenance-aware metrics and<br/>reporting snapshots"]:::process
+  X11["X11<br/>Reviewed configuration and<br/>release promotion"]:::process
+  X12["X12<br/>Mermaid atlas generation and<br/>diagram verification"]:::process
+  V01["V01<br/>Voice carrier, Asterisk and<br/>media foundation"]:::process
+  V02["V02<br/>Telephone authorization and<br/>final dial policy"]:::process
+  V03["V03<br/>Voice script, knowledge and<br/>tool approval"]:::process
+  V04["V04<br/>Durable call scheduling and<br/>origination"]:::process
+  V05["V05<br/>Real-time conversation and<br/>interruption loop"]:::process
+  V06["V06<br/>Voice retrieval and<br/>restricted tool execution"]:::process
+  V07["V07<br/>Human handoff and<br/>appointment coordination"]:::process
+  V08["V08<br/>Voice opt-out and recording<br/>controls"]:::process
+  V09["V09<br/>Call termination, retries<br/>and exhausted attempts"]:::process
+  V10["V10<br/>Call artifacts, access and<br/>retention"]:::process
+  V11["V11<br/>Call outcome reconciliation<br/>and CRM handoff"]:::process
+  V12["V12<br/>Voice quality qualification<br/>and incident recovery"]:::process
+  E01["E01<br/>Sending identity, DNS,<br/>mailbox and relay<br/>provisioning"]:::process
+  E02["E02<br/>Contact permission, hygiene<br/>and segmentation"]:::process
+  E03["E03<br/>Email content, landing pages<br/>and exact review"]:::process
+  E04["E04<br/>Staging simulation and<br/>controlled real-mailbox QA"]:::process
+  E05["E05<br/>CANARY, gradual ramp and<br/>production transition"]:::process
+  E06["E06<br/>Delivery callbacks,<br/>deduplication and<br/>suppression"]:::process
+  E07["E07<br/>Authentication, reputation<br/>and source-health monitoring"]:::process
+  E08["E08<br/>Risk decisions and email<br/>incident handling"]:::process
+  E09["E09<br/>Sender recovery and<br/>production requalification"]:::process
+  E10["E10<br/>Routine email operations and<br/>periodic review"]:::process
+  E11["E11<br/>Final per-recipient dispatch<br/>guard"]:::process
+  E12["E12<br/>Atomic sender quota and<br/>warm-up reservations"]:::process
+  E13["E13<br/>Inbound replies and human<br/>sales handoff"]:::process
+  E14["E14<br/>DMARC and TLS report<br/>ingestion"]:::process
+  C01["C01<br/>Trending topic discovery"]:::process
+  C02["C02<br/>SEO keyword clustering"]:::process
+  C03["C03<br/>Competitor content-gap<br/>analysis"]:::process
+  C04["C04<br/>Audience pain-point research"]:::process
+  C05["C05<br/>Campaign concept generation"]:::process
+  C06["C06<br/>Topical authority mapping"]:::process
+  C07["C07<br/>Fact-check and source pack"]:::process
+  C08["C08<br/>Editorial calendar<br/>generation"]:::process
+  C09["C09<br/>SEO pillar article"]:::process
+  C10["C10<br/>Topic-cluster articles"]:::process
+  C11["C11<br/>How-to guides"]:::process
+  C12["C12<br/>FAQ and knowledge articles"]:::process
+  C13["C13<br/>Product/service landing<br/>pages"]:::process
+  C14["C14<br/>Comparison pages"]:::process
+  C15["C15<br/>Customer success stories"]:::process
+  C16["C16<br/>Existing-content refresh"]:::process
+  C17["C17<br/>Short-form social posts"]:::process
+  C18["C18<br/>Thought-leadership posts"]:::process
+  C19["C19<br/>Multi-post threads"]:::process
+  C20["C20<br/>Social carousels"]:::process
+  C21["C21<br/>Social infographics"]:::process
+  C22["C22<br/>Poll and question campaigns"]:::process
+  C23["C23<br/>Community reply drafts"]:::process
+  C24["C24<br/>Evergreen post recycling"]:::process
+  C25["C25<br/>Weekly newsletter"]:::process
+  C26["C26<br/>Welcome email sequence"]:::process
+  C27["C27<br/>Lead-nurture series"]:::process
+  C28["C28<br/>Product launch sequence"]:::process
+  C29["C29<br/>Event promotion emails"]:::process
+  C30["C30<br/>Segmented email variations"]:::process
+  C31["C31<br/>Re-engagement campaign"]:::process
+  C32["C32<br/>A/B email content testing"]:::process
+  C33["C33<br/>Blog hero images"]:::process
+  C34["C34<br/>Social graphics and<br/>thumbnails"]:::process
+  C35["C35<br/>Advertising banners"]:::process
+  C36["C36<br/>Product lifestyle composites"]:::process
+  C37["C37<br/>Brand illustrations"]:::process
+  C38["C38<br/>Process diagrams"]:::process
+  C39["C39<br/>Data visualization cards"]:::process
+  C40["C40<br/>Image variants and<br/>accessibility"]:::process
+  C41["C41<br/>Blog-to-audio narration"]:::process
+  C42["C42<br/>Podcast episode scripts"]:::process
+  C43["C43<br/>Recorded podcast production"]:::process
+  C44["C44<br/>AI-narrated podcasts"]:::process
+  C45["C45<br/>Audio advertisement<br/>creatives"]:::process
+  C46["C46<br/>Short audio highlights"]:::process
+  C47["C47<br/>Voice-agent knowledge<br/>scripts"]:::process
+  C48["C48<br/>Transcripts and show notes"]:::process
+  C49["C49<br/>Vertical short-form videos"]:::process
+  C50["C50<br/>Slideshow explainers"]:::process
+  C51["C51<br/>Captioned videos"]:::process
+  C52["C52<br/>Product walkthrough videos"]:::process
+  C53["C53<br/>Long-video cutdowns"]:::process
+  C54["C54<br/>Video teasers and thumbnails"]:::process
+  C55["C55<br/>AI-generated motion scenes"]:::process
+  C56["C56<br/>Webinar and event recaps"]:::process
+  C57["C57<br/>Whitepapers"]:::process
+  C58["C58<br/>eBooks"]:::process
+  C59["C59<br/>Downloadable checklists"]:::process
+  C60["C60<br/>Buyer's guides"]:::process
+  C61["C61<br/>Case-study PDFs"]:::process
+  C62["C62<br/>Product one-pagers"]:::process
+  C63["C63<br/>Sales battlecards"]:::process
+  C64["C64<br/>Webinar scripts and handouts"]:::process
+  C65["C65<br/>Blog-to-social bundle"]:::process
+  C66["C66<br/>Blog-to-newsletter"]:::process
+  C67["C67<br/>Podcast-to-blog"]:::process
+  C68["C68<br/>Video-to-FAQ and articles"]:::process
+  C69["C69<br/>Multi-language localization"]:::process
+  C70["C70<br/>Persona-specific content<br/>variants"]:::process
+  C71["C71<br/>Accessibility asset<br/>generation"]:::process
+  C72["C72<br/>Performance-driven content<br/>refresh"]:::process
+  M01["M01<br/>Lead capture and contact<br/>management"]:::process
+  M02["M02<br/>Nurture and score leads"]:::process
+  M03["M03<br/>Sales follow-up"]:::process
+  M04["M04<br/>SEO content marketing"]:::process
+  M05["M05<br/>Marketing analytics and<br/>attribution"]:::process
+  M06["M06<br/>Welcome email series"]:::process
+  M07["M07<br/>Abandoned cart/checkout"]:::process
+  M08["M08<br/>Post-purchase<br/>cross-sell/upsell"]:::process
+  M09["M09<br/>Dormant-customer win-back"]:::process
+  M10["M10<br/>Paid search/social and<br/>retargeting"]:::process
+  M11["M11<br/>Content discovery and<br/>calendar"]:::process
+  M12["M12<br/>Video/audio repurposing"]:::process
+  M13["M13<br/>Newsletter subscriber<br/>onboarding"]:::process
+  M14["M14<br/>Comment/DM engagement<br/>follow-up"]:::process
+  M15["M15<br/>Social-to-site conversion<br/>reporting"]:::process
+  M16["M16<br/>Client onboarding"]:::process
+  M17["M17<br/>Multi-channel publishing"]:::process
+  M18["M18<br/>Client-facing campaign<br/>dashboards"]:::process
+  M19["M19<br/>Lead generation and routing"]:::process
+  M20["M20<br/>Automated client reports"]:::process
+  M21["M21<br/>Keyword tracking and alerts"]:::process
+  M22["M22<br/>Competitor change tracking"]:::process
+  M23["M23<br/>Email/site A/B tests"]:::process
+  M24["M24<br/>Landing page optimization"]:::process
+  M25["M25<br/>Consent-aware audience<br/>segmentation"]:::process
+  M26["M26<br/>Referral marketing"]:::process
+  M27["M27<br/>Affiliate management"]:::process
+  M28["M28<br/>Influencer discovery and<br/>outreach"]:::process
+  M29["M29<br/>First-party review requests"]:::process
+  M30["M30<br/>Reputation and brand<br/>monitoring"]:::process
+  M31["M31<br/>Webinar registration and<br/>follow-up"]:::process
+  M32["M32<br/>Permission-based SMS<br/>marketing"]:::process
+  M33["M33<br/>Local SEO and listings"]:::process
+  M34["M34<br/>Loyalty and reward programs"]:::process
+  M35["M35<br/>Marketing budget<br/>optimization"]:::process
+  M36["M36<br/>Marketing synchronization"]:::process
+  L01["L01<br/>Factorio simulation and<br/>controller continuity"]:::process
+  L02["L02<br/>OBS, GPU capture and<br/>broadcast continuity"]:::process
+  L03["L03<br/>Herdr and Coven<br/>coding-session preservation"]:::process
+  L04["L04<br/>Sandbox VMs, desktop access<br/>and tunnels"]:::process
+  L05["L05<br/>Pod/store integrations and<br/>held-hosting reconciliation"]:::process
+  L06["L06<br/>Workflow Studio, BTC and<br/>custom helper disposition"]:::process
+  L07["L07<br/>Conditional SMB,<br/>network-flow and MCP<br/>services"]:::process
+  L08["L08<br/>Legacy endpoint and<br/>orphan-volume disposition<br/>closure"]:::process
+  I01 --> I02
+  I01 --> I03
+  I01 --> I04
+  I02 --> I05
+  I02 --> I09
+  I02 --> I11
+  I02 --> I31
+  I02 --> I32
+  I03 --> I12
+  I03 --> I24
+  I03 --> I35
+  I04 --> I09
+  I04 --> I10
+  I04 --> I27
+  I04 --> I28
+  I04 --> I34
+  I05 --> I06
+  I05 --> I07
+  I05 --> I36
+  I06 --> I08
+  I06 --> I14
+  I06 --> I25
+  I07 --> I08
+  I07 --> I10
+  I07 --> I14
+  I07 --> V01
+  I08 --> I13
+  I08 --> I29
+  I08 --> I35
+  I09 --> I24
+  I09 --> I30
+  I09 --> L01
+  I09 --> L02
+  I09 --> L03
+  I09 --> L04
+  I10 --> I11
+  I10 --> I12
+  I10 --> I15
+  I10 --> I16
+  I10 --> I17
+  I10 --> I18
+  I10 --> I19
+  I11 --> I24
+  I11 --> I33
+  I11 --> X11
+  I12 --> I13
+  I12 --> I14
+  I12 --> E01
+  I12 --> V01
+  I12 --> X11
+  I13 --> M16
+  I13 --> M18
+  I13 --> M19
+  I13 --> I35
+  I14 --> E01
+  I14 --> M01
+  I14 --> X01
+  I14 --> I25
+  I15 --> X02
+  I15 --> X10
+  I15 --> E11
+  I15 --> V02
+  I15 --> I23
+  I16 --> M01
+  I16 --> E02
+  I16 --> C09
+  I16 --> I23
+  I17 --> X02
+  I17 --> X05
+  I17 --> M17
+  I17 --> I33
+  I18 --> C33
+  I18 --> C43
+  I18 --> C49
+  I18 --> C57
+  I18 --> V10
+  I18 --> I23
+  I19 --> I20
+  I19 --> I21
+  I19 --> X09
+  I19 --> I34
+  I20 --> X09
+  I20 --> I25
+  I21 --> X02
+  I21 --> X09
+  I21 --> I25
+  I22 --> I23
+  I22 --> I24
+  I22 --> I33
+  I23 --> I24
+  I23 --> I25
+  I23 --> I26
+  I24 --> I25
+  I24 --> X06
+  I25 --> I33
+  I25 --> E05
+  I25 --> V04
+  I25 --> M17
+  I25 --> I26
+  I26 --> I24
+  I26 --> X06
+  I27 --> I33
+  I27 --> I24
+  I28 --> X05
+  I28 --> V05
+  I28 --> C33
+  I28 --> C49
+  I29 --> I30
+  I29 --> I35
+  I29 --> L04
+  I30 --> L01
+  I30 --> L02
+  I30 --> L03
+  I30 --> L06
+  I31 --> L01
+  I31 --> L02
+  I31 --> L03
+  I31 --> L04
+  I31 --> L05
+  I31 --> L06
+  I31 --> L07
+  I31 --> L08
+  I32 --> L08
+  I32 --> X08
+  I33 --> X01
+  I33 --> E11
+  I33 --> V04
+  I33 --> M36
+  I34 --> I04
+  I34 --> I28
+  I34 --> I23
+  I34 --> X11
+  I35 --> I12
+  I35 --> I24
+  I36 --> X01
+  I36 --> E11
+  I36 --> V02
+  I36 --> M32
+  X01 --> X02
+  X01 --> M36
+  X01 --> E06
+  X01 --> V11
+  X02 --> X03
+  X02 --> X04
+  X02 --> X05
+  X02 --> X06
+  X02 --> X07
+  X03 --> M17
+  X03 --> E11
+  X03 --> V03
+  X03 --> C09
+  X04 --> E11
+  X04 --> V02
+  X04 --> M25
+  X04 --> M32
+  X04 --> X08
+  X05 --> C01
+  X05 --> C33
+  X05 --> C49
+  X05 --> C57
+  X05 --> X03
+  X06 --> X07
+  X06 --> X10
+  X06 --> E06
+  X06 --> V11
+  X06 --> M36
+  X07 --> X01
+  X07 --> X02
+  X07 --> X11
+  X08 --> M36
+  X08 --> I23
+  X08 --> V10
+  X08 --> E06
+  X09 --> X07
+  X09 --> E08
+  X09 --> V12
+  X09 --> I24
+  X10 --> M05
+  X10 --> M18
+  X10 --> M20
+  X10 --> M35
+  X10 --> C72
+  X11 --> I22
+  X11 --> I33
+  X11 --> X12
+  X12 --> I01
+  V01 --> V02
+  V01 --> V05
+  V02 --> V04
+  V03 --> V04
+  V03 --> V06
+  V04 --> V05
+  V04 --> V11
+  V05 --> V06
+  V05 --> V07
+  V05 --> V08
+  V05 --> V09
+  V06 --> V05
+  V06 --> V07
+  V06 --> V11
+  V07 --> V11
+  V07 --> M03
+  V08 --> V09
+  V08 --> V10
+  V08 --> X08
+  V09 --> V10
+  V09 --> V11
+  V09 --> V02
+  V10 --> V11
+  V10 --> I23
+  V10 --> X08
+  V11 --> M03
+  V11 --> M36
+  V11 --> X10
+  V12 --> V01
+  V12 --> V03
+  V12 --> V04
+  E01 --> E02
+  E01 --> E04
+  E01 --> E07
+  E01 --> E14
+  E02 --> E03
+  E02 --> E05
+  E02 --> M25
+  E03 --> E04
+  E03 --> E11
+  E04 --> E05
+  E04 --> E11
+  E05 --> E11
+  E05 --> E06
+  E05 --> E08
+  E05 --> E09
+  E06 --> E07
+  E06 --> E08
+  E06 --> E11
+  E06 --> X10
+  E07 --> E08
+  E07 --> E05
+  E08 --> E09
+  E08 --> X07
+  E09 --> E05
+  E09 --> E10
+  E10 --> E01
+  E10 --> E02
+  E10 --> E07
+  E10 --> I23
+  E11 --> E06
+  E11 --> X06
+  E12 --> E11
+  E13 --> E02
+  E13 --> M03
+  E13 --> M36
+  E14 --> E07
+  E14 --> X10
+  C01 --> C08
+  C01 --> M11
+  C02 --> C08
+  C02 --> M11
+  C03 --> C08
+  C03 --> M11
+  C04 --> C08
+  C04 --> M11
+  C05 --> C08
+  C05 --> M11
+  C06 --> C08
+  C06 --> M11
+  C07 --> C08
+  C07 --> M11
+  C08 --> C09
+  C08 --> M11
+  C09 --> M04
+  C09 --> M24
+  C10 --> M04
+  C10 --> M24
+  C11 --> M04
+  C11 --> M24
+  C12 --> M04
+  C12 --> M24
+  C13 --> M04
+  C13 --> M24
+  C14 --> M04
+  C14 --> M24
+  C15 --> M04
+  C15 --> M24
+  C16 --> M04
+  C16 --> M24
+  C17 --> M17
+  C17 --> M15
+  C18 --> M17
+  C18 --> M15
+  C19 --> M17
+  C19 --> M15
+  C20 --> M17
+  C20 --> M15
+  C21 --> M17
+  C21 --> M15
+  C22 --> M17
+  C22 --> M15
+  C23 --> M17
+  C23 --> M15
+  C24 --> M17
+  C24 --> M15
+  C25 --> E03
+  C25 --> M02
+  C26 --> E03
+  C26 --> M02
+  C27 --> E03
+  C27 --> M02
+  C28 --> E03
+  C28 --> M02
+  C29 --> E03
+  C29 --> M02
+  C30 --> E03
+  C30 --> M02
+  C31 --> E03
+  C31 --> M02
+  C32 --> E03
+  C32 --> M02
+  C33 --> C09
+  C33 --> C17
+  C33 --> M10
+  C34 --> C09
+  C34 --> C17
+  C34 --> M10
+  C35 --> C09
+  C35 --> C17
+  C35 --> M10
+  C36 --> C09
+  C36 --> C17
+  C36 --> M10
+  C37 --> C09
+  C37 --> C17
+  C37 --> M10
+  C38 --> C09
+  C38 --> C17
+  C38 --> M10
+  C39 --> C09
+  C39 --> C17
+  C39 --> M10
+  C40 --> C09
+  C40 --> C17
+  C40 --> M10
+  C41 --> C49
+  C41 --> C67
+  C42 --> C49
+  C42 --> C67
+  C43 --> C49
+  C43 --> C67
+  C44 --> C49
+  C44 --> C67
+  C45 --> C49
+  C45 --> C67
+  C46 --> C49
+  C46 --> C67
+  C47 --> V03
+  C48 --> C49
+  C48 --> C67
+  C49 --> M12
+  C49 --> M17
+  C50 --> M12
+  C50 --> M17
+  C51 --> M12
+  C51 --> M17
+  C52 --> M12
+  C52 --> M17
+  C53 --> M12
+  C53 --> M17
+  C54 --> M12
+  C54 --> M17
+  C55 --> M12
+  C55 --> M17
+  C56 --> M12
+  C56 --> M17
+  C57 --> M01
+  C57 --> M20
+  C58 --> M01
+  C58 --> M20
+  C59 --> M01
+  C59 --> M20
+  C60 --> M01
+  C60 --> M20
+  C61 --> M01
+  C61 --> M20
+  C62 --> M01
+  C62 --> M20
+  C63 --> M01
+  C63 --> M20
+  C64 --> M01
+  C64 --> M20
+  C65 --> M17
+  C65 --> X10
+  C66 --> M17
+  C66 --> X10
+  C67 --> M17
+  C67 --> X10
+  C68 --> M17
+  C68 --> X10
+  C69 --> M17
+  C69 --> X10
+  C70 --> M17
+  C70 --> X10
+  C71 --> M17
+  C71 --> X10
+  C72 --> C08
+  C72 --> C16
+  C72 --> M24
+  M01 --> M25
+  M01 --> M06
+  M01 --> M19
+  M02 --> M03
+  M02 --> M05
+  M03 --> V02
+  M03 --> M36
+  M04 --> M21
+  M04 --> M24
+  M05 --> M35
+  M05 --> M11
+  M06 --> M02
+  M06 --> M05
+  M07 --> M08
+  M07 --> M05
+  M08 --> M09
+  M08 --> M34
+  M09 --> M25
+  M09 --> M05
+  M10 --> M24
+  M10 --> M35
+  M11 --> C01
+  M11 --> C08
+  M11 --> M04
+  M11 --> M17
+  M12 --> C49
+  M12 --> C53
+  M12 --> M17
+  M13 --> E03
+  M13 --> M02
+  M14 --> M03
+  M14 --> M30
+  M15 --> M05
+  M15 --> M11
+  M16 --> M19
+  M16 --> M18
+  M17 --> M15
+  M17 --> M05
+  M18 --> M20
+  M19 --> M03
+  M19 --> M02
+  M20 --> M16
+  M20 --> M35
+  M21 --> C16
+  M21 --> M04
+  M22 --> C03
+  M22 --> M11
+  M23 --> M24
+  M23 --> M11
+  M24 --> C13
+  M24 --> M23
+  M25 --> M02
+  M25 --> M06
+  M25 --> M32
+  M26 --> M27
+  M26 --> M05
+  M27 --> M05
+  M28 --> M17
+  M28 --> M26
+  M29 --> M30
+  M29 --> M05
+  M30 --> M14
+  M30 --> M11
+  M31 --> C56
+  M31 --> M02
+  M32 --> M36
+  M32 --> M05
+  M33 --> M04
+  M33 --> M21
+  M34 --> M08
+  M34 --> M05
+  M35 --> M10
+  M35 --> M11
+  M36 --> M25
+  M36 --> X10
+  L01 --> L02
+  L01 --> X10
+  L02 --> I28
+  L02 --> X09
+  L03 --> X11
+  L04 --> I29
+  L04 --> X09
+  L05 --> M07
+  L05 --> M08
+  L05 --> M36
+  L06 --> X11
+  L06 --> L08
+  L07 --> I19
+  L07 --> X11
+  L08 --> I02
+  L08 --> X08
+
+classDef source fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e,stroke-width:1.6px;
+classDef process fill:#f8fafc,stroke:#94a3b8,color:#172554,stroke-width:1.4px;
+classDef gate fill:#fff7d6,stroke:#d97706,color:#78350f,stroke-width:1.8px;
+classDef control fill:#ede9fe,stroke:#8b5cf6,color:#4c1d95,stroke-dasharray:5 4;
+classDef done fill:#ccfbf1,stroke:#0f766e,color:#134e4a,stroke-width:1.8px;
+classDef hold fill:#fff1f2,stroke:#e11d48,color:#881337,stroke-width:1.5px;
+classDef legacy fill:#fdf2f8,stroke:#9d174d,color:#831843;
+classDef ext fill:#ecfeff,stroke:#0891b2,color:#164e63;

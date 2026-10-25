@@ -1,0 +1,70 @@
+{
+  "id": "X12",
+  "name": "Mermaid atlas generation and diagram verification",
+  "family": "Shared integration and control",
+  "subfamily": "Shared integration and control",
+  "trigger": "Workflow or architecture documentation change",
+  "steps": [
+    {
+      "action": "Validate workflow registry and cross-reference IDs",
+      "software": "Python validator"
+    },
+    {
+      "action": "Generate versioned Mermaid sources",
+      "software": "Git / deterministic generator"
+    },
+    {
+      "action": "Render actual Mermaid to SVG and PNG",
+      "software": "Mermaid / Chromium"
+    },
+    {
+      "action": "Check parse results, image dimensions and link coverage",
+      "software": "Playwright / Python"
+    },
+    {
+      "action": "Publish atlas, checksums and source manifest",
+      "software": "Forgejo / Library artifact"
+    }
+  ],
+  "gate": "Every diagram renders and every workflow is linked?",
+  "output": "Reproducible diagram library with visual QA receipts",
+  "acceptance_tests": [
+    "No image-generation model used",
+    "Rendering success not deployment acceptance"
+  ],
+  "upstream": [
+    "X11"
+  ],
+  "handoffs": [
+    "I01"
+  ],
+  "source": "Sources/V7/Consolidated_Self_Hosted_Technology_Stack_v7_2026-10-25.md",
+  "conditional": false,
+  "notes": "",
+  "failure": "Reject or HOLD the event/action, keep a redacted durable receipt, use bounded retries only for retry-safe failures, and send unresolved or ambiguous outcomes to human reconciliation.",
+  "status": "DESIGN_SPECIFIED_NOT_DEPLOYED",
+  "baseline": "V7",
+  "consolidation_revision": 1,
+  "controls": [],
+  "runtime_dependencies": [
+    "I10",
+    "I15",
+    "I19"
+  ],
+  "software": [
+    "Forgejo / Library artifact",
+    "Git / deterministic generator",
+    "Mermaid / Chromium",
+    "Playwright / Python",
+    "Python validator"
+  ],
+  "source_class": "consolidated-reference-design",
+  "run_contract": {
+    "owner": "Assigned accountable role in OpenProject before activation",
+    "idempotency": "client_id + source_system + source_event_id + action_scope + approved_revision",
+    "retry": "Bounded retry only after retryability classification; unknown remote effects HOLD",
+    "observability": "workflow_id, run_id, correlation_id, state and redacted error; no raw PII labels",
+    "recovery": "Restore HOLD; reapply suppression/deletion and reconcile external receipts before replay",
+    "completion": "Named output plus acceptance evidence, not merely a running service"
+  }
+}

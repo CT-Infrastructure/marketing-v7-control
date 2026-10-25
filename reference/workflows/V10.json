@@ -1,0 +1,83 @@
+{
+  "id": "V10",
+  "name": "Call artifacts, access and retention",
+  "family": "Outbound voice agents",
+  "subfamily": "Outbound voice agents",
+  "trigger": "Authorized call generates transcript or recording",
+  "steps": [
+    {
+      "action": "Confirm recording/transcript authorization",
+      "software": "Call ledger"
+    },
+    {
+      "action": "Store encrypted artifacts with scoped access",
+      "software": "SeaweedFS"
+    },
+    {
+      "action": "Persist hashes, policy and call references",
+      "software": "PostgreSQL"
+    },
+    {
+      "action": "Publish only approved summary to responsible owner",
+      "software": "Mautic / OpenProject"
+    },
+    {
+      "action": "Expire artifacts and related retrieval entries",
+      "software": "X08"
+    }
+  ],
+  "gate": "Artifact rights and retention valid?",
+  "output": "Minimal protected call evidence",
+  "acceptance_tests": [
+    "Raw recordings not copied into generic logs",
+    "Restored artifacts respect later deletion events"
+  ],
+  "upstream": [
+    "V09",
+    "I18",
+    "X08",
+    "V08"
+  ],
+  "handoffs": [
+    "V11",
+    "I23",
+    "X08"
+  ],
+  "source": "Sources/V7/Consolidated_Self_Hosted_Technology_Stack_v7_2026-10-25.md §4.2",
+  "conditional": false,
+  "notes": "",
+  "failure": "Fail closed for new calls; terminate or hand off an active call safely under policy. Reconcile carrier and ARI state before any redial. Preserve opt-out immediately.",
+  "status": "DESIGN_SPECIFIED_NOT_DEPLOYED",
+  "baseline": "V7",
+  "consolidation_revision": 1,
+  "controls": [
+    "X02",
+    "X03",
+    "X04",
+    "X06",
+    "X09"
+  ],
+  "runtime_dependencies": [
+    "I07",
+    "I15",
+    "I18",
+    "I28",
+    "I36"
+  ],
+  "software": [
+    "Call ledger",
+    "Mautic / OpenProject",
+    "PostgreSQL",
+    "SeaweedFS",
+    "X08"
+  ],
+  "source_class": "consolidated-reference-design",
+  "run_contract": {
+    "owner": "Assigned accountable role in OpenProject before activation",
+    "idempotency": "client_id + source_system + source_event_id + action_scope + approved_revision",
+    "retry": "Bounded retry only after retryability classification; unknown remote effects HOLD",
+    "observability": "workflow_id, run_id, correlation_id, state and redacted error; no raw PII labels",
+    "recovery": "Restore HOLD; reapply suppression/deletion and reconcile external receipts before replay",
+    "completion": "Named output plus acceptance evidence, not merely a running service"
+  }
+}

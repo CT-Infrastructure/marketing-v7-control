@@ -1,0 +1,76 @@
+{
+  "id": "C60",
+  "source_id": 60,
+  "name": "Buyer's guides",
+  "family": "Content generation",
+  "subfamily": "H. Documents & lead magnets",
+  "trigger": "Approved selection criteria and product facts",
+  "steps": [
+    {
+      "action": "Build decision criteria and source-checked comparisons",
+      "software": "SearXNG / approved source APIs"
+    },
+    {
+      "action": "typeset",
+      "software": "Pandoc / conditional Typst"
+    },
+    {
+      "action": "Validate facts, rights, format and exact revision",
+      "software": "Vale / validators / OpenProject"
+    },
+    {
+      "action": "Hand off approved artifact; recipient rechecks release controls",
+      "software": "ResourceSpace approved document"
+    }
+  ],
+  "gate": "Exact artifact, rights and intended handoff approved?",
+  "output": "Buyer guide; avoid fabricated pricing",
+  "acceptance_tests": [
+    "Source-specific deliverable checked: Buyer guide; avoid fabricated pricing",
+    "Material changes invalidate approval; destination remains staged until final release",
+    "Duplicate or uncertain external result uses X06, not blind retry"
+  ],
+  "upstream": [
+    "X05"
+  ],
+  "handoffs": [
+    "M01",
+    "M20"
+  ],
+  "source": "Sources/Library/Content_Generation_Workflow_Catalog_v6_2026-10-25.json #60",
+  "conditional": false,
+  "notes": "Original V6 identity, trigger, source procedure and deliverable retained. Stage role labels and common controls are V7 consolidation design refinements. This workflow does not itself authorize an external send, call or spend.",
+  "failure": "Keep the revision unpublished. Preserve evidence and failure status, request a new reviewed revision, and never retry an ambiguous publication without checking the destination.",
+  "status": "DESIGN_SPECIFIED_NOT_DEPLOYED",
+  "baseline": "V7",
+  "consolidation_revision": 1,
+  "source_procedure": "Build decision criteria and source-checked comparisons; typeset",
+  "source_software": "SearXNG, llama.cpp, Pandoc",
+  "controls": [
+    "X02",
+    "X03",
+    "X05",
+    "X06"
+  ],
+  "runtime_dependencies": [
+    "I10",
+    "I15",
+    "I18",
+    "I28"
+  ],
+  "software": [
+    "Pandoc / conditional Typst",
+    "ResourceSpace approved document",
+    "SearXNG / approved source APIs",
+    "Vale / validators / OpenProject"
+  ],
+  "source_class": "retained-source-pattern",
+  "run_contract": {
+    "owner": "Assigned accountable role in OpenProject before activation",
+    "idempotency": "client_id + source_system + source_event_id + action_scope + approved_revision",
+    "retry": "Bounded retry only after retryability classification; unknown remote effects HOLD",
+    "observability": "workflow_id, run_id, correlation_id, state and redacted error; no raw PII labels",
+    "recovery": "Restore HOLD; reapply suppression/deletion and reconcile external receipts before replay",
+    "completion": "Named output plus acceptance evidence, not merely a running service"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "offline_issue_count": 785,
+  "independent_test_filter": 190,
+  "human_gate_filter": 12,
+  "full_brief_and_inherited_cases_visible": true,
+  "javascript_errors": [],
+  "load_method": "set_content with all network blocked; file URL navigation restricted by this test environment"
+}

@@ -1,0 +1,78 @@
+{
+  "id": "X11",
+  "name": "Reviewed configuration and release promotion",
+  "family": "Shared integration and control",
+  "subfamily": "Shared integration and control",
+  "trigger": "Change request or new integration",
+  "steps": [
+    {
+      "action": "Version source, contracts, prompts and policy",
+      "software": "Git / Forgejo"
+    },
+    {
+      "action": "Pin application images and build dependencies",
+      "software": "Release manifest"
+    },
+    {
+      "action": "Validate schema, secrets handling and regression tests",
+      "software": "Trivy / Playwright / validators"
+    },
+    {
+      "action": "Rehearse backup and rollback for the exact release",
+      "software": "I23 / I24"
+    },
+    {
+      "action": "Promote through human approval and bounded rollout",
+      "software": "Ansible / OpenProject"
+    }
+  ],
+  "gate": "Change evidence and rollback accepted?",
+  "output": "Traceable approved release",
+  "acceptance_tests": [
+    "Secrets absent from repository",
+    "Local OmniRoute and custom adapter source pinned"
+  ],
+  "upstream": [
+    "I11",
+    "I12",
+    "I34",
+    "X07",
+    "L03",
+    "L06",
+    "L07"
+  ],
+  "handoffs": [
+    "I22",
+    "I33",
+    "X12"
+  ],
+  "source": "Sources/V7/Consolidated_Self_Hosted_Technology_Stack_v7_2026-10-25.md",
+  "conditional": false,
+  "notes": "",
+  "failure": "Reject or HOLD the event/action, keep a redacted durable receipt, use bounded retries only for retry-safe failures, and send unresolved or ambiguous outcomes to human reconciliation.",
+  "status": "DESIGN_SPECIFIED_NOT_DEPLOYED",
+  "baseline": "V7",
+  "consolidation_revision": 1,
+  "controls": [],
+  "runtime_dependencies": [
+    "I10",
+    "I15",
+    "I19"
+  ],
+  "software": [
+    "Ansible / OpenProject",
+    "Git / Forgejo",
+    "I23 / I24",
+    "Release manifest",
+    "Trivy / Playwright / validators"
+  ],
+  "source_class": "consolidated-reference-design",
+  "run_contract": {
+    "owner": "Assigned accountable role in OpenProject before activation",
+    "idempotency": "client_id + source_system + source_event_id + action_scope + approved_revision",
+    "retry": "Bounded retry only after retryability classification; unknown remote effects HOLD",
+    "observability": "workflow_id, run_id, correlation_id, state and redacted error; no raw PII labels",
+    "recovery": "Restore HOLD; reapply suppression/deletion and reconcile external receipts before replay",
+    "completion": "Named output plus acceptance evidence, not merely a running service"
+  }
+}

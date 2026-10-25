@@ -1,0 +1,285 @@
+{
+  "name": "Marketing V7 — Integrated Delivery",
+  "visibility": "PRIVATE",
+  "description": "Agent-ready V7 implementation with explicit safety boundaries. Engineering only; business approvals remain OpenProject.",
+  "fields": [
+    {
+      "name": "Package Key",
+      "type": "TEXT"
+    },
+    {
+      "name": "Execution",
+      "type": "SINGLE_SELECT",
+      "options": [
+        "Backlog",
+        "Ready",
+        "Leased",
+        "Running",
+        "Review",
+        "Merge queue",
+        "Accepted",
+        "Blocked",
+        "Orphaned",
+        "Deferred",
+        "Manual hold"
+      ]
+    },
+    {
+      "name": "Priority",
+      "type": "SINGLE_SELECT",
+      "options": [
+        "P0",
+        "P1",
+        "P2",
+        "P3"
+      ]
+    },
+    {
+      "name": "Phase",
+      "type": "SINGLE_SELECT",
+      "options": [
+        "P0",
+        "P1",
+        "P2",
+        "P3",
+        "P4",
+        "P5",
+        "P6"
+      ]
+    },
+    {
+      "name": "Risk",
+      "type": "SINGLE_SELECT",
+      "options": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    },
+    {
+      "name": "Workstream",
+      "type": "TEXT"
+    },
+    {
+      "name": "Workflow ID",
+      "type": "TEXT"
+    },
+    {
+      "name": "Agent",
+      "type": "TEXT"
+    },
+    {
+      "name": "Lease expires",
+      "type": "TEXT"
+    },
+    {
+      "name": "Evidence level",
+      "type": "SINGLE_SELECT",
+      "options": [
+        "Not run",
+        "Code merged",
+        "Sandbox qualified",
+        "Staging qualified",
+        "Production approved"
+      ]
+    }
+  ],
+  "labels": [
+    {
+      "name": "type:component",
+      "color": "2563EB",
+      "description": "V7 work package classification: component"
+    },
+    {
+      "name": "type:epic",
+      "color": "2563EB",
+      "description": "V7 work package classification: epic"
+    },
+    {
+      "name": "type:foundation",
+      "color": "2563EB",
+      "description": "V7 work package classification: foundation"
+    },
+    {
+      "name": "type:human-gate",
+      "color": "2563EB",
+      "description": "V7 work package classification: human-gate"
+    },
+    {
+      "name": "type:implementation",
+      "color": "2563EB",
+      "description": "V7 work package classification: implementation"
+    },
+    {
+      "name": "type:integration",
+      "color": "2563EB",
+      "description": "V7 work package classification: integration"
+    },
+    {
+      "name": "type:preservation",
+      "color": "2563EB",
+      "description": "V7 work package classification: preservation"
+    },
+    {
+      "name": "type:provider",
+      "color": "2563EB",
+      "description": "V7 work package classification: provider"
+    },
+    {
+      "name": "type:selection",
+      "color": "2563EB",
+      "description": "V7 work package classification: selection"
+    },
+    {
+      "name": "type:test-authoring",
+      "color": "2563EB",
+      "description": "V7 work package classification: test-authoring"
+    },
+    {
+      "name": "type:verification",
+      "color": "2563EB",
+      "description": "V7 work package classification: verification"
+    },
+    {
+      "name": "risk:low",
+      "color": "64748B",
+      "description": "Risk review level: low"
+    },
+    {
+      "name": "risk:medium",
+      "color": "64748B",
+      "description": "Risk review level: medium"
+    },
+    {
+      "name": "risk:high",
+      "color": "DC2626",
+      "description": "Risk review level: high"
+    },
+    {
+      "name": "risk:critical",
+      "color": "DC2626",
+      "description": "Risk review level: critical"
+    },
+    {
+      "name": "priority:P0",
+      "color": "7C3AED",
+      "description": "Delivery priority P0"
+    },
+    {
+      "name": "priority:P1",
+      "color": "7C3AED",
+      "description": "Delivery priority P1"
+    },
+    {
+      "name": "priority:P2",
+      "color": "7C3AED",
+      "description": "Delivery priority P2"
+    },
+    {
+      "name": "priority:P3",
+      "color": "7C3AED",
+      "description": "Delivery priority P3"
+    },
+    {
+      "name": "ready",
+      "color": "0F766E",
+      "description": "Coordinator projection; not an authorization or lock: ready"
+    },
+    {
+      "name": "blocked",
+      "color": "0F766E",
+      "description": "Coordinator projection; not an authorization or lock: blocked"
+    },
+    {
+      "name": "deferred",
+      "color": "0F766E",
+      "description": "Coordinator projection; not an authorization or lock: deferred"
+    },
+    {
+      "name": "manual-gate",
+      "color": "0F766E",
+      "description": "Coordinator projection; not an authorization or lock: manual-gate"
+    },
+    {
+      "name": "security-review",
+      "color": "0F766E",
+      "description": "Coordinator projection; not an authorization or lock: security-review"
+    },
+    {
+      "name": "needs-evidence",
+      "color": "0F766E",
+      "description": "Coordinator projection; not an authorization or lock: needs-evidence"
+    }
+  ],
+  "milestones": [
+    {
+      "title": "P0",
+      "description": "Source, ownership and capacity"
+    },
+    {
+      "title": "P1",
+      "description": "Security and shared contracts"
+    },
+    {
+      "title": "P2",
+      "description": "Components and tests-first authoring"
+    },
+    {
+      "title": "P3",
+      "description": "Workflow implementation"
+    },
+    {
+      "title": "P4",
+      "description": "Independent qualification"
+    },
+    {
+      "title": "P5",
+      "description": "Cross-domain integration"
+    },
+    {
+      "title": "P6",
+      "description": "Human-controlled production gates"
+    }
+  ],
+  "views": [
+    {
+      "name": "Ready now",
+      "filter": "Execution:Ready",
+      "layout": "table"
+    },
+    {
+      "name": "Active agents",
+      "filter": "Execution:Leased,Running,Review",
+      "layout": "board"
+    },
+    {
+      "name": "Blocked and orphaned",
+      "filter": "Execution:Blocked,Orphaned",
+      "layout": "table"
+    },
+    {
+      "name": "Security review",
+      "filter": "Risk:high,critical",
+      "layout": "table"
+    },
+    {
+      "name": "By workstream",
+      "filter": "",
+      "layout": "board",
+      "group_by": "Workstream"
+    },
+    {
+      "name": "Human gates",
+      "filter": "label:manual-gate",
+      "layout": "table"
+    },
+    {
+      "name": "Roadmap",
+      "filter": "",
+      "layout": "roadmap",
+      "group_by": "Phase"
+    }
+  ],
+  "view_creation": "Manual/UI setup where supported APIs cannot create requested view configuration; must be verified, not assumed."
+}

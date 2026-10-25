@@ -1,0 +1,58 @@
+{
+  "renderer": "Actual Mermaid bundled flowchart parser + Dagre layout + Chromium/Playwright",
+  "runtime_sha256": "0327f618ddb3f94e629ce8311122cb251546514603b10fdee1cdb951414858a8",
+  "playwright_version": "1.57.0",
+  "chromium_version": "144.0.7559.96",
+  "diagram_count": 3,
+  "runtime_service_tests": "NOT_RUN",
+  "results": [
+    {
+      "id": "O01",
+      "status": "PASS",
+      "source_sha256": "edd91af4d7cc99cdc3476bfb50bfea5516439d633d03a839af34e2fdc11248e4",
+      "png_sha256": "58d966f611eabcb66ac488307f2af7aa7aa88b9ef0d07b8356e6b420d425c4a9",
+      "svg_sha256": "61bbdc7f5310db7ab2e6dc35c5d3c2c5e87c22ac23a53c64fc7302eaa098051d",
+      "png_width": 2469,
+      "png_height": 3438,
+      "seconds": 2.13,
+      "natural_width": 1478.11328125,
+      "natural_height": 1823,
+      "scale": 1,
+      "card_width": 1543,
+      "render_width": 1479,
+      "render_height": 1823
+    },
+    {
+      "id": "O02",
+      "status": "PASS",
+      "source_sha256": "9c4fb571eb878e92905db8e61f1e8ca552a49bbdcc71f4109eef08d81b375ab5",
+      "png_sha256": "69bc8bf11ce877d323bbc1617aaa460813545b59dddc0c1c07062d20dcd4574f",
+      "svg_sha256": "5d923fd8efe73258712241974eab7995c2e5a9ff39674aeb5f732b46e05a4729",
+      "png_width": 1901,
+      "png_height": 3421,
+      "seconds": 1.01,
+      "natural_width": 1123.9296875,
+      "natural_height": 1811.5,
+      "scale": 1,
+      "card_width": 1188,
+      "render_width": 1124,
+      "render_height": 1812
+    },
+    {
+      "id": "O03",
+      "status": "PASS",
+      "source_sha256": "700070b8e8b7fae7a70b894fc02bdf180039057ea43925eed571738bc604c45d",
+      "png_sha256": "bcef13e67c4ff0d1581c2b4058ecd1ea6af6383cf051fbc3884b3f2be03d30bb",
+      "svg_sha256": "3e6483cf56a2a276ca3166c0a44b8b964a187d2b37a850b2c80a5c21af1c6255",
+      "png_width": 1558,
+      "png_height": 3656,
+      "seconds": 0.84,
+      "natural_width": 910,
+      "natural_height": 1936.5,
+      "scale": 1,
+      "card_width": 974,
+      "render_width": 910,
+      "render_height": 1937
+    }
+  ]
+}
