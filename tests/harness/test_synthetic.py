@@ -295,8 +295,57 @@ class HarnessTests(unittest.TestCase):
                 with self.assertRaises(ValueError):h.reconcile(pending['action_key'])
                 self.assertEqual(h.receipt(pending['action_key'])['status'],'UNKNOWN')
                 self.assertTrue(h.receipt(pending['action_key'])['reservation_retained'])
+    def test_fractional_clock_preserves_instant_and_whole_second_format(self):
+        self.assertEqual(s.FakeClock('2026-10-25T12:10:00Z').now(),'2026-10-25T12:10:00Z')
+        self.assertEqual(s.FakeClock('2026-10-25T12:10:00.000000Z').now(),'2026-10-25T12:10:00Z')
+        clock=s.FakeClock('2026-10-25T12:10:00.5Z')
+        self.assertEqual(clock.now(),'2026-10-25T12:10:00.500000Z')
+        clock.advance(1)
+        self.assertEqual(clock.now(),'2026-10-25T12:10:01.500000Z')
+        self.assertEqual(s.FakeClock('2026-10-25T12:10:00.123456Z').now(),'2026-10-25T12:10:00.123456Z')
+
+    def test_fractional_approval_expiry_is_exclusive(self):
+        for now,allowed in [('2026-10-25T12:00:00.499999Z',True),
+                            ('2026-10-25T12:00:00.500000Z',False),
+                            ('2026-10-25T12:00:00.500001Z',False)]:
+            with self.subTest(now=now),self.harness(clock=s.FakeClock(now)) as h:
+                h.authority._approvals['synthetic-approval']['expires_at']='2026-10-25T12:00:00.500000Z'
+                if allowed:
+                    self.assertEqual(h.submit(self.identity,'synthetic-approval')['status'],'ACCEPTED')
+                else:
+                    with self.assertRaises(ValueError):h.submit(self.identity,'synthetic-approval')
+                    self.assertEqual(h.provider.calls,[])
+
+    def test_fractional_callback_current_and_future_boundary(self):
+        for timestamp,allowed in [('2026-10-25T12:10:00.250000Z',True),
+                                  ('2026-10-25T12:10:00.500000Z',True),
+                                  ('2026-10-25T12:10:00.500001Z',False)]:
+            with self.subTest(timestamp=timestamp),self.harness(clock=s.FakeClock('2026-10-25T12:10:00.500000Z'),provider=s.FakeProvider('TIMEOUT_AFTER_ACCEPT')) as h:
+                pending=h.submit(self.identity,'synthetic-approval')
+                body,_=h.provider.callback(pending['action_key'],h.clock)
+                doc=json.loads(body);doc['occurred_at']=timestamp
+                if allowed:
+                    self.assertEqual(h.consume_callback(*self.resign(doc))['reconciliation_outcome'],'OCCURRED')
+                else:
+                    with self.assertRaises(ValueError):h.consume_callback(*self.resign(doc))
+                    self.assertEqual(h.receipt(pending['action_key'])['status'],'UNKNOWN')
+
+    def test_fractional_callback_age_preserves_300_second_boundary(self):
+        for timestamp,allowed in [('2026-10-25T12:05:00.499999Z',False),
+                                  ('2026-10-25T12:05:00.500000Z',True),
+                                  ('2026-10-25T12:05:00.500001Z',True)]:
+            with self.subTest(timestamp=timestamp),self.harness(clock=s.FakeClock('2026-10-25T12:10:00.500000Z'),provider=s.FakeProvider('TIMEOUT_AFTER_ACCEPT')) as h:
+                pending=h.submit(self.identity,'synthetic-approval')
+                body,_=h.provider.callback(pending['action_key'],h.clock)
+                doc=json.loads(body);doc['occurred_at']=timestamp
+                if allowed:
+                    self.assertEqual(h.consume_callback(*self.resign(doc))['reconciliation_outcome'],'OCCURRED')
+                else:
+                    with self.assertRaises(ValueError):h.consume_callback(*self.resign(doc))
+                    self.assertEqual(h.receipt(pending['action_key'])['status'],'UNKNOWN')
 if __name__=='__main__':
     unittest.main(verbosity=2)
+
 
 
 

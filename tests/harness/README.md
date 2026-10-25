@@ -4,7 +4,7 @@ This is test-only scaffolding around the accepted F04 core contracts. No Python,
 
 ## Modules and boundaries
 
-`synthetic.py` loads `contracts/core/validate.py` from the supplied snapshot and reuses its canonical action key, approval checks, receipt validation and allowed transitions. It does not fork those schemas or replace Activepieces, OpenProject or PostgreSQL. `test_synthetic.py` authors 28 positive and adversarial test methods. Shared JSON under `tests/fixtures/shared/` is synthetic input, not an acceptance receipt.
+`synthetic.py` loads `contracts/core/validate.py` from the supplied snapshot and reuses its canonical action key, approval checks, receipt validation and allowed transitions. It does not fork those schemas or replace Activepieces, OpenProject or PostgreSQL. `test_synthetic.py` authors 32 positive and adversarial test methods. Shared JSON under `tests/fixtures/shared/` is synthetic input, not an acceptance receipt.
 
 `FakeProvider` uses an exact registry of `fake://` endpoints for WordPress, Postiz, Mautic, voice, payments and ads. Calls are direct Python method calls that only mutate an in-memory dictionary. There are no listeners, HTTP clients, DNS lookups, SMTP transports, carrier connections, SDK fallbacks or child services. Real schemes, unrecognized endpoints, user-info, query strings and fragments are denied before state is reserved. The fake provider's ACCEPT result only simulates provider acceptance; it is not delivery, publication, charging, dialing or spend.
 
@@ -59,3 +59,8 @@ Idempotent acknowledgment never bypasses signature or identity validation. A sto
 ## Reconciliation readback identity
 
 Before resolving a reserved receipt to OCCURRED, direct readback must match the receipt action_key, source provider, client and destination exactly. Missing or conflicting action/provider fields fail closed without adding a receipt, changing UNKNOWN or releasing its reservation. Callback signature checks and late-event acknowledgments retain their prior behavior. Two added regression methods cover mismatched and missing action/provider fields; all26 prior tests remain intact, for28 authored tests. Runtime/provider execution still requires separate qualification.
+
+
+## Fractional fake-clock precision
+
+FakeClock preserves supported fractional UTC instants to microsecond precision. Its UTC output uses six fractional digits when nonzero and retains the original whole-second Z format when the fraction is zero. Integer-second advances preserve the fractional part. Approval expiry remains exclusive and callback timestamps are compared without truncating now: a future microsecond rejects, exactly300 seconds of age is allowed, and300 seconds plus one microsecond rejects. Four new regression methods cover these boundaries while keeping all28 earlier methods unchanged. This is synthetic time behavior, not a host-clock or runtime timing qualification.

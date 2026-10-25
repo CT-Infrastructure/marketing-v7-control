@@ -42,7 +42,9 @@ class FakeClock:
         if self._now.tzinfo is None:
             raise ValueError('timezone required')
     def now(self):
-        return self._now.astimezone(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+        instant=self._now.astimezone(timezone.utc)
+        precision='microseconds' if instant.microsecond else 'seconds'
+        return instant.isoformat(timespec=precision).replace('+00:00','Z')
     def advance(self, seconds):
         if type(seconds) is not int or seconds < 0:
             raise ValueError('nonnegative integer seconds required')
@@ -264,6 +266,7 @@ class Harness:
         with self.db:
             self.db.execute('INSERT INTO callbacks VALUES (?,?,?,?)',(doc['provider'],doc['client_id'],doc['event_id'],doc['action_key']))
         return result
+
 
 
 
