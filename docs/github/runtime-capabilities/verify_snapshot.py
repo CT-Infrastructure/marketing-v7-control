@@ -67,8 +67,16 @@ require(doc["project"]["visibility"] == "PRIVATE")
 require(doc["project"]["automation_readback"]["public"] is False)
 require(len(doc["project"]["verified_issue_mappings"]) == 6)
 mappings = doc["project"]["verified_issue_mappings"]
+approved_issue_repositories = {
+    key: f"{configuration['owner']}/{repository}"
+    for key, repository in configuration["issue_repositories"].items()
+}
 for mapping in mappings:
+    require(isinstance(mapping.get("key"), str))
+    require(mapping["key"] in approved_issue_repositories)
     require(mapping["repository"] in approved_repositories)
+    require(mapping["repository"] == approved_issue_repositories[mapping["key"]])
+    require(isinstance(mapping.get("node_id"), str) and bool(mapping["node_id"].strip()))
     require(type(mapping["number"]) is int and mapping["number"] > 0)
 require(len({m["key"] for m in mappings}) == len(mappings))
 require(len({m["node_id"] for m in mappings}) == len(mappings))

@@ -42,7 +42,7 @@ class SnapshotTests(unittest.TestCase):
             script = script_dir / 'verify_snapshot.py'
             script.write_text(self.verifier, encoding='utf-8')
             (script_dir / 'capabilities.json').write_text(json.dumps(doc), encoding='utf-8')
-            return subprocess.run([sys.executable, *(['-O'] if optimized else []), str(script)],
+            return subprocess.run([sys.executable, '-B', *(['-O'] if optimized else []), str(script)],
                                   capture_output=True, text=True, timeout=15, cwd=root)
 
     def reject(self, mutation, **kwargs):
@@ -147,6 +147,37 @@ class SnapshotTests(unittest.TestCase):
                 with self.subTest(number=value, optimized=optimized):
                     self.reject(lambda d: d['project']['verified_issue_mappings'][0].update(number=value), optimized=optimized)
             self.reject(lambda d: d['project']['verified_issue_mappings'][0].update(repository='unapproved/repository'), optimized=optimized)
+
+    def test_mapping_keys_follow_approved_configuration(self):
+        configuration = json.loads(self.configuration)
+        for optimized in (False, True):
+            for key in (None, True, 0, [], {}, '', 'UNKNOWN-ISSUE-KEY'):
+                with self.subTest(key=key, optimized=optimized):
+                    self.reject(lambda d: d['project']['verified_issue_mappings'][0].update(key=key),
+                                optimized=optimized)
+            self.reject(lambda d: d['project']['verified_issue_mappings'][0].pop('key'),
+                        optimized=optimized)
+            mapping = self.document['project']['verified_issue_mappings'][0]
+            expected = configuration['owner'] + '/' + configuration['issue_repositories'][mapping['key']]
+            wrong = next(configuration['owner'] + '/' + r['name']
+                         for r in configuration['repositories']
+                         if configuration['owner'] + '/' + r['name'] != expected)
+            self.reject(lambda d: d['project']['verified_issue_mappings'][0].update(repository=wrong),
+                        optimized=optimized)
+            # A known key routed to another repository must also be rejected.
+            other_key = next(key for key, repo in configuration['issue_repositories'].items()
+                             if configuration['owner'] + '/' + repo != mapping['repository'])
+            self.reject(lambda d: d['project']['verified_issue_mappings'][0].update(key=other_key),
+                        optimized=optimized)
+
+    def test_mapping_node_ids_are_nonblank_strings(self):
+        for optimized in (False, True):
+            self.reject(lambda d: d['project']['verified_issue_mappings'][0].pop('node_id'),
+                        optimized=optimized)
+            for value in (None, True, False, 0, 1, 1.5, [], {}, '', ' ', '\t\n'):
+                with self.subTest(node_id=value, optimized=optimized):
+                    self.reject(lambda d: d['project']['verified_issue_mappings'][0].update(node_id=value),
+                                optimized=optimized)
 
     def test_boolean_types_are_exact(self):
         paths = [
