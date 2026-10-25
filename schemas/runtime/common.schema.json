@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:marketing-v7:runtime:common:1.0",
+  "$defs": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^[^\\u0000-\\u0020\\u007f-\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000\\ufeff]+(?![\\s\\S])"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "minLength": 64,
+      "maxLength": 64
+    },
+    "datetime": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,6})?Z$"
+    },
+    "money": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "string",
+          "pattern": "^-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?(?![\\s\\S])"
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}(?![\\s\\S])"
+        }
+      },
+      "required": [
+        "amount",
+        "currency"
+      ],
+      "additionalProperties": false
+    },
+    "action_identity": {
+      "type": "object",
+      "properties": {
+        "client_id": {
+          "$ref": "urn:marketing-v7:runtime:common:1.0#/$defs/id"
+        },
+        "source_system": {
+          "$ref": "urn:marketing-v7:runtime:common:1.0#/$defs/id"
+        },
+        "source_event_id": {
+          "$ref": "urn:marketing-v7:runtime:common:1.0#/$defs/id"
+        },
+        "action_scope": {
+          "$ref": "urn:marketing-v7:runtime:common:1.0#/$defs/id"
+        },
+        "approved_revision": {
+          "$ref": "urn:marketing-v7:runtime:common:1.0#/$defs/id"
+        }
+      },
+      "required": [
+        "client_id",
+        "source_system",
+        "source_event_id",
+        "action_scope",
+        "approved_revision"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
