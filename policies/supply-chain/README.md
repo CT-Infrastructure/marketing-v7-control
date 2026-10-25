@@ -61,3 +61,9 @@ Full-repository scanning, Trivy vulnerability analysis, runtime artifact scannin
 ## Registry checkout bytes
 
 `source_registry_sha256` remains the SHA-256 of the immutable LF source registry bytes. Only the declared `reference/components/component_registry.json` receives checkout handling: the validator reads its bytes once and accepts LF bytes or a uniform CRLF materialization that reversibly converts to exactly those LF bytes. It hashes the recovered bytes before parsing the same bytes. It does not hash reserialized JSON or normalize whitespace, encoding, BOM, lone CR, or mixed line endings. Content changes and every other transformation still fail the unchanged source digest. This local checkout handling does not replace F01 raw Git-blob custody verification and does not alter registry files or the lock digest.
+
+## Exact package versions and shared exception diagnostics
+
+OS_PACKAGE release values accept native exact versions beginning with a digit, including Debian epoch, revision, and tilde pre-release syntax (for example `2:1.2.3~rc1-1`). Range operators, whitespace, wildcard versions, and moving release names remain rejected; other artifact kinds retain their existing stricter release rules. Artifact digests remain required for adoption.
+
+Call `validate_exceptions` with the complete manifest at the integration boundary before per-entry diagnostics. `adoption_blockers` checks the shared document structure, filters exceptions by the current entry ID, then revalidates all matching digest, finding, reviewer and time bindings. Other entries' valid exceptions cannot waive current-entry findings. The CLI performs full-manifest exception validation and captures current UTC once for both expiry and freshness checks. Fixed timestamps are confined to tests. Qualified scanner `latest` references remain unpinned.

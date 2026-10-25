@@ -195,4 +195,67 @@ class SupplyChain(unittest.TestCase):
                 with self.assertRaises((ValueError,ValidationError)):
                     lock.adoption_blockers(e,NOW,[self.exception()])
 
+    def test_exact_native_package_versions_and_ranges(self):
+        for version in ('1.2.3~rc1-1','2:1.2.3~deb12u1-1','1.2.3-4+deb12u2'):
+            e=self.entry();e.update(artifact_type='OS_PACKAGE',release=version)
+            m=self.manifest();m['entries']=[e if x['id']==e['id'] else x for x in m['entries']]
+            with self.subTest(version=version):
+                lock.validate_manifest(m)
+                self.assertEqual(lock.adoption_blockers(e,NOW),[])
+        for kind,version in (('OS_PACKAGE','~1.2'),('OS_PACKAGE','^1.2'),
+                             ('OS_PACKAGE','1.*'),('OS_PACKAGE','>=1.2'),
+                             ('OS_PACKAGE','1.2 || 2.0'),('OS_PACKAGE','UNSET'),
+                             ('APPLICATION','1.2.3~rc1-1')):
+            e=self.entry();e.update(artifact_type=kind,release=version)
+            with self.subTest(kind=kind,version=version):
+                if version=='UNSET':self.assertIn('release_UNSET',lock.adoption_blockers(e,NOW))
+                else:self.assert_rejected_at_both_entry_boundaries(e)
+
+    def test_shared_exceptions_are_scoped_and_current_bindings_checked(self):
+        first=self.entry();first['scans'][0].update(status='FAIL',findings=['synthetic-finding'])
+        second=copy.deepcopy(first);second['id']='CP034'
+        ex1=self.exception();ex2=dict(ex1,id='other-exception',entry_id='CP034')
+        document={'schema_version':'1.0','exceptions':[ex1,ex2]}
+        lock.validate_exceptions(document,{'entries':[first,second]},NOW)
+        self.assertEqual(lock.adoption_blockers(first,NOW,[ex1,ex2]),[])
+        self.assertEqual(lock.adoption_blockers(second,NOW,[ex1,ex2]),[])
+        for field,value in (('subject_digest',{'algorithm':'sha256','value':'e'*64}),
+                            ('finding_id','not-observed'),('evidence_ref','UNSET'),
+                            ('expires_at',NOW)):
+            with self.subTest(field=field),self.assertRaises((ValueError,ValidationError)):
+                lock.adoption_blockers(first,NOW,[dict(ex1,**{field:value}),ex2])
+        malformed=dict(ex1);malformed.pop('entry_id')
+        with self.assertRaises(ValidationError):lock.adoption_blockers(first,NOW,[malformed,ex2])
+        unknown=dict(ex1,entry_id='unknown-entry')
+        with self.assertRaises(ValueError):
+            lock.validate_exceptions({'schema_version':'1.0','exceptions':[unknown]},
+                                     {'entries':[first,second]},NOW)
+
+    def test_qualified_latest_scanner_releases_stay_held(self):
+        for version in ('registry/trivy:latest','registry/trivy:LATEST','latest','trivy/latest'):
+            e=self.entry();e['scans'][0]['tool_release']=version
+            with self.subTest(version=version):
+                self.assertIn('vulnerability_scanner_release_unpinned',lock.adoption_blockers(e,NOW))
+        e=self.entry();e['scans'][0]['tool_release']='registry/trivy:0.67.2'
+        self.assertNotIn('vulnerability_scanner_release_unpinned',lock.adoption_blockers(e,NOW))
+
+    def test_cli_uses_one_current_utc_instant_for_all_checks(self):
+        import io
+        from contextlib import redirect_stdout
+        from datetime import datetime,timezone
+        instant=datetime(2026,11,4,18,12,30,tzinfo=timezone.utc)
+        manifest=self.manifest()
+        with patch.object(lock,'datetime') as clock, \
+             patch.object(lock,'validate_manifest',return_value=manifest), \
+             patch.object(lock,'validate_exceptions') as exceptions, \
+             patch.object(lock,'adoption_blockers',return_value=['held']) as blockers, \
+             redirect_stdout(io.StringIO()):
+            clock.now.return_value=instant
+            lock.main()
+            clock.now.assert_called_once_with(timezone.utc)
+            self.assertEqual(exceptions.call_args.args[2],'2026-11-04T18:12:30Z')
+            self.assertEqual(blockers.call_count,len(manifest['entries']))
+            self.assertTrue(all(call.args[1]=='2026-11-04T18:12:30Z' for call in blockers.call_args_list))
+            self.assertIs(exceptions.call_args.args[1],manifest)
+
 if __name__=='__main__':unittest.main(verbosity=2)

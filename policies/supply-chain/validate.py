@@ -66,8 +66,15 @@ def validate_entry(e):
         raise ValueError('engineering observations cannot be adoption candidates')
     if re.search(r'(^|[^a-z])latest($|[^a-z])',e['release']+' '+e['origin'],re.I):
         raise ValueError('mutable latest tag forbidden')
-    if known(e['release']) and (re.search(r'[\s*^~<>=]',e['release']) or e['release'].lower() in ('main','master','head','stable','nightly')):
-        raise ValueError('floating release forbidden')
+    if known(e['release']):
+        # Native package revisions (including Debian pre-release '~') are exact
+        # versions, not dependency range expressions. Keep other types strict.
+        if e['artifact_type']=='OS_PACKAGE':
+            exact=bool(re.fullmatch(r'[0-9][A-Za-z0-9.+:~\-]*',e['release']))
+        else:
+            exact=not re.search(r'[\s*^~<>=]',e['release'])
+        if not exact or e['release'].lower() in ('main','master','head','stable','nightly'):
+            raise ValueError('floating release forbidden')
     if e['artifact_type'] in ('ACTION','COMFY_NODE') and known(e['release']):
         if not re.fullmatch('[a-f0-9]{40}',e['release']) or e['digest']!={'algorithm':'git-sha1','value':e['release']}:
             raise ValueError('source action/node requires matching full commit')
@@ -142,7 +149,13 @@ def validate_exceptions(document,manifest,now):
 def adoption_blockers(entry,now,exceptions=()):
     """Candidate diagnostics only; empty list is NOT authority to adopt/deploy."""
     validate_entry(entry)
-    validate_exceptions({'schema_version':'1.0','exceptions':list(exceptions)}, {'entries':[entry]}, now)
+    # Full-manifest binding validation belongs at the integration boundary.
+    # Here preserve structural rejection and revalidate every current-entry
+    # exception without treating valid exceptions for other entries as ours.
+    document={'schema_version':'1.0','exceptions':list(exceptions)}
+    schema_validate('exceptions',document)
+    exceptions=[e for e in document['exceptions'] if e['entry_id']==entry['id']]
+    validate_exceptions({'schema_version':'1.0','exceptions':exceptions}, {'entries':[entry]}, now)
     now=instant(now);reasons=[]
     if entry['state']!='CANDIDATE':reasons.append('not_candidate')
     if entry['purpose']!='component-plan':reasons.append('engineering_or_synthetic_only')
@@ -164,7 +177,7 @@ def adoption_blockers(entry,now,exceptions=()):
         prefix=scan['kind']
         check_digest(scan['subject_digest'])
         if scan['status']=='PASS' and scan['findings']:reasons.append(prefix+'_contradictory_PASS')
-        if re.search(r'[\s*^~<>=]',scan['tool_release']) or scan['tool_release'].lower() in ('latest','main','master','head','stable','nightly'):
+        if re.search(r'(^|[^a-z])latest($|[^a-z])',scan['tool_release'],re.I) or re.search(r'[\s*^~<>=]',scan['tool_release']) or scan['tool_release'].lower() in ('latest','main','master','head','stable','nightly'):
             reasons.append(prefix+'_scanner_release_unpinned')
         if scan['status']=='NOT_RUN':reasons.append(prefix+'_NOT_RUN');continue
         if any(scan[k]=='UNSET' for k in ('tool','tool_release','database_digest','scanned_at','report_ref','report_sha256')) or scan['subject_digest']!=entry['digest']:
@@ -176,7 +189,12 @@ def adoption_blockers(entry,now,exceptions=()):
             if not applicable:reasons.append(prefix+'_finding:'+finding)
     return sorted(set(reasons))
 
-if __name__=='__main__':
+def main():
+    # Capture once so expiry and freshness use one actual UTC boundary.
+    now=datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
     manifest=validate_manifest(json.loads((ROOT/'locks/supply-chain.lock.json').read_text()))
-    validate_exceptions(json.loads((ROOT/'locks/exceptions.json').read_text()),manifest,'2026-10-25T00:00:00Z')
-    print(json.dumps({'inventory_entries':len(manifest['entries']),'all_entries_held':all(adoption_blockers(e,'2026-10-25T00:00:00Z') for e in manifest['entries']),'scanning':'NOT_RUN','adoption_authority':False}))
+    document=json.loads((ROOT/'locks/exceptions.json').read_text())
+    validate_exceptions(document,manifest,now)
+    print(json.dumps({'inventory_entries':len(manifest['entries']),'all_entries_held':all(adoption_blockers(e,now,document['exceptions']) for e in manifest['entries']),'scanning':'NOT_RUN','adoption_authority':False}))
+
+if __name__=='__main__':main()
