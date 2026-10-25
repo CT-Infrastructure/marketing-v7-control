@@ -373,6 +373,41 @@ class RedactionTests(unittest.TestCase):
                 message='before '+key+'='+value+'; status=ok'
                 with self.subTest(key=key,value=value):
                     self.assertEqual(redact(message),message)
+    def test_unterminated_private_key_blocks_redact_to_end(self):
+        for kind in ('PRIVATE KEY','OPENSSH PRIVATE KEY','RSA PRIVATE KEY','EC PRIVATE KEY','ENCRYPTED PRIVATE KEY'):
+            for tail in ('SYNTHETIC_PRIVATE_BODY',
+                         'SYNTHETIC_PRIVATE_BODY\nSYNTHETIC_TAIL',
+                         'SYNTHETIC_PRIVATE_BODY\\',
+                         'SYNTHETIC_PRIVATE_BODY\n-----END '+kind[:3]):
+                payload='public-prefix\n-----BEGIN '+kind+'-----\n'+tail
+                for surface in ('prompt','log','artifact'):
+                    with self.subTest(kind=kind,surface=surface,tail=tail):
+                        safe=redact({'surface':surface,'message':payload})
+                        self.assertEqual(safe,{'surface':surface,'message':'public-prefix\n'+MARKER})
+                        self.assertNotIn('SYNTHETIC_PRIVATE_BODY',json.dumps(safe))
+                        serialized=redact(json.dumps({'surface':surface,'message':payload}))
+                        self.assertEqual(json.loads(serialized),safe)
+
+    def test_private_key_mismatched_footer_does_not_release_body(self):
+        payload='before -----BEGIN RSA PRIVATE KEY-----\nSYNTHETIC_PRIVATE_BODY\n-----END OPENSSH PRIVATE KEY-----\nSYNTHETIC_TAIL'
+        self.assertEqual(redact(payload),'before '+MARKER)
+        payload+='\n-----END RSA PRIVATE KEY-----; public-after'
+        self.assertEqual(redact(payload),'before '+MARKER+'; public-after')
+
+    def test_complete_private_blocks_keep_surrounding_ordinary_text(self):
+        for kind in ('PRIVATE KEY','OPENSSH PRIVATE KEY','RSA PRIVATE KEY','EC PRIVATE KEY','ENCRYPTED PRIVATE KEY'):
+            payload='before\n-----BEGIN '+kind+'-----\nSYNTHETIC_PRIVATE_BODY\n-----END '+kind+'-----\nafter'
+            self.assertEqual(redact(payload),'before\n'+MARKER+'\nafter')
+        for kind in ('CERTIFICATE','PUBLIC KEY'):
+            payload='before\n-----BEGIN '+kind+'-----\nSYNTHETIC_PUBLIC_TEXT\nafter'
+            self.assertEqual(redact(payload),payload)
+        self.assertEqual(redact('ordinary private key documentation without PEM header'),
+                         'ordinary private key documentation without PEM header')
+
+    def test_repeated_private_headers_remain_within_existing_input_bound(self):
+        payload=('-----BEGIN OPENSSH PRIVATE KEY-----\n'*1000)+'SYNTHETIC_PRIVATE_TAIL'
+        self.assertLess(len(payload),65536)
+        self.assertEqual(redact(payload),MARKER)
 if __name__ == "__main__":
     unittest.main()
 

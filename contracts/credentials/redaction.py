@@ -21,7 +21,9 @@ COMPOSITE_ASSIGNMENT = re.compile(
 # truncated or embedded. Decode only each bounded key, never guess nested values.
 MAX_JSON_TEXT = 65536
 PATTERNS = [
-    re.compile(r"-----BEGIN (?:[A-Z0-9 ]*PRIVATE KEY)-----.*?-----END (?:[A-Z0-9 ]*PRIVATE KEY)-----", re.S),
+    # A recognized private-key header owns its body until the matching footer
+    # or EOF. A different/truncated footer must not expose the remaining body.
+    re.compile(r"-----BEGIN (?P<pem_kind>[A-Z0-9 ]*PRIVATE KEY)-----.*?(?:-----END (?P=pem_kind)-----|\Z)", re.S),
     re.compile(r"AGE-SECRET-KEY-[A-Z0-9]+", re.I),
     re.compile(r"(?:github_pat_|gh[pousr]_)[A-Za-z0-9_]{16,}"),
     re.compile(r"\bsk-(?:proj-)?[A-Za-z0-9_-]{16,}"),
