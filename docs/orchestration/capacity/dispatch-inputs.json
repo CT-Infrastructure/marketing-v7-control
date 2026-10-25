@@ -3,8 +3,8 @@
   "provider_rpm": null,
   "provider_tpm": null,
   "provider_concurrency": null,
-  "total_spend_usd": null,
-  "per_task_spend_usd": null,
+  "total_spend_usd": 0,
+  "per_task_spend_usd": 0,
   "task_timeout_seconds": null,
   "approved_headroom": null,
   "agent_image_digest": null,
@@ -21,5 +21,11 @@
   "api_key_auth_allowed": false,
   "extra_usage_purchase_allowed": false,
   "review_provider": "GitHub Copilot",
-  "user_provider_instruction": "Codex implementation on subscription; Copilot reviews on GitHub"
+  "user_provider_instruction": "Codex implementation on subscription; Copilot reviews on GitHub",
+  "implementation_model": "GPT-6.1-Sol",
+  "implementation_reasoning_effort": "low",
+  "identity_qualified": false,
+  "adapter_qualified": false,
+  "subscription_entitlement_verified": false,
+  "worker_environment_qualified": false
 }

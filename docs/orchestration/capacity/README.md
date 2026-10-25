@@ -26,3 +26,40 @@ The metadata importer is separate from AI worker dispatch. Its existing
 100-write invocation and 300-write hourly budgets do not grant model spend or
 production access. G02 must bind a qualified runner, source revision, approved
 capacity, cost limits, scope and expiry before unattended agent execution.
+
+## Selected provider and present evidence
+
+The user selected Codex on the ChatGPT subscription for implementation, with
+GPT-6.1-Sol at low reasoning effort for every writing subagent, and GitHub
+Copilot for reviews. Login status was observed as `Logged in using ChatGPT`.
+This proves observed authentication, not numeric quotas or entitlement for any
+particular dispatch. Provider RPM, TPM and concurrency remain explicitly unknown.
+
+The zero total/per-task USD ceilings mean no API-dollar spend is authorized;
+they do not describe the subscription price or grant unlimited subscription use.
+No extra credits may be purchased. Subscription entitlement and quota enforcement
+still require trusted qualification. An OPENAI_API_KEY exists in the host
+environment: the trusted launcher must remove it from every worker environment
+and verify subscription identity without exposing its value.
+
+CLI 0.164.0 supports MXC and its command smoke passed. The legacy elevated
+sandbox rejected root-deny. A later MXC probe failed before any model session
+because the sanitized shell environment lacked SYSTEMROOT. This is not adapter
+qualification: preserve SYSTEMROOT and necessary nonsecret platform variables
+while excluding API credentials, then independently qualify the adapter. No
+worker launch or further probe is authorized by this document.
+
+All G02, egress, disk quota, cancellation, identity, source and provider-limit
+holds remain. A passing checker reports only structurally present inputs, never
+acceptance or permission to claim. The checker rejects non-object inputs,
+nonfinite/negative numbers, booleans posing as numeric budgets, malformed
+headroom and inconsistent memory measurements. It reads the measured snapshot
+without summing Windows and WSL memory. It does not verify measurement freshness,
+provider receipts, runtime enforcement or the authenticity of approval references.
+Trusted admission must refresh observations and verify those proofs before claim.
+
+Run the regression suite with:
+`python -m unittest discover -s docs/orchestration/capacity -p 'test_*.py'`.
+Unknown capacity reservations must remain unset until approved; actual worker
+slots remain zero. Global emergency STOP prevents new claims; the trusted
+controller cancels/reaps and reconciles active work before releasing reservations.
