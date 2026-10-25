@@ -1,0 +1,107 @@
+{
+  "tested_revision": "bb1abed74563fe42af6f07578c4a6e4644bf5c50",
+  "artifact_hashes": {
+    "AGENTS.md": "13ce4806ef5c61791e394b2bcd6a6a835acb010a2004efcdd995aa336798aba4",
+    "LICENSING.md": "95872a5481fa99412eb45a7f929a95732db3589fffc288d75b51e713370a190e",
+    "backlog/issues/CP099.md": "c9c0f3ae26b2a6c11fb4f17740338060a0eb9676dd5eaae93a0fb7f7712b06df",
+    "backlog/issues/CP100.md": "e9bb1f3f688ded72a1c7028789b58f1076a8dad8d0ec4fe15b4cb36bb412bf01",
+    "backlog/issues/CP101.md": "4828f2c201c2ed0dc7e5906e50e78554ca6d41f48f9652362b099aa06b136710",
+    "backlog/issues/CP102.md": "d495ff8b5e39a08f1fc27b40029e99311bd39fcac1f6f29a6c3092123dc6d722",
+    "backlog/issues/CP103.md": "46e5190d6f9ffca84d0561cf1fbc11725885fe92e78ecb824cf7121226eed4f1",
+    "backlog/issues/CP104.md": "126ad632c808c5485178d7177190825d25e45cd19ddfec2952b986a30dc68d3e",
+    "backlog/issues/CP105.md": "0f2136900783268846f1aece87a4b58b50350025e8fbcd9114a9e3cfc643c6e5",
+    "backlog/issues/CP106.md": "d6e4695fe746367720905b3bf08a62434a984a1d81ae258df5cd65c84afa25ba",
+    "backlog/issues/CP107.md": "b13e5f19e1502868f0a49797eb8e573c14aee8108fe66db6b26ec0f6b7993005",
+    "backlog/issues/CP108.md": "24269b869fcf21c213af1b9242a22eea114656d8356b59b315aeb2a5dee2bac0",
+    "backlog/issues/CP109.md": "c364fbd06b9c8ea5e07e3d1466f181aa883188b2386874f7f749b48157b85527",
+    "backlog/issues/CP110.md": "9ac9660cd47c3ecd7b2ae3c584ad364100f5f38ab8b1a607016ed16897505092",
+    "backlog/issues/CP111.md": "7bb7d17828b83e0c9f58261e1ef5b66c508c8c16f9dcf1d174b5d0258b8361bf",
+    "backlog/issues/CP112.md": "fc3f04e3051d2ecf7971875ff896ccf4d40c4f6b6a981c7e914ffed37eb5e10b",
+    "backlog/issues/CP113.md": "e130c2ecca9caf829fce531d818f09cb30923182fb3c43645cff6a74f5d64ebf",
+    "backlog/issues/CP114.md": "5406c069abc453e50f7654bad19b9ad6cd95db0d60e0d92f75378162e363ae99",
+    "backlog/issues/CP115.md": "72dc372693fedea840c67ee591fe613d22569808bd8c5e5bbcc0ab9a1d6f88d0",
+    "backlog/issues/CP116.md": "10dfee928d9e37c7c4878418cbe358ccde1f6b29ee08462262782ef8f46af8e2",
+    "backlog/issues/CP117.md": "f14242064ea487f29d9c6785f99c82b5067cf0a078567f0f27fdfdff89a42a7a",
+    "backlog/issues/CP118.md": "7e65a6cda8748cfdfda8339947c76cb7845b2394dd7bbcfc03e105e4d8d619e2",
+    "backlog/issues/CP119.md": "989a21c230907009a72dd2fdbc4c8bac907afbabc259ceacbfb3314304d1cb08",
+    "backlog/issues/CP120.md": "f147ca7eb85c2a5a03dca415c2de513adea1bdbbec89cb36a4515a3b5bcb1373",
+    "backlog/issues/CP121.md": "531f34c76afaba6f69fe0969a02a3a778d7c54017f5c60380f75b3356ad75433",
+    "backlog/issues/CP122.md": "1e595f5b304755b5b829562dca3ad862c97c959d724b4bff00615f1f533ac4fb",
+    "backlog/issues/CP123.md": "4e34c6c24e02b3a9f121ecb1c84bb64e856405427ab7d2fe616a258dfe0ac07a",
+    "backlog/issues/CP124.md": "831812a494d3261caafaf7591d4df7f98c32c50fed8262da8e2c2e2d39cff646",
+    "backlog/issues/CP125.md": "f573dd848071c09740d4cd3874c53641195e31ef3f7b84d8803c1b035df17e84",
+    "backlog/issues/CP126.md": "c5c182d59a6ab20a68d5fb8151fb6a5688b72b032a2ee0ef6421c56f8d9aa707",
+    "backlog/issues/CP127.md": "6d31358f15987645dc1b1106cde4e4fc3a9c8d9078d074a84777e0ff4c1ded64",
+    "backlog/issues/CP128.md": "c0251c6ca094d627503b9f4edefd54b274bdc407dfda56284c3e7613a8bb82cd",
+    "backlog/issues/CP129.md": "12da44f6225c9668e5383714962455b3bbb0d195392407fbc83a23599212eef6",
+    "backlog/issues/CP130.md": "ac818eee846368d9121ca9a1d9ab80dbc83a3cab00c42a9d21fb42d50f70cffd",
+    "backlog/issues/CP131.md": "823482f628eef4030e4f943f84d0c85b4ad73cc51749b47c7a55132a636ef3c9",
+    "backlog/issues/CP132.md": "61516981163509d13587b4338e043b7da0f4cca25870452197872bd26a327232",
+    "backlog/issues/CP133.md": "5ec139c030e5f194c2204f24b7ff557659b6159ae7e1abac052278898865489b",
+    "backlog/issues/CP134.md": "806cf9e75d291d1e8acd1b5cfb6dac066287b8305a39fc621ff49d5736cd905e",
+    "backlog/issues/CP135.md": "a2314d7b64b2e4772934f43dde9ba5f874ea59e6421f205dbd1755fbe74344cb",
+    "backlog/issues/CP136.md": "cb73a858aad5a639fe686a91a4a26fee40b21cb027e711309b30db9c59261cd4",
+    "backlog/issues/CP137.md": "bc40690f1405934f0053d946c67c18d40a74613c1e605290ed5e71237a8eda68",
+    "backlog/issues/CP138.md": "28cd482ddf8ebf6a678d45a830b81f9ed265a2dbbbfdf5f0c2b375b1ead53584",
+    "backlog/issues/F19.md": "9421bf8a5bf92bfd2c10445951add6d7c54f82aab1cce12b4f5eace923956c8d",
+    "docs/decisions/conditional/README.md": "47616ec9f457497c0cb3762c34cd5d6224c151d29695ef7779bc004af8b48d1e",
+    "docs/decisions/conditional/inspect.ps1": "7577b5e371cc13e4f25fcf5defc8a0e0a982b622c1e6e12948e85e751ee55dee",
+    "docs/decisions/conditional/policy.json": "ccce815e5d1ae76744ace9683106c037c2f54604563819655f5794d12fba17d3",
+    "docs/decisions/conditional/register.json": "4530c450e39cc928ea432cbe3cfdaa334eaa8f023b12870d47f251eb7f3835b7",
+    "docs/decisions/conditional/test_validate.py": "908c5d7431846c8cc2a472872d6e999fd75aa1bb90636a7f7c6645b69683499b",
+    "docs/decisions/conditional/validate.py": "5d9972d57385772f13b8a11971d6e2555e814071bb5f1451f69ac431bad81ac4",
+    "docs/orchestration/EXECUTION_PROTOCOL.md": "a207180b67b1f906305e5f2745aec3ec143f707f75d8ffc833bd57661c97d08a",
+    "orchestration/task_graph.json": "63bcaafb8a535ebb62688cf544c41b5bb74ffdaf1f760996af0873aa45f8f4a8",
+    "reference/architecture/Consolidated_Self_Hosted_Technology_Stack_v7_Integrated.md": "0e4bedeac7c6158cc2997d00a60b7a01109052ff66fcb1e03245211be83e3de4",
+    "reference/architecture/Integration_Contracts.md": "143a7a5844659dd7c0f36955ce3dea9b4480bd87d6544263b9ffd4f2d3bbbf37",
+    "reference/components/component_registry.json": "de49779855eabdd7f5defc5ff6157d6a3e875f6164d64278c4a70338d029899e",
+    "reference/mermaid/A00.mmd": "9aefd6f8d606f9d029caff1d2d2642dd5cd8913644ba9ca50f44ab5c8259f866",
+    "reference/mermaid/V07.mmd": "980130570f66d73db519c5f5c620385cae86a066605e0716eb317711615cd7f0",
+    "reference/workflows/V07.json": "8dce9b37be78f3fec7f4cd4344f14e8c19a4a0a4bb6ccb71856abcfc56ce8450"
+  },
+  "kind": "trusted-controller-offline-verification",
+  "task_key": "F19",
+  "verified_by": "root-trusted-integration",
+  "verified_at": "2026-10-25T22:53:23.913729+00:00",
+  "python": "3.12.3",
+  "runs": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "docs/decisions/conditional/test_validate.py"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "229da27c4dcd4ef44bd759446e5bea16fedc7a56fefc65c3779eacae9d5cdc32"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-O",
+        "docs/decisions/conditional/test_validate.py"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "a28ca2198b79122e93f2c4cae7d7cb539a2889c50406ad00ed229bfa77db505e"
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "review-tests/test_f19_adversarial.py"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "c03f8c91801febfdaf3b858c165932359a6c9352c8dd4ce1cc0cd6497c4f0b6b"
+    }
+  ],
+  "unit_tests_per_mode": 20,
+  "independent_test_methods": 6,
+  "runtime_cases_executed": 0,
+  "production_authorized": false,
+  "scope": "Exact committed validator/test/policy/register and source bytes; later metadata-only receipt is excluded from its own binding",
+  "excluded_metadata_paths": [
+    "docs/decisions/conditional/evidence.json",
+    "docs/decisions/conditional/controller-verification.json"
+  ],
+  "schema_version": "1.0"
+}
