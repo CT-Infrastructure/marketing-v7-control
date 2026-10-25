@@ -40,6 +40,7 @@ IDENTITY_MAX = 2147483647
 
 def image_reference(value):
     require(type(value) is str, 'immutable image digest required')
+    require(len(value.split('@',1)[0])<=255, 'registry/repository name exceeds 255 characters')
     match = re.fullmatch(
         r'(?P<host>[a-z0-9.-]+)(?::(?P<port>[0-9]{1,5}))?/'
         r'(?P<repo>[a-z0-9._/-]+)@sha256:[a-f0-9]{64}', value)
@@ -66,8 +67,9 @@ def validate_manifest(m):
     for key in ('uid', 'gid'):
         integer(m['process'][key], IDENTITY_MIN, IDENTITY_MAX, key)
     fs = m['filesystem']
-    shape(fs, 'read_only read_only_tmpfs mounts tmpfs', 'filesystem')
+    shape(fs, 'read_only read_only_tmpfs image_volumes mounts tmpfs', 'filesystem')
     require(fs['read_only_tmpfs'] is False, 'implicit writable tmpfs forbidden')
+    require(fs['image_volumes'] == 'ignore', 'image-declared volumes must be ignored')
     require(fs['read_only'] is True, 'read-only root required; exceptions need separate review')
     require(type(fs['mounts']) is list and type(fs['tmpfs']) is list, 'mount lists required')
     targets = set()
@@ -123,7 +125,7 @@ def validate_manifest(m):
 # Deliberately restricted offline syntax; not a replacement for the installed generator.
 KEYS = {
  'Unit':set('Description StartLimitIntervalSec StartLimitBurst'.split()),
- 'Container':set('Image ContainerName User ReadOnly ReadOnlyTmpfs NoNewPrivileges DropCapability Network Tmpfs Environment HealthCmd HealthInterval HealthTimeout HealthRetries HealthStartPeriod'.split()),
+ 'Container':set('Image ContainerName User ReadOnly ReadOnlyTmpfs PodmanArgs NoNewPrivileges DropCapability Network Tmpfs Environment HealthCmd HealthInterval HealthTimeout HealthRetries HealthStartPeriod'.split()),
  'Service':set('Restart RestartSec TimeoutStartSec TimeoutStopSec MemoryMax CPUQuota TasksMax RuntimeMaxSec'.split())}
 
 def validate_quadlet(source):
@@ -152,6 +154,7 @@ def validate_quadlet(source):
     for key, value in zip(('uid', 'gid'), c['User'].split(':')):
         integer(int(value), IDENTITY_MIN, IDENTITY_MAX, key)
     require(all(c[k]==v for k,v in {'ReadOnly':'true','ReadOnlyTmpfs':'false','NoNewPrivileges':'true','DropCapability':'all','Network':'none'}.items()), 'hardening required')
+    require(c['PodmanArgs']=='--image-volume=ignore', 'only fixed image-volume ignore argument is allowed')
     require(c['Environment']=='OUTBOUND_EFFECTS=HOLD', 'fixed held environment required')
     require(c['Tmpfs']=='/tmp:rw,nosuid,nodev,noexec,size=64m', 'bounded hardened tmpfs required')
     try:
@@ -187,3 +190,5 @@ if __name__=='__main__':
         print(json.dumps(result)); raise SystemExit(0)
     except (PolicyError,ValueError,TypeError,KeyError,OSError) as exc:
         print(json.dumps({'valid':False,'launch_authorized':False,'reason':str(exc)})); raise SystemExit(2)
+
+

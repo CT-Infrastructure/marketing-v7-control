@@ -16,7 +16,7 @@ def fixture():
     return dict(schema_version='1.0',component_id='synthetic-app',
         image='fixture.example.invalid/synthetic-app@sha256:'+'a'*64,rootless=True,
         process=dict(uid=10001,gid=10001),
-        filesystem=dict(read_only=True,read_only_tmpfs=False,mounts=[dict(type='named_volume',name='synthetic-state',target='/var/lib/synthetic',uid=10001,gid=10001,mode='0700',backup_ref='synthetic-backup',restore_ref='synthetic-held-restore')],tmpfs=[dict(target='/tmp',size_mib=64,noexec=True,nosuid=True,nodev=True)]),
+        filesystem=dict(read_only=True,read_only_tmpfs=False,image_volumes="ignore",mounts=[dict(type='named_volume',name='synthetic-state',target='/var/lib/synthetic',uid=10001,gid=10001,mode='0700',backup_ref='synthetic-backup',restore_ref='synthetic-held-restore')],tmpfs=[dict(target='/tmp',size_mib=64,noexec=True,nosuid=True,nodev=True)]),
         isolation=dict(privileged=False,network='none',pid='private',ipc='private',capabilities=[],no_new_privileges=True,seccomp='runtime-default',lsm='host-enforcing-default',devices=[],sockets=[]),
         resources=dict(memory_mib=512,cpu_percent=100,pids=128,disk_mib=512,runtime_seconds=3600),
         lifecycle=dict(restart='no',restart_seconds=10,start_seconds=180,stop_seconds=60,start_limit_interval_seconds=300,start_limit_burst=3,health=dict(argv=['/app/synthetic-health'],interval_seconds=30,timeout_seconds=5,retries=3,start_seconds=30),readiness_ref='synthetic-readiness',drain_ref='synthetic-drain',rollback_ref='synthetic-rollback'),
@@ -237,4 +237,24 @@ class BaselineTests(unittest.TestCase):
             result=subprocess.run([sys.executable,'-B',str(ROOT/'policies/container/validate.py'),'--quadlet',str(path)],capture_output=True,text=True,timeout=15)
             self.assertEqual(result.returncode,0,result.stdout)
 
+    def test_total_registry_repository_name_length_bound(self):
+        for registry in ('fixture.invalid','registry.invalid:65535'):
+            for total in (254,255,256):
+                repository='a'*(total-len(registry)-1)
+                reference=registry+'/'+repository+'@sha256:'+'a'*64
+                with self.subTest(registry=registry,total=total):
+                    self.check_image_in_both_formats(reference,total<=255)
+    def test_image_declared_volumes_cannot_create_implicit_writes(self):
+        for value in ('bind','tmpfs','',None,True):
+            self.changed('filesystem','image_volumes',value)
+        for value in ('--image-volume=bind','--image-volume=tmpfs','--privileged',
+                      '--image-volume=ignore --privileged','--image-volume=ignore --volume=/tmp:/tmp'):
+            source=quadlet().replace('PodmanArgs=--image-volume=ignore','PodmanArgs='+value)
+            with self.subTest(value=value),self.assertRaises(v.PolicyError):v.validate_quadlet(source)
+        with self.assertRaises(v.PolicyError):
+            v.validate_quadlet(quadlet().replace('PodmanArgs=--image-volume=ignore\n',''))
+        with self.assertRaises(v.PolicyError):
+            v.validate_quadlet(quadlet().replace('[Service]','PodmanArgs=--privileged\n[Service]'))
 if __name__=='__main__': unittest.main(verbosity=2)
+
+
