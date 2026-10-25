@@ -43,7 +43,7 @@ def plan(layout, issues):
     mapping = layout["issue_repositories"]
     cross_parents = sum(bool(x["parent_key"]) and mapping[x["key"]] != mapping[x["parent_key"]] for x in issues)
     cross_deps = sum(mapping[x["key"]] != mapping[d] for x in issues for d in x["depends_on"])
-    return {"mode": "PLAN_ONLY_NO_NETWORK", "owner": layout["owner"], "visibility": "private",
+    return {"mode": "PLAN_ONLY_NO_NETWORK", "owner": layout["owner"], "visibility": layout["visibility"],
             "repositories": dict(collections.Counter(mapping.values())), "issues": len(issues),
             "parent_links": sum(bool(x["parent_key"]) for x in issues),
             "dependency_links": sum(len(x["depends_on"]) for x in issues),
@@ -75,11 +75,11 @@ def repositories(gh, layout):
             if "HTTP 404" not in str(exc) or not gh.cfg.get("allow_repository_create"):
                 raise
             gh.api("/orgs/" + layout["owner"] + "/repos", "POST",
-                   {"name": name, "private": True, "auto_init": True, "has_issues": True,
+                   {"name": name, "private": gh.cfg["visibility"] != "public", "auto_init": True, "has_issues": True,
                     "has_wiki": False, "description": spec["description"]}, key=key)
             repo = gh.api("/repos/" + target)
-        if not repo["private"] or not repo.get("permissions", {}).get("admin"):
-            raise ValueError("Private repository with administrator access required: " + target)
+        if repo["private"] != (gh.cfg["visibility"] != "public") or not repo.get("permissions", {}).get("admin"):
+            raise ValueError("Approved visibility and administrator access required: " + target)
         gh.adopt(key)
         gh.state["repositories"][name] = {k: repo[k] for k in ["id", "node_id", "full_name", "html_url", "private", "default_branch"]}
         gh.save()
@@ -323,7 +323,16 @@ def main():
     cfg = json.loads(Path(args.config).read_text())
     if cfg["owner"] != layout["owner"] or cfg["repository"] != layout["hub"]:
         raise ValueError("Config destination and frozen layout disagree")
-    validate_destination(cfg, args.apply)
+    if cfg["visibility"] != layout["visibility"]:
+        raise ValueError("Config visibility and reviewed layout disagree")
+    if cfg["visibility"] == "public":
+        if not cfg.get("public_source_reviewed") or not cfg.get("public_publication_approval_ref"):
+            raise ValueError("Public disclosure requires separate explicit user authorization and source review")
+        # The original private-only importer remains unchanged. This adapter's
+        # public mode is an explicit, separately recorded user policy override.
+        validate_destination({**cfg, "visibility": "private"}, args.apply)
+    else:
+        validate_destination(cfg, args.apply)
     if not args.apply:
         print(json.dumps(plan(layout, issues), indent=2))
         return
