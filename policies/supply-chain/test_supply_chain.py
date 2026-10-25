@@ -258,4 +258,32 @@ class SupplyChain(unittest.TestCase):
             self.assertTrue(all(call.args[1]=='2026-11-04T18:12:30Z' for call in blockers.call_args_list))
             self.assertIs(exceptions.call_args.args[1],manifest)
 
+    def test_non_package_wildcards_ranges_and_moving_terminal_tags(self):
+        for value in ('1.x','1.X','v1.2.x','1.2||2.0','registry/repo:stable',
+                      'registry/repo:main','registry/repo:nightly','registry/repo:1.x'):
+            e=self.entry();e['release']=value
+            with self.subTest(release=value):self.assert_rejected_at_both_entry_boundaries(e)
+
+    def test_each_scanner_rejects_nonexact_releases_at_manifest_and_diagnostics(self):
+        for index in (0,1):
+            for value in ('1.x','v1.2.x','1.2||2.0','registry/trivy:stable',
+                          'registry/trivy:main','main','registry/trivy:latest'):
+                e=self.entry();e['scans'][index]['tool_release']=value
+                m=self.manifest();m['entries']=[e if x['id']==e['id'] else x for x in m['entries']]
+                with self.subTest(kind=e['scans'][index]['kind'],release=value):
+                    with self.assertRaises(ValueError):lock.validate_manifest(m)
+                    self.assertIn(e['scans'][index]['kind']+'_scanner_release_unpinned',
+                                  lock.adoption_blockers(e,NOW))
+
+    def test_exact_prerelease_and_sha_references_remain_valid(self):
+        versions=('1.2.3-rc.1','v2.0.0-beta+build.7','registry/repo:1.2.3-rc.1',
+                  'a'*40,'registry/repo@sha256:'+'b'*64)
+        for value in versions:
+            e=self.entry();e['release']=value
+            for scan in e['scans']:scan['tool_release']=value
+            m=self.manifest();m['entries']=[e if x['id']==e['id'] else x for x in m['entries']]
+            with self.subTest(release=value):
+                lock.validate_manifest(m)
+                self.assertEqual(lock.adoption_blockers(e,NOW),[])
+
 if __name__=='__main__':unittest.main(verbosity=2)

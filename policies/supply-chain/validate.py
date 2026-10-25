@@ -56,6 +56,21 @@ def require_nonblank(value):
     elif isinstance(value,list):
         for item in value:require_nonblank(item)
 
+def exact_release(value):
+    """Check a concrete version/tag or source hash, including qualified refs.
+
+    Prerelease names and full SHA pins are allowed. Wildcard/range syntax and
+    moving terminal tags are not concrete releases, even with a registry prefix.
+    """
+    if not isinstance(value,str) or not value or value=='UNSET':return False
+    if re.search(r'[\s*^~<>=|]',value):return False
+    terminal=re.split(r'[/@:]',value)[-1]
+    if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._+\-]*',terminal):return False
+    if terminal.lower() in ('latest','main','master','head','stable','nightly','x'):
+        return False
+    if re.search(r'(?:^|\.)[xX](?:$|[.\-+])',terminal):return False
+    return True
+
 def validate_entry(e):
     """Shared local invariants; registry/dependency checks remain manifest-wide."""
     schema=json.loads((HERE/'lock-manifest.schema.json').read_text())['properties']['entries']['items']
@@ -72,7 +87,7 @@ def validate_entry(e):
         if e['artifact_type']=='OS_PACKAGE':
             exact=bool(re.fullmatch(r'[0-9][A-Za-z0-9.+:~\-]*',e['release']))
         else:
-            exact=not re.search(r'[\s*^~<>=]',e['release'])
+            exact=exact_release(e['release'])
         if not exact or e['release'].lower() in ('main','master','head','stable','nightly'):
             raise ValueError('floating release forbidden')
     if e['artifact_type'] in ('ACTION','COMFY_NODE') and known(e['release']):
@@ -111,6 +126,9 @@ def validate_manifest(manifest):
                 raise ValueError('conditional component promotion requires separate selection')
         elif e['purpose']!='engineering-observation':raise ValueError('unbound component')
         validate_entry(e)
+        for scan in e['scans']:
+            if known(scan['tool_release']) and not exact_release(scan['tool_release']):
+                raise ValueError('floating scanner release forbidden')
     if covered!=set(components):raise ValueError('incomplete component inventory')
     graph={e['id']:e['dependencies'] for e in manifest['entries']}
     visiting=set();visited=set()
@@ -177,7 +195,7 @@ def adoption_blockers(entry,now,exceptions=()):
         prefix=scan['kind']
         check_digest(scan['subject_digest'])
         if scan['status']=='PASS' and scan['findings']:reasons.append(prefix+'_contradictory_PASS')
-        if re.search(r'(^|[^a-z])latest($|[^a-z])',scan['tool_release'],re.I) or re.search(r'[\s*^~<>=]',scan['tool_release']) or scan['tool_release'].lower() in ('latest','main','master','head','stable','nightly'):
+        if not exact_release(scan['tool_release']):
             reasons.append(prefix+'_scanner_release_unpinned')
         if scan['status']=='NOT_RUN':reasons.append(prefix+'_NOT_RUN');continue
         if any(scan[k]=='UNSET' for k in ('tool','tool_release','database_digest','scanned_at','report_ref','report_sha256')) or scan['subject_digest']!=entry['digest']:
