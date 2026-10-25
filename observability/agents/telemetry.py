@@ -27,6 +27,7 @@ RESOURCES=('cpu','memory_mib','disk_gib','gpu_vram_mib','gpu','slots','integrati
 ROLES=('implementation','review')
 MEASURES=('calls','input_tokens','output_tokens')
 MAX_BYTES=524288
+MAX_JSON_DEPTH=64
 MAX_TASKS=128
 MAX_ATTEMPTS=512
 CRITICAL_EVIDENCE_STATES=('READY','RUNNING','REVIEW')
@@ -72,6 +73,23 @@ def safe_ref(value,kind,nullable=False):
 def canonical(value):
     return json.dumps(value,sort_keys=True,separators=(',',':'),ensure_ascii=True,allow_nan=False)
 
+def check_json_depth(text):
+    """Bound containers before decoding, ignoring braces in escaped JSON strings."""
+    depth=0;quoted=False;escaped=False
+    for char in text:
+        if quoted:
+            if escaped:escaped=False
+            elif char=='\\':escaped=True
+            elif char=='"':quoted=False
+        elif char=='"':quoted=True
+        elif char in '{[':
+            depth+=1
+            if depth>MAX_JSON_DEPTH:
+                raise ValueError('input nesting exceeds supported depth')
+        elif char in '}]':
+            depth-=1
+            if depth<0:raise ValueError('invalid JSON container structure')
+
 def read_snapshot(path):
     with Path(path).open('rb') as stream:
         raw=stream.read(MAX_BYTES+1)
@@ -81,7 +99,13 @@ def read_snapshot(path):
         for key,item in pairs:
             require(key not in value);value[key]=item
         return value
-    return json.loads(raw,object_pairs_hook=unique,parse_constant=lambda _: (_ for _ in ()).throw(ValueError('invalid numeric constant')))
+    # Match json.loads(bytes) encoding behavior while scanning decoded characters.
+    text=raw.decode(json.detect_encoding(raw), 'surrogatepass')
+    check_json_depth(text)
+    try:
+        return json.loads(text,object_pairs_hook=unique,parse_constant=lambda _: (_ for _ in ()).throw(ValueError('invalid numeric constant')))
+    except RecursionError:
+        raise ValueError('input nesting exceeds supported depth') from None
 
 def validate(snapshot,now):
     shape(snapshot,('schema_version','sequence','observed_at','emergency_stop','dispatch_inputs','tasks','resources','accounting','model_usage'))

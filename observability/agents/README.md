@@ -65,3 +65,13 @@ The expiry is the earliest of snapshot freshness, critical prerequisite-evidence
 The API budget check uses exact integer ratios for spent + reserved versus cap. It does not add Decimals in the ambient precision context, so an arbitrarily small accepted reservation above an exact cap is not rounded away. The existing bounded decimal syntax and nonnegative amount limits remain unchanged.
 
 Six new tests cover successful publication followed by malformed/missing input or missing cursor, consumer-side expiry, exact-budget behavior at low/default/high Decimal precision, and partial-write cleanup. All original 30 methods remain. No exporter service, live telemetry or controller admission operation was run.
+## Excessive JSON nesting failure boundary
+
+The byte-size bound does not guarantee a JSON decoder can represent the input within Python's recursion limit. The reader now converts decoder RecursionError into a generic invalid-input error without retaining its traceback chain. The CLI also catches RecursionError from validation/rendering, publishes the same unavailable JSON/Prometheus outputs and exits 2 without printing input, paths or exception details. No recursion limit is increased and deeply nested content is never treated as valid telemetry.
+
+Three added tests preserve all 36 prior methods: bounded deep JSON rejection, success followed by deep-input failure in JSON and Prometheus modes, and an injected rendering recursion failure. They require prior positive files to become unavailable and diagnostics to remain sanitized. Root runs these synthetic checks; no live exporter, controller or provider is involved.
+## Deterministic structural-depth bound
+
+The file reader now scans decoded JSON text before parsing and rejects container depth above MAX_JSON_DEPTH=64, independently of Python's ambient recursion limit. This forward scan respects quoted strings and escape sequences; brackets within strings do not count. The existing byte limit and JSON-supported encoding detection remain, and decoder RecursionError is still sanitized as a fallback. No process recursion limit is lowered or raised.
+
+The existing deep-input method now tests both the first forbidden depth and a much deeper input, the exact permitted boundary, and large bracket/escaped-quote strings under UTF-8 and UTF-16. The CLI regression continues to require exit 2, no traceback/path/payload disclosure, and unavailable files. All 39 test methods remain; root executes the revised suite.

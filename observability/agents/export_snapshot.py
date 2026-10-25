@@ -54,12 +54,12 @@ def main():
         if args.output_dir:write_reports(args.output_dir,report)
         print(telemetry.prometheus(report) if args.prometheus else telemetry.canonical(report))
         return 0
-    except (ValueError,TypeError,KeyError,OSError,OverflowError):
+    except (ValueError,TypeError,KeyError,OSError,OverflowError,RecursionError):
         # No input values, paths, exception text or provider records in diagnostics.
         report=telemetry.unavailable_report(args.now)
         if args.output_dir:
             try:write_reports(args.output_dir,report)
-            except (ValueError,TypeError,KeyError,OSError,OverflowError):
+            except (ValueError,TypeError,KeyError,OSError,OverflowError,RecursionError):
                 try:invalidate_reports(args.output_dir)
                 except (ValueError,OSError):pass
         print(telemetry.prometheus(report) if args.prometheus else telemetry.canonical(report))

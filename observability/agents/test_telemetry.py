@@ -1,5 +1,7 @@
 """Authored F17 offline tests. No controller DB, models or external services."""
 import copy
+import contextlib
+import io
 from decimal import localcontext
 from unittest.mock import patch
 import json
@@ -343,6 +345,57 @@ class TelemetryTests(unittest.TestCase):
             with patch.object(exporter.os,'replace',side_effect=failing_replace),self.assertRaises(OSError):
                 write_reports(root,t.render(snapshot(),NOW))
             self.assertFalse((root/'agents.json').exists());self.assertFalse((root/'agents.prom').exists())
+    def test_bounded_deep_json_is_rejected_without_raw_reader_error(self):
+        with tempfile.TemporaryDirectory(prefix='f17-deep-') as directory:
+            path=Path(directory)/'deep.json'
+            for depth in (t.MAX_JSON_DEPTH+1,2000):
+                nested='['*depth+'"synthetic-deep-secret"'+']'*depth
+                self.assertLess(len(nested.encode()),t.MAX_BYTES)
+                path.write_text(nested)
+                with self.assertRaisesRegex(ValueError,'input nesting exceeds supported depth'):
+                    t.read_snapshot(path)
+            path.write_text('['*t.MAX_JSON_DEPTH+'0'+']'*t.MAX_JSON_DEPTH)
+            self.assertIsInstance(t.read_snapshot(path),list)
+            # Structural tokens in strings, including escaped quotes, are not depth.
+            ordinary={'text':'['*2000+'escaped " quote and backslash \\'+']'*2000}
+            for encoding in ('utf-8','utf-16'):
+                path.write_text(json.dumps(ordinary),encoding=encoding)
+                self.assertEqual(t.read_snapshot(path),ordinary)
+    def test_deep_json_cli_redacts_and_replaces_success_for_both_output_modes(self):
+        for prometheus in (False,True):
+            with self.subTest(prometheus=prometheus),tempfile.TemporaryDirectory(prefix='f17-deep-cli-') as directory:
+                root=Path(directory);source=root/'synthetic-private-deep.json'
+                source.write_text(json.dumps(snapshot()))
+                self.assertEqual(self.run_cli(source,root).returncode,0)
+                source.write_text('['*(t.MAX_JSON_DEPTH+1)+'"synthetic-deep-secret"'+']'*(t.MAX_JSON_DEPTH+1))
+                command=[sys.executable,'-B',str(Path(__file__).with_name('export_snapshot.py')),str(source),'--now',NOW,'--output-dir',str(root)]
+                if prometheus:command.append('--prometheus')
+                result=subprocess.run(command,capture_output=True,text=True,timeout=15)
+                self.assertEqual(result.returncode,2)
+                for forbidden in ('Traceback','synthetic-deep-secret','synthetic-private-deep',str(root)):
+                    self.assertNotIn(forbidden,result.stdout+result.stderr)
+                report=json.loads((root/'agents.json').read_text())
+                self.assertEqual(report['status'],'INVALID_SNAPSHOT')
+                self.assertFalse(report['export_available']);self.assertFalse(report['admission_signal'])
+                self.assertFalse(report['dispatch_authorized'])
+                metrics=(root/'agents.prom').read_text()
+                self.assertIn('agent_export_available 0',metrics);self.assertNotIn('agent_admission_signal 1',metrics)
+                if prometheus:self.assertIn('agent_export_available 0',result.stdout)
+                else:self.assertFalse(json.loads(result.stdout)['export_available'])
+
+    def test_render_recursion_uses_redacted_unavailable_boundary(self):
+        import export_snapshot as exporter
+        with tempfile.TemporaryDirectory(prefix='f17-render-depth-') as directory:
+            root=Path(directory);source=root/'snapshot.json';source.write_text(json.dumps(snapshot()))
+            write_reports(root,t.render(snapshot(),NOW))
+            arguments=['export_snapshot.py',str(source),'--now',NOW,'--output-dir',str(root)]
+            output=io.StringIO()
+            with patch.object(sys,'argv',arguments),patch.object(t,'render',side_effect=RecursionError('synthetic-private-recursion')),contextlib.redirect_stdout(output):
+                self.assertEqual(exporter.main(),2)
+            self.assertNotIn('synthetic-private-recursion',output.getvalue())
+            self.assertNotIn('Traceback',output.getvalue())
+            self.assertFalse(json.loads((root/'agents.json').read_text())['export_available'])
+            self.assertIn('agent_export_available 0',(root/'agents.prom').read_text())
 if __name__=='__main__':unittest.main(verbosity=2)
 
 
