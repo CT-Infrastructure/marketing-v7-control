@@ -174,6 +174,35 @@ class RedactionTests(unittest.TestCase):
                     safe = redact({"surface": surface, "message": "before " + scheme + " " + token + "; after"})
                     self.assertEqual(safe, {"surface": surface, "message": "before " + MARKER + "; after"})
 
+    def test_sensitive_label_matrix_in_structured_and_serialized_forms(self):
+        labels = ["password", "passwd", "authorization", "token", "secret"]
+        for parts in (("private", "key"), ("api", "key"), ("client", "secret"),
+                      ("access", "token"), ("refresh", "token"),
+                      ("smtp", "credential"), ("sip", "credential"),
+                      ("payment", "credential"), ("deploy", "token")):
+            labels.extend(separator.join(parts) for separator in ("", "_", "-"))
+        for label in labels:
+            for spelling in (label, label.upper()):
+                with self.subTest(label=spelling):
+                    self.assertEqual(redact({spelling: "synthetic-value"}), {spelling: MARKER})
+                    for separator in ("=", ": "):
+                        payload = spelling + separator + "synthetic-value; status=ok"
+                        self.assertEqual(redact(payload), MARKER + "; status=ok")
+                    payload = json.dumps({spelling: 'synthetic-"TAIL', "status": "ok"})
+                    for surface in ("prompt", "log", "artifact"):
+                        self.assertEqual(redact({"surface": surface, "message": payload}),
+                                         {"surface": surface,
+                                          "message": '{"' + MARKER + ', "status": "ok"}'})
+
+    def test_ordinary_assignment_words_are_preserved(self):
+        for label in ("secretary", "tokenizer", "secretion", "private", "access",
+                      "deployment", "key", "status", "client_secretary"):
+            with self.subTest(label=label):
+                payload = label + "=synthetic-public; status=ok"
+                self.assertEqual(redact(payload), payload)
+                payload = json.dumps({label: "synthetic-public"})
+                self.assertEqual(redact({"message": payload}), {"message": payload})
+
     def test_nested_sensitive_fields_and_opaque_values(self):
         data = {"safe_ref": "sops:synthetic-service", "records": [{"SMTP_PASSWORD": "fake"},
                 {"api_key": {"nested": "fake"}}, {"message": b"opaque-fake"}]}

@@ -6,6 +6,12 @@ be detected reliably; allowlisted structured output is the primary boundary.
 import re
 
 MARKER = "[REDACTED]"
+# Keep the shared vocabulary separate from the structured key's substring policy.
+SENSITIVE_LABEL = (r"password|passwd|authorization|private[_-]?key|api[_-]?key|"
+                   r"client[_-]?secret|access[_-]?token|refresh[_-]?token|"
+                   r"smtp[_-]?credential|sip[_-]?credential|payment[_-]?credential|"
+                   r"deploy[_-]?token")
+SENSITIVE_KEY = re.compile(r"(?i)(?:" + SENSITIVE_LABEL + r"|^token$|^secret$)")
 PATTERNS = [
     re.compile(r"-----BEGIN (?:[A-Z0-9 ]*PRIVATE KEY)-----.*?-----END (?:[A-Z0-9 ]*PRIVATE KEY)-----", re.S),
     re.compile(r"AGE-SECRET-KEY-[A-Z0-9]+", re.I),
@@ -14,9 +20,9 @@ PATTERNS = [
     re.compile(r"\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b"),
     re.compile(r"(?i)\b(?:Bearer|Basic)\s+[A-Za-z0-9+/_.~=:-]+"),
     re.compile(r"(?i)(?:postgres(?:ql)?|mysql|smtp|sips?)://[^\s/@:]+:[^\s/@]+@"),
-    re.compile(r"(?i)\b(?:password|passwd|token|api[_-]?key|client[_-]?secret|smtp[_-]?password|sip[_-]?password|payment[_-]?token)[\"']?\s*[=:]\s*(?:\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*'|[^\s,;]+)"),
+    re.compile(r"(?i)\b(?:" + SENSITIVE_LABEL + r"|token|secret|smtp[_-]?password|sip[_-]?password|payment[_-]?token)[\"']?\s*[=:]\s*(?:\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*'|[^\s,;]+)"),
 ]
-SENSITIVE_KEY = re.compile(r"(?i)(?:password|passwd|authorization|private[_-]?key|api[_-]?key|client[_-]?secret|access[_-]?token|refresh[_-]?token|smtp[_-]?credential|sip[_-]?credential|payment[_-]?credential|deploy[_-]?token|^token$|^secret$)")
+
 
 
 def redact(value, *, depth=0):
