@@ -86,11 +86,14 @@ def validate_entry(e):
         raise ValueError('engineering observations cannot be adoption candidates')
     # Repository names are not selectors: latest-version may be a valid name.
     origin=e['origin']
-    selector=origin.rsplit('@',1)[-1] if '@' in origin else (
-        origin.rsplit('/',1)[-1].rsplit(':',1)[-1]
-        if ':' in origin.rsplit('/',1)[-1] else None)
-    if selector is not None and selector.lower()=='latest':
-        raise ValueError('mutable latest tag forbidden')
+    terminal=origin.rsplit('/',1)[-1]
+    selector=terminal.rsplit('@',1)[-1] if '@' in terminal else (
+        terminal.rsplit(':',1)[-1] if ':' in terminal else None)
+    if selector is not None:
+        exact_selector=(exact_release('origin@'+selector) if '@' in terminal and selector.startswith('sha256:')
+                        else exact_release(selector))
+        if not exact_selector:
+            raise ValueError('floating origin selector forbidden')
     if known(e['release']):
         # Native package revisions (including Debian pre-release '~') are exact
         # versions, not dependency range expressions. Keep other types strict.
@@ -100,6 +103,10 @@ def validate_entry(e):
             exact=exact_release(e['release'])
         if not exact or e['release'].lower() in ('main','master','head','stable','nightly'):
             raise ValueError('floating release forbidden')
+    if '@sha256:' in e['release']:
+        release_digest=e['release'].rsplit('@sha256:',1)[1]
+        if e['digest']!={'algorithm':'sha256','value':release_digest}:
+            raise ValueError('release digest must match locked subject')
     if e['artifact_type'] in ('ACTION','COMFY_NODE') and known(e['release']):
         if not re.fullmatch('[a-f0-9]{40}',e['release']) or e['digest']!={'algorithm':'git-sha1','value':e['release']}:
             raise ValueError('source action/node requires matching full commit')

@@ -277,7 +277,7 @@ class SupplyChain(unittest.TestCase):
 
     def test_exact_prerelease_and_sha_references_remain_valid(self):
         versions=('1.2.3-rc.1','v2.0.0-beta+build.7','registry/repo:1.2.3-rc.1',
-                  'a'*40,'registry/repo@sha256:'+'b'*64)
+                  'a'*40,'registry/repo@sha256:'+'a'*64)
         for value in versions:
             e=self.entry();e['release']=value
             for scan in e['scans']:scan['tool_release']=value
@@ -331,5 +331,32 @@ class SupplyChain(unittest.TestCase):
                        'registry.invalid/repo@latest'):
             entry=self.entry();entry['origin']=origin
             with self.subTest(origin=origin):self.assert_rejected_at_both_entry_boundaries(entry)
+
+    def test_digest_qualified_release_binds_exact_locked_subject(self):
+        for kind in ('APPLICATION','OCI','TOOL','MODEL'):
+            entry=self.entry();entry.update(artifact_type=kind,release='registry/repo@sha256:'+'b'*64)
+            with self.subTest(kind=kind):self.assert_rejected_at_both_entry_boundaries(entry)
+        entry=self.entry();entry['release']='registry/repo@sha256:'+'a'*64
+        manifest=self.manifest();manifest['entries']=[entry if e['id']==entry['id'] else e for e in manifest['entries']]
+        lock.validate_manifest(manifest);self.assertEqual(lock.adoption_blockers(entry,NOW),[])
+        # Scanner tool identity is separate from the scanned subject identity.
+        for scan in entry['scans']:scan['tool_release']='registry/scanner@sha256:'+'b'*64
+        manifest['entries']=[entry if e['id']==entry['id'] else e for e in manifest['entries']]
+        lock.validate_manifest(manifest);self.assertEqual(lock.adoption_blockers(entry,NOW),[])
+
+    def test_explicit_origin_selectors_require_exact_pins(self):
+        for selector in ('main','master','head','stable','nightly','latest','1.x','1.*'):
+            for separator in (':','@'):
+                entry=self.entry();entry['origin']='registry.invalid/repo'+separator+selector
+                with self.subTest(selector=selector,separator=separator):
+                    self.assert_rejected_at_both_entry_boundaries(entry)
+        for origin in ('registry.invalid/latest-version:1.2.3',
+                       'registry.invalid/repo@sha256:'+'a'*64,
+                       'https://example.invalid/stable-tools/repository',
+                       'git@example.invalid:owner/repository'):
+            entry=self.entry();entry['origin']=origin
+            manifest=self.manifest();manifest['entries']=[entry if e['id']==entry['id'] else e for e in manifest['entries']]
+            with self.subTest(origin=origin):
+                lock.validate_manifest(manifest);self.assertEqual(lock.adoption_blockers(entry,NOW),[])
 
 if __name__=='__main__':unittest.main(verbosity=2)
