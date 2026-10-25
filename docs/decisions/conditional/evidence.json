@@ -1,0 +1,189 @@
+{
+  "schema_version": "1.1",
+  "packet_bindings": {
+    "task": {
+      "key": "F19",
+      "title": "[F19] Conditional technology selection and license policy",
+      "kind": "foundation",
+      "area": "governance",
+      "phase": "P1",
+      "priority": "P0",
+      "risk": "medium",
+      "parent_key": "EP-FOUNDATION",
+      "depends_on": [
+        "F01",
+        "F03"
+      ],
+      "write_paths": [
+        "docs/decisions/conditional/"
+      ],
+      "locks": [],
+      "resources": {
+        "cpu": 1,
+        "memory_mib": 1536,
+        "gpu": 0,
+        "slots": 1,
+        "integration": 0
+      },
+      "manual": false,
+      "enabled_by_default": true,
+      "workflow_id": null,
+      "body_path": "backlog/issues/F19.md",
+      "completion_authority": "independent reviewer + trusted integration controller",
+      "production_authorized": false,
+      "initial_state": "BACKLOG",
+      "body_sha256": "9421bf8a5bf92bfd2c10445951add6d7c54f82aab1cce12b4f5eace923956c8d"
+    },
+    "task_key": "F19",
+    "agent": "native/delivery-controls/conditional-technology",
+    "base_revision": "11f7a5f0aab4b41966e9d6134215b1a3823a8e95",
+    "graph_sha256": "240bfc59615c0e058b08e1955325dc3e5bb7411fc7216e3be97cbc25eba4070e",
+    "policy_sha256": "0fdc1b8c1c61f65e7a59cd1324bbe5b9c4f6f25f853d023b6c73be890b3848c1",
+    "fence": 1,
+    "input_sha256": "5a9de3688de0bd6d06740f2402b74a326a942620340f55acc0b7b49085235ab3"
+  },
+  "qualification": "offline source and policy validation only",
+  "original_native_evidence": {
+    "schema_version": "1.0",
+    "packet_bindings": {
+      "task": {
+        "key": "F19",
+        "title": "[F19] Conditional technology selection and license policy",
+        "kind": "foundation",
+        "area": "governance",
+        "phase": "P1",
+        "priority": "P0",
+        "risk": "medium",
+        "parent_key": "EP-FOUNDATION",
+        "depends_on": [
+          "F01",
+          "F03"
+        ],
+        "write_paths": [
+          "docs/decisions/conditional/"
+        ],
+        "locks": [],
+        "resources": {
+          "cpu": 1,
+          "memory_mib": 1536,
+          "gpu": 0,
+          "slots": 1,
+          "integration": 0
+        },
+        "manual": false,
+        "enabled_by_default": true,
+        "workflow_id": null,
+        "body_path": "backlog/issues/F19.md",
+        "completion_authority": "independent reviewer + trusted integration controller",
+        "production_authorized": false,
+        "initial_state": "BACKLOG",
+        "body_sha256": "9421bf8a5bf92bfd2c10445951add6d7c54f82aab1cce12b4f5eace923956c8d"
+      },
+      "task_key": "F19",
+      "agent": "native/delivery-controls/conditional-technology",
+      "base_revision": "11f7a5f0aab4b41966e9d6134215b1a3823a8e95",
+      "graph_sha256": "240bfc59615c0e058b08e1955325dc3e5bb7411fc7216e3be97cbc25eba4070e",
+      "policy_sha256": "0fdc1b8c1c61f65e7a59cd1324bbe5b9c4f6f25f853d023b6c73be890b3848c1",
+      "fence": 1,
+      "input_sha256": "5a9de3688de0bd6d06740f2402b74a326a942620340f55acc0b7b49085235ab3"
+    },
+    "workspace": "D:\\CompleteTech-Infrastructure\\.control\\marketing-v7\\20261025-bootstrap-review\\agents\\F19-1\\workspace",
+    "owned_paths": [
+      "docs/decisions/conditional/"
+    ],
+    "resources": {
+      "cpu": 1,
+      "memory_mib": 1536,
+      "gpu": 0,
+      "slots": 1,
+      "integration": 0
+    },
+    "branch": "UNKNOWN: isolated export, Git prohibited",
+    "candidate_revision": null,
+    "tested_revision": "Export at supplied base plus candidate file hashes in result.json; no candidate commit created",
+    "checks": [
+      {
+        "command": "& 'D:\\CompleteTech-Infrastructure\\.control\\marketing-v7\\20261025-bootstrap-review\\agents\\F19-1\\workspace\\docs\\decisions\\conditional\\inspect.ps1'",
+        "status": "PASS",
+        "exit_code": 0,
+        "environment": "Windows PowerShell; isolated snapshot; offline",
+        "limits": "Limited data inspection only, not Python execution or independent qualification"
+      },
+      {
+        "command": "python -B docs/decisions/conditional/validate.py",
+        "status": "NOT_RUN",
+        "exit_code": null,
+        "reason": "Python execution forbidden in child; root independent executor required"
+      },
+      {
+        "command": "python -B -m unittest discover -s docs/decisions/conditional -p test_validate.py -v",
+        "status": "NOT_RUN",
+        "exit_code": null,
+        "reason": "Python execution forbidden in child; root independent executor required"
+      },
+      {
+        "command": "powershell -NoProfile -File docs/decisions/conditional/inspect.ps1",
+        "status": "FAIL",
+        "exit_code": 1,
+        "environment": "Windows PowerShell child process",
+        "reason": "AuthorizationManager check failed: UnauthorizedAccess. No execution-policy change or bypass attempted."
+      }
+    ],
+    "acceptance": "Root independent reviewer and trusted integration controller only",
+    "residual_risks": [
+      "Python validator and mutation tests unexecuted; runtime correctness requires root execution",
+      "Named owners, measured gaps, license/edition/model rights, exact versions and dependency compatibility not supplied; all selection remains deferred",
+      "No production/site compatibility, provider account, approval or installation evidence",
+      "Trusted base/prerequisite acceptance not independently checked with Git or ledger; supplied launcher bindings retained",
+      "Separate powershell -File invocation blocked by AuthorizationManager; only the in-session inspection succeeded."
+    ],
+    "blockers": [
+      "Root must run Python validator and tests at exact candidate before acceptance",
+      "Any future candidate adoption requires missing human/rights/dependency/budget/rollback evidence, not core baseline activation"
+    ]
+  },
+  "remediation": {
+    "change": "Strict declared-text CRLF-to-LF canonical hashing; no source or stored source hash changes",
+    "tests": [
+      {
+        "command": "C:\\Python314\\python.exe -B D:\\CompleteTech-Infrastructure\\.control\\marketing-v7\\20261025-bootstrap-review\\agents\\F19-1\\workspace\\docs\\decisions\\conditional\\validate.py",
+        "exit_code": 0,
+        "environment": "Windows Python; offline read-only source validation; constructed temporary LF/CRLF fixtures"
+      },
+      {
+        "command": "C:\\Python314\\python.exe -B -m unittest discover -s D:\\CompleteTech-Infrastructure\\.control\\marketing-v7\\20261025-bootstrap-review\\agents\\F19-1\\workspace\\docs\\decisions\\conditional -p test_validate.py -v",
+        "exit_code": 0,
+        "environment": "Windows Python; offline read-only source validation; constructed temporary LF/CRLF fixtures"
+      },
+      {
+        "command": "C:\\Python314\\python.exe -B D:\\CompleteTech-Infrastructure\\.control\\marketing-v7\\20261025-bootstrap-review\\agents\\F19-1\\workspace\\docs\\decisions\\conditional\\validate.py --root D:\\CompleteTech-Infrastructure\\.control\\marketing-v7\\20261025-bootstrap-review\\foundation\\f19",
+        "exit_code": 0,
+        "environment": "Windows Python; offline read-only source validation; constructed temporary LF/CRLF fixtures"
+      }
+    ],
+    "test_count": 16,
+    "original_tests_preserved": 10,
+    "all_candidates": "40 DEFERRED, unselected, uninstalled, disabled",
+    "windows_worktree_read_only": true,
+    "raw_hash_mismatches": 49,
+    "canonical_hash_mismatches": 0
+  },
+  "acceptance": "Root independent reviewer and trusted integration controller only",
+  "blockers": [
+    "Future adoption requires named human owner and approval, demonstrated gap, verified rights, exact versions/dependencies, budget and rollback evidence."
+  ],
+  "residual_risks": [
+    "Offline validation is not production, legal, provider or installation qualification.",
+    "Native inspect.ps1 retains exact-byte historical behavior; checkout-aware validation uses Python."
+  ],
+  "redaction": {
+    "status": "controller_credentials_removed",
+    "scope": "All controller lease fields removed recursively from current and nested historical evidence.",
+    "history_note": "Existing historical source or artifact hashes can identify prior private material; they are retained for audit only and do not authorize disclosure of unredacted content."
+  },
+  "current_controller_verification": {
+    "ref": "controller-verification.json",
+    "tested_revision": "bb1abed74563fe42af6f07578c4a6e4644bf5c50",
+    "scope": "20 implementation tests in normal and optimized Linux Python plus6 independent tests; exact tested source hashes in receipt; no runtime qualification"
+  }
+}
