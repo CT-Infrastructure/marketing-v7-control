@@ -43,6 +43,32 @@ class Contracts(unittest.TestCase):
         a=dict(i,client_id='a:b',source_system='c');b=dict(i,client_id='a',source_system='b:c')
         self.assertNotEqual(core.action_key(a),core.action_key(b))
         self.assertEqual(base,core.action_key(dict(reversed(list(i.items())))))
+    def test_related_event_derives_supplied_action_key(self):
+        event=self.fixture('event-envelope');receipt=self.fixture('action-receipt')
+        core.validate('event-envelope',event)
+        core.validate('action-receipt',receipt)
+        identity={
+            'client_id':event['client_id'],
+            'source_system':event['source'],
+            'source_event_id':event['event_id'],
+            'action_scope':receipt['action_identity']['action_scope'],
+            'approved_revision':receipt['action_identity']['approved_revision'],
+        }
+        self.assertEqual(receipt['action_identity'],identity)
+        self.assertEqual(receipt['event_id'],event['event_id'])
+        self.assertEqual(receipt['correlation_id'],event['correlation_id'])
+        self.assertEqual(receipt['action_key'],core.action_key(identity))
+        # Schema-valid changes to any event identity component must change its key.
+        for event_field,identity_field in (
+            ('client_id','client_id'),('source','source_system'),
+            ('event_id','source_event_id'),
+        ):
+            with self.subTest(event_field=event_field):
+                changed_event=copy.deepcopy(event);changed_event[event_field]+='-other'
+                core.validate('event-envelope',changed_event)
+                changed_identity=dict(identity)
+                changed_identity[identity_field]=changed_event[event_field]
+                self.assertNotEqual(receipt['action_key'],core.action_key(changed_identity))
     def test_key_tamper(self):
         r=self.fixture('action-receipt');r['action_identity']['client_id']='wrong'
         with self.assertRaises(ValueError):core.validate('action-receipt',r)
@@ -97,18 +123,36 @@ class Contracts(unittest.TestCase):
     def test_identifier_strict_end_rejects_line_terminators(self):
         validator=Draft202012Validator(core.SCHEMAS['common']['$defs']['id'])
         validator.validate('opaque:valid-id')
-        for suffix in ('\n','\r','\r\n','\u2028','\u2029',' ', '\t'):
+        for suffix in ('\n','\r','\r\n','\u2028','\u2029','\ufeff','\u0085',' ', '\t'):
             with self.subTest(suffix=repr(suffix)),self.assertRaises(ValidationError):
                 validator.validate('opaque:valid-id'+suffix)
             receipt=self.fixture('action-receipt');receipt['approval_ref']+=suffix
             with self.assertRaises(ValidationError):core.validate('action-receipt',receipt)
 
+    def test_identifier_whitespace_is_portable_and_unicode_is_preserved(self):
+        validator=Draft202012Validator(core.SCHEMAS['common']['$defs']['id'])
+        # Explicit union of Python/ECMAScript whitespace plus C0, DEL and C1.
+        forbidden=(list(range(0x21))+list(range(0x7f,0xa1))+[0x1680]+
+                   list(range(0x2000,0x200b))+[0x2028,0x2029,0x202f,0x205f,0x3000,0xfeff])
+        for codepoint in forbidden:
+            char=chr(codepoint)
+            for value in (char+'client','cli'+char+'ent','client'+char):
+                with self.subTest(codepoint=hex(codepoint),value=repr(value)):
+                    with self.assertRaises(ValidationError):validator.validate(value)
+                    event=self.fixture('event-envelope');event['client_id']=value
+                    with self.assertRaises(ValidationError):core.validate('event-envelope',event)
+        for value in ('client:caf\u00e9','\u5ba2\u6237:123','client:\U0001f680',
+                      'client:e\u0301','client:\u200b','client:\u2060'):
+            with self.subTest(allowed=repr(value)):
+                validator.validate(value)
+                event=self.fixture('event-envelope');event['client_id']=value
+                core.validate('event-envelope',event)
     def test_money_strict_end_rejects_line_terminators(self):
         validator=Draft202012Validator(core.SCHEMAS['common']['$defs']['money'])
         for amount in ('0','-0','12.30','-12.30'):
             validator.validate({'amount':amount,'currency':'USD'})
         for field in ('amount','currency'):
-            for suffix in ('\n','\r','\r\n','\u2028','\u2029',' ', '\t'):
+            for suffix in ('\n','\r','\r\n','\u2028','\u2029','\ufeff','\u0085',' ', '\t'):
                 money={'amount':'12.30','currency':'USD'};money[field]+=suffix
                 with self.subTest(field=field,suffix=repr(suffix)),self.assertRaises(ValidationError):
                     validator.validate(money)

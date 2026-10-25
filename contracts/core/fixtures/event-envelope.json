@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "event_id": "synthetic-event-0001",
-  "source": "synthetic-fixture",
+  "source": "WordPress",
   "event_type": "marketing.example",
   "occurred_at": "2026-10-25T12:00:00Z",
   "received_at": "2026-10-25T12:00:01Z",
