@@ -114,6 +114,7 @@ class RegisterTests(unittest.TestCase):
                                   [("SERVICE", 156), ("RECOVERY", 104), ("ROUTE", 69)]
                                   for i in range(1, count+1)],
             "legacy_counts": {"SERVICE": 156, "RECOVERY": 104, "ROUTE": 69},
+            "acceptance_traceability_status": {"NOT_RUN": 576},
             "original_source_archive_hash_independently_verified": False,
             "source_provenance": {"fixture": True}}
         self.blobs = {
@@ -142,6 +143,28 @@ class RegisterTests(unittest.TestCase):
         key = "backlog/acceptance_traceability.csv"
         self.blobs[key] = self.blobs[key].replace(b"NOT_RUN", b"PASS", 1)
         with self.assertRaises(ValueError):
+            validate_register(self.register, self.blobs)
+
+    def test_promoted_status_summary_rejected(self):
+        for summary in [{"PASS": 576}, {"NOT_RUN": 575, "PASS": 1}]:
+            with self.subTest(summary=summary):
+                self.register["acceptance_traceability_status"] = summary
+                with self.assertRaisesRegex(ValueError, "status summary does not reconcile"):
+                    validate_register(self.register, self.blobs)
+
+    def test_malformed_status_summaries_rejected(self):
+        for summary in [None, [], "NOT_RUN", 576, {}, {"NOT_RUN": 575},
+                        {"NOT_RUN": -576}, {"NOT_RUN": "576"},
+                        {"NOT_RUN": 576.0}, {"NOT_RUN": True},
+                        {"NOT_RUN": 576, "PASS": 0}]:
+            with self.subTest(summary=summary):
+                self.register["acceptance_traceability_status"] = summary
+                with self.assertRaisesRegex(ValueError, "status summary does not reconcile"):
+                    validate_register(self.register, self.blobs)
+
+    def test_missing_status_summary_rejected(self):
+        del self.register["acceptance_traceability_status"]
+        with self.assertRaisesRegex(ValueError, "status summary does not reconcile"):
             validate_register(self.register, self.blobs)
 
     def test_archive_attestation_rejected(self):
@@ -248,6 +271,13 @@ class RevisionBindingTests(unittest.TestCase):
         register["original_source_archive_hash_independently_verified"] = True
         self.metadata["source-register.json"] = json.dumps(register).encode()
         with self.assertRaisesRegex(ValueError, "Unprovided original archive"):
+            self.run_verify()
+
+    def test_promoted_committed_status_summary_rejected(self):
+        register = json.loads(self.metadata["source-register.json"])
+        register["acceptance_traceability_status"] = {"PASS": 576}
+        self.metadata["source-register.json"] = json.dumps(register).encode()
+        with self.assertRaisesRegex(ValueError, "status summary does not reconcile"):
             self.run_verify()
 
     def test_external_classification_is_hashed_and_marked_mixed(self):

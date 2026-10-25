@@ -90,6 +90,12 @@ def validate_register(register, blobs):
         raise ValueError("Legacy categories do not reconcile")
     if any(r["initial_status"] != "NOT_RUN" for r in trace):
         raise ValueError("Runtime acceptance status was promoted without execution evidence")
+    status_counts = dict(Counter(r["initial_status"] for r in trace))
+    status_summary = register.get("acceptance_traceability_status")
+    if (not isinstance(status_summary, dict)
+            or any(type(count) is not int for count in status_summary.values())
+            or status_summary != status_counts):
+        raise ValueError("Acceptance trace status summary does not reconcile")
     if register["original_source_archive_hash_independently_verified"] is not False:
         raise ValueError("Unprovided original archive cannot be attested")
     if register["source_provenance"] != json.loads(blobs["reference/provenance.json"]):
