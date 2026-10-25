@@ -30,3 +30,9 @@ The twenty independently assigned workflow-review groups remain separate dossier
 ## Proposed follow-up, not active graph changes
 
 No graph amendment is justified solely by substring association. Review the 88 baseline/range acceptance routes and the 147 component consumer contracts first. For any substantiated hard-prerequisite change, record exact before/after edge, source/contract evidence, rationale, affected task closure and validation results; submit it to the trusted controller for review. The controller must invalidate/reconcile affected active leases before applying a changed graph or input hash. This audit neither invalidates leases nor edits the active graph. Human production authorization remains outside ordinary test writing.
+
+## Curated source evidence
+
+The [portable curation package](curation-public/README.md) provides explicit dispositions for all 147 components, with exact source-named workflow relations and separately identified engineering, native, deferred, legacy and external roles. Its source citations validate against the public checkout; source naming does not establish deployed ownership or runtime qualification.
+
+This supplements the initial unresolved component table. All 28 independent source-audit findings and the proposed domain-citation/email-ordering corrections remain pending root disposition. The original registry, workflow diagrams and build graph are unchanged. Run the portable validator and tests in addition to the package audit.

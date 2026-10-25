@@ -1,0 +1,40 @@
+{
+  "constraints": [
+    {
+      "rule": "F04 defines offline exact-revision/identity envelopes and native ownership; source curation cannot grant outbound authority.",
+      "evidence": {
+        "path": "contracts/core/README.md",
+        "pointer": "",
+        "sha256_lf": "f070513df8ef30a8cd2ed3c75ed8deae066655e42b4dd93a58c84f6506b5cf09",
+        "lines": [
+          3,
+          11,
+          12,
+          13,
+          14,
+          18,
+          19
+        ]
+      }
+    },
+    {
+      "rule": "F05 assigns native API owners, scoped action identity, HOLD/UNKNOWN reconciliation, no automatic resubmit and no direct native-table writes.",
+      "evidence": {
+        "path": "contracts/adapters/README.md",
+        "pointer": "",
+        "sha256_lf": "3b01236452b4b8861ec4a8969bc00c1ad41ddb6648153120ffd294c6e6cb4aa8",
+        "lines": [
+          3,
+          9,
+          13,
+          17,
+          19,
+          23,
+          25
+        ]
+      }
+    }
+  ],
+  "applies_to": "All proposed integration associations; not an authorization or runtime receipt",
+  "qualified": false
+}

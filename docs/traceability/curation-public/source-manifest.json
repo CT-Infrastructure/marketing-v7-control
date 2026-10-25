@@ -1,0 +1,797 @@
+{
+  "schema_version": "1.0",
+  "hash_semantics": "CRLF-to-LF byte normalization only",
+  "sources": [
+    {
+      "path": "backlog/issues.json",
+      "sha256_lf": "b655da3025feda286daf723cd0aa4fb38f9ec2340cfb817b4611533bfdd604d7"
+    },
+    {
+      "path": "contracts/adapters/README.md",
+      "sha256_lf": "3b01236452b4b8861ec4a8969bc00c1ad41ddb6648153120ffd294c6e6cb4aa8"
+    },
+    {
+      "path": "contracts/adapters/catalog.v1.json",
+      "sha256_lf": "38611dab19e52884125dc5203e47b4d0a1b6c99c3cd885a83447c7c878f356bc"
+    },
+    {
+      "path": "contracts/core/README.md",
+      "sha256_lf": "f070513df8ef30a8cd2ed3c75ed8deae066655e42b4dd93a58c84f6506b5cf09"
+    },
+    {
+      "path": "policies/container/native-exceptions.json",
+      "sha256_lf": "fd1c9da7facc45314222b639fdc9d6b7396ae44a0573c153ffb5a462ddd1708f"
+    },
+    {
+      "path": "reference/components/component_registry.json",
+      "sha256_lf": "de49779855eabdd7f5defc5ff6157d6a3e875f6164d64278c4a70338d029899e"
+    },
+    {
+      "path": "reference/workflows/C01.json",
+      "sha256_lf": "4f5d78dcb0f72e0b155b5d021b8941380774650ffc5d2dd22b41d1643897a17d"
+    },
+    {
+      "path": "reference/workflows/C02.json",
+      "sha256_lf": "d0288f6c95877d3157d01b3b6961b52c2c2d5dc3fb7ea9ca912fc5a14c05762b"
+    },
+    {
+      "path": "reference/workflows/C03.json",
+      "sha256_lf": "b90d8f5e3102cadd97b93f0333b0f95db808dcde5fc61a302df22224aa0c57f8"
+    },
+    {
+      "path": "reference/workflows/C04.json",
+      "sha256_lf": "0950d86dced8238decd51b78c604cac23fb2680ebb9b0eb5bc0516fe8035e43f"
+    },
+    {
+      "path": "reference/workflows/C05.json",
+      "sha256_lf": "2c532f06eda675330669f6e6b43c3bd7cfa5eab8a0e863d84a533d610a4a94a4"
+    },
+    {
+      "path": "reference/workflows/C06.json",
+      "sha256_lf": "31e42b1f6b5ec27fe4d7c424a06346d35e8b2c0185f9c87d1c4c02a02bc97956"
+    },
+    {
+      "path": "reference/workflows/C07.json",
+      "sha256_lf": "565f51f57b1e2aaf3a38fa372b5c2fb626758589409f27754456f8ad209ea615"
+    },
+    {
+      "path": "reference/workflows/C08.json",
+      "sha256_lf": "0702645bd96cd846d49fd795213219bd1ad9d6e1de054610346b947651ec46d3"
+    },
+    {
+      "path": "reference/workflows/C09.json",
+      "sha256_lf": "8262099c722366413b2cbf127289c0fe074cafc93a5cc3d71f5f596f04eecf74"
+    },
+    {
+      "path": "reference/workflows/C10.json",
+      "sha256_lf": "40d48169ff9ceae380248cdf892f9a0a7b90d94004f14d721cbd1431fec0e592"
+    },
+    {
+      "path": "reference/workflows/C11.json",
+      "sha256_lf": "84a4572192f25e11509a8fe3ae1dd86ca8e01c54cbd827fd8153fe958fd87599"
+    },
+    {
+      "path": "reference/workflows/C12.json",
+      "sha256_lf": "3a20b5f46a30ff8a58444a40dde1b3dab543a08f840a5f193d90bf61c134dff5"
+    },
+    {
+      "path": "reference/workflows/C13.json",
+      "sha256_lf": "2f1fdf5c9bd253177120963d45781be06194e45a94795dd8e69aeae4795e7a36"
+    },
+    {
+      "path": "reference/workflows/C14.json",
+      "sha256_lf": "3dd99d456f875494b1eedc47b9fb687c5a742e7d0fbec07f98bc3cf3eaa9b304"
+    },
+    {
+      "path": "reference/workflows/C15.json",
+      "sha256_lf": "aba7dba5ef662bdb38ec1cb52fa2f62a9c932bfacfb797959ceb295e50599e17"
+    },
+    {
+      "path": "reference/workflows/C16.json",
+      "sha256_lf": "9859050a8cdc3d72597e6231c96b2dce9b18dd3fe47c91fe0c6c5b24ee8a3940"
+    },
+    {
+      "path": "reference/workflows/C17.json",
+      "sha256_lf": "335840363f589afebb04ae60c93389abc751d9756bd80b5ec1e7849be2a02caf"
+    },
+    {
+      "path": "reference/workflows/C18.json",
+      "sha256_lf": "6be66341694738c33cd7ac10049313d5b188e71d3fa45bd82e5bf659cbb58c57"
+    },
+    {
+      "path": "reference/workflows/C19.json",
+      "sha256_lf": "a481f27d3c05fda91c993b15bb474d8eab4dd5785c938dfb4e2986ebf1ede6f3"
+    },
+    {
+      "path": "reference/workflows/C20.json",
+      "sha256_lf": "eed780f497bc002e33255f3d8ff26a165cd300e436db9b1a088079bb14ae0033"
+    },
+    {
+      "path": "reference/workflows/C21.json",
+      "sha256_lf": "0283d41f37371931eda5d9c01ef63b4b85d47ffb2fd8c273e4085cd5f653598e"
+    },
+    {
+      "path": "reference/workflows/C22.json",
+      "sha256_lf": "797670acf88c67d097b1f6e927ec819361f73e40b68f64c2cc0db11b712eb750"
+    },
+    {
+      "path": "reference/workflows/C23.json",
+      "sha256_lf": "c39fa81ea75a8e1a0e01470217b0448ac2f2fb38bb9458e85ff01415f09a7098"
+    },
+    {
+      "path": "reference/workflows/C24.json",
+      "sha256_lf": "7977e4f71c793e323e635e0a45e1654774eaffcc9b851b24822e679cb12033b9"
+    },
+    {
+      "path": "reference/workflows/C25.json",
+      "sha256_lf": "42ff8051938a41bc8007732686c1e3b878be1ebd18ffd905601d8bbe1e1c7c78"
+    },
+    {
+      "path": "reference/workflows/C26.json",
+      "sha256_lf": "5e495b433690b7f1f4cb19e1314c4608062d438b39f6f96f48c12078fa4c4061"
+    },
+    {
+      "path": "reference/workflows/C27.json",
+      "sha256_lf": "36305e3752e918840592bdd988e77363ba206a86853e7643280b43a884a08f90"
+    },
+    {
+      "path": "reference/workflows/C28.json",
+      "sha256_lf": "c93130447fc2189cebd03fdab68d5757053958e04d3d4592b012857bbbe1b0ec"
+    },
+    {
+      "path": "reference/workflows/C29.json",
+      "sha256_lf": "d343e9636cb9e407cde771de91c9774244001f31b88c4d2188bdbe091ca9e894"
+    },
+    {
+      "path": "reference/workflows/C30.json",
+      "sha256_lf": "22a46c4456dd50d2a870ea52c4aca6dd55c7b680719b0755ddd697c23dc2e34e"
+    },
+    {
+      "path": "reference/workflows/C31.json",
+      "sha256_lf": "b8c771ac176044832223e4d6bd529dd1f4f607d98044f54d7ef54249af5046db"
+    },
+    {
+      "path": "reference/workflows/C32.json",
+      "sha256_lf": "728fc2b91c86ae4fc5ba48e6ffe42b7650d427a62d6f478aba95c8ca8e6aff85"
+    },
+    {
+      "path": "reference/workflows/C33.json",
+      "sha256_lf": "1a6fe1fc5262f99f30d8e26709015985e3c52ea99526e538561917d5f0e99d0c"
+    },
+    {
+      "path": "reference/workflows/C34.json",
+      "sha256_lf": "96c944bf688835deacfd8b41b39d83750dfaa306e42aaf7044cc18edb2284807"
+    },
+    {
+      "path": "reference/workflows/C35.json",
+      "sha256_lf": "b668d1208d2fbb014e231e4377eced0cd1d2313a7f2fbfcb11c87b6944361a8b"
+    },
+    {
+      "path": "reference/workflows/C36.json",
+      "sha256_lf": "a7a3cf233500f7d0947cae1dc70e10132509e020488644f2e0c2a8eb0fcfb3ca"
+    },
+    {
+      "path": "reference/workflows/C37.json",
+      "sha256_lf": "8f1f0903b1d995aa06aa6d8410b497f15bf10de3a3207c27e74cc70df92fb18d"
+    },
+    {
+      "path": "reference/workflows/C38.json",
+      "sha256_lf": "c69c53b34b833710b44c22d95dfddfa18ad5bda564b4a5e64ca0d55693fac0c0"
+    },
+    {
+      "path": "reference/workflows/C39.json",
+      "sha256_lf": "7b2f88cc058e534eac2c08cee0c7a2809e49a3442828f0aa6bb880c05dcb9c10"
+    },
+    {
+      "path": "reference/workflows/C40.json",
+      "sha256_lf": "3966816c0b4e4d33044d0d3808a1a628fd7333156ac95ddb1e52c8308ee8ecc3"
+    },
+    {
+      "path": "reference/workflows/C41.json",
+      "sha256_lf": "0a350cc92c064a738149a68ceb95414376e1302b536152554b34349bb7e9dd43"
+    },
+    {
+      "path": "reference/workflows/C42.json",
+      "sha256_lf": "9b013b997efa85793ac2ea9f2a8f7fd9e9aea53e726622042d8245fcc2953198"
+    },
+    {
+      "path": "reference/workflows/C43.json",
+      "sha256_lf": "ce604847502ea730cc60915be26cab23d6975eddccc2202447a8ac5d3f9df66f"
+    },
+    {
+      "path": "reference/workflows/C44.json",
+      "sha256_lf": "e54ff8e7ecfb51b1e9efc54df04c69f7a6df75e964dc12eb8fb8a1e8055821b5"
+    },
+    {
+      "path": "reference/workflows/C45.json",
+      "sha256_lf": "74cf8b7c7d122fa1c878e36f8890e18ce2fecc9a717df1c21ad777b54cd048d7"
+    },
+    {
+      "path": "reference/workflows/C46.json",
+      "sha256_lf": "ed8baf4abda0e735fe436c759a47b6b983c4500ba18e4e22ea89e141e1c91ae0"
+    },
+    {
+      "path": "reference/workflows/C47.json",
+      "sha256_lf": "a55e15fe7fb7a3151a831fd7cabaadaf529a3b2f2e2e2d364a04e047b32ff9ea"
+    },
+    {
+      "path": "reference/workflows/C48.json",
+      "sha256_lf": "4962dfadcd0a17fbfa4fdbf1ef9e96bd7c74d2aa5f3993ca9016ef28d8428b04"
+    },
+    {
+      "path": "reference/workflows/C49.json",
+      "sha256_lf": "a316771129e7d5c87430f7773088523997a450df8679fb4cf46bcd754b706cd6"
+    },
+    {
+      "path": "reference/workflows/C50.json",
+      "sha256_lf": "38ea0252e2e0caeeb8894d1df4bfccec2fbb176cf3fcc840e9e8953f30024e3e"
+    },
+    {
+      "path": "reference/workflows/C51.json",
+      "sha256_lf": "42ad76995b77b1165fa948980d83195f3586948fd6d119db19efc8963f2feb97"
+    },
+    {
+      "path": "reference/workflows/C52.json",
+      "sha256_lf": "d256e0be9c74719f6fb1875034e4a5c4b9694bb1b63766664024e4623fc3676d"
+    },
+    {
+      "path": "reference/workflows/C53.json",
+      "sha256_lf": "78abb5b452ab3d7ed75346206a5b37c981a84118235eda37bbc3a69de9a809e3"
+    },
+    {
+      "path": "reference/workflows/C54.json",
+      "sha256_lf": "b8a481cc6c462c898c646a8384e47f388e5f42af017322d29f34b988770f1b01"
+    },
+    {
+      "path": "reference/workflows/C55.json",
+      "sha256_lf": "ea016e04bfa276c641fde5346285098e8bab826a9f8a33eba3b83fa68c8105a5"
+    },
+    {
+      "path": "reference/workflows/C56.json",
+      "sha256_lf": "7cd9697e1bbed8654477326b7b6fa82473b19359f75e9b0be25320be2f2d8ddd"
+    },
+    {
+      "path": "reference/workflows/C57.json",
+      "sha256_lf": "839df216f08978abe2b416e63d83cf2263313479c361ba6c0425b32c3c7d6d0b"
+    },
+    {
+      "path": "reference/workflows/C58.json",
+      "sha256_lf": "11c923e26241e06b52fdfd6792a3e23011fca77f30291d16dc173b57d8c7efcd"
+    },
+    {
+      "path": "reference/workflows/C59.json",
+      "sha256_lf": "4220a3999bbd54e48c2e605bec1f1c63f7c3a31dee0c5db8ca824737bf260349"
+    },
+    {
+      "path": "reference/workflows/C60.json",
+      "sha256_lf": "3f9498ad99d9e6218a73c9f0b35a0e76ac56e9738e027e559040c3fc6a8c98e4"
+    },
+    {
+      "path": "reference/workflows/C61.json",
+      "sha256_lf": "75f0526540f39bc2090cabbfa3a41f0f2510c295844e32e0cd0578d6e088a729"
+    },
+    {
+      "path": "reference/workflows/C62.json",
+      "sha256_lf": "36329fce8cfd2d9d7772b528624659bb57e1f7c6512dc8e0204690ec9214c049"
+    },
+    {
+      "path": "reference/workflows/C63.json",
+      "sha256_lf": "2475f060ed69c27673f7592bebe2a3aa814753996b7273f50611d5ca61a97341"
+    },
+    {
+      "path": "reference/workflows/C64.json",
+      "sha256_lf": "7fd51f087312e4abca75e852cd8132901241f8da6a3ef132c9460b42ab4fc4a9"
+    },
+    {
+      "path": "reference/workflows/C65.json",
+      "sha256_lf": "05c918c592374bd8348766e0494afc9c10a6380088203d1c8cb909aee2fe39c2"
+    },
+    {
+      "path": "reference/workflows/C66.json",
+      "sha256_lf": "28451032e8337358b7c7ce15f35a27bf8af09eadc49f1e08da952008225fef65"
+    },
+    {
+      "path": "reference/workflows/C67.json",
+      "sha256_lf": "ac6c7aeb4f59b1e8a70526d069501e00a22c2e957253dc13a150b0521ff2142c"
+    },
+    {
+      "path": "reference/workflows/C68.json",
+      "sha256_lf": "4c5ab54dc5b6fe58fbc33ac05567a53d25a2d29d4c61c4159ef7385a2f5c4054"
+    },
+    {
+      "path": "reference/workflows/C69.json",
+      "sha256_lf": "8482e9bcfcedc89162896ace8b7e0632c3bb2c2aee93cdc42f31f82896f92925"
+    },
+    {
+      "path": "reference/workflows/C70.json",
+      "sha256_lf": "0228e9279bfc45175d2e75794e2a9ac341dbdc8e17c2f95d1e8d606a2a92ba5d"
+    },
+    {
+      "path": "reference/workflows/C71.json",
+      "sha256_lf": "f95866f1ec5e2efa510936fe088cdeed6edd134df8a696f9e7c02c6f7e98d054"
+    },
+    {
+      "path": "reference/workflows/C72.json",
+      "sha256_lf": "1c8843a5b63feed189119a472c0465f4f0f24fc627bfa5bd3a2b41f2293e10d4"
+    },
+    {
+      "path": "reference/workflows/E01.json",
+      "sha256_lf": "e382d0e5dd39d49f655d686cd81e83092c57dc17ebfaf6ee39362f69aa4a3335"
+    },
+    {
+      "path": "reference/workflows/E02.json",
+      "sha256_lf": "4bbb902119ad57a81accb42d11b75dce48839f40eb9fc7e52e0dbbaad60a5dd2"
+    },
+    {
+      "path": "reference/workflows/E03.json",
+      "sha256_lf": "3db0460a6343fb61aa0f07db2e2b6ee001a4e583360b9308e658e12ffbda8b92"
+    },
+    {
+      "path": "reference/workflows/E04.json",
+      "sha256_lf": "1caef0a3b6dcf3678877e89229fdeb549ac06bf68466390a53310255f11bf6e8"
+    },
+    {
+      "path": "reference/workflows/E05.json",
+      "sha256_lf": "dd257be535992f5957eb91ae49bcfdbeda77d376686244f2b2c00704b5410b97"
+    },
+    {
+      "path": "reference/workflows/E06.json",
+      "sha256_lf": "0eece84923e730d4cddadaf108385e5140166c8bd2e91d78a06ba934820aa602"
+    },
+    {
+      "path": "reference/workflows/E07.json",
+      "sha256_lf": "f3e5e7ddcd8471525153a314f72e91ac5092fcec2d31021ff7a4cd251cffe0b7"
+    },
+    {
+      "path": "reference/workflows/E08.json",
+      "sha256_lf": "487b89644417dd8e9062373298d0ac2e7305b4607a4059ea2aa9bf2cf350adf6"
+    },
+    {
+      "path": "reference/workflows/E09.json",
+      "sha256_lf": "8a881ee54bbfa42ac4fc4418c72704150477f6f1b84216189a1588a370a79c2f"
+    },
+    {
+      "path": "reference/workflows/E10.json",
+      "sha256_lf": "c026bd458bab4ca0eaba7e85f6c28424ba7e271d3c43a12a4e88c166142c325c"
+    },
+    {
+      "path": "reference/workflows/E11.json",
+      "sha256_lf": "8751befe102b9def2395adfffacf1fa1bf9bfeaa18461cc512066f97644428db"
+    },
+    {
+      "path": "reference/workflows/E12.json",
+      "sha256_lf": "6ec992f05a8976664f621bd286078ea641f23d973312864ae14db5f697f0907f"
+    },
+    {
+      "path": "reference/workflows/E13.json",
+      "sha256_lf": "a36ca2dd98f61504139a65b697daa1603209be8cf5b628195a8d2063dac83801"
+    },
+    {
+      "path": "reference/workflows/E14.json",
+      "sha256_lf": "44b8a82bd2a321567aa143b950c8a4a8a1a64b22618bfc2d411d55b8561c6ee7"
+    },
+    {
+      "path": "reference/workflows/I01.json",
+      "sha256_lf": "d000f4aca7728be6fd4e231fba294bd9e4ebc3883579e318f3b7cf67ebfd91e1"
+    },
+    {
+      "path": "reference/workflows/I02.json",
+      "sha256_lf": "4b6423fc9a3d187d869d0ad7e67b6b7aa2a7b70b3059c6923850c3827fcca930"
+    },
+    {
+      "path": "reference/workflows/I03.json",
+      "sha256_lf": "d0015411b01b42f031fabe32ae3dba13162dfe66a10a0d3a055ff2f9448cbcfd"
+    },
+    {
+      "path": "reference/workflows/I04.json",
+      "sha256_lf": "54ca3402c75124ebd23482aaee7eab8b2f741ec9ddd4febd169a943941e93b69"
+    },
+    {
+      "path": "reference/workflows/I05.json",
+      "sha256_lf": "bd51a74dfaca023d9f841096da9a9ec927a311ce40513a66e10c85d0b06453bb"
+    },
+    {
+      "path": "reference/workflows/I06.json",
+      "sha256_lf": "117ab7595ac247cdce8fcfe372af556af864674a1ed22c04bb1f5b66c058b40a"
+    },
+    {
+      "path": "reference/workflows/I07.json",
+      "sha256_lf": "456276f4b77c115cb87adebf2cb6e296ee8244f6086481b255298561b9293926"
+    },
+    {
+      "path": "reference/workflows/I08.json",
+      "sha256_lf": "29785f96b0c25f00bceeaaf8192995856bd89a747545097ba39683a0f68ddca9"
+    },
+    {
+      "path": "reference/workflows/I09.json",
+      "sha256_lf": "544a8d537a598cb2995b694f34fba3c32c871a22b14098e2324e1e91e7122edf"
+    },
+    {
+      "path": "reference/workflows/I10.json",
+      "sha256_lf": "cd2ff1b391fa8e95d3ed09bd3cc50aa598cac9a93dca66885d973ddcc6e79a9f"
+    },
+    {
+      "path": "reference/workflows/I11.json",
+      "sha256_lf": "5b90b85058fa11278ec1ae5d4b4b08ff4a994bb8c424611589207f2e9cba99c2"
+    },
+    {
+      "path": "reference/workflows/I12.json",
+      "sha256_lf": "58501e797b63ad3103e28623d89dae5ff2a8b04da3d078456183b709a0fe4c8d"
+    },
+    {
+      "path": "reference/workflows/I13.json",
+      "sha256_lf": "c6456aab90d604b33b0030203a7a38fbdba2b331cbabcb6af9231a6048afe93c"
+    },
+    {
+      "path": "reference/workflows/I14.json",
+      "sha256_lf": "536c71298a3b37bc07fb8aca7ecd92c1444d98b0904fb01d1b68887d0842cc6b"
+    },
+    {
+      "path": "reference/workflows/I15.json",
+      "sha256_lf": "4a9ae123484bd1e353c526ada4283d38814d530f3ddf3d18bd9aa3e1d4c40200"
+    },
+    {
+      "path": "reference/workflows/I16.json",
+      "sha256_lf": "1a6eccd3196e545754f186123eff35fc932faf01632d39524c1ceb5f49163721"
+    },
+    {
+      "path": "reference/workflows/I17.json",
+      "sha256_lf": "3f469fb7d00326e812142cb78497f132ff39315b7fd8dfec98e05dc247a271d8"
+    },
+    {
+      "path": "reference/workflows/I18.json",
+      "sha256_lf": "490b7663225049864c1d3592d575e9709e1492edd23da095ced209bb27bf7c49"
+    },
+    {
+      "path": "reference/workflows/I19.json",
+      "sha256_lf": "c79b43d4224fac0a32a0bf5f53e9158466c5c993a67ee113cdf7c52f5483ec52"
+    },
+    {
+      "path": "reference/workflows/I20.json",
+      "sha256_lf": "c7f7d1d9a5190ed05aa7e803737b22e0d8e144086be7a14e517d2f722b6764b8"
+    },
+    {
+      "path": "reference/workflows/I21.json",
+      "sha256_lf": "53b300dc14b534e1c2be3a2a76d03c9357da2038fb07dc68232872fbcf7c35d3"
+    },
+    {
+      "path": "reference/workflows/I22.json",
+      "sha256_lf": "a1e3ed664cc7943caa854f5950f6339b5a4eb1c430579a57dc86d056ee3d723a"
+    },
+    {
+      "path": "reference/workflows/I23.json",
+      "sha256_lf": "d25809b704643ed8671f1e96dd2b653dd7b66b05a074b568c13e335b1d2866c6"
+    },
+    {
+      "path": "reference/workflows/I24.json",
+      "sha256_lf": "8232968a4ad90a41257522d7f40e8b9ece6c11ef3adce2dab186df8410bfe817"
+    },
+    {
+      "path": "reference/workflows/I25.json",
+      "sha256_lf": "e94b1802a707fbe3952f2c366a75c78b3478b9b87e1d2c37b0d63a8f598a3fb0"
+    },
+    {
+      "path": "reference/workflows/I26.json",
+      "sha256_lf": "ba596481b1b732a5927e8be9b267b585bd18a9d358a8a32a42a9e06455741268"
+    },
+    {
+      "path": "reference/workflows/I27.json",
+      "sha256_lf": "3aaa2ef0bb4ab764622213f5e98bcaf372f25add12a2c351b613bdc05f1d68d4"
+    },
+    {
+      "path": "reference/workflows/I28.json",
+      "sha256_lf": "a9b8f3aad6400c9bae195fa506ff23f747d07064dc6d7f99fe3d5bbf14c190c4"
+    },
+    {
+      "path": "reference/workflows/I29.json",
+      "sha256_lf": "4cdda2d835825cdda997fe352cdbfeb9083ce3f909a807a575d3fa09ed280a30"
+    },
+    {
+      "path": "reference/workflows/I30.json",
+      "sha256_lf": "b5fdfde3cafe46459cd342d7a5abb1e6c0491659b145bb42a1a1a5b64034e5cc"
+    },
+    {
+      "path": "reference/workflows/I31.json",
+      "sha256_lf": "6671231d51158820885a3dfba021f0f890d1194ba1a4a4c79a0b788a76d7db78"
+    },
+    {
+      "path": "reference/workflows/I32.json",
+      "sha256_lf": "0e58b91afa55f51ce47751653df5944c7644ba313db3e904b8e59d1e0ca91237"
+    },
+    {
+      "path": "reference/workflows/I33.json",
+      "sha256_lf": "4ea253d6e42ae797ddec4bcce32d972f10d9402df08c684b87fdda1e8f32c55e"
+    },
+    {
+      "path": "reference/workflows/I34.json",
+      "sha256_lf": "4dcdc6ba3aa40e51f77be19a78b0aab203c2fbbda1ca6e766dbe012e969ef07b"
+    },
+    {
+      "path": "reference/workflows/I35.json",
+      "sha256_lf": "be17492221783216671d2016d35d3aee7f02a253349f66a6137fbe0fdec05c59"
+    },
+    {
+      "path": "reference/workflows/I36.json",
+      "sha256_lf": "2fbc83e6ddcad7384742b33489bc565cf2e7f557989a31f00fad46059cd3b29c"
+    },
+    {
+      "path": "reference/workflows/L01.json",
+      "sha256_lf": "d40a639b37cb48229b32d74450fa26fc40cae57d2afcb92731dc00045b70fbe4"
+    },
+    {
+      "path": "reference/workflows/L02.json",
+      "sha256_lf": "104b40c5debf66f3ce6f6e862caa33455386d12a7d9e0f7aecfb65c95e056113"
+    },
+    {
+      "path": "reference/workflows/L03.json",
+      "sha256_lf": "de971cef1889103d4f2cb95def69cb60c0c1a69ce76741400aa2b32d018b470a"
+    },
+    {
+      "path": "reference/workflows/L04.json",
+      "sha256_lf": "4b6ea6d9a79b8d78103e06711d0923128e06cd746a3ee850ed4957217a3147fd"
+    },
+    {
+      "path": "reference/workflows/L05.json",
+      "sha256_lf": "a35ea72d1c7f1ae74f2c2a683600850ada73abb0a23070cf1f3c110932ad9a57"
+    },
+    {
+      "path": "reference/workflows/L06.json",
+      "sha256_lf": "4e54466f5a620a94fea57c3ea12fb7b4cccd355699e5da1ef4580bfcfb1cf134"
+    },
+    {
+      "path": "reference/workflows/L07.json",
+      "sha256_lf": "923f0606aa8c1ee5fe5ce783f36839c4aa2dd64dd5569c337ff1f5894cca5f1f"
+    },
+    {
+      "path": "reference/workflows/L08.json",
+      "sha256_lf": "be58f9fa3b14c1c0fcad5ebb1a32208ef546644d439516066bece7ae7e67dca0"
+    },
+    {
+      "path": "reference/workflows/M01.json",
+      "sha256_lf": "3401c386c0c8c8a2c28333b14aabe86f9af5bf014dc7094edf585e5a8e98588a"
+    },
+    {
+      "path": "reference/workflows/M02.json",
+      "sha256_lf": "9e0ce8c9a69604b3c0dd25645622c1cbe1251514dd7b4d00c7051ff5703254c0"
+    },
+    {
+      "path": "reference/workflows/M03.json",
+      "sha256_lf": "803ff72023cde8b5c032dca64d3b3a5758ff7191d16f9823f2e99d28e1c11bbf"
+    },
+    {
+      "path": "reference/workflows/M04.json",
+      "sha256_lf": "cc1559a6fc8a181afa9ff9896827af580e0fee9c6af6721e3067a8fa79dc9fcb"
+    },
+    {
+      "path": "reference/workflows/M05.json",
+      "sha256_lf": "c5665d856964dbae438a70fcc9df35bcc9e115b7f9e8220d48fd4e86ec25edc4"
+    },
+    {
+      "path": "reference/workflows/M06.json",
+      "sha256_lf": "12064e1928b9e5240b00e526e9abc684c34033dbd5c4a155c2d5c826b4dff098"
+    },
+    {
+      "path": "reference/workflows/M07.json",
+      "sha256_lf": "1f282d04b3a5f008123d6eabc9031c58d0d99ff25c0293593f85a28db951669a"
+    },
+    {
+      "path": "reference/workflows/M08.json",
+      "sha256_lf": "cd3c91a8e3bb60b808b549c2a6d9a786bcec0f7886535e9f7487b8ef210de91b"
+    },
+    {
+      "path": "reference/workflows/M09.json",
+      "sha256_lf": "b532ac253ec83cb0822e933531e104b3c14e9b209fe0f0d6e7d16ed5b15c633c"
+    },
+    {
+      "path": "reference/workflows/M10.json",
+      "sha256_lf": "b5d47edc69267a2f2765fa5f5e8a121296bc99b1d6e001919d42277bdc3944ec"
+    },
+    {
+      "path": "reference/workflows/M11.json",
+      "sha256_lf": "b347da8dab7a64ac74902f9da6585758cd0b0f91ad32bd6b973e16e40e84f963"
+    },
+    {
+      "path": "reference/workflows/M12.json",
+      "sha256_lf": "e55590dc1b05f614e619e5b884d8b165686655234cdb8d2e8c7e3253d84c02e2"
+    },
+    {
+      "path": "reference/workflows/M13.json",
+      "sha256_lf": "ed43c08762524b9d45ff5373a9e6a0e0ab5d952b21381951c40902e97b865a75"
+    },
+    {
+      "path": "reference/workflows/M14.json",
+      "sha256_lf": "0f156719601ceec8081f17e88d59f81e37ee510bdb83c87ce8fc2b1d24458b47"
+    },
+    {
+      "path": "reference/workflows/M15.json",
+      "sha256_lf": "26a95dd11ebdd50ee150da677306faaf47ac9719a48b8f677da65d262c6a0d88"
+    },
+    {
+      "path": "reference/workflows/M16.json",
+      "sha256_lf": "3185d1487ef686f25f4e3ce4e8bcaf20f2795450733334a4b2fe89964db7165d"
+    },
+    {
+      "path": "reference/workflows/M17.json",
+      "sha256_lf": "3019b84982390c5d74bccc2a7cc0c255d6951f144ea5952a3c17fe5e6e8080c4"
+    },
+    {
+      "path": "reference/workflows/M18.json",
+      "sha256_lf": "bc627143795b81ce791bff8cae1e68242167bfe033476c14ccf633c65fd86d25"
+    },
+    {
+      "path": "reference/workflows/M19.json",
+      "sha256_lf": "79378bdf68eafef766be558788bba7c835fadd264d8d6faa7d43ec9db1e7dea2"
+    },
+    {
+      "path": "reference/workflows/M20.json",
+      "sha256_lf": "0345afe3c2258ca696b20b3bb55ed84f308948bdafc0cfc3f3331b27a99ad7bc"
+    },
+    {
+      "path": "reference/workflows/M21.json",
+      "sha256_lf": "d563555177ee4b9b1960168a5f3ab4f3e4cb4323918baa6fa0c61aadb2f3d3b8"
+    },
+    {
+      "path": "reference/workflows/M22.json",
+      "sha256_lf": "98d203ec202874d15e8fec6be12e8750775fa9525ef94ed19842ce70f81bb1be"
+    },
+    {
+      "path": "reference/workflows/M23.json",
+      "sha256_lf": "275e7110408feee26c9ee9963eeddac97ae358bfa19a379f9e22cb062ed09b1e"
+    },
+    {
+      "path": "reference/workflows/M24.json",
+      "sha256_lf": "b09d24e3943558719dd43433f00a4568c2e8d7821dd73ac3d111ff82e9fc465c"
+    },
+    {
+      "path": "reference/workflows/M25.json",
+      "sha256_lf": "5ba1b25bc4dd422378c7359c97df18fc3501e80c01605712c10ff72ab8f6fb8e"
+    },
+    {
+      "path": "reference/workflows/M26.json",
+      "sha256_lf": "0067d0ae8fb6200dd80424063249b354f3c9abe33d8c338cae245bf4e969415f"
+    },
+    {
+      "path": "reference/workflows/M27.json",
+      "sha256_lf": "4fd4d6046b555029ce0dbedd7d2cd6eaae78736a0d8add6f1ecda44224804317"
+    },
+    {
+      "path": "reference/workflows/M28.json",
+      "sha256_lf": "44984ce641e37ae6e8771e9753433a19cdb1cc4e9b34ad9e102f233ee3b0d3ad"
+    },
+    {
+      "path": "reference/workflows/M29.json",
+      "sha256_lf": "29ba8bc20e425ccecb4a8ccfdd348389c157f528f6c33170603c2553cf0af0da"
+    },
+    {
+      "path": "reference/workflows/M30.json",
+      "sha256_lf": "25faae8ed4bfcd8b6fcf4bc0f0220e457376ea707bed41c89d436278c62bcd41"
+    },
+    {
+      "path": "reference/workflows/M31.json",
+      "sha256_lf": "049284e625a03c68f4f42707b254d65b2737ad0b1efe2f0ac3058eed6f2a30d3"
+    },
+    {
+      "path": "reference/workflows/M32.json",
+      "sha256_lf": "8fcded26175ed8a572d7d9063ad5b24204f65577cdfcffb98ddb195964bbebde"
+    },
+    {
+      "path": "reference/workflows/M33.json",
+      "sha256_lf": "6e03e3cf5d18acbdc7b5bc0257695b3a0bf82614f197890c9ac51f1fda48d8d0"
+    },
+    {
+      "path": "reference/workflows/M34.json",
+      "sha256_lf": "3078ba4b12ac9142320e4e1ea64829e133856bae8cc351bb4869fc7e4c80cb29"
+    },
+    {
+      "path": "reference/workflows/M35.json",
+      "sha256_lf": "3dffe4a87955caeb26cd6799b43cb892bbacfcbdc0e1d66a08e4255dc05711ce"
+    },
+    {
+      "path": "reference/workflows/M36.json",
+      "sha256_lf": "02b7553b6e08890c74e7303a735d9d934ca0d0b31330c0a8d0b6198f96e2d407"
+    },
+    {
+      "path": "reference/workflows/V01.json",
+      "sha256_lf": "a0c09e52880bd725d2f90f6067110e43fb230a648c19d446adc86ef154cf489c"
+    },
+    {
+      "path": "reference/workflows/V02.json",
+      "sha256_lf": "62db3df16002ef5caea9792885e5b15162b629f01167a20e860aec53931f6a52"
+    },
+    {
+      "path": "reference/workflows/V03.json",
+      "sha256_lf": "aff19b057e9aec7799480262a48d77ba0f20af34fa16d36afeae8db6b87c5c90"
+    },
+    {
+      "path": "reference/workflows/V04.json",
+      "sha256_lf": "38446ab8eb3c9a2bede77133f2b2074de1d3ebd0cd61b6441aa487dbcff401a4"
+    },
+    {
+      "path": "reference/workflows/V05.json",
+      "sha256_lf": "c2f35a42cfddc27afd321923bbcf319e286b6b0f69eac3c55cdbace9bfc2cd51"
+    },
+    {
+      "path": "reference/workflows/V06.json",
+      "sha256_lf": "e82328501a1e6dab14383d2cdb25bacf13ef5ee97b7a8800f83b2825c4c3a4a1"
+    },
+    {
+      "path": "reference/workflows/V07.json",
+      "sha256_lf": "8dce9b37be78f3fec7f4cd4344f14e8c19a4a0a4bb6ccb71856abcfc56ce8450"
+    },
+    {
+      "path": "reference/workflows/V08.json",
+      "sha256_lf": "ba299797a44d500da1918d49b3f93d4bac5d0496dd5143e5bfa2eccb8441a2c9"
+    },
+    {
+      "path": "reference/workflows/V09.json",
+      "sha256_lf": "bdfd283cecf059c819efa976c791beab32054de42762507fbc18d67076ad2b0f"
+    },
+    {
+      "path": "reference/workflows/V10.json",
+      "sha256_lf": "0df5b081321c9a45c62445930dfba25f248146af9a6262cd624668f5b4295f76"
+    },
+    {
+      "path": "reference/workflows/V11.json",
+      "sha256_lf": "62405fdfd4fdd03645a9507c2578d427206d6aff12162b1687710067b633431d"
+    },
+    {
+      "path": "reference/workflows/V12.json",
+      "sha256_lf": "2a4d9f359c4832314c839828ad6f33c1fc7ef06b61b30896088ec8aabc5675f5"
+    },
+    {
+      "path": "reference/workflows/X01.json",
+      "sha256_lf": "20f0c5e817265c5a0ce279d8bf66f1b0a6ff18c601f5cda1ad3679ed3b7e8589"
+    },
+    {
+      "path": "reference/workflows/X02.json",
+      "sha256_lf": "997822d1175ed1186211ec486edaa0e212e462f0192912626ce3cf90db20be32"
+    },
+    {
+      "path": "reference/workflows/X03.json",
+      "sha256_lf": "c03c7992820ed8a51d38d511350ee44a50b46fec4d7bf9d4b16c88e22a6c9d85"
+    },
+    {
+      "path": "reference/workflows/X04.json",
+      "sha256_lf": "2e6a1ffea1ea1ae1bb925213955330d9e03b43694adac73aa1417ac74071d468"
+    },
+    {
+      "path": "reference/workflows/X05.json",
+      "sha256_lf": "707c6d8473b81ed9a8b4aff8c389061cb18001cdc16095c7120619bfcecac98b"
+    },
+    {
+      "path": "reference/workflows/X06.json",
+      "sha256_lf": "e803347d08a9e603ad3a82ea09a5dc1f1500b83cf961826b6cb9db6196141366"
+    },
+    {
+      "path": "reference/workflows/X07.json",
+      "sha256_lf": "2a6b46887e90175f61943aa1e8a696afb2deb1a22b7dca38c0532c69cd45377d"
+    },
+    {
+      "path": "reference/workflows/X08.json",
+      "sha256_lf": "2c52141f585e427b400ca22035d537500ea6ecc0aa1f5a32ad57e4cb791bd7bb"
+    },
+    {
+      "path": "reference/workflows/X09.json",
+      "sha256_lf": "87ccb4388de93fe322261cc6e3a4dc92dcbe61d9c17ef06ae9834f2a286a3f64"
+    },
+    {
+      "path": "reference/workflows/X10.json",
+      "sha256_lf": "885e59160185241f9dce635c5b7e937bcfa52e949e07116e02ea8ae4f4ad7b8f"
+    },
+    {
+      "path": "reference/workflows/X11.json",
+      "sha256_lf": "977cd4431bd9d76ead47777c2f7fdae402391474a294146739006ff118e3c1e8"
+    },
+    {
+      "path": "reference/workflows/X12.json",
+      "sha256_lf": "19a3f5e64e5a138de5868a88bd74db443a716acdd38b4703d1e6668183ec8796"
+    }
+  ],
+  "public_source_context": {
+    "declared_base": "97df42d5a00c5a7131eff76526777bba4fbdacff",
+    "selected_candidate": "a14668130cb38b4e5f0799990ebce5289ea04998",
+    "hash_semantics": "SHA256 of bytes with CRLF pairs replaced by LF only; repository-relative citations",
+    "validation_is_not_native_ownership_or_qualification": true
+  },
+  "qualification": false
+}

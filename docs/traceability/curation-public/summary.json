@@ -1,0 +1,15 @@
+{
+  "components": 147,
+  "direct_source_named_relations": 904,
+  "engineering_prerequisite_relations": 1056,
+  "dispositions": {
+    "EXACT_SOURCE_NAMED_CONSUMERS_RECORDED": 71,
+    "ENGINEERING_OR_NATIVE_SUPPORT_ONLY": 17,
+    "DOCUMENTATION_UTILITY_NOT_RUNTIME_SERVICE": 1,
+    "LEGACY_SCOPE_REQUIRES_EXISTING_OWNER_DECISION": 9,
+    "CONDITIONAL_DEFERRED_NO_INSTALL_AUTHORITY": 40,
+    "EXTERNAL_CHANNEL_AUTHORITY_REQUIRED": 9
+  },
+  "raw_pending_audit_findings": 28,
+  "qualified": false
+}
