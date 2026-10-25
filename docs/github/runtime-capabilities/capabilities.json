@@ -1,0 +1,1458 @@
+{
+  "schema_version": "1.0",
+  "kind": "evidence_snapshot_not_approved_configuration",
+  "task_key": "F02",
+  "base_revision": "5126ca7c7273354b41e7de38e4a299b2a3c0656f",
+  "input_sha256": "7a3e27cf033f69f74bba69fb3fc546fdda4bed27b7fbbfec333013aaf4e5a8ef",
+  "graph_sha256": "240bfc59615c0e058b08e1955325dc3e5bb7411fc7216e3be97cbc25eba4070e",
+  "policy_sha256": "0fdc1b8c1c61f65e7a59cd1324bbe5b9c4f6f25f853d023b6c73be890b3848c1",
+  "fence": 1,
+  "evidence_date": "2026-10-25",
+  "timestamp_limit": "Rule and environment timestamps are original API object timestamps, not snapshot capture times. No fresher live verification performed.",
+  "authority": {
+    "organization": "CT-Infrastructure",
+    "account_type": "Organization per trusted task; standalone authenticated owner membership and plan payload not supplied",
+    "human_codeowner": "CompleteDotTech",
+    "codeowners_sha256": "8d2e4bde6ea56a90e9761a0bc4824800c01ed726cacd534a5735fb9d4fb7b791",
+    "original_design": "private monorepo",
+    "authorized_destination": "eight PUBLIC MIT repositories, explicitly chosen by user; not a workaround for private protection availability",
+    "private_repository_plan_support": "not established by supplied public repository evidence",
+    "production_authorized": false,
+    "production_credentials": "absent per trusted task; no credential inventory supplied",
+    "copilot": "Requested for subsequent PR reviews by user; no review receipt or enablement readback supplied. Does not replace required human or G gate approval."
+  },
+  "repositories": [
+    {
+      "repository": "CT-Infrastructure/marketing-v7-content",
+      "visibility": "public",
+      "license": "MIT",
+      "license_sha256": "7fb4bb7ca228ae11eda43f4d6e2896b474c32af03cbbe31deb148a9bf97204b1",
+      "main_sha": "4488fdaa61a2c9e9a19122922149ed50ea871174",
+      "main_protected": true,
+      "ci": [
+        {
+          "name": "package-validation",
+          "head_sha": "4488fdaa61a2c9e9a19122922149ed50ea871174",
+          "status": "completed",
+          "conclusion": "success",
+          "app_id": 15368
+        }
+      ],
+      "rulesets": [
+        {
+          "id": 25837638,
+          "name": "Marketing V7 protected integration",
+          "target": "branch",
+          "source_type": "Repository",
+          "source": "CT-Infrastructure/marketing-v7-content",
+          "enforcement": "active",
+          "conditions": {
+            "ref_name": {
+              "exclude": [],
+              "include": [
+                "~DEFAULT_BRANCH"
+              ]
+            }
+          },
+          "rules": [
+            {
+              "type": "deletion"
+            },
+            {
+              "type": "non_fast_forward"
+            },
+            {
+              "type": "pull_request",
+              "parameters": {
+                "required_approving_review_count": 1,
+                "dismiss_stale_reviews_on_push": true,
+                "required_reviewers": [],
+                "require_code_owner_review": true,
+                "dismissal_restriction": {
+                  "enabled": false,
+                  "allowed_actors": []
+                },
+                "require_last_push_approval": true,
+                "required_review_thread_resolution": true,
+                "require_extra_approval_for_unattributed_changes": true,
+                "allowed_merge_methods": [
+                  "merge",
+                  "squash",
+                  "rebase"
+                ]
+              }
+            },
+            {
+              "type": "required_status_checks",
+              "parameters": {
+                "strict_required_status_checks_policy": true,
+                "do_not_enforce_on_create": false,
+                "required_status_checks": [
+                  {
+                    "context": "package-validation",
+                    "integration_id": 15368
+                  }
+                ]
+              }
+            }
+          ],
+          "node_id": "RRS_lACqUmVwb3NpdG9yec5Vc4cyzgGKQEY",
+          "created_at": "2026-10-25T17:22:40.849-04:00",
+          "updated_at": "2026-10-25T17:27:10.980-04:00",
+          "bypass_actors": [],
+          "current_user_can_bypass": "never",
+          "_links": {
+            "self": {
+              "href": "https://api.github.com/repos/CT-Infrastructure/marketing-v7-content/rulesets/25837638"
+            },
+            "html": {
+              "href": "https://github.com/CT-Infrastructure/marketing-v7-content/rules/25837638"
+            }
+          }
+        }
+      ],
+      "token_policy": {
+        "default_workflow_permissions": "read",
+        "can_approve_pull_request_reviews": false
+      },
+      "action_allowlist": {
+        "github_owned_allowed": false,
+        "patterns_allowed": [
+          "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1"
+        ],
+        "verified_allowed": false
+      },
+      "environments": [
+        {
+          "name": "production",
+          "created_at": "2026-10-25T21:22:44Z",
+          "updated_at": "2026-10-25T21:22:44Z",
+          "can_admins_bypass": true,
+          "deployment_branch_policy": {
+            "protected_branches": true,
+            "custom_branch_policies": false
+          },
+          "required_reviewers": [
+            {
+              "prevent_self_review": true,
+              "reviewers": [
+                "CompleteDotTech"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "staging",
+          "created_at": "2026-10-25T21:22:42Z",
+          "updated_at": "2026-10-25T21:22:42Z",
+          "can_admins_bypass": true,
+          "deployment_branch_policy": {
+            "protected_branches": true,
+            "custom_branch_policies": false
+          },
+          "required_reviewers": [
+            {
+              "prevent_self_review": true,
+              "reviewers": [
+                "CompleteDotTech"
+              ]
+            }
+          ]
+        }
+      ],
+      "bootstrap": {
+        "repository": "CT-Infrastructure/marketing-v7-content",
+        "pr": "https://github.com/CT-Infrastructure/marketing-v7-content/pull/2",
+        "candidate_sha": "180bd608de12e8d3e1db28c58433a05137b1689c",
+        "merge_sha": "4488fdaa61a2c9e9a19122922149ed50ea871174",
+        "review_authority": "EXPLICIT_USER_BOOTSTRAP_WAIVER",
+        "checks": [
+          {
+            "name": "package-validation",
+            "id": 121295992255,
+            "app_id": 15368
+          }
+        ],
+        "review_rule_restored": true,
+        "evidence_level": "BOOTSTRAP_MERGED_ONLY",
+        "production_actions": 0
+      }
+    },
+    {
+      "repository": "CT-Infrastructure/marketing-v7-control",
+      "visibility": "public",
+      "license": "MIT",
+      "license_sha256": "7fb4bb7ca228ae11eda43f4d6e2896b474c32af03cbbe31deb148a9bf97204b1",
+      "main_sha": "5126ca7c7273354b41e7de38e4a299b2a3c0656f",
+      "main_protected": true,
+      "ci": [
+        {
+          "name": "package-validation",
+          "head_sha": "5126ca7c7273354b41e7de38e4a299b2a3c0656f",
+          "status": "completed",
+          "conclusion": "success",
+          "app_id": 15368
+        }
+      ],
+      "rulesets": [
+        {
+          "id": 25837623,
+          "name": "Marketing V7 protected integration",
+          "target": "branch",
+          "source_type": "Repository",
+          "source": "CT-Infrastructure/marketing-v7-control",
+          "enforcement": "active",
+          "conditions": {
+            "ref_name": {
+              "exclude": [],
+              "include": [
+                "~DEFAULT_BRANCH"
+              ]
+            }
+          },
+          "rules": [
+            {
+              "type": "deletion"
+            },
+            {
+              "type": "non_fast_forward"
+            },
+            {
+              "type": "pull_request",
+              "parameters": {
+                "required_approving_review_count": 1,
+                "dismiss_stale_reviews_on_push": true,
+                "required_reviewers": [],
+                "require_code_owner_review": true,
+                "dismissal_restriction": {
+                  "enabled": false,
+                  "allowed_actors": []
+                },
+                "require_last_push_approval": true,
+                "required_review_thread_resolution": true,
+                "require_extra_approval_for_unattributed_changes": true,
+                "allowed_merge_methods": [
+                  "merge",
+                  "squash",
+                  "rebase"
+                ]
+              }
+            },
+            {
+              "type": "required_status_checks",
+              "parameters": {
+                "strict_required_status_checks_policy": true,
+                "do_not_enforce_on_create": false,
+                "required_status_checks": [
+                  {
+                    "context": "package-validation",
+                    "integration_id": 15368
+                  }
+                ]
+              }
+            }
+          ],
+          "node_id": "RRS_lACqUmVwb3NpdG9yec5Vc4bDzgGKQDc",
+          "created_at": "2026-10-25T17:22:10.736-04:00",
+          "updated_at": "2026-10-25T17:27:20.193-04:00",
+          "bypass_actors": [],
+          "current_user_can_bypass": "never",
+          "_links": {
+            "self": {
+              "href": "https://api.github.com/repos/CT-Infrastructure/marketing-v7-control/rulesets/25837623"
+            },
+            "html": {
+              "href": "https://github.com/CT-Infrastructure/marketing-v7-control/rules/25837623"
+            }
+          }
+        }
+      ],
+      "token_policy": {
+        "default_workflow_permissions": "read",
+        "can_approve_pull_request_reviews": false
+      },
+      "action_allowlist": {
+        "github_owned_allowed": false,
+        "patterns_allowed": [
+          "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1"
+        ],
+        "verified_allowed": false
+      },
+      "environments": [
+        {
+          "name": "production",
+          "created_at": "2026-10-25T21:22:13Z",
+          "updated_at": "2026-10-25T21:22:13Z",
+          "can_admins_bypass": true,
+          "deployment_branch_policy": {
+            "protected_branches": true,
+            "custom_branch_policies": false
+          },
+          "required_reviewers": [
+            {
+              "prevent_self_review": true,
+              "reviewers": [
+                "CompleteDotTech"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "staging",
+          "created_at": "2026-10-25T21:22:12Z",
+          "updated_at": "2026-10-25T21:22:12Z",
+          "can_admins_bypass": true,
+          "deployment_branch_policy": {
+            "protected_branches": true,
+            "custom_branch_policies": false
+          },
+          "required_reviewers": [
+            {
+              "prevent_self_review": true,
+              "reviewers": [
+                "CompleteDotTech"
+              ]
+            }
+          ]
+        }
+      ],
+      "bootstrap": {
+        "repository": "CT-Infrastructure/marketing-v7-control",
+        "pr": "https://github.com/CT-Infrastructure/marketing-v7-control/pull/2",
+        "candidate_sha": "1e3e663d1068ee7cb2121c0391a1cd423dd20eb0",
+        "merge_sha": "5126ca7c7273354b41e7de38e4a299b2a3c0656f",
+        "review_authority": "EXPLICIT_USER_BOOTSTRAP_WAIVER",
+        "checks": [
+          {
+            "name": "package-validation",
+            "id": 121296021006,
+            "app_id": 15368
+          }
+        ],
+        "review_rule_restored": true,
+        "evidence_level": "BOOTSTRAP_MERGED_ONLY",
+        "production_actions": 0
+      }
+    },
+    {
+      "repository": "CT-Infrastructure/marketing-v7-email",
+      "visibility": "public",
+      "license": "MIT",
+      "license_sha256": "7fb4bb7ca228ae11eda43f4d6e2896b474c32af03cbbe31deb148a9bf97204b1",
+      "main_sha": "c4e61301fcd992a217b0b925286385c9af2ea611",
+      "main_protected": true,
+      "ci": [
+        {
+          "name": "package-validation",
+          "head_sha": "c4e61301fcd992a217b0b925286385c9af2ea611",
+          "status": "completed",
+          "conclusion": "success",
+          "app_id": 15368
+        }
+      ],
+      "rulesets": [
+        {
+          "id": 25837641,
+          "name": "Marketing V7 protected integration",
+          "target": "branch",
+          "source_type": "Repository",
+          "source": "CT-Infrastructure/marketing-v7-email",
+          "enforcement": "active",
+          "conditions": {
+            "ref_name": {
+              "exclude": [],
+              "include": [
+                "~DEFAULT_BRANCH"
+              ]
+            }
+          },
+          "rules": [
+            {
+              "type": "deletion"
+            },
+            {
+              "type": "non_fast_forward"
+            },
+            {
+              "type": "pull_request",
+              "parameters": {
+                "required_approving_review_count": 1,
+                "dismiss_stale_reviews_on_push": true,
+                "required_reviewers": [],
+                "require_code_owner_review": true,
+                "dismissal_restriction": {
+                  "enabled": false,
+                  "allowed_actors": []
+                },
+                "require_last_push_approval": true,
+                "required_review_thread_resolution": true,
+                "require_extra_approval_for_unattributed_changes": true,
+                "allowed_merge_methods": [
+                  "merge",
+                  "squash",
+                  "rebase"
+                ]
+              }
+            },
+            {
+              "type": "required_status_checks",
+              "parameters": {
+                "strict_required_status_checks_policy": true,
+                "do_not_enforce_on_create": false,
+                "required_status_checks": [
+                  {
+                    "context": "package-validation",
+                    "integration_id": 15368
+                  }
+                ]
+              }
+            }
+          ],
+          "node_id": "RRS_lACqUmVwb3NpdG9yec5Vc4dozgGKQEk",
+          "created_at": "2026-10-25T17:22:50.942-04:00",
+          "updated_at": "2026-10-25T17:27:29.181-04:00",
+          "bypass_actors": [],
+          "current_user_can_bypass": "never",
+          "_links": {
+            "self": {
+              "href": "https://api.github.com/repos/CT-Infrastructure/marketing-v7-email/rulesets/25837641"
+            },
+            "html": {
+              "href": "https://github.com/CT-Infrastructure/marketing-v7-email/rules/25837641"
+            }
+          }
+        }
+      ],
+      "token_policy": {
+        "default_workflow_permissions": "read",
+        "can_approve_pull_request_reviews": false
+      },
+      "action_allowlist": {
+        "github_owned_allowed": false,
+        "patterns_allowed": [
+          "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1"
+        ],
+        "verified_allowed": false
+      },
+      "environments": [
+        {
+          "name": "production",
+          "created_at": "2026-10-25T21:22:54Z",
+          "updated_at": "2026-10-25T21:22:54Z",
+          "can_admins_bypass": true,
+          "deployment_branch_policy": {
+            "protected_branches": true,
+            "custom_branch_policies": false
+          },
+          "required_reviewers": [
+            {
+              "prevent_self_review": true,
+              "reviewers": [
+                "CompleteDotTech"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "staging",
+          "created_at": "2026-10-25T21:22:52Z",
+          "updated_at": "2026-10-25T21:22:52Z",
+          "can_admins_bypass": true,
+          "deployment_branch_policy": {
+            "protected_branches": true,
+            "custom_branch_policies": false
+          },
+          "required_reviewers": [
+            {
+              "prevent_self_review": true,
+              "reviewers": [
+                "CompleteDotTech"
+              ]
+            }
+          ]
+        }
+      ],
+      "bootstrap": {
+        "repository": "CT-Infrastructure/marketing-v7-email",
+        "pr": "https://github.com/CT-Infrastructure/marketing-v7-email/pull/2",
+        "candidate_sha": "b8696ec511a3bb26395de5dac5f473619670677f",
+        "merge_sha": "c4e61301fcd992a217b0b925286385c9af2ea611",
+        "review_authority": "EXPLICIT_USER_BOOTSTRAP_WAIVER",
+        "checks": [
+          {
+            "name": "package-validation",
+            "id": 121296047651,
+            "app_id": 15368
+          }
+        ],
+        "review_rule_restored": true,
+        "evidence_level": "BOOTSTRAP_MERGED_ONLY",
+        "production_actions": 0
+      }
+    },
+    {
+      "repository": "CT-Infrastructure/marketing-v7-infrastructure",
+      "visibility": "public",
+      "license": "MIT",
+      "license_sha256": "7fb4bb7ca228ae11eda43f4d6e2896b474c32af03cbbe31deb148a9bf97204b1",
+      "main_sha": "405c5151d4bc166c9b26a1ea48abde0322fcb05e",
+      "main_protected": true,
+      "ci": [
+        {
+          "name": "package-validation",
+          "head_sha": "405c5151d4bc166c9b26a1ea48abde0322fcb05e",
+          "status": "completed",
+          "conclusion": "success",
+          "app_id": 15368
+        }
+      ],
+      "rulesets": [
+        {
+          "id": 25837631,
+          "name": "Marketing V7 protected integration",
+          "target": "branch",
+          "source_type": "Repository",
+          "source": "CT-Infrastructure/marketing-v7-infrastructure",
+          "enforcement": "active",
+          "conditions": {
+            "ref_name": {
+              "exclude": [],
+              "include": [
+                "~DEFAULT_BRANCH"
+              ]
+            }
+          },
+          "rules": [
+            {
+              "type": "deletion"
+            },
+            {
+              "type": "non_fast_forward"
+            },
+            {
+              "type": "pull_request",
+              "parameters": {
+                "required_approving_review_count": 1,
+                "dismiss_stale_reviews_on_push": true,
+                "required_reviewers": [],
+                "require_code_owner_review": true,
+                "dismissal_restriction": {
+                  "enabled": false,
+                  "allowed_actors": []
+                },
+                "require_last_push_approval": true,
+                "required_review_thread_resolution": true,
+                "require_extra_approval_for_unattributed_changes": true,
+                "allowed_merge_methods": [
+                  "merge",
+                  "squash",
+                  "rebase"
+                ]
+              }
+            },
+            {
+              "type": "required_status_checks",
+              "parameters": {
+                "strict_required_status_checks_policy": true,
+                "do_not_enforce_on_create": false,
+                "required_status_checks": [
+                  {
+                    "context": "package-validation",
+                    "integration_id": 15368
+                  }
+                ]
+              }
+            }
+          ],
+          "node_id": "RRS_lACqUmVwb3NpdG9yec5Vc4bvzgGKQD8",
+          "created_at": "2026-10-25T17:22:20.191-04:00",
+          "updated_at": "2026-10-25T17:27:38.407-04:00",
+          "bypass_actors": [],
+          "current_user_can_bypass": "never",
+          "_links": {
+            "self": {
+              "href": "https://api.github.com/repos/CT-Infrastructure/marketing-v7-infrastructure/rulesets/25837631"
+            },
+            "html": {
+              "href": "https://github.com/CT-Infrastructure/marketing-v7-infrastructure/rules/25837631"
+            }
+          }
+        }
+      ],
+      "token_policy": {
+        "default_workflow_permissions": "read",
+        "can_approve_pull_request_reviews": false
+      },
+      "action_allowlist": {
+        "github_owned_allowed": false,
+        "patterns_allowed": [
+          "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1"
+        ],
+        "verified_allowed": false
+      },
+      "environments": [
+        {
+          "name": "production",
+          "created_at": "2026-10-25T21:22:23Z",
+          "updated_at": "2026-10-25T21:22:23Z",
+          "can_admins_bypass": true,
+          "deployment_branch_policy": {
+            "protected_branches": true,
+            "custom_branch_policies": false
+          },
+          "required_reviewers": [
+            {
+              "prevent_self_review": true,
+              "reviewers": [
+                "CompleteDotTech"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "staging",
+          "created_at": "2026-10-25T21:22:22Z",
+          "updated_at": "2026-10-25T21:22:22Z",
+          "can_admins_bypass": true,
+          "deployment_branch_policy": {
+            "protected_branches": true,
+            "custom_branch_policies": false
+          },
+          "required_reviewers": [
+            {
+              "prevent_self_review": true,
+              "reviewers": [
+                "CompleteDotTech"
+              ]
+            }
+          ]
+        }
+      ],
+      "bootstrap": {
+        "repository": "CT-Infrastructure/marketing-v7-infrastructure",
+        "pr": "https://github.com/CT-Infrastructure/marketing-v7-infrastructure/pull/2",
+        "candidate_sha": "a32b356131a34c479d2a9de50eef8128c842c26b",
+        "merge_sha": "405c5151d4bc166c9b26a1ea48abde0322fcb05e",
+        "review_authority": "EXPLICIT_USER_BOOTSTRAP_WAIVER",
+        "checks": [
+          {
+            "name": "package-validation",
+            "id": 121296072410,
+            "app_id": 15368
+          }
+        ],
+        "review_rule_restored": true,
+        "evidence_level": "BOOTSTRAP_MERGED_ONLY",
+        "production_actions": 0
+      }
+    },
+    {
+      "repository": "CT-Infrastructure/marketing-v7-integrations",
+      "visibility": "public",
+      "license": "MIT",
+      "license_sha256": "7fb4bb7ca228ae11eda43f4d6e2896b474c32af03cbbe31deb148a9bf97204b1",
+      "main_sha": "b242535be7ca610f8914e20c712a66dd7465a8c9",
+      "main_protected": true,
+      "ci": [
+        {
+          "name": "package-validation",
+          "head_sha": "b242535be7ca610f8914e20c712a66dd7465a8c9",
+          "status": "completed",
+          "conclusion": "success",
+          "app_id": 15368
+        }
+      ],
+      "rulesets": [
+        {
+          "id": 25837634,
+          "name": "Marketing V7 protected integration",
+          "target": "branch",
+          "source_type": "Repository",
+          "source": "CT-Infrastructure/marketing-v7-integrations",
+          "enforcement": "active",
+          "conditions": {
+            "ref_name": {
+              "exclude": [],
+              "include": [
+                "~DEFAULT_BRANCH"
+              ]
+            }
+          },
+          "rules": [
+            {
+              "type": "deletion"
+            },
+            {
+              "type": "non_fast_forward"
+            },
+            {
+              "type": "pull_request",
+              "parameters": {
+                "required_approving_review_count": 1,
+                "dismiss_stale_reviews_on_push": true,
+                "required_reviewers": [],
+                "require_code_owner_review": true,
+                "dismissal_restriction": {
+                  "enabled": false,
+                  "allowed_actors": []
+                },
+                "require_last_push_approval": true,
+                "required_review_thread_resolution": true,
+                "require_extra_approval_for_unattributed_changes": true,
+                "allowed_merge_methods": [
+                  "merge",
+                  "squash",
+                  "rebase"
+                ]
+              }
+            },
+            {
+              "type": "required_status_checks",
+              "parameters": {
+                "strict_required_status_checks_policy": true,
+                "do_not_enforce_on_create": false,
+                "required_status_checks": [
+                  {
+                    "context": "package-validation",
+                    "integration_id": 15368
+                  }
+                ]
+              }
+            }
+          ],
+          "node_id": "RRS_lACqUmVwb3NpdG9yec5Vc4cZzgGKQEI",
+          "created_at": "2026-10-25T17:22:30.699-04:00",
+          "updated_at": "2026-10-25T17:27:47.363-04:00",
+          "bypass_actors": [],
+          "current_user_can_bypass": "never",
+          "_links": {
+            "self": {
+              "href": "https://api.github.com/repos/CT-Infrastructure/marketing-v7-integrations/rulesets/25837634"
+            },
+            "html": {
+              "href": "https://github.com/CT-Infrastructure/marketing-v7-integrations/rules/25837634"
+            }
+          }
+        }
+      ],
+      "token_policy": {
+        "default_workflow_permissions": "read",
+        "can_approve_pull_request_reviews": false
+      },
+      "action_allowlist": {
+        "github_owned_allowed": false,
+        "patterns_allowed": [
+          "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1"
+        ],
+        "verified_allowed": false
+      },
+      "environments": [
+        {
+          "name": "production",
+          "created_at": "2026-10-25T21:22:34Z",
+          "updated_at": "2026-10-25T21:22:34Z",
+          "can_admins_bypass": true,
+          "deployment_branch_policy": {
+            "protected_branches": true,
+            "custom_branch_policies": false
+          },
+          "required_reviewers": [
+            {
+              "prevent_self_review": true,
+              "reviewers": [
+                "CompleteDotTech"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "staging",
+          "created_at": "2026-10-25T21:22:32Z",
+          "updated_at": "2026-10-25T21:22:32Z",
+          "can_admins_bypass": true,
+          "deployment_branch_policy": {
+            "protected_branches": true,
+            "custom_branch_policies": false
+          },
+          "required_reviewers": [
+            {
+              "prevent_self_review": true,
+              "reviewers": [
+                "CompleteDotTech"
+              ]
+            }
+          ]
+        }
+      ],
+      "bootstrap": {
+        "repository": "CT-Infrastructure/marketing-v7-integrations",
+        "pr": "https://github.com/CT-Infrastructure/marketing-v7-integrations/pull/2",
+        "candidate_sha": "76f8aba3ad2d1692a48986c08d04dd0edeba1013",
+        "merge_sha": "b242535be7ca610f8914e20c712a66dd7465a8c9",
+        "review_authority": "EXPLICIT_USER_BOOTSTRAP_WAIVER",
+        "checks": [
+          {
+            "name": "package-validation",
+            "id": 121296097195,
+            "app_id": 15368
+          }
+        ],
+        "review_rule_restored": true,
+        "evidence_level": "BOOTSTRAP_MERGED_ONLY",
+        "production_actions": 0
+      }
+    },
+    {
+      "repository": "CT-Infrastructure/marketing-v7-legacy",
+      "visibility": "public",
+      "license": "MIT",
+      "license_sha256": "7fb4bb7ca228ae11eda43f4d6e2896b474c32af03cbbe31deb148a9bf97204b1",
+      "main_sha": "d05862ddc91a8108dd4b4359b1180c6c0656f2fc",
+      "main_protected": true,
+      "ci": [
+        {
+          "name": "package-validation",
+          "head_sha": "d05862ddc91a8108dd4b4359b1180c6c0656f2fc",
+          "status": "completed",
+          "conclusion": "success",
+          "app_id": 15368
+        }
+      ],
+      "rulesets": [
+        {
+          "id": 25837656,
+          "name": "Marketing V7 protected integration",
+          "target": "branch",
+          "source_type": "Repository",
+          "source": "CT-Infrastructure/marketing-v7-legacy",
+          "enforcement": "active",
+          "conditions": {
+            "ref_name": {
+              "exclude": [],
+              "include": [
+                "~DEFAULT_BRANCH"
+              ]
+            }
+          },
+          "rules": [
+            {
+              "type": "deletion"
+            },
+            {
+              "type": "non_fast_forward"
+            },
+            {
+              "type": "pull_request",
+              "parameters": {
+                "required_approving_review_count": 1,
+                "dismiss_stale_reviews_on_push": true,
+                "required_reviewers": [],
+                "require_code_owner_review": true,
+                "dismissal_restriction": {
+                  "enabled": false,
+                  "allowed_actors": []
+                },
+                "require_last_push_approval": true,
+                "required_review_thread_resolution": true,
+                "require_extra_approval_for_unattributed_changes": true,
+                "allowed_merge_methods": [
+                  "merge",
+                  "squash",
+                  "rebase"
+                ]
+              }
+            },
+            {
+              "type": "required_status_checks",
+              "parameters": {
+                "strict_required_status_checks_policy": true,
+                "do_not_enforce_on_create": false,
+                "required_status_checks": [
+                  {
+                    "context": "package-validation",
+                    "integration_id": 15368
+                  }
+                ]
+              }
+            }
+          ],
+          "node_id": "RRS_lACqUmVwb3NpdG9yec5Vc4fgzgGKQFg",
+          "created_at": "2026-10-25T17:23:21.652-04:00",
+          "updated_at": "2026-10-25T17:27:56.348-04:00",
+          "bypass_actors": [],
+          "current_user_can_bypass": "never",
+          "_links": {
+            "self": {
+              "href": "https://api.github.com/repos/CT-Infrastructure/marketing-v7-legacy/rulesets/25837656"
+            },
+            "html": {
+              "href": "https://github.com/CT-Infrastructure/marketing-v7-legacy/rules/25837656"
+            }
+          }
+        }
+      ],
+      "token_policy": {
+        "default_workflow_permissions": "read",
+        "can_approve_pull_request_reviews": false
+      },
+      "action_allowlist": {
+        "github_owned_allowed": false,
+        "patterns_allowed": [
+          "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1"
+        ],
+        "verified_allowed": false
+      },
+      "environments": [
+        {
+          "name": "production",
+          "created_at": "2026-10-25T21:23:25Z",
+          "updated_at": "2026-10-25T21:23:25Z",
+          "can_admins_bypass": true,
+          "deployment_branch_policy": {
+            "protected_branches": true,
+            "custom_branch_policies": false
+          },
+          "required_reviewers": [
+            {
+              "prevent_self_review": true,
+              "reviewers": [
+                "CompleteDotTech"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "staging",
+          "created_at": "2026-10-25T21:23:23Z",
+          "updated_at": "2026-10-25T21:23:23Z",
+          "can_admins_bypass": true,
+          "deployment_branch_policy": {
+            "protected_branches": true,
+            "custom_branch_policies": false
+          },
+          "required_reviewers": [
+            {
+              "prevent_self_review": true,
+              "reviewers": [
+                "CompleteDotTech"
+              ]
+            }
+          ]
+        }
+      ],
+      "bootstrap": {
+        "repository": "CT-Infrastructure/marketing-v7-legacy",
+        "pr": "https://github.com/CT-Infrastructure/marketing-v7-legacy/pull/2",
+        "candidate_sha": "8e64c1861d278714388104792ae6f0729239b043",
+        "merge_sha": "d05862ddc91a8108dd4b4359b1180c6c0656f2fc",
+        "review_authority": "EXPLICIT_USER_BOOTSTRAP_WAIVER",
+        "checks": [
+          {
+            "name": "package-validation",
+            "id": 121296121761,
+            "app_id": 15368
+          }
+        ],
+        "review_rule_restored": true,
+        "evidence_level": "BOOTSTRAP_MERGED_ONLY",
+        "production_actions": 0
+      }
+    },
+    {
+      "repository": "CT-Infrastructure/marketing-v7-marketing",
+      "visibility": "public",
+      "license": "MIT",
+      "license_sha256": "7fb4bb7ca228ae11eda43f4d6e2896b474c32af03cbbe31deb148a9bf97204b1",
+      "main_sha": "b0828dda46b16b79a7b72db9e4a66c7bce3bcf55",
+      "main_protected": true,
+      "ci": [
+        {
+          "name": "package-validation",
+          "head_sha": "b0828dda46b16b79a7b72db9e4a66c7bce3bcf55",
+          "status": "completed",
+          "conclusion": "success",
+          "app_id": 15368
+        }
+      ],
+      "rulesets": [
+        {
+          "id": 25837648,
+          "name": "Marketing V7 protected integration",
+          "target": "branch",
+          "source_type": "Repository",
+          "source": "CT-Infrastructure/marketing-v7-marketing",
+          "enforcement": "active",
+          "conditions": {
+            "ref_name": {
+              "exclude": [],
+              "include": [
+                "~DEFAULT_BRANCH"
+              ]
+            }
+          },
+          "rules": [
+            {
+              "type": "deletion"
+            },
+            {
+              "type": "non_fast_forward"
+            },
+            {
+              "type": "pull_request",
+              "parameters": {
+                "required_approving_review_count": 1,
+                "dismiss_stale_reviews_on_push": true,
+                "required_reviewers": [],
+                "require_code_owner_review": true,
+                "dismissal_restriction": {
+                  "enabled": false,
+                  "allowed_actors": []
+                },
+                "require_last_push_approval": true,
+                "required_review_thread_resolution": true,
+                "require_extra_approval_for_unattributed_changes": true,
+                "allowed_merge_methods": [
+                  "merge",
+                  "squash",
+                  "rebase"
+                ]
+              }
+            },
+            {
+              "type": "required_status_checks",
+              "parameters": {
+                "strict_required_status_checks_policy": true,
+                "do_not_enforce_on_create": false,
+                "required_status_checks": [
+                  {
+                    "context": "package-validation",
+                    "integration_id": 15368
+                  }
+                ]
+              }
+            }
+          ],
+          "node_id": "RRS_lACqUmVwb3NpdG9yec5Vc4e3zgGKQFA",
+          "created_at": "2026-10-25T17:23:11.070-04:00",
+          "updated_at": "2026-10-25T17:28:05.369-04:00",
+          "bypass_actors": [],
+          "current_user_can_bypass": "never",
+          "_links": {
+            "self": {
+              "href": "https://api.github.com/repos/CT-Infrastructure/marketing-v7-marketing/rulesets/25837648"
+            },
+            "html": {
+              "href": "https://github.com/CT-Infrastructure/marketing-v7-marketing/rules/25837648"
+            }
+          }
+        }
+      ],
+      "token_policy": {
+        "default_workflow_permissions": "read",
+        "can_approve_pull_request_reviews": false
+      },
+      "action_allowlist": {
+        "github_owned_allowed": false,
+        "patterns_allowed": [
+          "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1"
+        ],
+        "verified_allowed": false
+      },
+      "environments": [
+        {
+          "name": "production",
+          "created_at": "2026-10-25T21:23:14Z",
+          "updated_at": "2026-10-25T21:23:14Z",
+          "can_admins_bypass": true,
+          "deployment_branch_policy": {
+            "protected_branches": true,
+            "custom_branch_policies": false
+          },
+          "required_reviewers": [
+            {
+              "prevent_self_review": true,
+              "reviewers": [
+                "CompleteDotTech"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "staging",
+          "created_at": "2026-10-25T21:23:13Z",
+          "updated_at": "2026-10-25T21:23:13Z",
+          "can_admins_bypass": true,
+          "deployment_branch_policy": {
+            "protected_branches": true,
+            "custom_branch_policies": false
+          },
+          "required_reviewers": [
+            {
+              "prevent_self_review": true,
+              "reviewers": [
+                "CompleteDotTech"
+              ]
+            }
+          ]
+        }
+      ],
+      "bootstrap": {
+        "repository": "CT-Infrastructure/marketing-v7-marketing",
+        "pr": "https://github.com/CT-Infrastructure/marketing-v7-marketing/pull/2",
+        "candidate_sha": "ac92ce1848359ad45ac48701f87b4f3ef3f0ea21",
+        "merge_sha": "b0828dda46b16b79a7b72db9e4a66c7bce3bcf55",
+        "review_authority": "EXPLICIT_USER_BOOTSTRAP_WAIVER",
+        "checks": [
+          {
+            "name": "package-validation",
+            "id": 121296148129,
+            "app_id": 15368
+          }
+        ],
+        "review_rule_restored": true,
+        "evidence_level": "BOOTSTRAP_MERGED_ONLY",
+        "production_actions": 0
+      }
+    },
+    {
+      "repository": "CT-Infrastructure/marketing-v7-voice",
+      "visibility": "public",
+      "license": "MIT",
+      "license_sha256": "7fb4bb7ca228ae11eda43f4d6e2896b474c32af03cbbe31deb148a9bf97204b1",
+      "main_sha": "51a23c7762f22f745dfc4380118b08e8814ee4f9",
+      "main_protected": true,
+      "ci": [
+        {
+          "name": "package-validation",
+          "head_sha": "51a23c7762f22f745dfc4380118b08e8814ee4f9",
+          "status": "completed",
+          "conclusion": "success",
+          "app_id": 15368
+        }
+      ],
+      "rulesets": [
+        {
+          "id": 25837645,
+          "name": "Marketing V7 protected integration",
+          "target": "branch",
+          "source_type": "Repository",
+          "source": "CT-Infrastructure/marketing-v7-voice",
+          "enforcement": "active",
+          "conditions": {
+            "ref_name": {
+              "exclude": [],
+              "include": [
+                "~DEFAULT_BRANCH"
+              ]
+            }
+          },
+          "rules": [
+            {
+              "type": "deletion"
+            },
+            {
+              "type": "non_fast_forward"
+            },
+            {
+              "type": "pull_request",
+              "parameters": {
+                "required_approving_review_count": 1,
+                "dismiss_stale_reviews_on_push": true,
+                "required_reviewers": [],
+                "require_code_owner_review": true,
+                "dismissal_restriction": {
+                  "enabled": false,
+                  "allowed_actors": []
+                },
+                "require_last_push_approval": true,
+                "required_review_thread_resolution": true,
+                "require_extra_approval_for_unattributed_changes": true,
+                "allowed_merge_methods": [
+                  "merge",
+                  "squash",
+                  "rebase"
+                ]
+              }
+            },
+            {
+              "type": "required_status_checks",
+              "parameters": {
+                "strict_required_status_checks_policy": true,
+                "do_not_enforce_on_create": false,
+                "required_status_checks": [
+                  {
+                    "context": "package-validation",
+                    "integration_id": 15368
+                  }
+                ]
+              }
+            }
+          ],
+          "node_id": "RRS_lACqUmVwb3NpdG9yec5Vc4eTzgGKQE0",
+          "created_at": "2026-10-25T17:23:00.843-04:00",
+          "updated_at": "2026-10-25T17:28:14.106-04:00",
+          "bypass_actors": [],
+          "current_user_can_bypass": "never",
+          "_links": {
+            "self": {
+              "href": "https://api.github.com/repos/CT-Infrastructure/marketing-v7-voice/rulesets/25837645"
+            },
+            "html": {
+              "href": "https://github.com/CT-Infrastructure/marketing-v7-voice/rules/25837645"
+            }
+          }
+        }
+      ],
+      "token_policy": {
+        "default_workflow_permissions": "read",
+        "can_approve_pull_request_reviews": false
+      },
+      "action_allowlist": {
+        "github_owned_allowed": false,
+        "patterns_allowed": [
+          "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1"
+        ],
+        "verified_allowed": false
+      },
+      "environments": [
+        {
+          "name": "production",
+          "created_at": "2026-10-25T21:23:04Z",
+          "updated_at": "2026-10-25T21:23:04Z",
+          "can_admins_bypass": true,
+          "deployment_branch_policy": {
+            "protected_branches": true,
+            "custom_branch_policies": false
+          },
+          "required_reviewers": [
+            {
+              "prevent_self_review": true,
+              "reviewers": [
+                "CompleteDotTech"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "staging",
+          "created_at": "2026-10-25T21:23:02Z",
+          "updated_at": "2026-10-25T21:23:02Z",
+          "can_admins_bypass": true,
+          "deployment_branch_policy": {
+            "protected_branches": true,
+            "custom_branch_policies": false
+          },
+          "required_reviewers": [
+            {
+              "prevent_self_review": true,
+              "reviewers": [
+                "CompleteDotTech"
+              ]
+            }
+          ]
+        }
+      ],
+      "bootstrap": {
+        "repository": "CT-Infrastructure/marketing-v7-voice",
+        "pr": "https://github.com/CT-Infrastructure/marketing-v7-voice/pull/2",
+        "candidate_sha": "3d931bd084c7798fe6df3b91cfe29e862c38acf3",
+        "merge_sha": "51a23c7762f22f745dfc4380118b08e8814ee4f9",
+        "review_authority": "EXPLICIT_USER_BOOTSTRAP_WAIVER",
+        "checks": [
+          {
+            "name": "package-validation",
+            "id": 121296170512,
+            "app_id": 15368
+          }
+        ],
+        "review_rule_restored": true,
+        "evidence_level": "BOOTSTRAP_MERGED_ONLY",
+        "production_actions": 0
+      }
+    }
+  ],
+  "project": {
+    "visibility": "PRIVATE",
+    "automation_readback": {
+      "public": false,
+      "workflows": {
+        "nodes": [
+          {
+            "id": "PWF_lADOFL4oqs4BotOwzgeG9KM",
+            "name": "Auto-add sub-issues to project",
+            "enabled": true
+          },
+          {
+            "id": "PWF_lADOFL4oqs4BotOwzgeG9Kc",
+            "name": "Item added to project",
+            "enabled": true
+          },
+          {
+            "id": "PWF_lADOFL4oqs4BotOwzgeG9J8",
+            "name": "Item closed",
+            "enabled": true
+          },
+          {
+            "id": "PWF_lADOFL4oqs4BotOwzgeG9KU",
+            "name": "Pull request linked to issue",
+            "enabled": true
+          }
+        ]
+      }
+    },
+    "removed_workflows_per_trusted_task": [
+      "auto-close",
+      "PR-merged"
+    ],
+    "saved_views": {
+      "names_filters_layout": "exist per trusted task; exact payload not supplied",
+      "grouping": "unverified"
+    },
+    "metadata": "Partial import in progress; full 785 issue hierarchy, fields, labels, milestones, parent and dependency links and acceptance not established",
+    "write_budget_per_hour": 300,
+    "verified_issue_mappings": [
+      {
+        "key": "EP-PROGRAM",
+        "repository": "CT-Infrastructure/marketing-v7-control",
+        "number": 3,
+        "node_id": "I_kwDOVXOGw88AAAABZ2O2bw"
+      },
+      {
+        "key": "EP-FOUNDATION",
+        "repository": "CT-Infrastructure/marketing-v7-control",
+        "number": 4,
+        "node_id": "I_kwDOVXOGw88AAAABZ2O3zQ"
+      },
+      {
+        "key": "EP-COMP-INFRA",
+        "repository": "CT-Infrastructure/marketing-v7-control",
+        "number": 5,
+        "node_id": "I_kwDOVXOGw88AAAABZ2O45A"
+      },
+      {
+        "key": "EP-COMP-APPS",
+        "repository": "CT-Infrastructure/marketing-v7-control",
+        "number": 6,
+        "node_id": "I_kwDOVXOGw88AAAABZ2O6Vw"
+      },
+      {
+        "key": "EP-COMP-AI",
+        "repository": "CT-Infrastructure/marketing-v7-control",
+        "number": 7,
+        "node_id": "I_kwDOVXOGw88AAAABZ2O7xA"
+      },
+      {
+        "key": "EP-COMP-TOOLS",
+        "repository": "CT-Infrastructure/marketing-v7-control",
+        "number": 8,
+        "node_id": "I_kwDOVXOGw88AAAABZ2O9AA"
+      }
+    ]
+  },
+  "human_gates": [
+    {
+      "key": "G01",
+      "title": "[G01] Approve source disclosure, owner and engineering authorization",
+      "status": "not_assessed_no_approval_granted"
+    },
+    {
+      "key": "G02",
+      "title": "[G02] Authorize qualified multi-agent execution",
+      "status": "not_assessed_no_approval_granted"
+    },
+    {
+      "key": "G03",
+      "title": "[G03] Authorize target site and recovery readiness",
+      "status": "not_assessed_no_approval_granted"
+    },
+    {
+      "key": "G04",
+      "title": "[G04] Authorize production web publishing",
+      "status": "not_assessed_no_approval_granted"
+    },
+    {
+      "key": "G05",
+      "title": "[G05] Authorize production email sending",
+      "status": "not_assessed_no_approval_granted"
+    },
+    {
+      "key": "G06",
+      "title": "[G06] Authorize production voice dialing",
+      "status": "not_assessed_no_approval_granted"
+    },
+    {
+      "key": "G07",
+      "title": "[G07] Authorize production social scheduling",
+      "status": "not_assessed_no_approval_granted"
+    },
+    {
+      "key": "G08",
+      "title": "[G08] Authorize optional ads, SMS and payments",
+      "status": "not_assessed_no_approval_granted"
+    },
+    {
+      "key": "G09",
+      "title": "[G09] Authorize migration cutover and destructive scope",
+      "status": "not_assessed_no_approval_granted"
+    },
+    {
+      "key": "G10",
+      "title": "[G10] Authorize client isolation and retention readiness",
+      "status": "not_assessed_no_approval_granted"
+    },
+    {
+      "key": "G11",
+      "title": "[G11] Authorize GPU and batch production limits",
+      "status": "not_assessed_no_approval_granted"
+    },
+    {
+      "key": "G12",
+      "title": "[G12] Final production acceptance and handover",
+      "status": "not_assessed_no_approval_granted"
+    }
+  ],
+  "evidence_manifest": [
+    {
+      "source": "final-controls-readback.json",
+      "sha256": "57261855e01def76f6d05975122559679b34f3c785bd8b3619f4d1a462061216",
+      "timestamp_basis": "No capture timestamp in supplied file; filesystem timestamp is not asserted as API observation time."
+    },
+    {
+      "source": "first-issue-readback.json",
+      "sha256": "7d256c094633cc6217ada9f28efbd4f13ceb6d14b434d2de6396f1e2c3d2e98a",
+      "timestamp_basis": "No capture timestamp in supplied file; filesystem timestamp is not asserted as API observation time."
+    },
+    {
+      "source": "project-automation.json",
+      "sha256": "906dadcf4edcde98b747ee4d1aa153f32a1793d062b653da325ee16ce74b7d59",
+      "timestamp_basis": "No capture timestamp in supplied file; filesystem timestamp is not asserted as API observation time."
+    },
+    {
+      "source": "public-merges.json",
+      "sha256": "2c0e1ec29ffed8ad37fc58187bd8c5c64e17057a05aa11c1173202756c9a5d7e",
+      "timestamp_basis": "No capture timestamp in supplied file; filesystem timestamp is not asserted as API observation time."
+    },
+    {
+      "source": "public-repositories.json",
+      "sha256": "13eb5d38f6681cf1f5a2158dfeb81da153251abb0d6814fa195499688537c99b",
+      "timestamp_basis": "No capture timestamp in supplied file; filesystem timestamp is not asserted as API observation time."
+    },
+    {
+      "source": "source-manifest.json",
+      "sha256": "8a19c8ab2a4431264e3ff5c28f9ebc8ec2118bf815427fca9ab38b6c12716700",
+      "timestamp_basis": "No capture timestamp in supplied file; filesystem timestamp is not asserted as API observation time."
+    },
+    {
+      "source": "task.json",
+      "sha256": "166df1cffd7fd9426873646df3d7acb31e2cfada60f3c4f1f74f7a4f7a83f34f",
+      "timestamp_basis": "No capture timestamp in supplied file; filesystem timestamp is not asserted as API observation time."
+    }
+  ],
+  "limitations": [
+    "No live API requests; supplied evidence only.",
+    "Bootstrap merge receipts prove bootstrap only, not F02 acceptance, deployment, or runtime qualification.",
+    "Environment administrators can bypass reviewers; approval policy must still be followed.",
+    "GitHub branch rulesets have no bypass actors in supplied readback; environment bypass is distinct.",
+    "Independent review, trusted integration and applicable human gate receipts remain required."
+  ]
+}
