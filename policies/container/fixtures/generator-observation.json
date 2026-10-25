@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "generator_version": "4.9.3",
+  "observed_input_sha256": "89d48984a2c6c694b3c0cc46101c54e0e120bb030d7abe59033c2543c450e1ee",
+  "observed_input_encoding": "base64",
+  "observed_input_bytes": "IyBTWU5USEVUSUMgR0VORVJBVE9SIElOUFVUIE9OTFkuIE5ldmVyIGluc3RhbGwsIHB1bGwgb3IgcnVuIHRoaXMgZml4dHVyZS4NCiMgUmVzb2x2ZWQgZmljdGl0aW91cyAuaW52YWxpZCBpbWFnZS9kaWdlc3Q7IG5vIFtJbnN0YWxsXSB0YXJnZXQgaXMgZW5hYmxlZC4NCltVbml0XQ0KRGVzY3JpcHRpb249c3ludGhldGljIGhlbGQNClN0YXJ0TGltaXRJbnRlcnZhbFNlYz0zMDANClN0YXJ0TGltaXRCdXJzdD0zDQoNCltDb250YWluZXJdDQpJbWFnZT1maXh0dXJlLmV4YW1wbGUuaW52YWxpZC9zeW50aGV0aWMtYXBwQHNoYTI1NjphYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhDQpDb250YWluZXJOYW1lPXN5bnRoZXRpYy1hcHANClVzZXI9MTAwMDE6MTAwMDENClJlYWRPbmx5PXRydWUNClJlYWRPbmx5VG1wZnM9ZmFsc2UKUG9kbWFuQXJncz0tLWltYWdlLXZvbHVtZT1pZ25vcmUNCk5vTmV3UHJpdmlsZWdlcz10cnVlDQpEcm9wQ2FwYWJpbGl0eT1hbGwNCk5ldHdvcms9bm9uZQ0KRW52aXJvbm1lbnQ9T1VUQk9VTkRfRUZGRUNUUz1IT0xEDQpUbXBmcz0vdG1wOnJ3LG5vc3VpZCxub2Rldixub2V4ZWMsc2l6ZT02NG0NCkhlYWx0aENtZD1bIi9hcHAvc3ludGhldGljLWhlYWx0aCJdDQpIZWFsdGhJbnRlcnZhbD0zMHMNCkhlYWx0aFRpbWVvdXQ9NXMNCkhlYWx0aFJldHJpZXM9Mw0KSGVhbHRoU3RhcnRQZXJpb2Q9MzBzDQoNCltTZXJ2aWNlXQ0KUmVzdGFydD1ubw0KUmVzdGFydFNlYz0xMA0KVGltZW91dFN0YXJ0U2VjPTE4MA0KVGltZW91dFN0b3BTZWM9NjANCk1lbW9yeU1heD01MTJNDQpDUFVRdW90YT0xMDAlDQpUYXNrc01heD0xMjgNClJ1bnRpbWVNYXhTZWM9MzYwMA0KDQo=",
+  "observed_input_newlines": {
+    "crlf": 34,
+    "bare_lf": 1
+  },
+  "committed_fixture": "synthetic.container",
+  "committed_fixture_sha256": "db05ebd2305573e94093d7ffc281f3cd89b519e8987ff5b2f839fa1c4a339138",
+  "normalization": "Replace each CRLF byte pair with LF; no other transformation",
+  "normalization_verified": true,
+  "observed_stdout_fixture": "quadlet-4.9.3.service.txt",
+  "observed_stdout_sha256": "4303f168720aa304acf2ebbc214a0306a8c52789ebc2de7a637902fa8a97d815",
+  "generator_exit_code": 0,
+  "execstart_image_volume_arguments": 1,
+  "new_generator_invocation_claimed": false,
+  "runtime_started": false,
+  "runtime_qualified": false
+}
