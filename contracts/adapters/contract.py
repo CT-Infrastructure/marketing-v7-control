@@ -49,7 +49,7 @@ def error_decision(code, *, submitted):
     require(type(submitted) is bool, "submitted must be an exact boolean")
     require(code in ERRORS, "unknown error category")
     # Once delivery may have occurred, a transport failure never proves absence.
-    if submitted and code in {"RATE_LIMITED_BEFORE_SUBMIT", "TRANSIENT_BEFORE_SUBMIT",
+    if submitted and code in {"NOT_FOUND", "RATE_LIMITED_BEFORE_SUBMIT", "TRANSIENT_BEFORE_SUBMIT",
                               "TIMEOUT_AFTER_SUBMIT", "AMBIGUOUS_RESPONSE"}:
         return "UNKNOWN"
     return ERRORS[code]

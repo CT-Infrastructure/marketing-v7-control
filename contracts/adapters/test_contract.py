@@ -108,6 +108,8 @@ class ContractTests(unittest.TestCase):
         self.assertEqual(error_decision("TRANSIENT_BEFORE_SUBMIT", submitted=True), "UNKNOWN")
         self.assertEqual(error_decision("TIMEOUT_AFTER_SUBMIT", submitted=True), "UNKNOWN")
         self.assertEqual(error_decision("PERMISSION", submitted=False), "REJECTED")
+        self.assertEqual(error_decision("NOT_FOUND", submitted=False), "REJECTED")
+        self.assertEqual(error_decision("NOT_FOUND", submitted=True), "UNKNOWN")
         for invalid in ["false", 0, None]:
             with self.assertRaises(ValueError): error_decision("PERMISSION", submitted=invalid)
 
