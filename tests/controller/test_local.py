@@ -10,10 +10,11 @@ import sys
 import tempfile
 import threading
 import unittest
+import traceback
 
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'orchestration/controller'))
-from local import LocalController, canonical_hash, result_digest, AUTHORITY, F11_SCHEMA_VERSION, _REFERENCE
+from local import LocalController, canonical_hash, result_digest, AUTHORITY, F11_SCHEMA_VERSION, _REFERENCE, preflight_existing_ledger, stable_ledger_copy
 
 BASE='a'*40
 HEAD='b'*40
@@ -63,16 +64,34 @@ class ControllerTests(unittest.TestCase):
     def test_atomic_same_task_across_controller_instances(self):
         self.make(); barrier=threading.Barrier(8)
         def attempt(n):
-            s=self.make(); barrier.wait(); return s.claim('author'+str(n),BASE)
+            try:
+                s=self.make()
+            except BaseException:
+                barrier.abort()
+                raise
+            barrier.wait(timeout=10)
+            return s.claim('author'+str(n),BASE)
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
-            claims=list(pool.map(attempt,range(8)))
+            futures=[pool.submit(attempt,n) for n in range(8)]
+            claims=[]; errors=[]
+            for future in futures:
+                try: claims.append(future.result(timeout=20))
+                except BaseException as error:
+                    errors.append(''.join(traceback.format_exception(error)))
+            self.assertFalse(errors, '\n'.join(errors))
         self.assertEqual(sum(p is not None for p in claims),1)
         self.assertEqual(self.make().record('A')['attempts'],1)
     def test_atomic_all_resource_caps(self):
         self.tasks=[task(str(i)) for i in range(8)];self.make()
         def attempt(n): return self.make().claim('author'+str(n),BASE,str(n))
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
-            claims=list(pool.map(attempt,range(8)))
+            futures=[pool.submit(attempt,n) for n in range(8)]
+            claims=[]; errors=[]
+            for future in futures:
+                try: claims.append(future.result(timeout=20))
+                except BaseException as error:
+                    errors.append(''.join(traceback.format_exception(error)))
+            self.assertFalse(errors, '\n'.join(errors))
         self.assertEqual(sum(p is not None for p in claims),2)
         self.assertEqual(self.make().status()['resources_reserved']['cpu'],2)
         self.assertEqual(self.make().status()['resources_reserved']['slots'],2)
@@ -308,6 +327,101 @@ class ControllerTests(unittest.TestCase):
         self.assertEqual(reopened.record('A')['state'],'RUNNING')
         self.assertEqual(reopened.record('A')['fence'],p['fence'])
         self.assertIsNone(self.claim(reopened))
+    def directory_bytes(self, ignore_shm=False):
+        # No SQLite connection here: even the test observer must not make SHM.
+        return {p.name: (p.read_bytes(), p.stat().st_mode) for p in self.path.parent.iterdir() if p.is_file() and not (ignore_shm and p.name.endswith('-shm'))}
+
+    def detached_wal(self, marked):
+        source = self.path.parent / 'wal-source.sqlite3'
+        if marked:
+            LocalController(source,self.tasks,self.pol,clock=lambda:self.now[0],fixture_only=True)
+        else:
+            _REFERENCE.Scheduler(source,self.tasks,self.pol,clock=lambda:self.now[0])
+        db=sqlite3.connect(source)
+        db.execute('PRAGMA wal_autocheckpoint=0')
+        db.execute("INSERT INTO metadata VALUES ('synthetic_wal_value','committed')")
+        if marked:
+            db.execute("UPDATE metadata SET value='offline-fixture' WHERE key='f11_mode'")
+        db.commit()
+        self.path.write_bytes(source.read_bytes())
+        Path(str(self.path)+'-wal').write_bytes(Path(str(source)+'-wal').read_bytes())
+        self.addCleanup(db.close)
+        return db
+
+    def test_rejected_wal_without_shm_preserves_all_directory_bytes(self):
+        self.detached_wal(False)
+        before=self.directory_bytes()
+        with self.assertRaises(ValueError):self.make()
+        self.assertEqual(before,self.directory_bytes())
+        self.assertFalse(Path(str(self.path)+'-shm').exists())
+
+    def test_rejected_wal_with_existing_shm_preserves_it(self):
+        self.detached_wal(False)
+        Path(str(self.path)+'-shm').write_bytes(b'synthetic-existing-index-must-not-be-touched')
+        before=self.directory_bytes()
+        with self.assertRaises(ValueError):self.make()
+        self.assertEqual(before,self.directory_bytes())
+
+    def test_markers_committed_only_in_wal_are_visible(self):
+        self.make()
+        db=sqlite3.connect(self.path)
+        self.addCleanup(db.close)
+        db.execute("UPDATE metadata SET value='wrong' WHERE key='f11_mode'");db.commit()
+        db.execute('PRAGMA wal_checkpoint(TRUNCATE)')
+        db.execute("UPDATE metadata SET value='offline-fixture' WHERE key='f11_mode'");db.commit()
+        before=self.directory_bytes()
+        preflight_existing_ledger(self.path,True)
+        self.assertEqual(before,self.directory_bytes())
+
+    def test_incompatible_marker_committed_in_wal_is_not_ignored(self):
+        self.make()
+        db=sqlite3.connect(self.path);self.addCleanup(db.close)
+        db.execute("UPDATE metadata SET value='wrong' WHERE key='f11_mode'");db.commit()
+        before=self.directory_bytes()
+        with self.assertRaises(ValueError):preflight_existing_ledger(self.path,True)
+        self.assertEqual(before,self.directory_bytes())
+
+    def test_uncommitted_marker_does_not_override_committed_snapshot(self):
+        self.make()
+        db=sqlite3.connect(self.path);self.addCleanup(db.close)
+        db.execute("UPDATE metadata SET value='wrong' WHERE key='f11_mode'")
+        before=self.directory_bytes(ignore_shm=True)
+        preflight_existing_ledger(self.path,True)
+        self.assertEqual(before,self.directory_bytes(ignore_shm=True))
+
+    def test_tiny_snapshot_read_requests_are_bounded_by_observed_size(self):
+        from local import read_ledger_files
+        self.make()
+        original = Path.open
+        requests = []
+        class ObservedStream:
+            def __init__(self, stream, size): self.stream, self.size = stream, size
+            def __enter__(self): self.stream.__enter__(); return self
+            def __exit__(self, *args): return self.stream.__exit__(*args)
+            def read(self, amount):
+                requests.append(amount)
+                self_test.assertLessEqual(amount, min(64*1024, self.size+1))
+                return self.stream.read(amount)
+        self_test = self
+        def observed(path, *args, **kwargs):
+            stream = original(path, *args, **kwargs)
+            return ObservedStream(stream, path.stat().st_size)
+        with patch.object(Path, 'open', observed):
+            captured = read_ledger_files(self.path)
+        self.assertTrue(requests)
+        self.assertEqual(captured[''], self.path.read_bytes())
+
+    def test_transient_snapshot_change_retries_without_source_sqlite(self):
+        from local import SnapshotChanged
+        with patch('local.read_ledger_files',side_effect=[SnapshotChanged('synthetic change'), {'':b'stable'}, {'':b'stable'}]) as read:
+            self.assertEqual(stable_ledger_copy(self.path),{'':b'stable'})
+            self.assertEqual(read.call_count,3)
+
+    def test_changing_snapshot_fails_closed_after_bounded_retries(self):
+        with patch('local.PREFLIGHT_ATTEMPTS',3), patch('local.read_ledger_files',side_effect=[{'': bytes([n])} for n in range(6)]) as read:
+            with self.assertRaises(ValueError):stable_ledger_copy(self.path)
+            self.assertEqual(read.call_count,6)
+
     def test_stop_prevents_dispatch_and_preserves_active(self):
         s=self.make();p=self.claim(s);s.stop('synthetic-stop');self.assertIsNone(self.claim(s));self.assertEqual(s.record('A')['state'],'RUNNING')
 

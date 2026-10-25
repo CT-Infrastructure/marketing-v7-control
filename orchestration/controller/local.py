@@ -13,6 +13,7 @@ from pathlib import Path
 import re
 import sqlite3
 import time
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[2]
 _SPEC = importlib.util.spec_from_file_location('_f11_reference_scheduler', ROOT / 'tools/scheduler.py')
@@ -103,8 +104,80 @@ def validate_result(result, task):
 F11_SCHEMA_VERSION = '2'
 
 
+# Bound memory and retries. Larger or continuously changing ledgers require a
+# controller-maintained snapshot/checkpoint; this preflight never performs one.
+PREFLIGHT_MAX_BYTES = 256 * 1024 * 1024
+PREFLIGHT_ATTEMPTS = 32
+
+
+class SnapshotChanged(ValueError):
+    pass
+
+
+def read_ledger_files(path):
+    result = {}
+    remaining = PREFLIGHT_MAX_BYTES
+    for suffix in ('', '-wal', '-journal'):
+        source = Path(str(path) + suffix)
+        require(not source.is_symlink() and not getattr(source, 'is_junction', lambda: False)(), 'Linked ledger sidecar is forbidden')
+        try:
+            with source.open('rb') as stream:
+                before = source.stat()
+                require(source.is_file() and before.st_size <= remaining, 'Ledger snapshot exceeds preflight bound')
+                chunks = []
+                unread = before.st_size + 1
+                while unread:
+                    chunk = stream.read(min(64 * 1024, unread))
+                    if not chunk:
+                        break
+                    chunks.append(chunk)
+                    unread -= len(chunk)
+                content = b''.join(chunks)
+                if len(content) != before.st_size:
+                    raise SnapshotChanged('Ledger length changed during preflight')
+                after = source.stat()
+                if (before.st_ino, before.st_size, before.st_mtime_ns) != (after.st_ino, after.st_size, after.st_mtime_ns):
+                    raise SnapshotChanged('Ledger changed during preflight')
+                require(len(content) <= remaining, 'Ledger snapshot exceeds preflight bound')
+                remaining -= len(content)
+                result[suffix] = content
+        except FileNotFoundError:
+            if suffix == '':
+                raise SnapshotChanged('Ledger disappeared during preflight')
+            result[suffix] = None
+    return result
+
+
+def stable_ledger_copy(path):
+    # SHM is an ephemeral index, never authority. SQLite rebuilds it only in
+    # scratch from the copied committed WAL; immutable=1 would ignore that WAL.
+    for _ in range(PREFLIGHT_ATTEMPTS):
+        try:
+            first = read_ledger_files(path)
+            second = read_ledger_files(path)
+            if first == second:
+                return second
+        except (SnapshotChanged, PermissionError):
+            # Checkpoint/short-lived writer activity is retryable, never a
+            # reason to inspect or modify the original with SQLite.
+            pass
+        time.sleep(0.01)
+    raise ValueError('Ledger is changing; retry preflight with a stable snapshot')
+
+
+def validate_ledger_markers(db, expected_mode):
+    table = db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='metadata'").fetchone()
+    require(table is not None, 'Unmarked ledger requires reviewed migration')
+    mode = db.execute("SELECT value FROM metadata WHERE key='f11_mode'").fetchone()
+    version = db.execute("SELECT value FROM metadata WHERE key='f11_schema_version'").fetchone()
+    require(mode is not None and mode[0] == expected_mode, 'Unmarked or incompatible ledger mode requires reviewed migration')
+    require(version is not None and version[0] == F11_SCHEMA_VERSION, 'Unmarked or incompatible ledger version requires reviewed migration')
+    columns = {row[1] for row in db.execute('PRAGMA table_info(f11_attempts)')}
+    require('launch_ref' in columns, 'Missing durable launch schema requires reviewed migration')
+
+
 def preflight_existing_ledger(database, fixture_only):
-    """Read-only refusal precedes reference schema setup, mkdir, chmod or writes."""
+    """Inspect a WAL-aware private snapshot; never open the source with SQLite."""
     path = Path(database)
     require(not path.is_symlink() and not getattr(path, 'is_junction', lambda: False)(), 'Linked ledger is forbidden')
     if not path.exists():
@@ -112,16 +185,13 @@ def preflight_existing_ledger(database, fixture_only):
     require(path.is_file(), 'Existing ledger must be a regular file')
     expected_mode = 'offline-fixture' if fixture_only else 'trusted-live-admission'
     try:
-        with contextlib.closing(sqlite3.connect(path.resolve().as_uri() + '?mode=ro', uri=True)) as db:
-            db.execute('PRAGMA query_only=ON')
-            table = db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='metadata'").fetchone()
-            require(table is not None, 'Unmarked ledger requires reviewed migration')
-            mode = db.execute("SELECT value FROM metadata WHERE key='f11_mode'").fetchone()
-            version = db.execute("SELECT value FROM metadata WHERE key='f11_schema_version'").fetchone()
-            require(mode is not None and mode[0] == expected_mode, 'Unmarked or incompatible ledger mode requires reviewed migration')
-            require(version is not None and version[0] == F11_SCHEMA_VERSION, 'Unmarked or incompatible ledger version requires reviewed migration')
-            columns = {row[1] for row in db.execute('PRAGMA table_info(f11_attempts)')}
-            require('launch_ref' in columns, 'Missing durable launch schema requires reviewed migration')
+        with tempfile.TemporaryDirectory(prefix='f11-preflight-') as scratch:
+            snapshot = Path(scratch) / 'ledger.sqlite3'
+            for suffix, content in stable_ledger_copy(path).items():
+                if content is not None:
+                    Path(str(snapshot) + suffix).write_bytes(content)
+            with contextlib.closing(sqlite3.connect(snapshot)) as db:
+                validate_ledger_markers(db, expected_mode)
     except sqlite3.DatabaseError:
         raise ValueError('Unreadable or incompatible ledger requires reviewed migration') from None
 
