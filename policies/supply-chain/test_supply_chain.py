@@ -286,4 +286,50 @@ class SupplyChain(unittest.TestCase):
                 lock.validate_manifest(m)
                 self.assertEqual(lock.adoption_blockers(e,NOW),[])
 
+    def test_explicit_branch_namespaces_rejected_at_public_boundaries(self):
+        values=('refs/heads/feature','refs/heads/release-1.0',
+                'https://example.invalid/repo/refs/heads/feature',
+                'refs/remotes/origin/release-1.0')
+        for value in values:
+            for kind in ('APPLICATION','OCI','TOOL','MODEL'):
+                entry=self.entry();entry.update(artifact_type=kind,release=value)
+                with self.subTest(kind=kind,release=value):
+                    self.assert_rejected_at_both_entry_boundaries(entry)
+            for index in (0,1):
+                entry=self.entry();entry['scans'][index]['tool_release']=value
+                manifest=self.manifest();manifest['entries']=[entry if e['id']==entry['id'] else e for e in manifest['entries']]
+                with self.subTest(scanner=index,release=value):
+                    with self.assertRaises(ValueError):lock.validate_manifest(manifest)
+                    self.assertIn(entry['scans'][index]['kind']+'_scanner_release_unpinned',lock.adoption_blockers(entry,NOW))
+
+    def test_digest_scanner_refs_require_exact_sha256_at_public_boundaries(self):
+        bad=('registry/scanner@sha256:deadbeef','registry/scanner@sha256:release-1.0',
+             'registry/scanner@sha256:'+'A'*64,'registry/scanner@sha256:'+'a'*63,
+             'registry/scanner@sha512:'+'a'*64,'registry/scanner@sha256:'+'a'*65)
+        for value in bad:
+            for index in (0,1):
+                entry=self.entry();entry['scans'][index]['tool_release']=value
+                manifest=self.manifest();manifest['entries']=[entry if e['id']==entry['id'] else e for e in manifest['entries']]
+                with self.subTest(scanner=index,value=value):
+                    with self.assertRaises(ValueError):lock.validate_manifest(manifest)
+                    self.assertIn(entry['scans'][index]['kind']+'_scanner_release_unpinned',lock.adoption_blockers(entry,NOW))
+        entry=self.entry()
+        for scan in entry['scans']:scan['tool_release']='registry/scanner@sha256:'+'a'*64
+        manifest=self.manifest();manifest['entries']=[entry if e['id']==entry['id'] else e for e in manifest['entries']]
+        lock.validate_manifest(manifest);self.assertEqual(lock.adoption_blockers(entry,NOW),[])
+
+    def test_latest_repository_names_are_not_mutable_selectors(self):
+        for origin in ('https://example.invalid/latest-version/repo',
+                       'registry.invalid/latest-version/repo:1.2.3',
+                       'registry.invalid/latest-version/repo@sha256:'+'a'*64,
+                       'https://example.invalid/owner/latest-version'):
+            entry=self.entry();entry.update(origin=origin,release='latest-version-1.2.3')
+            manifest=self.manifest();manifest['entries']=[entry if e['id']==entry['id'] else e for e in manifest['entries']]
+            with self.subTest(origin=origin):
+                lock.validate_manifest(manifest);self.assertEqual(lock.adoption_blockers(entry,NOW),[])
+        for origin in ('registry.invalid/latest-version/repo:latest',
+                       'registry.invalid/repo@latest'):
+            entry=self.entry();entry['origin']=origin
+            with self.subTest(origin=origin):self.assert_rejected_at_both_entry_boundaries(entry)
+
 if __name__=='__main__':unittest.main(verbosity=2)

@@ -64,6 +64,11 @@ def exact_release(value):
     """
     if not isinstance(value,str) or not value or value=='UNSET':return False
     if re.search(r'[\s*^~<>=|]',value):return False
+    # Explicit branch namespaces stay mutable regardless of terminal spelling.
+    if re.search(r'(?:^|/)refs/(?:heads|remotes)/',value,re.I):return False
+    if '@' in value:
+        # Digest qualification cannot fall back to the generic tag grammar.
+        return re.fullmatch(r'[^@]+@sha256:[a-f0-9]{64}',value) is not None
     terminal=re.split(r'[/@:]',value)[-1]
     if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._+\-]*',terminal):return False
     if terminal.lower() in ('latest','main','master','head','stable','nightly','x'):
@@ -79,7 +84,12 @@ def validate_entry(e):
     check_digest(e['digest'])
     if e['purpose']=='engineering-observation' and e['state']!='OBSERVED':
         raise ValueError('engineering observations cannot be adoption candidates')
-    if re.search(r'(^|[^a-z])latest($|[^a-z])',e['release']+' '+e['origin'],re.I):
+    # Repository names are not selectors: latest-version may be a valid name.
+    origin=e['origin']
+    selector=origin.rsplit('@',1)[-1] if '@' in origin else (
+        origin.rsplit('/',1)[-1].rsplit(':',1)[-1]
+        if ':' in origin.rsplit('/',1)[-1] else None)
+    if selector is not None and selector.lower()=='latest':
         raise ValueError('mutable latest tag forbidden')
     if known(e['release']):
         # Native package revisions (including Debian pre-release '~') are exact
