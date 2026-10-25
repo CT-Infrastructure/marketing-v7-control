@@ -1,0 +1,7 @@
+{
+  "synthetic_only": true,
+  "body_utf8": "{\"action_key\":\"sha256:66b5a475573c43c02bf7b891dab15fa75af5deab4527b12842d3f0453ae9374a\",\"client_id\":\"synthetic-client\",\"destination\":\"synthetic-wordpress-site\",\"event_id\":\"synthetic-callback-1\",\"occurred_at\":\"2026-10-25T12:10:00Z\",\"provider\":\"WordPress\",\"provider_object_ref\":\"synthetic-object-17c23d63d8903023\"}",
+  "signature": "886307fde4dd039870bf6a625229043aa541cb46ea932e84067c0db8d162b35a",
+  "signature_scheme": "HMAC-SHA256-public-test-material",
+  "runtime_qualification": "NOT_RUN"
+}

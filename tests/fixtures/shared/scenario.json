@@ -1,0 +1,6 @@
+{
+  "identity": {"client_id":"synthetic-client","source_system":"WordPress","source_event_id":"synthetic-event-0001","action_scope":"publish:synthetic-wordpress-site","approved_revision":"revision-1"},
+  "approval": {"schema_version":"1.0","approval_id":"synthetic-approval","source_system":"OpenProject","source_object_ref":"synthetic-work-package","client_id":"synthetic-client","approved_revision":"revision-1","asset_sha256s":["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"],"destination":"synthetic-wordpress-site","action_scope":"publish:synthetic-wordpress-site","approved_by_ref":"synthetic-reviewer","approved_at":"2026-10-25T12:00:00Z","expires_at":"2026-10-25T13:00:00Z","status":"APPROVED"},
+  "synthetic_only":true,
+  "runtime_qualification":"NOT_RUN"
+}
