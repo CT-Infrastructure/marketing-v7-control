@@ -276,8 +276,28 @@ class HarnessTests(unittest.TestCase):
                 self.assertEqual(h.receipt(pending['action_key']),confirmed)
                 self.assertEqual(h.db.execute('SELECT count(*) FROM callbacks').fetchone()[0],0)
                 self.assertEqual(len(h.provider.calls),1)
+    def test_unknown_readback_action_and_provider_must_match_reservation(self):
+        for field,value in [('action_key','sha256:'+'0'*64),('provider','Postiz')]:
+            with self.subTest(field=field),self.harness(provider=s.FakeProvider('TIMEOUT_AFTER_ACCEPT')) as h:
+                pending=h.submit(self.identity,'synthetic-approval')
+                history=h.db.execute('SELECT count(*) FROM history').fetchone()[0]
+                h.provider._objects[pending['action_key']][field]=value
+                with self.assertRaises(ValueError):h.reconcile(pending['action_key'])
+                self.assertEqual(h.receipt(pending['action_key']),pending)
+                self.assertEqual(h.db.execute('SELECT count(*) FROM history').fetchone()[0],history)
+                self.assertEqual(len(h.provider.calls),1)
+
+    def test_unknown_readback_missing_action_or_provider_is_rejected(self):
+        for field in ('action_key','provider'):
+            with self.subTest(field=field),self.harness(provider=s.FakeProvider('TIMEOUT_AFTER_ACCEPT')) as h:
+                pending=h.submit(self.identity,'synthetic-approval')
+                del h.provider._objects[pending['action_key']][field]
+                with self.assertRaises(ValueError):h.reconcile(pending['action_key'])
+                self.assertEqual(h.receipt(pending['action_key'])['status'],'UNKNOWN')
+                self.assertTrue(h.receipt(pending['action_key'])['reservation_retained'])
 if __name__=='__main__':
     unittest.main(verbosity=2)
+
 
 
 

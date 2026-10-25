@@ -203,8 +203,12 @@ class Harness:
         if obj is None:
             return self._transition(previous, status='RECONCILED', reconciliation_ref='synthetic-readback',
                                     reconciliation_outcome='NOT_OCCURRED', reservation_retained=False)
-        if obj['client_id'] != previous['action_identity']['client_id'] or obj['destination'] != previous['destination']:
-            raise ValueError('cross-client/destination readback')
+        if (type(obj) is not dict or
+                obj.get('client_id') != previous['action_identity']['client_id'] or
+                obj.get('destination') != previous['destination'] or
+                obj.get('action_key') != previous['action_key'] or
+                obj.get('provider') != previous['action_identity']['source_system']):
+            raise ValueError('readback does not match reserved action/provider/client/destination')
         return self._transition(previous, status='RECONCILED', reconciliation_ref='synthetic-readback',
                                 reconciliation_outcome='OCCURRED', provider_object_ref=obj['provider_object_ref'],
                                 outbound_state='CONFIRMED', reservation_retained=True)
@@ -260,6 +264,7 @@ class Harness:
         with self.db:
             self.db.execute('INSERT INTO callbacks VALUES (?,?,?,?)',(doc['provider'],doc['client_id'],doc['event_id'],doc['action_key']))
         return result
+
 
 
 
