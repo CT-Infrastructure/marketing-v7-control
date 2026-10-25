@@ -1,0 +1,38 @@
+flowchart TB
+  CTL["Shared infrastructure and execution controls<br/>See each workflow for exact prerequisites"]:::control
+  L01["L01<br/>Factorio simulation and<br/>controller continuity"]:::process
+  CTL -. "supports" .-> L01
+  L02["L02<br/>OBS, GPU capture and<br/>broadcast continuity"]:::process
+  CTL -. "supports" .-> L02
+  L03["L03<br/>Herdr and Coven<br/>coding-session preservation"]:::process
+  CTL -. "supports" .-> L03
+  L04["L04<br/>Sandbox VMs, desktop access<br/>and tunnels"]:::process
+  CTL -. "supports" .-> L04
+  L05["L05<br/>Pod/store integrations and<br/>held-hosting reconciliation"]:::process
+  CTL -. "supports" .-> L05
+  L06["L06<br/>Workflow Studio, BTC and<br/>custom helper disposition"]:::process
+  CTL -. "supports" .-> L06
+  L07["L07<br/>Conditional SMB, network-flow<br/>and MCP services"]:::process
+  CTL -. "supports" .-> L07
+  L08["L08<br/>Legacy endpoint and<br/>orphan-volume disposition<br/>closure"]:::process
+  CTL -. "supports" .-> L08
+  L01 --> L02
+  L06 --> L08
+  OUT["Cross-domain handoffs<br/>I02, I19, I28, I29, M07, M08, M36, X08, X09, X10, X11"]:::done
+  L01 --> OUT
+  L02 --> OUT
+  L03 --> OUT
+  L04 --> OUT
+  L05 --> OUT
+  L06 --> OUT
+  L07 --> OUT
+  L08 --> OUT
+
+classDef source fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e,stroke-width:1.6px;
+classDef process fill:#f8fafc,stroke:#94a3b8,color:#172554,stroke-width:1.4px;
+classDef gate fill:#fff7d6,stroke:#d97706,color:#78350f,stroke-width:1.8px;
+classDef control fill:#ede9fe,stroke:#8b5cf6,color:#4c1d95,stroke-dasharray:5 4;
+classDef done fill:#ccfbf1,stroke:#0f766e,color:#134e4a,stroke-width:1.8px;
+classDef hold fill:#fff1f2,stroke:#e11d48,color:#881337,stroke-width:1.5px;
+classDef legacy fill:#fdf2f8,stroke:#9d174d,color:#831843;
+classDef ext fill:#ecfeff,stroke:#0891b2,color:#164e63;

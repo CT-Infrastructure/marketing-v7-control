@@ -1,0 +1,75 @@
+{
+  "id": "X07",
+  "name": "Dead-letter, manual repair and controlled replay",
+  "family": "Shared integration and control",
+  "subfamily": "Shared integration and control",
+  "trigger": "Exhausted retry, invalid state or ambiguous effect",
+  "steps": [
+    {
+      "action": "Classify deterministic failure versus transient outage",
+      "software": "Activepieces"
+    },
+    {
+      "action": "Preserve redacted event, attempt and error context",
+      "software": "PostgreSQL / Loki"
+    },
+    {
+      "action": "Assign accountable remediation and deadline",
+      "software": "OpenProject"
+    },
+    {
+      "action": "Correct source or configuration with versioned evidence",
+      "software": "Native owner"
+    },
+    {
+      "action": "Recheck consent, approval and idempotency before replay",
+      "software": "X02 / channel guard"
+    }
+  ],
+  "gate": "Repair and replay authorized?",
+  "output": "Resolved exception or an auditable continuing hold",
+  "acceptance_tests": [
+    "Retries capped with backoff/jitter",
+    "Replay cannot bypass new suppression"
+  ],
+  "upstream": [
+    "X02",
+    "X06",
+    "X09",
+    "E08"
+  ],
+  "handoffs": [
+    "X01",
+    "X02",
+    "X11"
+  ],
+  "source": "Sources/V7/Consolidated_Self_Hosted_Technology_Stack_v7_2026-10-25.md",
+  "conditional": false,
+  "notes": "",
+  "failure": "Reject or HOLD the event/action, keep a redacted durable receipt, use bounded retries only for retry-safe failures, and send unresolved or ambiguous outcomes to human reconciliation.",
+  "status": "DESIGN_SPECIFIED_NOT_DEPLOYED",
+  "baseline": "V7",
+  "consolidation_revision": 1,
+  "controls": [],
+  "runtime_dependencies": [
+    "I10",
+    "I15",
+    "I19"
+  ],
+  "software": [
+    "Activepieces",
+    "Native owner",
+    "OpenProject",
+    "PostgreSQL / Loki",
+    "X02 / channel guard"
+  ],
+  "source_class": "consolidated-reference-design",
+  "run_contract": {
+    "owner": "Assigned accountable role in OpenProject before activation",
+    "idempotency": "client_id + source_system + source_event_id + action_scope + approved_revision",
+    "retry": "Bounded retry only after retryability classification; unknown remote effects HOLD",
+    "observability": "workflow_id, run_id, correlation_id, state and redacted error; no raw PII labels",
+    "recovery": "Restore HOLD; reapply suppression/deletion and reconcile external receipts before replay",
+    "completion": "Named output plus acceptance evidence, not merely a running service"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "owner": null,
+  "repository": "marketing-v7-platform",
+  "project_title": "Marketing V7 — Integrated Delivery",
+  "project_number": null,
+  "visibility": "private",
+  "default_branch": "main",
+  "api_version": "2026-03-10",
+  "source_reviewed": false,
+  "private_access_reviewed": false,
+  "human_codeowners": [],
+  "native_relationships": "required",
+  "mutation_delay_seconds": 1.2,
+  "maximum_mutations_per_run": 100,
+  "allow_project_create": false,
+  "allow_repository_create": false,
+  "rule_and_environment_setup": "Separate capability-reviewed bootstrap task; never silently waived."
+}

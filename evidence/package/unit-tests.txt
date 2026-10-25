@@ -1,0 +1,71 @@
+test_ambiguous_create_not_replayed (test_merge_and_import.ImportTests.test_ambiguous_create_not_replayed) ... ok
+test_budget_pause_does_not_write (test_merge_and_import.ImportTests.test_budget_pause_does_not_write) ... ok
+test_graphql_errors_remain_pending (test_merge_and_import.ImportTests.test_graphql_errors_remain_pending) ... ok
+test_readback_adoption_clears_pending (test_merge_and_import.ImportTests.test_readback_adoption_clears_pending) ... ok
+test_execution_not_proven_by_pr (test_merge_and_import.MergeTests.test_execution_not_proven_by_pr) ... ok
+test_input_binding_rejected (test_merge_and_import.MergeTests.test_input_binding_rejected) ... ok
+test_later_failed_check_rejected (test_merge_and_import.MergeTests.test_later_failed_check_rejected) ... ok
+test_missing_files_rejected (test_merge_and_import.MergeTests.test_missing_files_rejected) ... ok
+test_scope_rename_rejected (test_merge_and_import.MergeTests.test_scope_rename_rejected) ... ok
+test_security_review_required (test_merge_and_import.MergeTests.test_security_review_required) ... ok
+test_self_review_rejected (test_merge_and_import.MergeTests.test_self_review_rejected) ... ok
+test_stale_review_rejected (test_merge_and_import.MergeTests.test_stale_review_rejected) ... ok
+test_unmerged_rejected (test_merge_and_import.MergeTests.test_unmerged_rejected) ... ok
+test_valid_exact_head (test_merge_and_import.MergeTests.test_valid_exact_head) ... ok
+test_wrong_check_app_rejected (test_merge_and_import.MergeTests.test_wrong_check_app_rejected) ... ok
+test_accepted_ancestor_allows_dispatch (test_merge_and_import.SourceRevisionTests.test_accepted_ancestor_allows_dispatch) ... ok
+test_nonrevision_receipt_holds_dispatch (test_merge_and_import.SourceRevisionTests.test_nonrevision_receipt_holds_dispatch) ... ok
+test_stale_source_holds_dispatch (test_merge_and_import.SourceRevisionTests.test_stale_source_holds_dispatch) ... ok
+test_unaccepted_dependency_holds_dispatch (test_merge_and_import.SourceRevisionTests.test_unaccepted_dependency_holds_dispatch) ... ok
+test_apply_requires_review (test_package.PackageTests.test_apply_requires_review) ... ok
+test_archive_path_attack (test_package.PackageTests.test_archive_path_attack) ... ok
+test_archive_safe_file (test_package.PackageTests.test_archive_safe_file) ... ok
+test_archive_size_budget (test_package.PackageTests.test_archive_size_budget) ... ok
+test_archive_symlink_attack (test_package.PackageTests.test_archive_symlink_attack) ... ok
+test_full_coverage (test_package.PackageTests.test_full_coverage) ... /mnt/data/Marketing_V7_GitHub_Agent_Package_2026-10-25/tools/validate_package.py:14: ResourceWarning: unclosed file <_io.TextIOWrapper name='/mnt/data/Marketing_V7_GitHub_Agent_Package_2026-10-25/reference/acceptance/Original_Acceptance_Matrix.csv' mode='r' encoding='utf-8'>
+  cases=list(csv.DictReader((root/'reference/acceptance/Original_Acceptance_Matrix.csv').open()))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/mnt/data/Marketing_V7_GitHub_Agent_Package_2026-10-25/tools/validate_package.py:15: ResourceWarning: unclosed file <_io.TextIOWrapper name='/mnt/data/Marketing_V7_GitHub_Agent_Package_2026-10-25/backlog/acceptance_traceability.csv' mode='r' encoding='utf-8'>
+  trace=list(csv.DictReader((root/'backlog/acceptance_traceability.csv').open()))
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_human_notes_retained (test_package.PackageTests.test_human_notes_retained) ... ok
+test_inventory_rejects_symlink (test_package.PackageTests.test_inventory_rejects_symlink) ... ok
+test_missing_update_markers_rejected (test_package.PackageTests.test_missing_update_markers_rejected) ... ok
+test_public_destination_rejected (test_package.PackageTests.test_public_destination_rejected) ... ok
+test_real_launcher_disabled_by_default (test_package.PackageTests.test_real_launcher_disabled_by_default) ... ok
+test_atomic_competing_claim (test_scheduler.SchedulerTests.test_atomic_competing_claim) ... ok
+test_budget_limits_claims (test_scheduler.SchedulerTests.test_budget_limits_claims) ... ok
+test_capacity_bound (test_scheduler.SchedulerTests.test_capacity_bound) ... ok
+test_cost_overrun_stops_dispatch (test_scheduler.SchedulerTests.test_cost_overrun_stops_dispatch) ... ok
+test_cycle_rejected (test_scheduler.SchedulerTests.test_cycle_rejected) ... ok
+test_demo_parallel (test_scheduler.SchedulerTests.test_demo_parallel) ... ok
+test_dependency_waits_for_acceptance (test_scheduler.SchedulerTests.test_dependency_waits_for_acceptance) ... ok
+test_exact_file_scope (test_scheduler.SchedulerTests.test_exact_file_scope) ... ok
+test_explicit_lock (test_scheduler.SchedulerTests.test_explicit_lock) ... ok
+test_fence_increases_after_safe_retry (test_scheduler.SchedulerTests.test_fence_increases_after_safe_retry) ... ok
+test_graph_change_rejected (test_scheduler.SchedulerTests.test_graph_change_rejected) ... ok
+test_initial_frontier (test_scheduler.SchedulerTests.test_initial_frontier) ... ok
+test_input_hash_binding (test_scheduler.SchedulerTests.test_input_hash_binding) ... ok
+test_manual_and_deferred_not_dispatched (test_scheduler.SchedulerTests.test_manual_and_deferred_not_dispatched) ... ok
+test_no_self_accept (test_scheduler.SchedulerTests.test_no_self_accept) ... ok
+test_orphan_needs_positive_proof (test_scheduler.SchedulerTests.test_orphan_needs_positive_proof) ... ok
+test_orphan_retains_capacity (test_scheduler.SchedulerTests.test_orphan_retains_capacity) ... ok
+test_path_lock_conflicts (test_scheduler.SchedulerTests.test_path_lock_conflicts) ... ok
+test_path_traversal_rejected (test_scheduler.SchedulerTests.test_path_traversal_rejected) ... ok
+test_policy_change_rejected (test_scheduler.SchedulerTests.test_policy_change_rejected) ... ok
+test_prefix_not_string_prefix (test_scheduler.SchedulerTests.test_prefix_not_string_prefix) ... ok
+test_restart_preserves_lease (test_scheduler.SchedulerTests.test_restart_preserves_lease) ... ok
+test_result_scope_rejected (test_scheduler.SchedulerTests.test_result_scope_rejected) ... ok
+test_sibling_scopes_parallel (test_scheduler.SchedulerTests.test_sibling_scopes_parallel) ... ok
+test_stale_heartbeat_rejected (test_scheduler.SchedulerTests.test_stale_heartbeat_rejected) ... ok
+test_stale_result_rejected (test_scheduler.SchedulerTests.test_stale_result_rejected) ... ok
+test_stop_prevents_new_claim (test_scheduler.SchedulerTests.test_stop_prevents_new_claim) ... ok
+test_unknown_dependency_rejected (test_scheduler.SchedulerTests.test_unknown_dependency_rejected) ... ok
+test_unknown_usage_charges_reservation (test_scheduler.SchedulerTests.test_unknown_usage_charges_reservation) ... ok
+test_unlock_after_acceptance (test_scheduler.SchedulerTests.test_unlock_after_acceptance) ... ok
+
+----------------------------------------------------------------------
+Ran 60 tests in 2.514s
+
+OK

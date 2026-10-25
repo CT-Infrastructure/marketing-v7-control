@@ -1,0 +1,76 @@
+{
+  "id": "L08",
+  "name": "Legacy endpoint and orphan-volume disposition closure",
+  "family": "Legacy workload continuity",
+  "subfamily": "Legacy workload continuity",
+  "trigger": "Route-only or retained-storage review",
+  "steps": [
+    {
+      "action": "Match stable service/endpoint IDs to source evidence",
+      "software": "Legacy crosswalk"
+    },
+    {
+      "action": "Preserve 410, disabled and unresolved behavior",
+      "software": "Caddy / systemd"
+    },
+    {
+      "action": "Identify retained data, credentials and expiry",
+      "software": "Owner / restic"
+    },
+    {
+      "action": "Approve migrate, retain, archive or delete scope",
+      "software": "OpenProject"
+    },
+    {
+      "action": "Verify endpoint and data outcome independently",
+      "software": "Playwright / operator"
+    }
+  ],
+  "gate": "Disposition and retention evidence complete?",
+  "output": "Closed legacy record or continuing explicit blocker",
+  "acceptance_tests": [
+    "Every route-only record remains traceable",
+    "No prune from absence of a running container"
+  ],
+  "upstream": [
+    "I31",
+    "I32",
+    "L06"
+  ],
+  "handoffs": [
+    "I02",
+    "X08"
+  ],
+  "source": "Sources/Legacy/docs/service-recovery-manifest.csv; Sources/Legacy/docs/service-disposition-register.csv",
+  "conditional": true,
+  "notes": "",
+  "failure": "Preserve the current held/stopped/retired intent. Do not start, delete, prune, extend an old run window, or reactivate a public route without a separate owner decision.",
+  "status": "DESIGN_SPECIFIED_NOT_DEPLOYED",
+  "baseline": "V7",
+  "consolidation_revision": 1,
+  "controls": [
+    "I02",
+    "I23",
+    "I30"
+  ],
+  "runtime_dependencies": [
+    "I09",
+    "I23"
+  ],
+  "software": [
+    "Caddy / systemd",
+    "Legacy crosswalk",
+    "OpenProject",
+    "Owner / restic",
+    "Playwright / operator"
+  ],
+  "source_class": "consolidated-reference-design",
+  "run_contract": {
+    "owner": "Assigned accountable role in OpenProject before activation",
+    "idempotency": "client_id + source_system + source_event_id + action_scope + approved_revision",
+    "retry": "Bounded retry only after retryability classification; unknown remote effects HOLD",
+    "observability": "workflow_id, run_id, correlation_id, state and redacted error; no raw PII labels",
+    "recovery": "Restore HOLD; reapply suppression/deletion and reconcile external receipts before replay",
+    "completion": "Named output plus acceptance evidence, not merely a running service"
+  }
+}

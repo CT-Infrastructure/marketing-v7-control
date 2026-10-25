@@ -1,0 +1,30 @@
+# REVIEW TEMPLATE ONLY: substitute/validate every value before installing.
+[Unit]
+Description=REVIEWED_APP — held by default
+After=network-online.target
+Wants=network-online.target
+
+[Container]
+Image=REGISTRY/APP@sha256:REVIEWED_DIGEST
+ContainerName=REVIEWED_APP
+User=10001:10001
+ReadOnly=true
+NoNewPrivileges=true
+DropCapability=all
+Network=REVIEWED_PRIVATE_NETWORK.network
+Secret=REVIEWED_SECRET,type=mount,target=credential
+Volume=REVIEWED_STATE.volume:/var/lib/app:rw
+Tmpfs=/tmp:rw,nosuid,nodev,noexec,size=128m
+Environment=OUTBOUND_EFFECTS=HOLD
+# Use release-specific health/readiness commands and validate Quadlet support.
+
+[Service]
+Restart=on-failure
+RestartSec=10
+TimeoutStartSec=180
+TimeoutStopSec=60
+MemoryMax=1G
+CPUQuota=100%
+TasksMax=256
+
+# No Install target until approved deployment. Rootless user manager required.

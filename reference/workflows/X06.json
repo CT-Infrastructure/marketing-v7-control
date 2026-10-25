@@ -1,0 +1,77 @@
+{
+  "id": "X06",
+  "name": "Destination reconciliation and uncertain outcomes",
+  "family": "Shared integration and control",
+  "subfamily": "Shared integration and control",
+  "trigger": "API timeout, send attempt or restored queue",
+  "steps": [
+    {
+      "action": "Load action key and expected destination state",
+      "software": "PostgreSQL"
+    },
+    {
+      "action": "Query supported provider/native state using existing ID",
+      "software": "WordPress / Postiz / SMTP / carrier APIs"
+    },
+    {
+      "action": "Distinguish confirmed success, confirmed failure and unknown",
+      "software": "Bounded adapter"
+    },
+    {
+      "action": "Update receipt and native owner without inventing status",
+      "software": "Activepieces"
+    },
+    {
+      "action": "Escalate unresolvable outcomes before retry",
+      "software": "OpenProject"
+    }
+  ],
+  "gate": "Outcome confirmed or safely retryable?",
+  "output": "Reconciled external state or an UNKNOWN hold",
+  "acceptance_tests": [
+    "Timeout not equated to failure",
+    "No duplicate send/post/call from blind retry"
+  ],
+  "upstream": [
+    "X02",
+    "I24",
+    "I26",
+    "E11"
+  ],
+  "handoffs": [
+    "X07",
+    "X10",
+    "E06",
+    "V11",
+    "M36"
+  ],
+  "source": "Sources/V7/Consolidated_Self_Hosted_Technology_Stack_v7_2026-10-25.md",
+  "conditional": false,
+  "notes": "",
+  "failure": "Reject or HOLD the event/action, keep a redacted durable receipt, use bounded retries only for retry-safe failures, and send unresolved or ambiguous outcomes to human reconciliation.",
+  "status": "DESIGN_SPECIFIED_NOT_DEPLOYED",
+  "baseline": "V7",
+  "consolidation_revision": 1,
+  "controls": [],
+  "runtime_dependencies": [
+    "I10",
+    "I15",
+    "I19"
+  ],
+  "software": [
+    "Activepieces",
+    "Bounded adapter",
+    "OpenProject",
+    "PostgreSQL",
+    "WordPress / Postiz / SMTP / carrier APIs"
+  ],
+  "source_class": "consolidated-reference-design",
+  "run_contract": {
+    "owner": "Assigned accountable role in OpenProject before activation",
+    "idempotency": "client_id + source_system + source_event_id + action_scope + approved_revision",
+    "retry": "Bounded retry only after retryability classification; unknown remote effects HOLD",
+    "observability": "workflow_id, run_id, correlation_id, state and redacted error; no raw PII labels",
+    "recovery": "Restore HOLD; reapply suppression/deletion and reconcile external receipts before replay",
+    "completion": "Named output plus acceptance evidence, not merely a running service"
+  }
+}

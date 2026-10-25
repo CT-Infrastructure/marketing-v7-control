@@ -1,0 +1,12 @@
+{
+  "mode": "SYNTHETIC_ONLY",
+  "ai_agents_launched": 0,
+  "github_mutations": 0,
+  "production_actions": 0,
+  "synthetic_tasks": 24,
+  "accepted": 24,
+  "configured_workers": 12,
+  "observed_peak_parallel_mock_workers": 9,
+  "exclusive_lock_scenario_included": true,
+  "all_completed": true
+}

@@ -1,0 +1,29 @@
+flowchart TB
+  IN["X10: Scheduled report or campaign review"]:::source
+  S1["Read permitted native metrics and source<br/>timestamps<br/><b>Matomo / Mautic / SerpBear / Postiz</b>"]:::process
+  IN --> S1
+  S2["Normalize units, timezone, currency and<br/>campaign IDs<br/><b>Activepieces</b>"]:::process
+  S1 --> S2
+  S3["Deduplicate conversions against<br/>authoritative references<br/><b>PostgreSQL</b>"]:::process
+  S2 --> S3
+  S4["Record absent/late sources as unknown<br/><b>PostgreSQL snapshots</b>"]:::process
+  S3 --> S4
+  GATE{"Data lineage and freshness<br/>sufficient?"}:::gate
+  S4 --> GATE
+  GATE -- "No / unknown" --> HOLD["HOLD<br/>Repair, review or reconcile"]:::hold
+  S5["Present outcomes and limitations for<br/>decision<br/><b>Grafana / OpenProject</b>"]:::process
+  GATE -- "Yes" --> S5
+  OUT["Traceable reporting snapshot and improvement<br/>tasks"]:::done
+  S5 --> OUT
+  NEXT["Connected handoffs<br/>M05, M18, M20, M35, C72"]:::ext
+  OUT --> NEXT
+
+classDef source fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e,stroke-width:1.6px;
+classDef process fill:#f8fafc,stroke:#94a3b8,color:#172554,stroke-width:1.4px;
+classDef gate fill:#fff7d6,stroke:#d97706,color:#78350f,stroke-width:1.8px;
+classDef control fill:#ede9fe,stroke:#8b5cf6,color:#4c1d95,stroke-dasharray:5 4;
+classDef done fill:#ccfbf1,stroke:#0f766e,color:#134e4a,stroke-width:1.8px;
+classDef hold fill:#fff1f2,stroke:#e11d48,color:#881337,stroke-width:1.5px;
+classDef legacy fill:#fdf2f8,stroke:#9d174d,color:#831843;
+classDef ext fill:#ecfeff,stroke:#0891b2,color:#164e63;
+

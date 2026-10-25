@@ -1,0 +1,12 @@
+{
+  "repository": null,
+  "base_branch": "main",
+  "expected_head_sha": null,
+  "expected_input_sha256": null,
+  "verified_by": null,
+  "reviewer_logins": [],
+  "security_reviewer_logins": [],
+  "minimum_approvals": 1,
+  "required_checks": [],
+  "note": "Populate exact trusted check names and numeric GitHub App IDs after F02/F13 qualification. No CODE_MERGED receipt authorizes production."
+}

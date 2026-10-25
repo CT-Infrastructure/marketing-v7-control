@@ -1,0 +1,74 @@
+{
+  "id": "X04",
+  "name": "Independent channel eligibility and withdrawal",
+  "family": "Shared integration and control",
+  "subfamily": "Shared integration and control",
+  "trigger": "Send, call, SMS, tracking or audience export",
+  "steps": [
+    {
+      "action": "Identify channel, purpose, jurisdiction and client",
+      "software": "Workflow policy"
+    },
+    {
+      "action": "Read authoritative consent and suppression",
+      "software": "Mautic / call ledger / site consent"
+    },
+    {
+      "action": "Check campaign, time window, identity and provider constraints",
+      "software": "Deterministic guard"
+    },
+    {
+      "action": "Recheck after any queue delay",
+      "software": "Final destination boundary"
+    },
+    {
+      "action": "Propagate withdrawals and invalidate queued authorization",
+      "software": "Activepieces / native owners"
+    }
+  ],
+  "gate": "Action remains eligible at execution time?",
+  "output": "Allowed decision or recorded suppression",
+  "acceptance_tests": [
+    "Email consent never grants phone/SMS consent",
+    "In-flight unsubscribe blocks queued action"
+  ],
+  "upstream": [
+    "X02"
+  ],
+  "handoffs": [
+    "E11",
+    "V02",
+    "M25",
+    "M32",
+    "X08"
+  ],
+  "source": "Sources/V7/Consolidated_Self_Hosted_Technology_Stack_v7_2026-10-25.md",
+  "conditional": false,
+  "notes": "",
+  "failure": "Reject or HOLD the event/action, keep a redacted durable receipt, use bounded retries only for retry-safe failures, and send unresolved or ambiguous outcomes to human reconciliation.",
+  "status": "DESIGN_SPECIFIED_NOT_DEPLOYED",
+  "baseline": "V7",
+  "consolidation_revision": 1,
+  "controls": [],
+  "runtime_dependencies": [
+    "I10",
+    "I15",
+    "I19"
+  ],
+  "software": [
+    "Activepieces / native owners",
+    "Deterministic guard",
+    "Final destination boundary",
+    "Mautic / call ledger / site consent",
+    "Workflow policy"
+  ],
+  "source_class": "consolidated-reference-design",
+  "run_contract": {
+    "owner": "Assigned accountable role in OpenProject before activation",
+    "idempotency": "client_id + source_system + source_event_id + action_scope + approved_revision",
+    "retry": "Bounded retry only after retryability classification; unknown remote effects HOLD",
+    "observability": "workflow_id, run_id, correlation_id, state and redacted error; no raw PII labels",
+    "recovery": "Restore HOLD; reapply suppression/deletion and reconcile external receipts before replay",
+    "completion": "Named output plus acceptance evidence, not merely a running service"
+  }
+}

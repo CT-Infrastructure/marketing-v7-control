@@ -1,0 +1,36 @@
+flowchart TB
+  CTL["Shared infrastructure and execution controls<br/>See each workflow for exact prerequisites"]:::control
+  C25["C25<br/>Weekly newsletter"]:::process
+  CTL -. "supports" .-> C25
+  C26["C26<br/>Welcome email sequence"]:::process
+  CTL -. "supports" .-> C26
+  C27["C27<br/>Lead-nurture series"]:::process
+  CTL -. "supports" .-> C27
+  C28["C28<br/>Product launch sequence"]:::process
+  CTL -. "supports" .-> C28
+  C29["C29<br/>Event promotion emails"]:::process
+  CTL -. "supports" .-> C29
+  C30["C30<br/>Segmented email variations"]:::process
+  CTL -. "supports" .-> C30
+  C31["C31<br/>Re-engagement campaign"]:::process
+  CTL -. "supports" .-> C31
+  C32["C32<br/>A/B email content testing"]:::process
+  CTL -. "supports" .-> C32
+  OUT["Cross-domain handoffs<br/>E03, M02"]:::done
+  C25 --> OUT
+  C26 --> OUT
+  C27 --> OUT
+  C28 --> OUT
+  C29 --> OUT
+  C30 --> OUT
+  C31 --> OUT
+  C32 --> OUT
+
+classDef source fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e,stroke-width:1.6px;
+classDef process fill:#f8fafc,stroke:#94a3b8,color:#172554,stroke-width:1.4px;
+classDef gate fill:#fff7d6,stroke:#d97706,color:#78350f,stroke-width:1.8px;
+classDef control fill:#ede9fe,stroke:#8b5cf6,color:#4c1d95,stroke-dasharray:5 4;
+classDef done fill:#ccfbf1,stroke:#0f766e,color:#134e4a,stroke-width:1.8px;
+classDef hold fill:#fff1f2,stroke:#e11d48,color:#881337,stroke-width:1.5px;
+classDef legacy fill:#fdf2f8,stroke:#9d174d,color:#831843;
+classDef ext fill:#ecfeff,stroke:#0891b2,color:#164e63;

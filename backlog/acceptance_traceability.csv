@@ -1,0 +1,577 @@
+source_test_id,workflow_id,test,implementation_issue,test_authoring_issue,verification_issue,initial_status
+I01-T01,I01,All 156 disposition rows and 104 recovery rows referenced,WF-I01-BUILD,WF-I01-TEST,WF-I01-VERIFY,NOT_RUN
+I01-T02,I01,No inaccessible scope labelled absent,WF-I01-BUILD,WF-I01-TEST,WF-I01-VERIFY,NOT_RUN
+I02-T01,I02,Retired 410 routes remain retired,WF-I02-BUILD,WF-I02-TEST,WF-I02-VERIFY,NOT_RUN
+I02-T02,I02,Every scope has an owner or an explicit blocker,WF-I02-BUILD,WF-I02-TEST,WF-I02-VERIFY,NOT_RUN
+I03-T01,I03,No secret values in diagrams or logs,WF-I03-BUILD,WF-I03-TEST,WF-I03-VERIFY,NOT_RUN
+I03-T02,I03,Offline decrypt and local-console drill pass,WF-I03-BUILD,WF-I03-TEST,WF-I03-VERIFY,NOT_RUN
+I04-T01,I04,No destructive install over uncaptured source,WF-I04-BUILD,WF-I04-TEST,WF-I04-VERIFY,NOT_RUN
+I04-T02,I04,GPU and firmware assumptions verified,WF-I04-BUILD,WF-I04-TEST,WF-I04-VERIFY,NOT_RUN
+I05-T01,I05,No simultaneous DHCP authorities,WF-I05-BUILD,WF-I05-TEST,WF-I05-VERIFY,NOT_RUN
+I05-T02,I05,Original router can be reconnected,WF-I05-BUILD,WF-I05-TEST,WF-I05-VERIFY,NOT_RUN
+I06-T01,I06,All historical declarations preserved in source crosswalk,WF-I06-BUILD,WF-I06-TEST,WF-I06-VERIFY,NOT_RUN
+I06-T02,I06,No public-DNS claims from local dnsmasq,WF-I06-BUILD,WF-I06-TEST,WF-I06-VERIFY,NOT_RUN
+I07-T01,I07,No unintended WAN administration,WF-I07-BUILD,WF-I07-TEST,WF-I07-VERIFY,NOT_RUN
+I07-T02,I07,IPv6 policy agrees with intended exposure,WF-I07-BUILD,WF-I07-TEST,WF-I07-VERIFY,NOT_RUN
+I08-T01,I08,Wrong-tailnet access denied,WF-I08-BUILD,WF-I08-TEST,WF-I08-VERIFY,NOT_RUN
+I08-T02,I08,Headscale outage does not eliminate local recovery,WF-I08-BUILD,WF-I08-TEST,WF-I08-VERIFY,NOT_RUN
+I09-T01,I09,All 12 historical guests dispositioned,WF-I09-BUILD,WF-I09-TEST,WF-I09-VERIFY,NOT_RUN
+I09-T02,I09,No XML copy treated as complete Proxmox migration,WF-I09-BUILD,WF-I09-TEST,WF-I09-VERIFY,NOT_RUN
+I10-T01,I10,Guest networking does not overwrite Proxmox host networking,WF-I10-BUILD,WF-I10-TEST,WF-I10-VERIFY,NOT_RUN
+I10-T02,I10,Rootless UID/subuid ownership validated,WF-I10-BUILD,WF-I10-TEST,WF-I10-VERIFY,NOT_RUN
+I11-T01,I11,No blanket compose up,WF-I11-BUILD,WF-I11-TEST,WF-I11-VERIFY,NOT_RUN
+I11-T02,I11,No direct transplant of live Docker storage,WF-I11-BUILD,WF-I11-TEST,WF-I11-VERIFY,NOT_RUN
+I12-T01,I12,Restore can decrypt Activepieces connections,WF-I12-BUILD,WF-I12-TEST,WF-I12-VERIFY,NOT_RUN
+I12-T02,I12,No key material in workflow exports,WF-I12-BUILD,WF-I12-TEST,WF-I12-VERIFY,NOT_RUN
+I13-T01,I13,Keycloak not assumed to proxy every app,WF-I13-BUILD,WF-I13-TEST,WF-I13-VERIFY,NOT_RUN
+I13-T02,I13,Segment labels not treated as hard tenancy,WF-I13-BUILD,WF-I13-TEST,WF-I13-VERIFY,NOT_RUN
+I14-T01,I14,Valid leaf certificate alone is insufficient,WF-I14-BUILD,WF-I14-TEST,WF-I14-VERIFY,NOT_RUN
+I14-T02,I14,No retired route reactivated implicitly,WF-I14-BUILD,WF-I14-TEST,WF-I14-VERIFY,NOT_RUN
+I15-T01,I15,No direct writes into unsupported app schemas,WF-I15-BUILD,WF-I15-TEST,WF-I15-VERIFY,NOT_RUN
+I15-T02,I15,Embedding model remains separate from pgvector,WF-I15-BUILD,WF-I15-TEST,WF-I15-VERIFY,NOT_RUN
+I16-T01,I16,Mautic not forced onto PostgreSQL,WF-I16-BUILD,WF-I16-TEST,WF-I16-VERIFY,NOT_RUN
+I16-T02,I16,Assets/uploads recover with database metadata,WF-I16-BUILD,WF-I16-TEST,WF-I16-VERIFY,NOT_RUN
+I17-T01,I17,No untested drop-in assumption,WF-I17-BUILD,WF-I17-TEST,WF-I17-VERIFY,NOT_RUN
+I17-T02,I17,Queue loss cannot create unauthorized replays,WF-I17-BUILD,WF-I17-TEST,WF-I17-VERIFY,NOT_RUN
+I18-T01,I18,ResourceSpace remains approved asset authority,WF-I18-BUILD,WF-I18-TEST,WF-I18-VERIFY,NOT_RUN
+I18-T02,I18,Same-host object copy is not independent backup,WF-I18-BUILD,WF-I18-TEST,WF-I18-VERIFY,NOT_RUN
+I19-T01,I19,No PII in metric labels,WF-I19-BUILD,WF-I19-TEST,WF-I19-VERIFY,NOT_RUN
+I19-T02,I19,Main-host failure detection limitation documented,WF-I19-BUILD,WF-I19-TEST,WF-I19-VERIFY,NOT_RUN
+I20-T01,I20,Historical script presence not proof of scheduler,WF-I20-BUILD,WF-I20-TEST,WF-I20-VERIFY,NOT_RUN
+I20-T02,I20,Duplicate feeds and alerts tested,WF-I20-BUILD,WF-I20-TEST,WF-I20-VERIFY,NOT_RUN
+I21-T01,I21,Unused legacy dedupe fields not treated as protection,WF-I21-BUILD,WF-I21-TEST,WF-I21-VERIFY,NOT_RUN
+I21-T02,I21,Replaying same snapshot does not notify twice,WF-I21-BUILD,WF-I21-TEST,WF-I21-VERIFY,NOT_RUN
+I22-T01,I22,No unattended application schema upgrade,WF-I22-BUILD,WF-I22-TEST,WF-I22-VERIFY,NOT_RUN
+I22-T02,I22,ComfyUI custom nodes and local builds reviewed,WF-I22-BUILD,WF-I22-TEST,WF-I22-VERIFY,NOT_RUN
+I23-T01,I23,No reliance on same-host copies alone,WF-I23-BUILD,WF-I23-TEST,WF-I23-VERIFY,NOT_RUN
+I23-T02,I23,Database and asset generations correlated,WF-I23-BUILD,WF-I23-TEST,WF-I23-VERIFY,NOT_RUN
+I24-T01,I24,Restore defaults HOLD,WF-I24-BUILD,WF-I24-TEST,WF-I24-VERIFY,NOT_RUN
+I24-T02,I24,No old queue automatically resumes external actions,WF-I24-BUILD,WF-I24-TEST,WF-I24-VERIFY,NOT_RUN
+I25-T01,I25,No source and target outbound workers active together,WF-I25-BUILD,WF-I25-TEST,WF-I25-VERIFY,NOT_RUN
+I25-T02,I25,No launch while critical B01-B12 blocker remains,WF-I25-BUILD,WF-I25-TEST,WF-I25-VERIFY,NOT_RUN
+I26-T01,I26,Rollback is not just repointing DNS,WF-I26-BUILD,WF-I26-TEST,WF-I26-VERIFY,NOT_RUN
+I26-T02,I26,Unknown provider effects held for review,WF-I26-BUILD,WF-I26-TEST,WF-I26-VERIFY,NOT_RUN
+I27-T01,I27,Router and recovery access power dependencies considered,WF-I27-BUILD,WF-I27-TEST,WF-I27-VERIFY,NOT_RUN
+I27-T02,I27,No call/send burst after power return,WF-I27-BUILD,WF-I27-TEST,WF-I27-VERIFY,NOT_RUN
+I28-T01,I28,Concurrent-call latency measured,WF-I28-BUILD,WF-I28-TEST,WF-I28-VERIFY,NOT_RUN
+I28-T02,I28,No assumption of GPU passthrough sharing or unlimited VRAM,WF-I28-BUILD,WF-I28-TEST,WF-I28-VERIFY,NOT_RUN
+I29-T01,I29,Registered task not equated to running tunnel,WF-I29-BUILD,WF-I29-TEST,WF-I29-VERIFY,NOT_RUN
+I29-T02,I29,No host-key checking bypass,WF-I29-BUILD,WF-I29-TEST,WF-I29-VERIFY,NOT_RUN
+I30-T01,I30,Old process path is not current authorization,WF-I30-BUILD,WF-I30-TEST,WF-I30-VERIFY,NOT_RUN
+I30-T02,I30,Expired campaigns stay stopped,WF-I30-BUILD,WF-I30-TEST,WF-I30-VERIFY,NOT_RUN
+I31-T01,I31,Every unmatched row defaults HOLD/preserve,WF-I31-BUILD,WF-I31-TEST,WF-I31-VERIFY,NOT_RUN
+I31-T02,I31,No blanket service removal,WF-I31-BUILD,WF-I31-TEST,WF-I31-VERIFY,NOT_RUN
+I32-T01,I32,Stopped container not proof data can be deleted,WF-I32-BUILD,WF-I32-TEST,WF-I32-VERIFY,NOT_RUN
+I32-T02,I32,V7 AI selection does not revive retired old AI routes,WF-I32-BUILD,WF-I32-TEST,WF-I32-VERIFY,NOT_RUN
+I33-T01,I33,Unit active is not functional readiness,WF-I33-BUILD,WF-I33-TEST,WF-I33-VERIFY,NOT_RUN
+I33-T02,I33,Disabled legacy units remain disabled,WF-I33-BUILD,WF-I33-TEST,WF-I33-VERIFY,NOT_RUN
+I34-T01,I34,Single host not described as HA,WF-I34-BUILD,WF-I34-TEST,WF-I34-VERIFY,NOT_RUN
+I34-T02,I34,RPO/RTO are objectives until measured,WF-I34-BUILD,WF-I34-TEST,WF-I34-VERIFY,NOT_RUN
+I35-T01,I35,No dependency on failed Keycloak for bootstrap,WF-I35-BUILD,WF-I35-TEST,WF-I35-VERIFY,NOT_RUN
+I35-T02,I35,Emergency action does not bypass channel permissions,WF-I35-BUILD,WF-I35-TEST,WF-I35-VERIFY,NOT_RUN
+I36-T01,I36,UTC storage with explicit local display,WF-I36-BUILD,WF-I36-TEST,WF-I36-VERIFY,NOT_RUN
+I36-T02,I36,Unknown recipient timezone blocks restricted calls,WF-I36-BUILD,WF-I36-TEST,WF-I36-VERIFY,NOT_RUN
+X01-T01,X01,"Forged, stale or wrong-client webhook rejected",WF-X01-BUILD,WF-X01-TEST,WF-X01-VERIFY,NOT_RUN
+X01-T02,X01,Duplicate delivery acknowledged without duplicate action,WF-X01-BUILD,WF-X01-TEST,WF-X01-VERIFY,NOT_RUN
+X02-T01,X02,Replay does not duplicate local writes,WF-X02-BUILD,WF-X02-TEST,WF-X02-VERIFY,NOT_RUN
+X02-T02,X02,Remote exactly-once is not assumed,WF-X02-BUILD,WF-X02-TEST,WF-X02-VERIFY,NOT_RUN
+X03-T01,X03,Stale or mismatched approval blocked,WF-X03-BUILD,WF-X03-TEST,WF-X03-VERIFY,NOT_RUN
+X03-T02,X03,Model cannot approve its own publication,WF-X03-BUILD,WF-X03-TEST,WF-X03-VERIFY,NOT_RUN
+X04-T01,X04,Email consent never grants phone/SMS consent,WF-X04-BUILD,WF-X04-TEST,WF-X04-VERIFY,NOT_RUN
+X04-T02,X04,In-flight unsubscribe blocks queued action,WF-X04-BUILD,WF-X04-TEST,WF-X04-VERIFY,NOT_RUN
+X05-T01,X05,Untrusted source cannot change tool permission,WF-X05-BUILD,WF-X05-TEST,WF-X05-VERIFY,NOT_RUN
+X05-T02,X05,Timeouts and cancellation leave no valid partial output,WF-X05-BUILD,WF-X05-TEST,WF-X05-VERIFY,NOT_RUN
+X06-T01,X06,Timeout not equated to failure,WF-X06-BUILD,WF-X06-TEST,WF-X06-VERIFY,NOT_RUN
+X06-T02,X06,No duplicate send/post/call from blind retry,WF-X06-BUILD,WF-X06-TEST,WF-X06-VERIFY,NOT_RUN
+X07-T01,X07,Retries capped with backoff/jitter,WF-X07-BUILD,WF-X07-TEST,WF-X07-VERIFY,NOT_RUN
+X07-T02,X07,Replay cannot bypass new suppression,WF-X07-BUILD,WF-X07-TEST,WF-X07-VERIFY,NOT_RUN
+X08-T01,X08,Restores reapply later deletion/suppression events,WF-X08-BUILD,WF-X08-TEST,WF-X08-VERIFY,NOT_RUN
+X08-T02,X08,"Immutable backup expiry is disclosed, not instant deletion claimed",WF-X08-BUILD,WF-X08-TEST,WF-X08-VERIFY,NOT_RUN
+X09-T01,X09,Observability failure never silently approves sends,WF-X09-BUILD,WF-X09-TEST,WF-X09-VERIFY,NOT_RUN
+X09-T02,X09,Ops alerts independent from marketing hold,WF-X09-BUILD,WF-X09-TEST,WF-X09-VERIFY,NOT_RUN
+X10-T01,X10,Missing is never zero,WF-X10-BUILD,WF-X10-TEST,WF-X10-VERIFY,NOT_RUN
+X10-T02,X10,Attribution assumptions and confidence visible,WF-X10-BUILD,WF-X10-TEST,WF-X10-VERIFY,NOT_RUN
+X11-T01,X11,Secrets absent from repository,WF-X11-BUILD,WF-X11-TEST,WF-X11-VERIFY,NOT_RUN
+X11-T02,X11,Local OmniRoute and custom adapter source pinned,WF-X11-BUILD,WF-X11-TEST,WF-X11-VERIFY,NOT_RUN
+X12-T01,X12,No image-generation model used,WF-X12-BUILD,WF-X12-TEST,WF-X12-VERIFY,NOT_RUN
+X12-T02,X12,Rendering success not deployment acceptance,WF-X12-BUILD,WF-X12-TEST,WF-X12-VERIFY,NOT_RUN
+V01-T01,V01,ARI not exposed publicly,WF-V01-BUILD,WF-V01-TEST,WF-V01-VERIFY,NOT_RUN
+V01-T02,V01,No unapproved external test calls,WF-V01-BUILD,WF-V01-TEST,WF-V01-VERIFY,NOT_RUN
+V02-T01,V02,Email opt-in not accepted as phone consent,WF-V02-BUILD,WF-V02-TEST,WF-V02-VERIFY,NOT_RUN
+V02-T02,V02,Unknown jurisdiction/timezone held,WF-V02-BUILD,WF-V02-TEST,WF-V02-VERIFY,NOT_RUN
+V03-T01,V03,Retrieved text cannot expand tool scope,WF-V03-BUILD,WF-V03-TEST,WF-V03-VERIFY,NOT_RUN
+V03-T02,V03,Material script change requires reapproval,WF-V03-BUILD,WF-V03-TEST,WF-V03-VERIFY,NOT_RUN
+V04-T01,V04,Restart does not duplicate originate,WF-V04-BUILD,WF-V04-TEST,WF-V04-VERIFY,NOT_RUN
+V04-T02,V04,Carrier timeout reconciled before redial,WF-V04-BUILD,WF-V04-TEST,WF-V04-VERIFY,NOT_RUN
+V05-T01,V05,User interruption cancels stale speech,WF-V05-BUILD,WF-V05-TEST,WF-V05-VERIFY,NOT_RUN
+V05-T02,V05,Batch jobs cannot violate tested voice latency,WF-V05-BUILD,WF-V05-TEST,WF-V05-VERIFY,NOT_RUN
+V06-T01,V06,No unrestricted shell/browser tool,WF-V06-BUILD,WF-V06-TEST,WF-V06-VERIFY,NOT_RUN
+V06-T02,V06,Sensitive actions require separate confirmation,WF-V06-BUILD,WF-V06-TEST,WF-V06-VERIFY,NOT_RUN
+V07-T01,V07,No invented appointment confirmation,WF-V07-BUILD,WF-V07-TEST,WF-V07-VERIFY,NOT_RUN
+V07-T02,V07,Transfer failure has a safe fallback,WF-V07-BUILD,WF-V07-TEST,WF-V07-VERIFY,NOT_RUN
+V08-T01,V08,No queued redial after opt-out,WF-V08-BUILD,WF-V08-TEST,WF-V08-VERIFY,NOT_RUN
+V08-T02,V08,Recording refusal handled under approved policy,WF-V08-BUILD,WF-V08-TEST,WF-V08-VERIFY,NOT_RUN
+V09-T01,V09,Busy/no-answer distinct from completed outcome,WF-V09-BUILD,WF-V09-TEST,WF-V09-VERIFY,NOT_RUN
+V09-T02,V09,No retry storm,WF-V09-BUILD,WF-V09-TEST,WF-V09-VERIFY,NOT_RUN
+V10-T01,V10,Raw recordings not copied into generic logs,WF-V10-BUILD,WF-V10-TEST,WF-V10-VERIFY,NOT_RUN
+V10-T02,V10,Restored artifacts respect later deletion events,WF-V10-BUILD,WF-V10-TEST,WF-V10-VERIFY,NOT_RUN
+V11-T01,V11,Email campaign consent not inferred from a call outcome,WF-V11-BUILD,WF-V11-TEST,WF-V11-VERIFY,NOT_RUN
+V11-T02,V11,Duplicate callback creates no extra task,WF-V11-BUILD,WF-V11-TEST,WF-V11-VERIFY,NOT_RUN
+V12-T01,V12,Speech models and licenses pinned,WF-V12-BUILD,WF-V12-TEST,WF-V12-VERIFY,NOT_RUN
+V12-T02,V12,No production calls used as unapproved test traffic,WF-V12-BUILD,WF-V12-TEST,WF-V12-VERIFY,NOT_RUN
+E01-T01,E01,Local dnsmasq not public DNS authority,WF-E01-BUILD,WF-E01-TEST,WF-E01-VERIFY,NOT_RUN
+E01-T02,E01,DNS syntax alone not delivered-message alignment,WF-E01-BUILD,WF-E01-TEST,WF-E01-VERIFY,NOT_RUN
+E02-T01,E02,Valid address/import not consent,WF-E02-BUILD,WF-E02-TEST,WF-E02-VERIFY,NOT_RUN
+E02-T02,E02,Unsubscribed contact never reactivated by sync,WF-E02-BUILD,WF-E02-TEST,WF-E02-VERIFY,NOT_RUN
+E03-T01,E03,AI cannot self-approve,WF-E03-BUILD,WF-E03-TEST,WF-E03-VERIFY,NOT_RUN
+E03-T02,E03,Content update invalidates old approval,WF-E03-BUILD,WF-E03-TEST,WF-E03-VERIFY,NOT_RUN
+E04-T01,E04,Mailpit cannot forward to production lists,WF-E04-BUILD,WF-E04-TEST,WF-E04-VERIFY,NOT_RUN
+E04-T02,E04,Actual unsubscribe action verified,WF-E04-BUILD,WF-E04-TEST,WF-E04-VERIFY,NOT_RUN
+E05-T01,E05,No fixed-day success assumption,WF-E05-BUILD,WF-E05-TEST,WF-E05-VERIFY,NOT_RUN
+E05-T02,E05,No fake opens/replies or engagement exchange,WF-E05-BUILD,WF-E05-TEST,WF-E05-VERIFY,NOT_RUN
+E06-T01,E06,Repeated callback idempotent,WF-E06-BUILD,WF-E06-TEST,WF-E06-VERIFY,NOT_RUN
+E06-T02,E06,Queue-delay unsubscribe blocks final send,WF-E06-BUILD,WF-E06-TEST,WF-E06-VERIFY,NOT_RUN
+E07-T01,E07,No Postmaster data labelled unknown,WF-E07-BUILD,WF-E07-TEST,WF-E07-VERIFY,NOT_RUN
+E07-T02,E07,Authentication and reputation treated separately,WF-E07-BUILD,WF-E07-TEST,WF-E07-VERIFY,NOT_RUN
+E08-T01,E08,No control bypass from manual sends,WF-E08-BUILD,WF-E08-TEST,WF-E08-VERIFY,NOT_RUN
+E08-T02,E08,Ops alerts not suppressed with marketing,WF-E08-BUILD,WF-E08-TEST,WF-E08-VERIFY,NOT_RUN
+E09-T01,E09,No replay of old send queue after restore,WF-E09-BUILD,WF-E09-TEST,WF-E09-VERIFY,NOT_RUN
+E09-T02,E09,Unknown SMTP acceptances reconciled first,WF-E09-BUILD,WF-E09-TEST,WF-E09-VERIFY,NOT_RUN
+E10-T01,E10,Warm-up is not a one-time guarantee,WF-E10-BUILD,WF-E10-TEST,WF-E10-VERIFY,NOT_RUN
+E10-T02,E10,Document provider and policy changes,WF-E10-BUILD,WF-E10-TEST,WF-E10-VERIFY,NOT_RUN
+E11-T01,E11,Manual/restarted/immediate worker cannot bypass guard,WF-E11-BUILD,WF-E11-TEST,WF-E11-VERIFY,NOT_RUN
+E11-T02,E11,Systemd rate limits alone are not per-recipient enforcement,WF-E11-BUILD,WF-E11-TEST,WF-E11-VERIFY,NOT_RUN
+E12-T01,E12,Concurrent workers cannot over-reserve,WF-E12-BUILD,WF-E12-TEST,WF-E12-VERIFY,NOT_RUN
+E12-T02,E12,UNKNOWN acceptance not freed for another send,WF-E12-BUILD,WF-E12-TEST,WF-E12-VERIFY,NOT_RUN
+E13-T01,E13,No fabricated replies for reputation,WF-E13-BUILD,WF-E13-TEST,WF-E13-VERIFY,NOT_RUN
+E13-T02,E13,Sensitive messages not copied into broad logs,WF-E13-BUILD,WF-E13-TEST,WF-E13-VERIFY,NOT_RUN
+E14-T01,E14,Exact parsedmarc release and PostgreSQL extra pinned,WF-E14-BUILD,WF-E14-TEST,WF-E14-VERIFY,NOT_RUN
+E14-T02,E14,Failure reports minimized by policy,WF-E14-BUILD,WF-E14-TEST,WF-E14-VERIFY,NOT_RUN
+C01-T01,C01,"Source-specific deliverable checked: Ranked, source-linked topics; editorial review",WF-C01-BUILD,WF-C01-TEST,WF-C01-VERIFY,NOT_RUN
+C01-T02,C01,Material changes invalidate approval; destination remains staged until final release,WF-C01-BUILD,WF-C01-TEST,WF-C01-VERIFY,NOT_RUN
+C01-T03,C01,"Duplicate or uncertain external result uses X06, not blind retry",WF-C01-BUILD,WF-C01-TEST,WF-C01-VERIFY,NOT_RUN
+C02-T01,C02,Source-specific deliverable checked: Keyword clusters and briefs; validate demand,WF-C02-BUILD,WF-C02-TEST,WF-C02-VERIFY,NOT_RUN
+C02-T02,C02,Material changes invalidate approval; destination remains staged until final release,WF-C02-BUILD,WF-C02-TEST,WF-C02-VERIFY,NOT_RUN
+C02-T03,C02,"Duplicate or uncertain external result uses X06, not blind retry",WF-C02-BUILD,WF-C02-TEST,WF-C02-VERIFY,NOT_RUN
+C03-T01,C03,Source-specific deliverable checked: Gap report and proposed briefs; verify external facts,WF-C03-BUILD,WF-C03-TEST,WF-C03-VERIFY,NOT_RUN
+C03-T02,C03,Material changes invalidate approval; destination remains staged until final release,WF-C03-BUILD,WF-C03-TEST,WF-C03-VERIFY,NOT_RUN
+C03-T03,C03,"Duplicate or uncertain external result uses X06, not blind retry",WF-C03-BUILD,WF-C03-TEST,WF-C03-VERIFY,NOT_RUN
+C04-T01,C04,Source-specific deliverable checked: Persona pain-point report; privacy review,WF-C04-BUILD,WF-C04-TEST,WF-C04-VERIFY,NOT_RUN
+C04-T02,C04,Material changes invalidate approval; destination remains staged until final release,WF-C04-BUILD,WF-C04-TEST,WF-C04-VERIFY,NOT_RUN
+C04-T03,C04,"Duplicate or uncertain external result uses X06, not blind retry",WF-C04-BUILD,WF-C04-TEST,WF-C04-VERIFY,NOT_RUN
+C05-T01,C05,Source-specific deliverable checked: Campaign concept options; human strategy approval,WF-C05-BUILD,WF-C05-TEST,WF-C05-VERIFY,NOT_RUN
+C05-T02,C05,Material changes invalidate approval; destination remains staged until final release,WF-C05-BUILD,WF-C05-TEST,WF-C05-VERIFY,NOT_RUN
+C05-T03,C05,"Duplicate or uncertain external result uses X06, not blind retry",WF-C05-BUILD,WF-C05-TEST,WF-C05-VERIFY,NOT_RUN
+C06-T01,C06,Source-specific deliverable checked: Pillar/cluster map; technical review,WF-C06-BUILD,WF-C06-TEST,WF-C06-VERIFY,NOT_RUN
+C06-T02,C06,Material changes invalidate approval; destination remains staged until final release,WF-C06-BUILD,WF-C06-TEST,WF-C06-VERIFY,NOT_RUN
+C06-T03,C06,"Duplicate or uncertain external result uses X06, not blind retry",WF-C06-BUILD,WF-C06-TEST,WF-C06-VERIFY,NOT_RUN
+C07-T01,C07,Source-specific deliverable checked: Source ledger and claim review; mandatory verification,WF-C07-BUILD,WF-C07-TEST,WF-C07-VERIFY,NOT_RUN
+C07-T02,C07,Material changes invalidate approval; destination remains staged until final release,WF-C07-BUILD,WF-C07-TEST,WF-C07-VERIFY,NOT_RUN
+C07-T03,C07,"Duplicate or uncertain external result uses X06, not blind retry",WF-C07-BUILD,WF-C07-TEST,WF-C07-VERIFY,NOT_RUN
+C08-T01,C08,Source-specific deliverable checked: Approved calendar; no auto-approval,WF-C08-BUILD,WF-C08-TEST,WF-C08-VERIFY,NOT_RUN
+C08-T02,C08,Material changes invalidate approval; destination remains staged until final release,WF-C08-BUILD,WF-C08-TEST,WF-C08-VERIFY,NOT_RUN
+C08-T03,C08,"Duplicate or uncertain external result uses X06, not blind retry",WF-C08-BUILD,WF-C08-TEST,WF-C08-VERIFY,NOT_RUN
+C09-T01,C09,Source-specific deliverable checked: Pillar article; approve before publication,WF-C09-BUILD,WF-C09-TEST,WF-C09-VERIFY,NOT_RUN
+C09-T02,C09,Material changes invalidate approval; destination remains staged until final release,WF-C09-BUILD,WF-C09-TEST,WF-C09-VERIFY,NOT_RUN
+C09-T03,C09,"Duplicate or uncertain external result uses X06, not blind retry",WF-C09-BUILD,WF-C09-TEST,WF-C09-VERIFY,NOT_RUN
+C10-T01,C10,Source-specific deliverable checked: Related articles; check canonical and duplicates,WF-C10-BUILD,WF-C10-TEST,WF-C10-VERIFY,NOT_RUN
+C10-T02,C10,Material changes invalidate approval; destination remains staged until final release,WF-C10-BUILD,WF-C10-TEST,WF-C10-VERIFY,NOT_RUN
+C10-T03,C10,"Duplicate or uncertain external result uses X06, not blind retry",WF-C10-BUILD,WF-C10-TEST,WF-C10-VERIFY,NOT_RUN
+C11-T01,C11,Source-specific deliverable checked: How-to page; human accuracy check,WF-C11-BUILD,WF-C11-TEST,WF-C11-VERIFY,NOT_RUN
+C11-T02,C11,Material changes invalidate approval; destination remains staged until final release,WF-C11-BUILD,WF-C11-TEST,WF-C11-VERIFY,NOT_RUN
+C11-T03,C11,"Duplicate or uncertain external result uses X06, not blind retry",WF-C11-BUILD,WF-C11-TEST,WF-C11-VERIFY,NOT_RUN
+C12-T01,C12,Source-specific deliverable checked: Fact-checked FAQs; avoid invented policies,WF-C12-BUILD,WF-C12-TEST,WF-C12-VERIFY,NOT_RUN
+C12-T02,C12,Material changes invalidate approval; destination remains staged until final release,WF-C12-BUILD,WF-C12-TEST,WF-C12-VERIFY,NOT_RUN
+C12-T03,C12,"Duplicate or uncertain external result uses X06, not blind retry",WF-C12-BUILD,WF-C12-TEST,WF-C12-VERIFY,NOT_RUN
+C13-T01,C13,Source-specific deliverable checked: Landing-page draft; claim and conversion QA,WF-C13-BUILD,WF-C13-TEST,WF-C13-VERIFY,NOT_RUN
+C13-T02,C13,Material changes invalidate approval; destination remains staged until final release,WF-C13-BUILD,WF-C13-TEST,WF-C13-VERIFY,NOT_RUN
+C13-T03,C13,"Duplicate or uncertain external result uses X06, not blind retry",WF-C13-BUILD,WF-C13-TEST,WF-C13-VERIFY,NOT_RUN
+C14-T01,C14,Source-specific deliverable checked: Accurate comparison; no fabricated ratings,WF-C14-BUILD,WF-C14-TEST,WF-C14-VERIFY,NOT_RUN
+C14-T02,C14,Material changes invalidate approval; destination remains staged until final release,WF-C14-BUILD,WF-C14-TEST,WF-C14-VERIFY,NOT_RUN
+C14-T03,C14,"Duplicate or uncertain external result uses X06, not blind retry",WF-C14-BUILD,WF-C14-TEST,WF-C14-VERIFY,NOT_RUN
+C15-T01,C15,Source-specific deliverable checked: Approved case study; customer consent,WF-C15-BUILD,WF-C15-TEST,WF-C15-VERIFY,NOT_RUN
+C15-T02,C15,Material changes invalidate approval; destination remains staged until final release,WF-C15-BUILD,WF-C15-TEST,WF-C15-VERIFY,NOT_RUN
+C15-T03,C15,"Duplicate or uncertain external result uses X06, not blind retry",WF-C15-BUILD,WF-C15-TEST,WF-C15-VERIFY,NOT_RUN
+C16-T01,C16,Source-specific deliverable checked: Reviewed revised page; preserve history,WF-C16-BUILD,WF-C16-TEST,WF-C16-VERIFY,NOT_RUN
+C16-T02,C16,Material changes invalidate approval; destination remains staged until final release,WF-C16-BUILD,WF-C16-TEST,WF-C16-VERIFY,NOT_RUN
+C16-T03,C16,"Duplicate or uncertain external result uses X06, not blind retry",WF-C16-BUILD,WF-C16-TEST,WF-C16-VERIFY,NOT_RUN
+C17-T01,C17,Source-specific deliverable checked: Scheduled posts; approval/account check,WF-C17-BUILD,WF-C17-TEST,WF-C17-VERIFY,NOT_RUN
+C17-T02,C17,Material changes invalidate approval; destination remains staged until final release,WF-C17-BUILD,WF-C17-TEST,WF-C17-VERIFY,NOT_RUN
+C17-T03,C17,"Duplicate or uncertain external result uses X06, not blind retry",WF-C17-BUILD,WF-C17-TEST,WF-C17-VERIFY,NOT_RUN
+C18-T01,C18,Source-specific deliverable checked: Reviewed leadership post,WF-C18-BUILD,WF-C18-TEST,WF-C18-VERIFY,NOT_RUN
+C18-T02,C18,Material changes invalidate approval; destination remains staged until final release,WF-C18-BUILD,WF-C18-TEST,WF-C18-VERIFY,NOT_RUN
+C18-T03,C18,"Duplicate or uncertain external result uses X06, not blind retry",WF-C18-BUILD,WF-C18-TEST,WF-C18-VERIFY,NOT_RUN
+C19-T01,C19,Source-specific deliverable checked: Thread; validate per-channel format,WF-C19-BUILD,WF-C19-TEST,WF-C19-VERIFY,NOT_RUN
+C19-T02,C19,Material changes invalidate approval; destination remains staged until final release,WF-C19-BUILD,WF-C19-TEST,WF-C19-VERIFY,NOT_RUN
+C19-T03,C19,"Duplicate or uncertain external result uses X06, not blind retry",WF-C19-BUILD,WF-C19-TEST,WF-C19-VERIFY,NOT_RUN
+C20-T01,C20,Source-specific deliverable checked: Image/video carousel; legibility check,WF-C20-BUILD,WF-C20-TEST,WF-C20-VERIFY,NOT_RUN
+C20-T02,C20,Material changes invalidate approval; destination remains staged until final release,WF-C20-BUILD,WF-C20-TEST,WF-C20-VERIFY,NOT_RUN
+C20-T03,C20,"Duplicate or uncertain external result uses X06, not blind retry",WF-C20-BUILD,WF-C20-TEST,WF-C20-VERIFY,NOT_RUN
+C21-T01,C21,Source-specific deliverable checked: Data-faithful infographic; number QA,WF-C21-BUILD,WF-C21-TEST,WF-C21-VERIFY,NOT_RUN
+C21-T02,C21,Material changes invalidate approval; destination remains staged until final release,WF-C21-BUILD,WF-C21-TEST,WF-C21-VERIFY,NOT_RUN
+C21-T03,C21,"Duplicate or uncertain external result uses X06, not blind retry",WF-C21-BUILD,WF-C21-TEST,WF-C21-VERIFY,NOT_RUN
+C22-T01,C22,Source-specific deliverable checked: Poll drafts; platform support validation,WF-C22-BUILD,WF-C22-TEST,WF-C22-VERIFY,NOT_RUN
+C22-T02,C22,Material changes invalidate approval; destination remains staged until final release,WF-C22-BUILD,WF-C22-TEST,WF-C22-VERIFY,NOT_RUN
+C22-T03,C22,"Duplicate or uncertain external result uses X06, not blind retry",WF-C22-BUILD,WF-C22-TEST,WF-C22-VERIFY,NOT_RUN
+C23-T01,C23,Source-specific deliverable checked: Human-approved replies; no autonomous impersonation,WF-C23-BUILD,WF-C23-TEST,WF-C23-VERIFY,NOT_RUN
+C23-T02,C23,Material changes invalidate approval; destination remains staged until final release,WF-C23-BUILD,WF-C23-TEST,WF-C23-VERIFY,NOT_RUN
+C23-T03,C23,"Duplicate or uncertain external result uses X06, not blind retry",WF-C23-BUILD,WF-C23-TEST,WF-C23-VERIFY,NOT_RUN
+C24-T01,C24,Source-specific deliverable checked: Revised evergreen content; no stale claims,WF-C24-BUILD,WF-C24-TEST,WF-C24-VERIFY,NOT_RUN
+C24-T02,C24,Material changes invalidate approval; destination remains staged until final release,WF-C24-BUILD,WF-C24-TEST,WF-C24-VERIFY,NOT_RUN
+C24-T03,C24,"Duplicate or uncertain external result uses X06, not blind retry",WF-C24-BUILD,WF-C24-TEST,WF-C24-VERIFY,NOT_RUN
+C25-T01,C25,Source-specific deliverable checked: Newsletter; V5 consent/dispatch checks,WF-C25-BUILD,WF-C25-TEST,WF-C25-VERIFY,NOT_RUN
+C25-T02,C25,Material changes invalidate approval; destination remains staged until final release,WF-C25-BUILD,WF-C25-TEST,WF-C25-VERIFY,NOT_RUN
+C25-T03,C25,"Duplicate or uncertain external result uses X06, not blind retry",WF-C25-BUILD,WF-C25-TEST,WF-C25-VERIFY,NOT_RUN
+C26-T01,C26,Source-specific deliverable checked: Welcome campaign; do not bypass suppression,WF-C26-BUILD,WF-C26-TEST,WF-C26-VERIFY,NOT_RUN
+C26-T02,C26,Material changes invalidate approval; destination remains staged until final release,WF-C26-BUILD,WF-C26-TEST,WF-C26-VERIFY,NOT_RUN
+C26-T03,C26,"Duplicate or uncertain external result uses X06, not blind retry",WF-C26-BUILD,WF-C26-TEST,WF-C26-VERIFY,NOT_RUN
+C27-T01,C27,Source-specific deliverable checked: Nurture emails; validate permissions,WF-C27-BUILD,WF-C27-TEST,WF-C27-VERIFY,NOT_RUN
+C27-T02,C27,Material changes invalidate approval; destination remains staged until final release,WF-C27-BUILD,WF-C27-TEST,WF-C27-VERIFY,NOT_RUN
+C27-T03,C27,"Duplicate or uncertain external result uses X06, not blind retry",WF-C27-BUILD,WF-C27-TEST,WF-C27-VERIFY,NOT_RUN
+C28-T01,C28,Source-specific deliverable checked: Launch sequence; source and claim checks,WF-C28-BUILD,WF-C28-TEST,WF-C28-VERIFY,NOT_RUN
+C28-T02,C28,Material changes invalidate approval; destination remains staged until final release,WF-C28-BUILD,WF-C28-TEST,WF-C28-VERIFY,NOT_RUN
+C28-T03,C28,"Duplicate or uncertain external result uses X06, not blind retry",WF-C28-BUILD,WF-C28-TEST,WF-C28-VERIFY,NOT_RUN
+C29-T01,C29,Source-specific deliverable checked: Event campaign; timezone and suppression QA,WF-C29-BUILD,WF-C29-TEST,WF-C29-VERIFY,NOT_RUN
+C29-T02,C29,Material changes invalidate approval; destination remains staged until final release,WF-C29-BUILD,WF-C29-TEST,WF-C29-VERIFY,NOT_RUN
+C29-T03,C29,"Duplicate or uncertain external result uses X06, not blind retry",WF-C29-BUILD,WF-C29-TEST,WF-C29-VERIFY,NOT_RUN
+C30-T01,C30,Source-specific deliverable checked: Segment variations; final recipient eligibility,WF-C30-BUILD,WF-C30-TEST,WF-C30-VERIFY,NOT_RUN
+C30-T02,C30,Material changes invalidate approval; destination remains staged until final release,WF-C30-BUILD,WF-C30-TEST,WF-C30-VERIFY,NOT_RUN
+C30-T03,C30,"Duplicate or uncertain external result uses X06, not blind retry",WF-C30-BUILD,WF-C30-TEST,WF-C30-VERIFY,NOT_RUN
+C31-T01,C31,Source-specific deliverable checked: Re-engagement campaign; V5 warm-up controls,WF-C31-BUILD,WF-C31-TEST,WF-C31-VERIFY,NOT_RUN
+C31-T02,C31,Material changes invalidate approval; destination remains staged until final release,WF-C31-BUILD,WF-C31-TEST,WF-C31-VERIFY,NOT_RUN
+C31-T03,C31,"Duplicate or uncertain external result uses X06, not blind retry",WF-C31-BUILD,WF-C31-TEST,WF-C31-VERIFY,NOT_RUN
+C32-T01,C32,Source-specific deliverable checked: Experiment summary; no false inbox metric,WF-C32-BUILD,WF-C32-TEST,WF-C32-VERIFY,NOT_RUN
+C32-T02,C32,Material changes invalidate approval; destination remains staged until final release,WF-C32-BUILD,WF-C32-TEST,WF-C32-VERIFY,NOT_RUN
+C32-T03,C32,"Duplicate or uncertain external result uses X06, not blind retry",WF-C32-BUILD,WF-C32-TEST,WF-C32-VERIFY,NOT_RUN
+C33-T01,C33,Source-specific deliverable checked: Approved featured image and alt text,WF-C33-BUILD,WF-C33-TEST,WF-C33-VERIFY,NOT_RUN
+C33-T02,C33,Material changes invalidate approval; destination remains staged until final release,WF-C33-BUILD,WF-C33-TEST,WF-C33-VERIFY,NOT_RUN
+C33-T03,C33,"Duplicate or uncertain external result uses X06, not blind retry",WF-C33-BUILD,WF-C33-TEST,WF-C33-VERIFY,NOT_RUN
+C34-T01,C34,Source-specific deliverable checked: Channel-sized artwork; brand review,WF-C34-BUILD,WF-C34-TEST,WF-C34-VERIFY,NOT_RUN
+C34-T02,C34,Material changes invalidate approval; destination remains staged until final release,WF-C34-BUILD,WF-C34-TEST,WF-C34-VERIFY,NOT_RUN
+C34-T03,C34,"Duplicate or uncertain external result uses X06, not blind retry",WF-C34-BUILD,WF-C34-TEST,WF-C34-VERIFY,NOT_RUN
+C35-T01,C35,Source-specific deliverable checked: Ad graphics; legal claim validation,WF-C35-BUILD,WF-C35-TEST,WF-C35-VERIFY,NOT_RUN
+C35-T02,C35,Material changes invalidate approval; destination remains staged until final release,WF-C35-BUILD,WF-C35-TEST,WF-C35-VERIFY,NOT_RUN
+C35-T03,C35,"Duplicate or uncertain external result uses X06, not blind retry",WF-C35-BUILD,WF-C35-TEST,WF-C35-VERIFY,NOT_RUN
+C36-T01,C36,Source-specific deliverable checked: Product lifestyle asset; no misleading depiction,WF-C36-BUILD,WF-C36-TEST,WF-C36-VERIFY,NOT_RUN
+C36-T02,C36,Material changes invalidate approval; destination remains staged until final release,WF-C36-BUILD,WF-C36-TEST,WF-C36-VERIFY,NOT_RUN
+C36-T03,C36,"Duplicate or uncertain external result uses X06, not blind retry",WF-C36-BUILD,WF-C36-TEST,WF-C36-VERIFY,NOT_RUN
+C37-T01,C37,Source-specific deliverable checked: Approved illustration set,WF-C37-BUILD,WF-C37-TEST,WF-C37-VERIFY,NOT_RUN
+C37-T02,C37,Material changes invalidate approval; destination remains staged until final release,WF-C37-BUILD,WF-C37-TEST,WF-C37-VERIFY,NOT_RUN
+C37-T03,C37,"Duplicate or uncertain external result uses X06, not blind retry",WF-C37-BUILD,WF-C37-TEST,WF-C37-VERIFY,NOT_RUN
+C38-T01,C38,Source-specific deliverable checked: Accurate process diagram,WF-C38-BUILD,WF-C38-TEST,WF-C38-VERIFY,NOT_RUN
+C38-T02,C38,Material changes invalidate approval; destination remains staged until final release,WF-C38-BUILD,WF-C38-TEST,WF-C38-VERIFY,NOT_RUN
+C38-T03,C38,"Duplicate or uncertain external result uses X06, not blind retry",WF-C38-BUILD,WF-C38-TEST,WF-C38-VERIFY,NOT_RUN
+C39-T01,C39,Source-specific deliverable checked: Graphic with traceable numbers,WF-C39-BUILD,WF-C39-TEST,WF-C39-VERIFY,NOT_RUN
+C39-T02,C39,Material changes invalidate approval; destination remains staged until final release,WF-C39-BUILD,WF-C39-TEST,WF-C39-VERIFY,NOT_RUN
+C39-T03,C39,"Duplicate or uncertain external result uses X06, not blind retry",WF-C39-BUILD,WF-C39-TEST,WF-C39-VERIFY,NOT_RUN
+C40-T01,C40,Source-specific deliverable checked: Device/channel variants; reviewed alt text,WF-C40-BUILD,WF-C40-TEST,WF-C40-VERIFY,NOT_RUN
+C40-T02,C40,Material changes invalidate approval; destination remains staged until final release,WF-C40-BUILD,WF-C40-TEST,WF-C40-VERIFY,NOT_RUN
+C40-T03,C40,"Duplicate or uncertain external result uses X06, not blind retry",WF-C40-BUILD,WF-C40-TEST,WF-C40-VERIFY,NOT_RUN
+C41-T01,C41,Source-specific deliverable checked: Narrated audio; reviewed pronunciation,WF-C41-BUILD,WF-C41-TEST,WF-C41-VERIFY,NOT_RUN
+C41-T02,C41,Material changes invalidate approval; destination remains staged until final release,WF-C41-BUILD,WF-C41-TEST,WF-C41-VERIFY,NOT_RUN
+C41-T03,C41,"Duplicate or uncertain external result uses X06, not blind retry",WF-C41-BUILD,WF-C41-TEST,WF-C41-VERIFY,NOT_RUN
+C42-T01,C42,Source-specific deliverable checked: Reviewed recording script,WF-C42-BUILD,WF-C42-TEST,WF-C42-VERIFY,NOT_RUN
+C42-T02,C42,Material changes invalidate approval; destination remains staged until final release,WF-C42-BUILD,WF-C42-TEST,WF-C42-VERIFY,NOT_RUN
+C42-T03,C42,"Duplicate or uncertain external result uses X06, not blind retry",WF-C42-BUILD,WF-C42-TEST,WF-C42-VERIFY,NOT_RUN
+C43-T01,C43,Source-specific deliverable checked: Edited episode; recording rights,WF-C43-BUILD,WF-C43-TEST,WF-C43-VERIFY,NOT_RUN
+C43-T02,C43,Material changes invalidate approval; destination remains staged until final release,WF-C43-BUILD,WF-C43-TEST,WF-C43-VERIFY,NOT_RUN
+C43-T03,C43,"Duplicate or uncertain external result uses X06, not blind retry",WF-C43-BUILD,WF-C43-TEST,WF-C43-VERIFY,NOT_RUN
+C44-T01,C44,Source-specific deliverable checked: Podcast audio; voice/music licensing,WF-C44-BUILD,WF-C44-TEST,WF-C44-VERIFY,NOT_RUN
+C44-T02,C44,Material changes invalidate approval; destination remains staged until final release,WF-C44-BUILD,WF-C44-TEST,WF-C44-VERIFY,NOT_RUN
+C44-T03,C44,"Duplicate or uncertain external result uses X06, not blind retry",WF-C44-BUILD,WF-C44-TEST,WF-C44-VERIFY,NOT_RUN
+C45-T01,C45,Source-specific deliverable checked: Audio ad; claim and audio QA,WF-C45-BUILD,WF-C45-TEST,WF-C45-VERIFY,NOT_RUN
+C45-T02,C45,Material changes invalidate approval; destination remains staged until final release,WF-C45-BUILD,WF-C45-TEST,WF-C45-VERIFY,NOT_RUN
+C45-T03,C45,"Duplicate or uncertain external result uses X06, not blind retry",WF-C45-BUILD,WF-C45-TEST,WF-C45-VERIFY,NOT_RUN
+C46-T01,C46,Source-specific deliverable checked: Short clips; preserve context,WF-C46-BUILD,WF-C46-TEST,WF-C46-VERIFY,NOT_RUN
+C46-T02,C46,Material changes invalidate approval; destination remains staged until final release,WF-C46-BUILD,WF-C46-TEST,WF-C46-VERIFY,NOT_RUN
+C46-T03,C46,"Duplicate or uncertain external result uses X06, not blind retry",WF-C46-BUILD,WF-C46-TEST,WF-C46-VERIFY,NOT_RUN
+C47-T01,C47,Source-specific deliverable checked: Tested knowledge scripts; V4 consent intact,WF-C47-BUILD,WF-C47-TEST,WF-C47-VERIFY,NOT_RUN
+C47-T02,C47,Material changes invalidate approval; destination remains staged until final release,WF-C47-BUILD,WF-C47-TEST,WF-C47-VERIFY,NOT_RUN
+C47-T03,C47,"Duplicate or uncertain external result uses X06, not blind retry",WF-C47-BUILD,WF-C47-TEST,WF-C47-VERIFY,NOT_RUN
+C48-T01,C48,Source-specific deliverable checked: Transcript and notes; privacy review,WF-C48-BUILD,WF-C48-TEST,WF-C48-VERIFY,NOT_RUN
+C48-T02,C48,Material changes invalidate approval; destination remains staged until final release,WF-C48-BUILD,WF-C48-TEST,WF-C48-VERIFY,NOT_RUN
+C48-T03,C48,"Duplicate or uncertain external result uses X06, not blind retry",WF-C48-BUILD,WF-C48-TEST,WF-C48-VERIFY,NOT_RUN
+C49-T01,C49,Source-specific deliverable checked: Short video; human scene/audio review,WF-C49-BUILD,WF-C49-TEST,WF-C49-VERIFY,NOT_RUN
+C49-T02,C49,Material changes invalidate approval; destination remains staged until final release,WF-C49-BUILD,WF-C49-TEST,WF-C49-VERIFY,NOT_RUN
+C49-T03,C49,"Duplicate or uncertain external result uses X06, not blind retry",WF-C49-BUILD,WF-C49-TEST,WF-C49-VERIFY,NOT_RUN
+C50-T01,C50,Source-specific deliverable checked: Explainer; verify visual facts,WF-C50-BUILD,WF-C50-TEST,WF-C50-VERIFY,NOT_RUN
+C50-T02,C50,Material changes invalidate approval; destination remains staged until final release,WF-C50-BUILD,WF-C50-TEST,WF-C50-VERIFY,NOT_RUN
+C50-T03,C50,"Duplicate or uncertain external result uses X06, not blind retry",WF-C50-BUILD,WF-C50-TEST,WF-C50-VERIFY,NOT_RUN
+C51-T01,C51,Source-specific deliverable checked: Accessible captioned video,WF-C51-BUILD,WF-C51-TEST,WF-C51-VERIFY,NOT_RUN
+C51-T02,C51,Material changes invalidate approval; destination remains staged until final release,WF-C51-BUILD,WF-C51-TEST,WF-C51-VERIFY,NOT_RUN
+C51-T03,C51,"Duplicate or uncertain external result uses X06, not blind retry",WF-C51-BUILD,WF-C51-TEST,WF-C51-VERIFY,NOT_RUN
+C52-T01,C52,Source-specific deliverable checked: Demo video; data/privacy QA,WF-C52-BUILD,WF-C52-TEST,WF-C52-VERIFY,NOT_RUN
+C52-T02,C52,Material changes invalidate approval; destination remains staged until final release,WF-C52-BUILD,WF-C52-TEST,WF-C52-VERIFY,NOT_RUN
+C52-T03,C52,"Duplicate or uncertain external result uses X06, not blind retry",WF-C52-BUILD,WF-C52-TEST,WF-C52-VERIFY,NOT_RUN
+C53-T01,C53,Source-specific deliverable checked: Short cutdowns; preserve original context,WF-C53-BUILD,WF-C53-TEST,WF-C53-VERIFY,NOT_RUN
+C53-T02,C53,Material changes invalidate approval; destination remains staged until final release,WF-C53-BUILD,WF-C53-TEST,WF-C53-VERIFY,NOT_RUN
+C53-T03,C53,"Duplicate or uncertain external result uses X06, not blind retry",WF-C53-BUILD,WF-C53-TEST,WF-C53-VERIFY,NOT_RUN
+C54-T01,C54,Source-specific deliverable checked: Teaser/thumbnail set; check claims,WF-C54-BUILD,WF-C54-TEST,WF-C54-VERIFY,NOT_RUN
+C54-T02,C54,Material changes invalidate approval; destination remains staged until final release,WF-C54-BUILD,WF-C54-TEST,WF-C54-VERIFY,NOT_RUN
+C54-T03,C54,"Duplicate or uncertain external result uses X06, not blind retry",WF-C54-BUILD,WF-C54-TEST,WF-C54-VERIFY,NOT_RUN
+C55-T01,C55,Source-specific deliverable checked: Motion scene; GPU/license review,WF-C55-BUILD,WF-C55-TEST,WF-C55-VERIFY,NOT_RUN
+C55-T02,C55,Material changes invalidate approval; destination remains staged until final release,WF-C55-BUILD,WF-C55-TEST,WF-C55-VERIFY,NOT_RUN
+C55-T03,C55,"Duplicate or uncertain external result uses X06, not blind retry",WF-C55-BUILD,WF-C55-TEST,WF-C55-VERIFY,NOT_RUN
+C56-T01,C56,Source-specific deliverable checked: Recap article and media; speaker rights,WF-C56-BUILD,WF-C56-TEST,WF-C56-VERIFY,NOT_RUN
+C56-T02,C56,Material changes invalidate approval; destination remains staged until final release,WF-C56-BUILD,WF-C56-TEST,WF-C56-VERIFY,NOT_RUN
+C56-T03,C56,"Duplicate or uncertain external result uses X06, not blind retry",WF-C56-BUILD,WF-C56-TEST,WF-C56-VERIFY,NOT_RUN
+C57-T01,C57,Source-specific deliverable checked: Whitepaper; reference and PDF QA,WF-C57-BUILD,WF-C57-TEST,WF-C57-VERIFY,NOT_RUN
+C57-T02,C57,Material changes invalidate approval; destination remains staged until final release,WF-C57-BUILD,WF-C57-TEST,WF-C57-VERIFY,NOT_RUN
+C57-T03,C57,"Duplicate or uncertain external result uses X06, not blind retry",WF-C57-BUILD,WF-C57-TEST,WF-C57-VERIFY,NOT_RUN
+C58-T01,C58,Source-specific deliverable checked: EPUB/DOCX/PDF where configured; rights QA,WF-C58-BUILD,WF-C58-TEST,WF-C58-VERIFY,NOT_RUN
+C58-T02,C58,Material changes invalidate approval; destination remains staged until final release,WF-C58-BUILD,WF-C58-TEST,WF-C58-VERIFY,NOT_RUN
+C58-T03,C58,"Duplicate or uncertain external result uses X06, not blind retry",WF-C58-BUILD,WF-C58-TEST,WF-C58-VERIFY,NOT_RUN
+C59-T01,C59,Source-specific deliverable checked: Checklist; factual process review,WF-C59-BUILD,WF-C59-TEST,WF-C59-VERIFY,NOT_RUN
+C59-T02,C59,Material changes invalidate approval; destination remains staged until final release,WF-C59-BUILD,WF-C59-TEST,WF-C59-VERIFY,NOT_RUN
+C59-T03,C59,"Duplicate or uncertain external result uses X06, not blind retry",WF-C59-BUILD,WF-C59-TEST,WF-C59-VERIFY,NOT_RUN
+C60-T01,C60,Source-specific deliverable checked: Buyer guide; avoid fabricated pricing,WF-C60-BUILD,WF-C60-TEST,WF-C60-VERIFY,NOT_RUN
+C60-T02,C60,Material changes invalidate approval; destination remains staged until final release,WF-C60-BUILD,WF-C60-TEST,WF-C60-VERIFY,NOT_RUN
+C60-T03,C60,"Duplicate or uncertain external result uses X06, not blind retry",WF-C60-BUILD,WF-C60-TEST,WF-C60-VERIFY,NOT_RUN
+C61-T01,C61,Source-specific deliverable checked: Case study; customer authorization,WF-C61-BUILD,WF-C61-TEST,WF-C61-VERIFY,NOT_RUN
+C61-T02,C61,Material changes invalidate approval; destination remains staged until final release,WF-C61-BUILD,WF-C61-TEST,WF-C61-VERIFY,NOT_RUN
+C61-T03,C61,"Duplicate or uncertain external result uses X06, not blind retry",WF-C61-BUILD,WF-C61-TEST,WF-C61-VERIFY,NOT_RUN
+C62-T01,C62,Source-specific deliverable checked: One-pager; claims reviewed,WF-C62-BUILD,WF-C62-TEST,WF-C62-VERIFY,NOT_RUN
+C62-T02,C62,Material changes invalidate approval; destination remains staged until final release,WF-C62-BUILD,WF-C62-TEST,WF-C62-VERIFY,NOT_RUN
+C62-T03,C62,"Duplicate or uncertain external result uses X06, not blind retry",WF-C62-BUILD,WF-C62-TEST,WF-C62-VERIFY,NOT_RUN
+C63-T01,C63,Source-specific deliverable checked: Internal sales enablement; source recency,WF-C63-BUILD,WF-C63-TEST,WF-C63-VERIFY,NOT_RUN
+C63-T02,C63,Material changes invalidate approval; destination remains staged until final release,WF-C63-BUILD,WF-C63-TEST,WF-C63-VERIFY,NOT_RUN
+C63-T03,C63,"Duplicate or uncertain external result uses X06, not blind retry",WF-C63-BUILD,WF-C63-TEST,WF-C63-VERIFY,NOT_RUN
+C64-T01,C64,Source-specific deliverable checked: Speaker kit; content approval,WF-C64-BUILD,WF-C64-TEST,WF-C64-VERIFY,NOT_RUN
+C64-T02,C64,Material changes invalidate approval; destination remains staged until final release,WF-C64-BUILD,WF-C64-TEST,WF-C64-VERIFY,NOT_RUN
+C64-T03,C64,"Duplicate or uncertain external result uses X06, not blind retry",WF-C64-BUILD,WF-C64-TEST,WF-C64-VERIFY,NOT_RUN
+C65-T01,C65,Source-specific deliverable checked: Social pack; preserve claims and attribution,WF-C65-BUILD,WF-C65-TEST,WF-C65-VERIFY,NOT_RUN
+C65-T02,C65,Material changes invalidate approval; destination remains staged until final release,WF-C65-BUILD,WF-C65-TEST,WF-C65-VERIFY,NOT_RUN
+C65-T03,C65,"Duplicate or uncertain external result uses X06, not blind retry",WF-C65-BUILD,WF-C65-TEST,WF-C65-VERIFY,NOT_RUN
+C66-T01,C66,Source-specific deliverable checked: Newsletter; V5 consent and dispatch policy,WF-C66-BUILD,WF-C66-TEST,WF-C66-VERIFY,NOT_RUN
+C66-T02,C66,Material changes invalidate approval; destination remains staged until final release,WF-C66-BUILD,WF-C66-TEST,WF-C66-VERIFY,NOT_RUN
+C66-T03,C66,"Duplicate or uncertain external result uses X06, not blind retry",WF-C66-BUILD,WF-C66-TEST,WF-C66-VERIFY,NOT_RUN
+C67-T01,C67,Source-specific deliverable checked: Article; guest and quote consent,WF-C67-BUILD,WF-C67-TEST,WF-C67-VERIFY,NOT_RUN
+C67-T02,C67,Material changes invalidate approval; destination remains staged until final release,WF-C67-BUILD,WF-C67-TEST,WF-C67-VERIFY,NOT_RUN
+C67-T03,C67,"Duplicate or uncertain external result uses X06, not blind retry",WF-C67-BUILD,WF-C67-TEST,WF-C67-VERIFY,NOT_RUN
+C68-T01,C68,Source-specific deliverable checked: FAQ/posts; review context,WF-C68-BUILD,WF-C68-TEST,WF-C68-VERIFY,NOT_RUN
+C68-T02,C68,Material changes invalidate approval; destination remains staged until final release,WF-C68-BUILD,WF-C68-TEST,WF-C68-VERIFY,NOT_RUN
+C68-T03,C68,"Duplicate or uncertain external result uses X06, not blind retry",WF-C68-BUILD,WF-C68-TEST,WF-C68-VERIFY,NOT_RUN
+C69-T01,C69,Source-specific deliverable checked: Localized variant; native-speaker review,WF-C69-BUILD,WF-C69-TEST,WF-C69-VERIFY,NOT_RUN
+C69-T02,C69,Material changes invalidate approval; destination remains staged until final release,WF-C69-BUILD,WF-C69-TEST,WF-C69-VERIFY,NOT_RUN
+C69-T03,C69,"Duplicate or uncertain external result uses X06, not blind retry",WF-C69-BUILD,WF-C69-TEST,WF-C69-VERIFY,NOT_RUN
+C70-T01,C70,Source-specific deliverable checked: Variants; segment privacy and consistency,WF-C70-BUILD,WF-C70-TEST,WF-C70-VERIFY,NOT_RUN
+C70-T02,C70,Material changes invalidate approval; destination remains staged until final release,WF-C70-BUILD,WF-C70-TEST,WF-C70-VERIFY,NOT_RUN
+C70-T03,C70,"Duplicate or uncertain external result uses X06, not blind retry",WF-C70-BUILD,WF-C70-TEST,WF-C70-VERIFY,NOT_RUN
+C71-T01,C71,Source-specific deliverable checked: Accessible derivative; human checks,WF-C71-BUILD,WF-C71-TEST,WF-C71-VERIFY,NOT_RUN
+C71-T02,C71,Material changes invalidate approval; destination remains staged until final release,WF-C71-BUILD,WF-C71-TEST,WF-C71-VERIFY,NOT_RUN
+C71-T03,C71,"Duplicate or uncertain external result uses X06, not blind retry",WF-C71-BUILD,WF-C71-TEST,WF-C71-VERIFY,NOT_RUN
+C72-T01,C72,Source-specific deliverable checked: Refresh brief; do not auto-rewrite live page,WF-C72-BUILD,WF-C72-TEST,WF-C72-VERIFY,NOT_RUN
+C72-T02,C72,Material changes invalidate approval; destination remains staged until final release,WF-C72-BUILD,WF-C72-TEST,WF-C72-VERIFY,NOT_RUN
+C72-T03,C72,"Duplicate or uncertain external result uses X06, not blind retry",WF-C72-BUILD,WF-C72-TEST,WF-C72-VERIFY,NOT_RUN
+M01-T01,M01,"Confirm source and outcome: Validated contact, route and accountable sales work item",WF-M01-BUILD,WF-M01-TEST,WF-M01-VERIFY,NOT_RUN
+M01-T02,M01,"Reject stale authorization, wrong client and repeated action",WF-M01-BUILD,WF-M01-TEST,WF-M01-VERIFY,NOT_RUN
+M01-T03,M01,Report missing data as unknown and reconcile external effects,WF-M01-BUILD,WF-M01-TEST,WF-M01-VERIFY,NOT_RUN
+M02-T01,M02,"Confirm source and outcome: Consent-compliant nurture events, updated lead score and handoff",WF-M02-BUILD,WF-M02-TEST,WF-M02-VERIFY,NOT_RUN
+M02-T02,M02,"Reject stale authorization, wrong client and repeated action",WF-M02-BUILD,WF-M02-TEST,WF-M02-VERIFY,NOT_RUN
+M02-T03,M02,Report missing data as unknown and reconcile external effects,WF-M02-BUILD,WF-M02-TEST,WF-M02-VERIFY,NOT_RUN
+M03-T01,M03,"Confirm source and outcome: Assigned follow-up, optionally booked meeting or authorized call outcome",WF-M03-BUILD,WF-M03-TEST,WF-M03-VERIFY,NOT_RUN
+M03-T02,M03,"Reject stale authorization, wrong client and repeated action",WF-M03-BUILD,WF-M03-TEST,WF-M03-VERIFY,NOT_RUN
+M03-T03,M03,Report missing data as unknown and reconcile external effects,WF-M03-BUILD,WF-M03-TEST,WF-M03-VERIFY,NOT_RUN
+M04-T01,M04,"Confirm source and outcome: Approved article and creatives, audited page and ranking/goal snapshots",WF-M04-BUILD,WF-M04-TEST,WF-M04-VERIFY,NOT_RUN
+M04-T02,M04,"Reject stale authorization, wrong client and repeated action",WF-M04-BUILD,WF-M04-TEST,WF-M04-VERIFY,NOT_RUN
+M04-T03,M04,Report missing data as unknown and reconcile external effects,WF-M04-BUILD,WF-M04-TEST,WF-M04-VERIFY,NOT_RUN
+M05-T01,M05,Confirm source and outcome: Source-aware campaign report and data freshness evidence,WF-M05-BUILD,WF-M05-TEST,WF-M05-VERIFY,NOT_RUN
+M05-T02,M05,"Reject stale authorization, wrong client and repeated action",WF-M05-BUILD,WF-M05-TEST,WF-M05-VERIFY,NOT_RUN
+M05-T03,M05,Report missing data as unknown and reconcile external effects,WF-M05-BUILD,WF-M05-TEST,WF-M05-VERIFY,NOT_RUN
+M06-T01,M06,Confirm source and outcome: Welcome sequence and updated subscriber state,WF-M06-BUILD,WF-M06-TEST,WF-M06-VERIFY,NOT_RUN
+M06-T02,M06,"Reject stale authorization, wrong client and repeated action",WF-M06-BUILD,WF-M06-TEST,WF-M06-VERIFY,NOT_RUN
+M06-T03,M06,Report missing data as unknown and reconcile external effects,WF-M06-BUILD,WF-M06-TEST,WF-M06-VERIFY,NOT_RUN
+M07-T01,M07,"Confirm source and outcome: Eligible recovery attempt or explicit stop, reconciled order outcome",WF-M07-BUILD,WF-M07-TEST,WF-M07-VERIFY,NOT_RUN
+M07-T02,M07,"Reject stale authorization, wrong client and repeated action",WF-M07-BUILD,WF-M07-TEST,WF-M07-VERIFY,NOT_RUN
+M07-T03,M07,Report missing data as unknown and reconcile external effects,WF-M07-BUILD,WF-M07-TEST,WF-M07-VERIFY,NOT_RUN
+M08-T01,M08,Confirm source and outcome: Auditable targeted offer and measured incremental purchase,WF-M08-BUILD,WF-M08-TEST,WF-M08-VERIFY,NOT_RUN
+M08-T02,M08,"Reject stale authorization, wrong client and repeated action",WF-M08-BUILD,WF-M08-TEST,WF-M08-VERIFY,NOT_RUN
+M08-T03,M08,Report missing data as unknown and reconcile external effects,WF-M08-BUILD,WF-M08-TEST,WF-M08-VERIFY,NOT_RUN
+M09-T01,M09,Confirm source and outcome: Completed reactivation sequence and refreshed lifecycle state,WF-M09-BUILD,WF-M09-TEST,WF-M09-VERIFY,NOT_RUN
+M09-T02,M09,"Reject stale authorization, wrong client and repeated action",WF-M09-BUILD,WF-M09-TEST,WF-M09-VERIFY,NOT_RUN
+M09-T03,M09,Report missing data as unknown and reconcile external effects,WF-M09-BUILD,WF-M09-TEST,WF-M09-VERIFY,NOT_RUN
+M10-T01,M10,"Confirm source and outcome: Approved ad creatives, controlled budget changes and conversion measurement",WF-M10-BUILD,WF-M10-TEST,WF-M10-VERIFY,NOT_RUN
+M10-T02,M10,"Reject stale authorization, wrong client and repeated action",WF-M10-BUILD,WF-M10-TEST,WF-M10-VERIFY,NOT_RUN
+M10-T03,M10,Report missing data as unknown and reconcile external effects,WF-M10-BUILD,WF-M10-TEST,WF-M10-VERIFY,NOT_RUN
+M11-T01,M11,"Confirm source and outcome: Reviewed campaign brief, scheduled publishing work and approved creatives",WF-M11-BUILD,WF-M11-TEST,WF-M11-VERIFY,NOT_RUN
+M11-T02,M11,"Reject stale authorization, wrong client and repeated action",WF-M11-BUILD,WF-M11-TEST,WF-M11-VERIFY,NOT_RUN
+M11-T03,M11,Report missing data as unknown and reconcile external effects,WF-M11-BUILD,WF-M11-TEST,WF-M11-VERIFY,NOT_RUN
+M12-T01,M12,Confirm source and outcome: Approved captioned derivative assets ready for posting,WF-M12-BUILD,WF-M12-TEST,WF-M12-VERIFY,NOT_RUN
+M12-T02,M12,"Reject stale authorization, wrong client and repeated action",WF-M12-BUILD,WF-M12-TEST,WF-M12-VERIFY,NOT_RUN
+M12-T03,M12,Report missing data as unknown and reconcile external effects,WF-M12-BUILD,WF-M12-TEST,WF-M12-VERIFY,NOT_RUN
+M13-T01,M13,Confirm source and outcome: Confirmed onboarding sequence and newsletter subscription,WF-M13-BUILD,WF-M13-TEST,WF-M13-VERIFY,NOT_RUN
+M13-T02,M13,"Reject stale authorization, wrong client and repeated action",WF-M13-BUILD,WF-M13-TEST,WF-M13-VERIFY,NOT_RUN
+M13-T03,M13,Report missing data as unknown and reconcile external effects,WF-M13-BUILD,WF-M13-TEST,WF-M13-VERIFY,NOT_RUN
+M14-T01,M14,Confirm source and outcome: Approved/reviewed interaction and lead handoff where warranted,WF-M14-BUILD,WF-M14-TEST,WF-M14-VERIFY,NOT_RUN
+M14-T02,M14,"Reject stale authorization, wrong client and repeated action",WF-M14-BUILD,WF-M14-TEST,WF-M14-VERIFY,NOT_RUN
+M14-T03,M14,Report missing data as unknown and reconcile external effects,WF-M14-BUILD,WF-M14-TEST,WF-M14-VERIFY,NOT_RUN
+M15-T01,M15,Confirm source and outcome: Cross-channel conversion report with missing-data notes,WF-M15-BUILD,WF-M15-TEST,WF-M15-VERIFY,NOT_RUN
+M15-T02,M15,"Reject stale authorization, wrong client and repeated action",WF-M15-BUILD,WF-M15-TEST,WF-M15-VERIFY,NOT_RUN
+M15-T03,M15,Report missing data as unknown and reconcile external effects,WF-M15-BUILD,WF-M15-TEST,WF-M15-VERIFY,NOT_RUN
+M16-T01,M16,"Confirm source and outcome: Client project, permissions, assets, owner and audit trail",WF-M16-BUILD,WF-M16-TEST,WF-M16-VERIFY,NOT_RUN
+M16-T02,M16,"Reject stale authorization, wrong client and repeated action",WF-M16-BUILD,WF-M16-TEST,WF-M16-VERIFY,NOT_RUN
+M16-T03,M16,Report missing data as unknown and reconcile external effects,WF-M16-BUILD,WF-M16-TEST,WF-M16-VERIFY,NOT_RUN
+M17-T01,M17,Confirm source and outcome: Published channel-specific approved revisions with reconciled IDs,WF-M17-BUILD,WF-M17-TEST,WF-M17-VERIFY,NOT_RUN
+M17-T02,M17,"Reject stale authorization, wrong client and repeated action",WF-M17-BUILD,WF-M17-TEST,WF-M17-VERIFY,NOT_RUN
+M17-T03,M17,Report missing data as unknown and reconcile external effects,WF-M17-BUILD,WF-M17-TEST,WF-M17-VERIFY,NOT_RUN
+M18-T01,M18,Confirm source and outcome: Client dashboard showing comparable KPIs and freshness,WF-M18-BUILD,WF-M18-TEST,WF-M18-VERIFY,NOT_RUN
+M18-T02,M18,"Reject stale authorization, wrong client and repeated action",WF-M18-BUILD,WF-M18-TEST,WF-M18-VERIFY,NOT_RUN
+M18-T03,M18,Report missing data as unknown and reconcile external effects,WF-M18-BUILD,WF-M18-TEST,WF-M18-VERIFY,NOT_RUN
+M19-T01,M19,"Confirm source and outcome: Deduplicated, authorized lead assignment and client handoff",WF-M19-BUILD,WF-M19-TEST,WF-M19-VERIFY,NOT_RUN
+M19-T02,M19,"Reject stale authorization, wrong client and repeated action",WF-M19-BUILD,WF-M19-TEST,WF-M19-VERIFY,NOT_RUN
+M19-T03,M19,Report missing data as unknown and reconcile external effects,WF-M19-BUILD,WF-M19-TEST,WF-M19-VERIFY,NOT_RUN
+M20-T01,M20,"Confirm source and outcome: Approved, delivered client performance report",WF-M20-BUILD,WF-M20-TEST,WF-M20-VERIFY,NOT_RUN
+M20-T02,M20,"Reject stale authorization, wrong client and repeated action",WF-M20-BUILD,WF-M20-TEST,WF-M20-VERIFY,NOT_RUN
+M20-T03,M20,Report missing data as unknown and reconcile external effects,WF-M20-BUILD,WF-M20-TEST,WF-M20-VERIFY,NOT_RUN
+M21-T01,M21,Confirm source and outcome: Prioritized SEO task backed by ranking evidence,WF-M21-BUILD,WF-M21-TEST,WF-M21-VERIFY,NOT_RUN
+M21-T02,M21,"Reject stale authorization, wrong client and repeated action",WF-M21-BUILD,WF-M21-TEST,WF-M21-VERIFY,NOT_RUN
+M21-T03,M21,Report missing data as unknown and reconcile external effects,WF-M21-BUILD,WF-M21-TEST,WF-M21-VERIFY,NOT_RUN
+M22-T01,M22,Confirm source and outcome: Auditable change digest and a human-approved action,WF-M22-BUILD,WF-M22-TEST,WF-M22-VERIFY,NOT_RUN
+M22-T02,M22,"Reject stale authorization, wrong client and repeated action",WF-M22-BUILD,WF-M22-TEST,WF-M22-VERIFY,NOT_RUN
+M22-T03,M22,Report missing data as unknown and reconcile external effects,WF-M22-BUILD,WF-M22-TEST,WF-M22-VERIFY,NOT_RUN
+M23-T01,M23,"Confirm source and outcome: Experiment result with defined outcome, uncertainty, and rollout decision",WF-M23-BUILD,WF-M23-TEST,WF-M23-VERIFY,NOT_RUN
+M23-T02,M23,"Reject stale authorization, wrong client and repeated action",WF-M23-BUILD,WF-M23-TEST,WF-M23-VERIFY,NOT_RUN
+M23-T03,M23,Report missing data as unknown and reconcile external effects,WF-M23-BUILD,WF-M23-TEST,WF-M23-VERIFY,NOT_RUN
+M24-T01,M24,Confirm source and outcome: Approved page revision and measured performance change,WF-M24-BUILD,WF-M24-TEST,WF-M24-VERIFY,NOT_RUN
+M24-T02,M24,"Reject stale authorization, wrong client and repeated action",WF-M24-BUILD,WF-M24-TEST,WF-M24-VERIFY,NOT_RUN
+M24-T03,M24,Report missing data as unknown and reconcile external effects,WF-M24-BUILD,WF-M24-TEST,WF-M24-VERIFY,NOT_RUN
+M25-T01,M25,Confirm source and outcome: Up-to-date eligible audience lists and segment history,WF-M25-BUILD,WF-M25-TEST,WF-M25-VERIFY,NOT_RUN
+M25-T02,M25,"Reject stale authorization, wrong client and repeated action",WF-M25-BUILD,WF-M25-TEST,WF-M25-VERIFY,NOT_RUN
+M25-T03,M25,Report missing data as unknown and reconcile external effects,WF-M25-BUILD,WF-M25-TEST,WF-M25-VERIFY,NOT_RUN
+M26-T01,M26,Confirm source and outcome: Verified referral attribution and reward decision,WF-M26-BUILD,WF-M26-TEST,WF-M26-VERIFY,NOT_RUN
+M26-T02,M26,"Reject stale authorization, wrong client and repeated action",WF-M26-BUILD,WF-M26-TEST,WF-M26-VERIFY,NOT_RUN
+M26-T03,M26,Report missing data as unknown and reconcile external effects,WF-M26-BUILD,WF-M26-TEST,WF-M26-VERIFY,NOT_RUN
+M27-T01,M27,Confirm source and outcome: Validated partner earnings with approved payout evidence,WF-M27-BUILD,WF-M27-TEST,WF-M27-VERIFY,NOT_RUN
+M27-T02,M27,"Reject stale authorization, wrong client and repeated action",WF-M27-BUILD,WF-M27-TEST,WF-M27-VERIFY,NOT_RUN
+M27-T03,M27,Report missing data as unknown and reconcile external effects,WF-M27-BUILD,WF-M27-TEST,WF-M27-VERIFY,NOT_RUN
+M28-T01,M28,"Confirm source and outcome: Shortlisted partners, approved outreach and tracked response",WF-M28-BUILD,WF-M28-TEST,WF-M28-VERIFY,NOT_RUN
+M28-T02,M28,"Reject stale authorization, wrong client and repeated action",WF-M28-BUILD,WF-M28-TEST,WF-M28-VERIFY,NOT_RUN
+M28-T03,M28,Report missing data as unknown and reconcile external effects,WF-M28-BUILD,WF-M28-TEST,WF-M28-VERIFY,NOT_RUN
+M29-T01,M29,Confirm source and outcome: Authentic review request and moderation outcome,WF-M29-BUILD,WF-M29-TEST,WF-M29-VERIFY,NOT_RUN
+M29-T02,M29,"Reject stale authorization, wrong client and repeated action",WF-M29-BUILD,WF-M29-TEST,WF-M29-VERIFY,NOT_RUN
+M29-T03,M29,Report missing data as unknown and reconcile external effects,WF-M29-BUILD,WF-M29-TEST,WF-M29-VERIFY,NOT_RUN
+M30-T01,M30,"Confirm source and outcome: Classified, escalated and reconciled reputation issues",WF-M30-BUILD,WF-M30-TEST,WF-M30-VERIFY,NOT_RUN
+M30-T02,M30,"Reject stale authorization, wrong client and repeated action",WF-M30-BUILD,WF-M30-TEST,WF-M30-VERIFY,NOT_RUN
+M30-T03,M30,Report missing data as unknown and reconcile external effects,WF-M30-BUILD,WF-M30-TEST,WF-M30-VERIFY,NOT_RUN
+M31-T01,M31,"Confirm source and outcome: Registration, authorized event session and follow-up segment",WF-M31-BUILD,WF-M31-TEST,WF-M31-VERIFY,NOT_RUN
+M31-T02,M31,"Reject stale authorization, wrong client and repeated action",WF-M31-BUILD,WF-M31-TEST,WF-M31-VERIFY,NOT_RUN
+M31-T03,M31,Report missing data as unknown and reconcile external effects,WF-M31-BUILD,WF-M31-TEST,WF-M31-VERIFY,NOT_RUN
+M32-T01,M32,Confirm source and outcome: Permissioned send with prompt opt-out reconciliation,WF-M32-BUILD,WF-M32-TEST,WF-M32-VERIFY,NOT_RUN
+M32-T02,M32,"Reject stale authorization, wrong client and repeated action",WF-M32-BUILD,WF-M32-TEST,WF-M32-VERIFY,NOT_RUN
+M32-T03,M32,Report missing data as unknown and reconcile external effects,WF-M32-BUILD,WF-M32-TEST,WF-M32-VERIFY,NOT_RUN
+M33-T01,M33,Confirm source and outcome: Audited local search presence and authorized listing actions,WF-M33-BUILD,WF-M33-TEST,WF-M33-VERIFY,NOT_RUN
+M33-T02,M33,"Reject stale authorization, wrong client and repeated action",WF-M33-BUILD,WF-M33-TEST,WF-M33-VERIFY,NOT_RUN
+M33-T03,M33,Report missing data as unknown and reconcile external effects,WF-M33-BUILD,WF-M33-TEST,WF-M33-VERIFY,NOT_RUN
+M34-T01,M34,"Confirm source and outcome: Atomic points balance, issued/redeemed reward and audit",WF-M34-BUILD,WF-M34-TEST,WF-M34-VERIFY,NOT_RUN
+M34-T02,M34,"Reject stale authorization, wrong client and repeated action",WF-M34-BUILD,WF-M34-TEST,WF-M34-VERIFY,NOT_RUN
+M34-T03,M34,Report missing data as unknown and reconcile external effects,WF-M34-BUILD,WF-M34-TEST,WF-M34-VERIFY,NOT_RUN
+M35-T01,M35,Confirm source and outcome: Approved campaign budget proposal and verified provider state,WF-M35-BUILD,WF-M35-TEST,WF-M35-VERIFY,NOT_RUN
+M35-T02,M35,"Reject stale authorization, wrong client and repeated action",WF-M35-BUILD,WF-M35-TEST,WF-M35-VERIFY,NOT_RUN
+M35-T03,M35,Report missing data as unknown and reconcile external effects,WF-M35-BUILD,WF-M35-TEST,WF-M35-VERIFY,NOT_RUN
+M36-T01,M36,Confirm source and outcome: Consistent integration record and updates to authoritative owners,WF-M36-BUILD,WF-M36-TEST,WF-M36-VERIFY,NOT_RUN
+M36-T02,M36,"Reject stale authorization, wrong client and repeated action",WF-M36-BUILD,WF-M36-TEST,WF-M36-VERIFY,NOT_RUN
+M36-T03,M36,Report missing data as unknown and reconcile external effects,WF-M36-BUILD,WF-M36-TEST,WF-M36-VERIFY,NOT_RUN
+L01-T01,L01,No automatic restart of stopped Factorio slot,WF-L01-BUILD,WF-L01-TEST,WF-L01-VERIFY,NOT_RUN
+L01-T02,L01,RCON remains private,WF-L01-BUILD,WF-L01-TEST,WF-L01-VERIFY,NOT_RUN
+L02-T01,L02,No accidental live stream on restore,WF-L02-BUILD,WF-L02-TEST,WF-L02-VERIFY,NOT_RUN
+L02-T02,L02,GPU contention tested against V4 voice,WF-L02-BUILD,WF-L02-TEST,WF-L02-VERIFY,NOT_RUN
+L03-T01,L03,Do not infer owner from process name,WF-L03-BUILD,WF-L03-TEST,WF-L03-VERIFY,NOT_RUN
+L03-T02,L03,Preserve uncommitted work and locks,WF-L03-BUILD,WF-L03-TEST,WF-L03-VERIFY,NOT_RUN
+L04-T01,L04,Stopped templates remain stopped,WF-L04-BUILD,WF-L04-TEST,WF-L04-VERIFY,NOT_RUN
+L04-T02,L04,No guessed alternate SSH identity,WF-L04-BUILD,WF-L04-TEST,WF-L04-VERIFY,NOT_RUN
+L05-T01,L05,Existing secret reference is not proof of provider access,WF-L05-BUILD,WF-L05-TEST,WF-L05-VERIFY,NOT_RUN
+L05-T02,L05,Held hosting stays held,WF-L05-BUILD,WF-L05-TEST,WF-L05-VERIFY,NOT_RUN
+L06-T01,L06,Names do not establish current business purpose,WF-L06-BUILD,WF-L06-TEST,WF-L06-VERIFY,NOT_RUN
+L06-T02,L06,No custom app silently adopted as baseline,WF-L06-BUILD,WF-L06-TEST,WF-L06-VERIFY,NOT_RUN
+L07-T01,L07,Unhealthy historical MCP not treated as healthy,WF-L07-BUILD,WF-L07-TEST,WF-L07-VERIFY,NOT_RUN
+L07-T02,L07,No new permanent service without owner/cost,WF-L07-BUILD,WF-L07-TEST,WF-L07-VERIFY,NOT_RUN
+L08-T01,L08,Every route-only record remains traceable,WF-L08-BUILD,WF-L08-TEST,WF-L08-VERIFY,NOT_RUN
+L08-T02,L08,No prune from absence of a running container,WF-L08-BUILD,WF-L08-TEST,WF-L08-VERIFY,NOT_RUN
+BASE-489,E01,SPF/DKIM/DMARC and DNS,WF-E01-BUILD,WF-E01-TEST,WF-E01-VERIFY,NOT_RUN
+BASE-490,E01,SMTP authentication,WF-E01-BUILD,WF-E01-TEST,WF-E01-VERIFY,NOT_RUN
+BASE-491,E02,Mautic targeting,WF-E02-BUILD,WF-E02-TEST,WF-E02-VERIFY,NOT_RUN
+BASE-492,E02,Consent/unsubscribe,WF-E02-BUILD,WF-E02-TEST,WF-E02-VERIFY,NOT_RUN
+BASE-493,E11,Unsubscribe during queue delay,WF-E11-BUILD,WF-E11-TEST,WF-E11-VERIFY,NOT_RUN
+BASE-494,E12,Rate-cap enforcement,WF-E12-BUILD,WF-E12-TEST,WF-E12-VERIFY,NOT_RUN
+BASE-495,E12,Concurrent workers,WF-E12-BUILD,WF-E12-TEST,WF-E12-VERIFY,NOT_RUN
+BASE-496,E11,Immediate/manual bypass,WF-E11-BUILD,WF-E11-TEST,WF-E11-VERIFY,NOT_RUN
+BASE-497,E06,Permanent bounce,WF-E06-BUILD,WF-E06-TEST,WF-E06-VERIFY,NOT_RUN
+BASE-498,E06,Repeated provider webhook,WF-E06-BUILD,WF-E06-TEST,WF-E06-VERIFY,NOT_RUN
+BASE-499,E11,Temporary SMTP rejection,WF-E11-BUILD,WF-E11-TEST,WF-E11-VERIFY,NOT_RUN
+BASE-500,E07,No Postmaster data,WF-E07-BUILD,WF-E07-TEST,WF-E07-VERIFY,NOT_RUN
+BASE-501,E11,Activepieces/DB outage,WF-E11-BUILD,WF-E11-TEST,WF-E11-VERIFY,NOT_RUN
+BASE-502,E11,Mautic restart,WF-E11-BUILD,WF-E11-TEST,WF-E11-VERIFY,NOT_RUN
+BASE-503,E04,Mailpit test,WF-E04-BUILD,WF-E04-TEST,WF-E04-VERIFY,NOT_RUN
+BASE-504,E04,Playwright unsubscribe,WF-E04-BUILD,WF-E04-TEST,WF-E04-VERIFY,NOT_RUN
+BASE-505,E07,DNS misconfiguration,WF-E07-BUILD,WF-E07-TEST,WF-E07-VERIFY,NOT_RUN
+BASE-506,E09,Restore after outage,WF-E09-BUILD,WF-E09-TEST,WF-E09-VERIFY,NOT_RUN
+BASE-507,E09,Incident recovery,WF-E09-BUILD,WF-E09-TEST,WF-E09-VERIFY,NOT_RUN
+BASE-508,C08,Brief and objective,WF-C08-BUILD,WF-C08-TEST,WF-C08-VERIFY,NOT_RUN
+BASE-509,C07,Research/evidence,WF-C07-BUILD,WF-C07-TEST,WF-C07-VERIFY,NOT_RUN
+BASE-510,X05,Untrusted sources,WF-X05-BUILD,WF-X05-TEST,WF-X05-VERIFY,NOT_RUN
+BASE-511,X05,Structured AI output,WF-X05-BUILD,WF-X05-TEST,WF-X05-VERIFY,NOT_RUN
+BASE-512,C07,Approved knowledge retrieval,WF-C07-BUILD,WF-C07-TEST,WF-C07-VERIFY,NOT_RUN
+BASE-513,C07,Factual review,WF-C07-BUILD,WF-C07-TEST,WF-C07-VERIFY,NOT_RUN
+BASE-514,C09,Vale brand/style checks,WF-C09-BUILD,WF-C09-TEST,WF-C09-VERIFY,NOT_RUN
+BASE-515,X03,Disclaimers and rights,WF-X03-BUILD,WF-X03-TEST,WF-X03-VERIFY,NOT_RUN
+BASE-516,C33,ComfyUI models/nodes,WF-C33-BUILD,WF-C33-TEST,WF-C33-VERIFY,NOT_RUN
+BASE-517,I18,ResourceSpace,WF-I18-BUILD,WF-I18-TEST,WF-I18-VERIFY,NOT_RUN
+BASE-518,C49,FFmpeg,WF-C49-BUILD,WF-C49-TEST,WF-C49-VERIFY,NOT_RUN
+BASE-519,C57,Pandoc/Typst,WF-C57-BUILD,WF-C57-TEST,WF-C57-VERIFY,NOT_RUN
+BASE-520,X03,Content approval,WF-X03-BUILD,WF-X03-TEST,WF-X03-VERIFY,NOT_RUN
+BASE-521,X03,Modified approved content,WF-X03-BUILD,WF-X03-TEST,WF-X03-VERIFY,NOT_RUN
+BASE-522,C09,WordPress staging,WF-C09-BUILD,WF-C09-TEST,WF-C09-VERIFY,NOT_RUN
+BASE-523,M17,Postiz and Temporal,WF-M17-BUILD,WF-M17-TEST,WF-M17-VERIFY,NOT_RUN
+BASE-524,E11,Mautic email,WF-E11-BUILD,WF-E11-TEST,WF-E11-VERIFY,NOT_RUN
+BASE-525,X02,Duplicate publishing request,WF-X02-BUILD,WF-X02-TEST,WF-X02-VERIFY,NOT_RUN
+BASE-526,X06,Unknown publishing result,WF-X06-BUILD,WF-X06-TEST,WF-X06-VERIFY,NOT_RUN
+BASE-527,I12,Credential failure,WF-I12-BUILD,WF-I12-TEST,WF-I12-VERIFY,NOT_RUN
+BASE-528,X03,Activepieces/DB outage,WF-X03-BUILD,WF-X03-TEST,WF-X03-VERIFY,NOT_RUN
+BASE-529,I18,Missing media,WF-I18-BUILD,WF-I18-TEST,WF-I18-VERIFY,NOT_RUN
+BASE-530,M17,Unauthorized social account,WF-M17-BUILD,WF-M17-TEST,WF-M17-VERIFY,NOT_RUN
+BASE-531,X03,Invalid customer rights,WF-X03-BUILD,WF-X03-TEST,WF-X03-VERIFY,NOT_RUN
+BASE-532,X04,Withdrawal,WF-X04-BUILD,WF-X04-TEST,WF-X04-VERIFY,NOT_RUN
+BASE-533,X10,No analytics,WF-X10-BUILD,WF-X10-TEST,WF-X10-VERIFY,NOT_RUN
+BASE-534,C72,Changed model,WF-C72-BUILD,WF-C72-TEST,WF-C72-VERIFY,NOT_RUN
+BASE-535,I28,Parallel rendering,WF-I28-BUILD,WF-I28-TEST,WF-I28-VERIFY,NOT_RUN
+BASE-536,I24,Restore,WF-I24-BUILD,WF-I24-TEST,WF-I24-VERIFY,NOT_RUN
+BASE-537,M36,Marketing campaign schema,WF-M36-BUILD,WF-M36-TEST,WF-M36-VERIFY,NOT_RUN
+BASE-538,M15,UTM propagation,WF-M15-BUILD,WF-M15-TEST,WF-M15-VERIFY,NOT_RUN
+BASE-539,M01,Form submit,WF-M01-BUILD,WF-M01-TEST,WF-M01-VERIFY,NOT_RUN
+BASE-540,X02,Double-submit / webhook retry,WF-X02-BUILD,WF-X02-TEST,WF-X02-VERIFY,NOT_RUN
+BASE-541,X04,Cross-channel permission,WF-X04-BUILD,WF-X04-TEST,WF-X04-VERIFY,NOT_RUN
+BASE-542,X04,Consent withdrawal in-flight,WF-X04-BUILD,WF-X04-TEST,WF-X04-VERIFY,NOT_RUN
+BASE-543,M25,Website tracking,WF-M25-BUILD,WF-M25-TEST,WF-M25-VERIFY,NOT_RUN
+BASE-544,M24,Lighthouse report,WF-M24-BUILD,WF-M24-TEST,WF-M24-VERIFY,NOT_RUN
+BASE-545,M21,SEO separation,WF-M21-BUILD,WF-M21-TEST,WF-M21-VERIFY,NOT_RUN
+BASE-546,M17,Social API disconnection,WF-M17-BUILD,WF-M17-TEST,WF-M17-VERIFY,NOT_RUN
+BASE-547,M17,Postiz/Temporal outage,WF-M17-BUILD,WF-M17-TEST,WF-M17-VERIFY,NOT_RUN
+BASE-548,M10,Paid ads denied permissions,WF-M10-BUILD,WF-M10-TEST,WF-M10-VERIFY,NOT_RUN
+BASE-549,M35,Ad budget change,WF-M35-BUILD,WF-M35-TEST,WF-M35-VERIFY,NOT_RUN
+BASE-550,M07,Ecommerce missing,WF-M07-BUILD,WF-M07-TEST,WF-M07-VERIFY,NOT_RUN
+BASE-551,M07,Abandoned-cart purchase after trigger,WF-M07-BUILD,WF-M07-TEST,WF-M07-VERIFY,NOT_RUN
+BASE-552,M34,Refund/chargeback,WF-M34-BUILD,WF-M34-TEST,WF-M34-VERIFY,NOT_RUN
+BASE-553,M05,Attribution join,WF-M05-BUILD,WF-M05-TEST,WF-M05-VERIFY,NOT_RUN
+BASE-554,M05,Advertising data absent,WF-M05-BUILD,WF-M05-TEST,WF-M05-VERIFY,NOT_RUN
+BASE-555,M23,Experiment,WF-M23-BUILD,WF-M23-TEST,WF-M23-VERIFY,NOT_RUN
+BASE-556,M29,First-party reviews,WF-M29-BUILD,WF-M29-TEST,WF-M29-VERIFY,NOT_RUN
+BASE-557,M32,SMS STOP,WF-M32-BUILD,WF-M32-TEST,WF-M32-VERIFY,NOT_RUN
+BASE-558,M32,Provider SMS unavailable,WF-M32-BUILD,WF-M32-TEST,WF-M32-VERIFY,NOT_RUN
+BASE-559,M16,Client separation,WF-M16-BUILD,WF-M16-TEST,WF-M16-VERIFY,NOT_RUN
+BASE-560,M03,Sales handoff,WF-M03-BUILD,WF-M03-TEST,WF-M03-VERIFY,NOT_RUN
+BASE-561,M01,Real visitor metrics,WF-M01-BUILD,WF-M01-TEST,WF-M01-VERIFY,NOT_RUN
+BASE-562,M20,Marketing report,WF-M20-BUILD,WF-M20-TEST,WF-M20-VERIFY,NOT_RUN
+BASE-563,I24,Recovery,WF-I24-BUILD,WF-I24-TEST,WF-I24-VERIFY,NOT_RUN
+BASE-564,X08,Consent/retention deletion,WF-X08-BUILD,WF-X08-TEST,WF-X08-VERIFY,NOT_RUN
+B01,I01,Complete rootful Podman inventory and private state,WF-I01-BUILD,WF-I01-TEST,WF-I01-VERIFY,NOT_RUN
+B02,I01,Other-user runtime stores and private ownership,WF-I01-BUILD,WF-I01-TEST,WF-I01-VERIFY,NOT_RUN
+B03,I07,Effective Train firewall and forwarding rules,WF-I07-BUILD,WF-I07-TEST,WF-I07-VERIFY,NOT_RUN
+B04,I09,Full guest services and protected disk chains,WF-I09-BUILD,WF-I09-TEST,WF-I09-VERIFY,NOT_RUN
+B05,I30,Current campaign/controller ownership and safe handover,WF-I30-BUILD,WF-I30-TEST,WF-I30-VERIFY,NOT_RUN
+B06,I22,Reproducible custom-image source,WF-I22-BUILD,WF-I22-TEST,WF-I22-VERIFY,NOT_RUN
+B07,I23,"Consistent, off-host and restore-tested data generations",WF-I23-BUILD,WF-I23-TEST,WF-I23-VERIFY,NOT_RUN
+B08,I08,Complete external/private access policy,WF-I08-BUILD,WF-I08-TEST,WF-I08-VERIFY,NOT_RUN
+B09,I21,Proven automation inputs and scheduler continuity,WF-I21-BUILD,WF-I21-TEST,WF-I21-VERIFY,NOT_RUN
+B10,I12,Complete secret/certificate recovery and renewal ownership,WF-I12-BUILD,WF-I12-TEST,WF-I12-VERIFY,NOT_RUN
+B11,I02,Application acceptance and unresolved disposition,WF-I02-BUILD,WF-I02-TEST,WF-I02-VERIFY,NOT_RUN
+B12,I24,"Destination-specific network, hardware and recovery test",WF-I24-BUILD,WF-I24-TEST,WF-I24-VERIFY,NOT_RUN

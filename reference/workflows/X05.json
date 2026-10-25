@@ -1,0 +1,76 @@
+{
+  "id": "X05",
+  "name": "Bounded AI, browser and media jobs",
+  "family": "Shared integration and control",
+  "subfamily": "Shared integration and control",
+  "trigger": "Approved generation, audit or conversion task",
+  "steps": [
+    {
+      "action": "Resolve approved sources, job schema and tool scope",
+      "software": "Activepieces / PostgreSQL"
+    },
+    {
+      "action": "Admit resource and execution budget",
+      "software": "systemd / I28"
+    },
+    {
+      "action": "Execute pinned local model or utility in isolation",
+      "software": "llama.cpp / FFmpeg / Playwright"
+    },
+    {
+      "action": "Validate structured output and reject incomplete files",
+      "software": "Python / Vale / ffprobe"
+    },
+    {
+      "action": "Store artifact hashes and provenance",
+      "software": "ResourceSpace / SeaweedFS"
+    }
+  ],
+  "gate": "Job output and budget checks passed?",
+  "output": "Validated artifact or explicit bounded failure",
+  "acceptance_tests": [
+    "Untrusted source cannot change tool permission",
+    "Timeouts and cancellation leave no valid partial output"
+  ],
+  "upstream": [
+    "X02",
+    "I28",
+    "I17"
+  ],
+  "handoffs": [
+    "C01",
+    "C33",
+    "C49",
+    "C57",
+    "X03"
+  ],
+  "source": "Sources/V7/Consolidated_Self_Hosted_Technology_Stack_v7_2026-10-25.md",
+  "conditional": false,
+  "notes": "",
+  "failure": "Reject or HOLD the event/action, keep a redacted durable receipt, use bounded retries only for retry-safe failures, and send unresolved or ambiguous outcomes to human reconciliation.",
+  "status": "DESIGN_SPECIFIED_NOT_DEPLOYED",
+  "baseline": "V7",
+  "consolidation_revision": 1,
+  "controls": [],
+  "runtime_dependencies": [
+    "I10",
+    "I15",
+    "I19"
+  ],
+  "software": [
+    "Activepieces / PostgreSQL",
+    "Python / Vale / ffprobe",
+    "ResourceSpace / SeaweedFS",
+    "llama.cpp / FFmpeg / Playwright",
+    "systemd / I28"
+  ],
+  "source_class": "consolidated-reference-design",
+  "run_contract": {
+    "owner": "Assigned accountable role in OpenProject before activation",
+    "idempotency": "client_id + source_system + source_event_id + action_scope + approved_revision",
+    "retry": "Bounded retry only after retryability classification; unknown remote effects HOLD",
+    "observability": "workflow_id, run_id, correlation_id, state and redacted error; no raw PII labels",
+    "recovery": "Restore HOLD; reapply suppression/deletion and reconcile external receipts before replay",
+    "completion": "Named output plus acceptance evidence, not merely a running service"
+  }
+}

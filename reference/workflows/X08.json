@@ -1,0 +1,77 @@
+{
+  "id": "X08",
+  "name": "Retention, deletion and consent propagation",
+  "family": "Shared integration and control",
+  "subfamily": "Shared integration and control",
+  "trigger": "Verified deletion, withdrawal or retention deadline",
+  "steps": [
+    {
+      "action": "Verify requester and exact data/client scope",
+      "software": "Native authority / human review"
+    },
+    {
+      "action": "Apply legal hold and retention rules",
+      "software": "OpenProject"
+    },
+    {
+      "action": "Remove or restrict authoritative app records and derivatives",
+      "software": "Mautic / ResourceSpace / PostgreSQL"
+    },
+    {
+      "action": "Propagate to caches, exports and vector indexes",
+      "software": "Activepieces"
+    },
+    {
+      "action": "Maintain minimal permitted suppression and backup-deletion policy",
+      "software": "Protected audit ledger"
+    }
+  ],
+  "gate": "Required scope reconciled with retention rules?",
+  "output": "Documented privacy action and downstream receipts",
+  "acceptance_tests": [
+    "Restores reapply later deletion/suppression events",
+    "Immutable backup expiry is disclosed, not instant deletion claimed"
+  ],
+  "upstream": [
+    "X04",
+    "I32",
+    "V08",
+    "V10",
+    "L08"
+  ],
+  "handoffs": [
+    "M36",
+    "I23",
+    "V10",
+    "E06"
+  ],
+  "source": "Sources/V7/Consolidated_Self_Hosted_Technology_Stack_v7_2026-10-25.md",
+  "conditional": false,
+  "notes": "",
+  "failure": "Reject or HOLD the event/action, keep a redacted durable receipt, use bounded retries only for retry-safe failures, and send unresolved or ambiguous outcomes to human reconciliation.",
+  "status": "DESIGN_SPECIFIED_NOT_DEPLOYED",
+  "baseline": "V7",
+  "consolidation_revision": 1,
+  "controls": [],
+  "runtime_dependencies": [
+    "I10",
+    "I15",
+    "I19"
+  ],
+  "software": [
+    "Activepieces",
+    "Mautic / ResourceSpace / PostgreSQL",
+    "Native authority / human review",
+    "OpenProject",
+    "Protected audit ledger"
+  ],
+  "source_class": "consolidated-reference-design",
+  "run_contract": {
+    "owner": "Assigned accountable role in OpenProject before activation",
+    "idempotency": "client_id + source_system + source_event_id + action_scope + approved_revision",
+    "retry": "Bounded retry only after retryability classification; unknown remote effects HOLD",
+    "observability": "workflow_id, run_id, correlation_id, state and redacted error; no raw PII labels",
+    "recovery": "Restore HOLD; reapply suppression/deletion and reconcile external receipts before replay",
+    "completion": "Named output plus acceptance evidence, not merely a running service"
+  }
+}

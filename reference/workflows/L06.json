@@ -1,0 +1,75 @@
+{
+  "id": "L06",
+  "name": "Workflow Studio, BTC and custom helper disposition",
+  "family": "Legacy workload continuity",
+  "subfamily": "Legacy workload continuity",
+  "trigger": "Unmatched bespoke app or native helper encountered",
+  "steps": [
+    {
+      "action": "Identify owner, exact source and durable state",
+      "software": "Legacy register"
+    },
+    {
+      "action": "Preserve custom build and API contracts",
+      "software": "Git / image archive"
+    },
+    {
+      "action": "Compare function against existing V7 responsibility",
+      "software": "Activepieces / Grafana / OpenProject"
+    },
+    {
+      "action": "Isolate approved exception and disable duplicate scheduling",
+      "software": "systemd / Proxmox"
+    },
+    {
+      "action": "Retire only on separately approved data decision",
+      "software": "I32"
+    }
+  ],
+  "gate": "Exception has owner, scope and acceptance?",
+  "output": "Reviewed bespoke-service exception or preserved hold",
+  "acceptance_tests": [
+    "Names do not establish current business purpose",
+    "No custom app silently adopted as baseline"
+  ],
+  "upstream": [
+    "I31",
+    "I30"
+  ],
+  "handoffs": [
+    "X11",
+    "L08"
+  ],
+  "source": "Sources/Legacy/docs/service-recovery-manifest.csv; Sources/Legacy/docs/service-disposition-register.csv",
+  "conditional": true,
+  "notes": "",
+  "failure": "Preserve the current held/stopped/retired intent. Do not start, delete, prune, extend an old run window, or reactivate a public route without a separate owner decision.",
+  "status": "DESIGN_SPECIFIED_NOT_DEPLOYED",
+  "baseline": "V7",
+  "consolidation_revision": 1,
+  "controls": [
+    "I02",
+    "I23",
+    "I30"
+  ],
+  "runtime_dependencies": [
+    "I09",
+    "I23"
+  ],
+  "software": [
+    "Activepieces / Grafana / OpenProject",
+    "Git / image archive",
+    "I32",
+    "Legacy register",
+    "systemd / Proxmox"
+  ],
+  "source_class": "consolidated-reference-design",
+  "run_contract": {
+    "owner": "Assigned accountable role in OpenProject before activation",
+    "idempotency": "client_id + source_system + source_event_id + action_scope + approved_revision",
+    "retry": "Bounded retry only after retryability classification; unknown remote effects HOLD",
+    "observability": "workflow_id, run_id, correlation_id, state and redacted error; no raw PII labels",
+    "recovery": "Restore HOLD; reapply suppression/deletion and reconcile external receipts before replay",
+    "completion": "Named output plus acceptance evidence, not merely a running service"
+  }
+}

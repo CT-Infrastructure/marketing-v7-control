@@ -1,0 +1,76 @@
+{
+  "id": "L04",
+  "name": "Sandbox VMs, desktop access and tunnels",
+  "family": "Legacy workload continuity",
+  "subfamily": "Legacy workload continuity",
+  "trigger": "Approved sandbox migration",
+  "steps": [
+    {
+      "action": "Inventory guest state, noVNC/SSH routes and firewall",
+      "software": "Legacy owner"
+    },
+    {
+      "action": "Preserve guest disks and stopped/autostart intent",
+      "software": "I09"
+    },
+    {
+      "action": "Rebuild isolated sandbox boundary",
+      "software": "Proxmox / nftables"
+    },
+    {
+      "action": "Reconcile Windows/WSL tunnel and host-key trust",
+      "software": "I29"
+    },
+    {
+      "action": "Test explicitly permitted access with no public leakage",
+      "software": "Operator"
+    }
+  ],
+  "gate": "Sandbox and tunnel isolation proven?",
+  "output": "Qualified sandbox access or documented hold",
+  "acceptance_tests": [
+    "Stopped templates remain stopped",
+    "No guessed alternate SSH identity"
+  ],
+  "upstream": [
+    "I31",
+    "I09",
+    "I29"
+  ],
+  "handoffs": [
+    "I29",
+    "X09"
+  ],
+  "source": "Sources/Legacy/docs/service-recovery-manifest.csv; Sources/Legacy/docs/service-disposition-register.csv",
+  "conditional": true,
+  "notes": "",
+  "failure": "Preserve the current held/stopped/retired intent. Do not start, delete, prune, extend an old run window, or reactivate a public route without a separate owner decision.",
+  "status": "DESIGN_SPECIFIED_NOT_DEPLOYED",
+  "baseline": "V7",
+  "consolidation_revision": 1,
+  "controls": [
+    "I02",
+    "I23",
+    "I30"
+  ],
+  "runtime_dependencies": [
+    "I09",
+    "I23"
+  ],
+  "software": [
+    "I09",
+    "I29",
+    "Legacy owner",
+    "Operator",
+    "Proxmox / nftables"
+  ],
+  "source_class": "consolidated-reference-design",
+  "run_contract": {
+    "owner": "Assigned accountable role in OpenProject before activation",
+    "idempotency": "client_id + source_system + source_event_id + action_scope + approved_revision",
+    "retry": "Bounded retry only after retryability classification; unknown remote effects HOLD",
+    "observability": "workflow_id, run_id, correlation_id, state and redacted error; no raw PII labels",
+    "recovery": "Restore HOLD; reapply suppression/deletion and reconcile external receipts before replay",
+    "completion": "Named output plus acceptance evidence, not merely a running service"
+  }
+}

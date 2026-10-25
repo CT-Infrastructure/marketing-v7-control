@@ -1,0 +1,24 @@
+flowchart LR
+ IN["Native event / poll / human request"]:::source --> AUTH["X01<br/>authenticate, schema, client scope"]:::process
+ AUTH --> LEDGER["X02<br/>inbox + domain state + outbox"]:::process
+ LEDGER --> REVIEW["X03<br/>exact revision / assets / destination"]:::process
+ REVIEW --> ELIG["X04<br/>current channel permission"]:::process
+ ELIG --> FINAL{"Final native boundary<br/>eligible and owned?"}:::gate
+ FINAL -- "No / unknown" --> HOLD["HOLD / X07 review"]:::hold
+ FINAL -- "Yes" --> OWNER["Native authority<br/>WordPress | Postiz | Mautic<br/>voice controller | approved provider"]:::done
+ OWNER --> RECEIPT["X06<br/>confirmed success / failure / UNKNOWN"]:::process
+ RECEIPT --> METRIC["X10<br/>provenance + freshness + reporting"]:::process
+ RECEIPT -- "Ambiguous" --> HOLD
+ METRIC --> PLAN["OpenProject<br/>next reviewed decision"]:::process
+ CONSENT["Mautic: email contacts<br/>call ledger: telephone permission<br/>SMS/tracking: independent context"]:::control -. "no inferred cross-channel consent" .-> ELIG
+ DATA["PostgreSQL: operational records<br/>not a duplicate CRM or app database"]:::control -. "durable keys and audit" .-> LEDGER
+
+
+classDef source fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e,stroke-width:1.6px;
+classDef process fill:#f8fafc,stroke:#94a3b8,color:#172554,stroke-width:1.4px;
+classDef gate fill:#fff7d6,stroke:#d97706,color:#78350f,stroke-width:1.8px;
+classDef control fill:#ede9fe,stroke:#8b5cf6,color:#4c1d95,stroke-dasharray:5 4;
+classDef done fill:#ccfbf1,stroke:#0f766e,color:#134e4a,stroke-width:1.8px;
+classDef hold fill:#fff1f2,stroke:#e11d48,color:#881337,stroke-width:1.5px;
+classDef legacy fill:#fdf2f8,stroke:#9d174d,color:#831843;
+classDef ext fill:#ecfeff,stroke:#0891b2,color:#164e63;

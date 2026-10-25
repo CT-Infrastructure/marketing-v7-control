@@ -1,0 +1,42 @@
+{
+  "validation_scope": "PACKAGE_MANIFESTS_ONLY",
+  "status": "PASS",
+  "issues": 785,
+  "schedulable_and_manual_tasks": 759,
+  "issue_types": {
+    "epic": 26,
+    "foundation": 20,
+    "component": 89,
+    "preservation": 9,
+    "selection": 40,
+    "provider": 9,
+    "implementation": 190,
+    "test-authoring": 190,
+    "verification": 190,
+    "integration": 10,
+    "human-gate": 12
+  },
+  "workflow_count": 190,
+  "component_count": 147,
+  "source_acceptance_ids": 576,
+  "legacy_opaque_rows": 329,
+  "build_edges": 4848,
+  "build_dag_acyclic": true,
+  "native_parent_max_children": 40,
+  "largest_issue_body_characters": 7351,
+  "independent_tests_first_tasks": 190,
+  "topological_level_counts_not_runtime_parallelism": {
+    "0": 3,
+    "1": 4,
+    "2": 19,
+    "3": 325,
+    "4": 40,
+    "5": 168,
+    "6": 6,
+    "7": 135,
+    "8": 7
+  },
+  "live_github_tested": false,
+  "real_agent_adapter_tested": false,
+  "production_tests_executed": false
+}

@@ -1,0 +1,1 @@
+Templates are non-deployable until image, runtime, UID, health, network, state and secret references are reviewed. Do not bypass placeholder checks or add privileged flags to make a template start. Use component-native images where suitable; do not package every dependency as a server.

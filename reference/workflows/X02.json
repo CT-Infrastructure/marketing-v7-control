@@ -1,0 +1,77 @@
+{
+  "id": "X02",
+  "name": "Durable inbox, outbox and idempotent execution",
+  "family": "Shared integration and control",
+  "subfamily": "Shared integration and control",
+  "trigger": "Accepted event or retry-safe job",
+  "steps": [
+    {
+      "action": "Insert source event with unique client/source/event key",
+      "software": "PostgreSQL"
+    },
+    {
+      "action": "Atomically record domain transition and action intent",
+      "software": "PostgreSQL transaction"
+    },
+    {
+      "action": "Claim bounded work with lease and fencing metadata",
+      "software": "Activepieces / Python worker"
+    },
+    {
+      "action": "Recheck permission and execution ownership",
+      "software": "Channel guard"
+    },
+    {
+      "action": "Store attempt and external identifier before completion",
+      "software": "PostgreSQL"
+    }
+  ],
+  "gate": "Action eligible and no unresolved prior attempt?",
+  "output": "Durable action ledger and replay-safe local state",
+  "acceptance_tests": [
+    "Replay does not duplicate local writes",
+    "Remote exactly-once is not assumed"
+  ],
+  "upstream": [
+    "X01",
+    "I15",
+    "I17",
+    "I21",
+    "X07"
+  ],
+  "handoffs": [
+    "X03",
+    "X04",
+    "X05",
+    "X06",
+    "X07"
+  ],
+  "source": "Sources/V7/Consolidated_Self_Hosted_Technology_Stack_v7_2026-10-25.md",
+  "conditional": false,
+  "notes": "",
+  "failure": "Reject or HOLD the event/action, keep a redacted durable receipt, use bounded retries only for retry-safe failures, and send unresolved or ambiguous outcomes to human reconciliation.",
+  "status": "DESIGN_SPECIFIED_NOT_DEPLOYED",
+  "baseline": "V7",
+  "consolidation_revision": 1,
+  "controls": [],
+  "runtime_dependencies": [
+    "I10",
+    "I15",
+    "I19"
+  ],
+  "software": [
+    "Activepieces / Python worker",
+    "Channel guard",
+    "PostgreSQL",
+    "PostgreSQL transaction"
+  ],
+  "source_class": "consolidated-reference-design",
+  "run_contract": {
+    "owner": "Assigned accountable role in OpenProject before activation",
+    "idempotency": "client_id + source_system + source_event_id + action_scope + approved_revision",
+    "retry": "Bounded retry only after retryability classification; unknown remote effects HOLD",
+    "observability": "workflow_id, run_id, correlation_id, state and redacted error; no raw PII labels",
+    "recovery": "Restore HOLD; reapply suppression/deletion and reconcile external receipts before replay",
+    "completion": "Named output plus acceptance evidence, not merely a running service"
+  }
+}

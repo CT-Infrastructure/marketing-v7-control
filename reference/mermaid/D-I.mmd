@@ -1,0 +1,179 @@
+flowchart TB
+  CTL["Shared infrastructure and execution controls<br/>See each workflow for exact prerequisites"]:::control
+  I01["I01<br/>Evidence inventory and source<br/>reconciliation"]:::process
+  CTL -. "supports" .-> I01
+  I02["I02<br/>Architecture precedence and<br/>disposition approval"]:::process
+  CTL -. "supports" .-> I02
+  I03["I03<br/>Offline recovery custody and<br/>bootstrap kit"]:::process
+  CTL -. "supports" .-> I03
+  I04["I04<br/>Hardware, storage and<br/>hypervisor readiness"]:::process
+  CTL -. "supports" .-> I04
+  I05["I05<br/>Isolated OpenWrt router<br/>replacement"]:::process
+  CTL -. "supports" .-> I05
+  I06["I06<br/>DHCP, split DNS and hostname<br/>ownership"]:::process
+  CTL -. "supports" .-> I06
+  I07["I07<br/>Network segmentation and<br/>ingress policy"]:::process
+  CTL -. "supports" .-> I07
+  I08["I08<br/>Private access and distinct<br/>VPN control planes"]:::process
+  CTL -. "supports" .-> I08
+  I09["I09<br/>Libvirt guest preservation<br/>and Proxmox migration"]:::process
+  CTL -. "supports" .-> I09
+  I10["I10<br/>Debian application-host<br/>provisioning"]:::process
+  CTL -. "supports" .-> I10
+  I11["I11<br/>Docker and mixed-Podman<br/>migration to Quadlet"]:::process
+  CTL -. "supports" .-> I11
+  I12["I12<br/>Secrets, identity keys and<br/>credential rotation"]:::process
+  CTL -. "supports" .-> I12
+  I13["I13<br/>SSO, local authentication and<br/>client isolation"]:::process
+  CTL -. "supports" .-> I13
+  I14["I14<br/>Caddy, TLS issuance and<br/>certificate custody"]:::process
+  CTL -. "supports" .-> I14
+  I15["I15<br/>PostgreSQL and pgvector<br/>service foundation"]:::process
+  CTL -. "supports" .-> I15
+  I16["I16<br/>MariaDB application-state<br/>foundation"]:::process
+  CTL -. "supports" .-> I16
+  I17["I17<br/>Valkey and native queue<br/>compatibility"]:::process
+  CTL -. "supports" .-> I17
+  I18["I18<br/>SeaweedFS and approved-asset<br/>storage"]:::process
+  CTL -. "supports" .-> I18
+  I19["I19<br/>Observability and actionable<br/>alerting"]:::process
+  CTL -. "supports" .-> I19
+  I20["I20<br/>Router logfeed ownership and<br/>telemetry handover"]:::process
+  CTL -. "supports" .-> I20
+  I21["I21<br/>Host snapshots and<br/>trigger-engine replacement"]:::process
+  CTL -. "supports" .-> I21
+  I22["I22<br/>Patch, vulnerability and<br/>supply-chain release"]:::process
+  CTL -. "supports" .-> I22
+  I23["I23<br/>Application-consistent backup<br/>and off-host protection"]:::process
+  CTL -. "supports" .-> I23
+  I24["I24<br/>Isolated restore and recovery<br/>qualification"]:::process
+  CTL -. "supports" .-> I24
+  I25["I25<br/>Controlled cutover and<br/>single-writer transfer"]:::process
+  CTL -. "supports" .-> I25
+  I26["I26<br/>Rollback with<br/>external-side-effect<br/>reconciliation"]:::process
+  CTL -. "supports" .-> I26
+  I27["I27<br/>UPS event and graceful power<br/>recovery"]:::process
+  CTL -. "supports" .-> I27
+  I28["I28<br/>GPU and batch-workload<br/>admission"]:::process
+  CTL -. "supports" .-> I28
+  I29["I29<br/>Workstation, SSH and tunnel<br/>dependency continuity"]:::process
+  CTL -. "supports" .-> I29
+  I30["I30<br/>Active agent and controller<br/>handover"]:::process
+  CTL -. "supports" .-> I30
+  I31["I31<br/>Non-core workload<br/>preservation and scope<br/>isolation"]:::process
+  CTL -. "supports" .-> I31
+  I32["I32<br/>Retirement, orphan storage<br/>and endpoint tombstones"]:::process
+  CTL -. "supports" .-> I32
+  I33["I33<br/>Dependency-aware boot and<br/>health reconciliation"]:::process
+  CTL -. "supports" .-> I33
+  I34["I34<br/>Capacity, retention and<br/>reliability review"]:::process
+  CTL -. "supports" .-> I34
+  I35["I35<br/>Break-glass access and<br/>account recovery"]:::process
+  CTL -. "supports" .-> I35
+  I36["I36<br/>Time synchronization and<br/>scheduled-action correctness"]:::process
+  CTL -. "supports" .-> I36
+  I01 --> I02
+  I01 --> I03
+  I01 --> I04
+  I02 --> I05
+  I02 --> I09
+  I02 --> I11
+  I02 --> I31
+  I02 --> I32
+  I03 --> I12
+  I03 --> I24
+  I03 --> I35
+  I04 --> I09
+  I04 --> I10
+  I04 --> I27
+  I04 --> I28
+  I04 --> I34
+  I05 --> I06
+  I05 --> I07
+  I05 --> I36
+  I06 --> I08
+  I06 --> I14
+  I06 --> I25
+  I07 --> I08
+  I07 --> I10
+  I07 --> I14
+  I08 --> I13
+  I08 --> I29
+  I08 --> I35
+  I09 --> I24
+  I09 --> I30
+  I10 --> I11
+  I10 --> I12
+  I10 --> I15
+  I10 --> I16
+  I10 --> I17
+  I10 --> I18
+  I10 --> I19
+  I11 --> I24
+  I11 --> I33
+  I12 --> I13
+  I12 --> I14
+  I13 --> I35
+  I14 --> I25
+  I15 --> I23
+  I16 --> I23
+  I17 --> I33
+  I18 --> I23
+  I19 --> I20
+  I19 --> I21
+  I19 --> I34
+  I20 --> I25
+  I21 --> I25
+  I22 --> I23
+  I22 --> I24
+  I22 --> I33
+  I23 --> I24
+  I23 --> I25
+  I23 --> I26
+  I24 --> I25
+  I25 --> I33
+  I25 --> I26
+  I26 --> I24
+  I27 --> I33
+  I27 --> I24
+  I29 --> I30
+  I29 --> I35
+  I34 --> I04
+  I34 --> I28
+  I34 --> I23
+  I35 --> I12
+  I35 --> I24
+  OUT["Cross-domain handoffs<br/>C09, C33, C43, C49, C57, E01, E02, E05, E11, L01, L02, L03, L04, L05,<br/>L06, L07, L08, M01, M16, M17, M18, M19, M32, M36, V01, V02, V04, V05,<br/>V10, X01, X02, X05, X06, X08, X09, X10, X11"]:::done
+  I07 --> OUT
+  I09 --> OUT
+  I11 --> OUT
+  I12 --> OUT
+  I13 --> OUT
+  I14 --> OUT
+  I15 --> OUT
+  I16 --> OUT
+  I17 --> OUT
+  I18 --> OUT
+  I19 --> OUT
+  I20 --> OUT
+  I21 --> OUT
+  I24 --> OUT
+  I25 --> OUT
+  I26 --> OUT
+  I28 --> OUT
+  I29 --> OUT
+  I30 --> OUT
+  I31 --> OUT
+  I32 --> OUT
+  I33 --> OUT
+  I34 --> OUT
+  I36 --> OUT
+
+classDef source fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e,stroke-width:1.6px;
+classDef process fill:#f8fafc,stroke:#94a3b8,color:#172554,stroke-width:1.4px;
+classDef gate fill:#fff7d6,stroke:#d97706,color:#78350f,stroke-width:1.8px;
+classDef control fill:#ede9fe,stroke:#8b5cf6,color:#4c1d95,stroke-dasharray:5 4;
+classDef done fill:#ccfbf1,stroke:#0f766e,color:#134e4a,stroke-width:1.8px;
+classDef hold fill:#fff1f2,stroke:#e11d48,color:#881337,stroke-width:1.5px;
+classDef legacy fill:#fdf2f8,stroke:#9d174d,color:#831843;
+classDef ext fill:#ecfeff,stroke:#0891b2,color:#164e63;

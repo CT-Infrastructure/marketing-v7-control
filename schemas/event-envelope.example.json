@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "event_id": "synthetic-event-0001",
+  "source": "synthetic-fixture",
+  "event_type": "marketing.example",
+  "occurred_at": "2026-10-25T12:00:00Z",
+  "received_at": "2026-10-25T12:00:01Z",
+  "client_id": "synthetic-client",
+  "workflow_id": "M01",
+  "correlation_id": "synthetic-correlation",
+  "idempotency_key": "synthetic-client:fixture:event-0001:action:revision-1",
+  "authority_ref": "fixture-only",
+  "approval_ref": null,
+  "channel_eligibility_ref": null,
+  "payload_ref": "synthetic/fixture.json",
+  "default_outbound_state": "HOLD"
+}
