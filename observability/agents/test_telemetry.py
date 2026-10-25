@@ -1,5 +1,7 @@
 """Authored F17 offline tests. No controller DB, models or external services."""
 import copy
+from decimal import localcontext
+from unittest.mock import patch
 import json
 from pathlib import Path
 import subprocess
@@ -260,6 +262,87 @@ class TelemetryTests(unittest.TestCase):
         with self.assertRaises(ValueError):t.render(data,NOW,cursor)
         old_cursor={key:value for key,value in cursor.items() if key!='attempt_bindings'}
         with self.assertRaises(ValueError):t.render(data,NOW,old_cursor)
+    def run_cli(self,path,root,previous=None):
+        command=[sys.executable,'-B',str(Path(__file__).with_name('export_snapshot.py')),str(path),'--now',NOW,'--output-dir',str(root)]
+        if previous is not None:command.extend(['--previous-cursor',str(previous)])
+        return subprocess.run(command,capture_output=True,text=True,timeout=15)
+
+    def test_output_success_then_invalid_or_unreadable_snapshot_is_unavailable(self):
+        for failure in ('invalid','missing'):
+            with self.subTest(failure=failure),tempfile.TemporaryDirectory(prefix='f17-stale-') as directory:
+                root=Path(directory);source=root/'snapshot.json';source.write_text(json.dumps(snapshot()))
+                self.assertEqual(self.run_cli(source,root).returncode,0)
+                self.assertTrue(json.loads((root/'agents.json').read_text())['admission_signal'])
+                if failure=='invalid':source.write_text('{broken')
+                else:source.unlink()
+                failed=self.run_cli(source,root)
+                self.assertEqual(failed.returncode,2)
+                report=json.loads((root/'agents.json').read_text())
+                self.assertFalse(report['export_available']);self.assertFalse(report['admission_signal'])
+                self.assertFalse(t.report_is_current(report,NOW))
+                metrics=(root/'agents.prom').read_text()
+                self.assertIn('agent_export_available 0',metrics)
+                self.assertIn('agent_admission_signal 0',metrics)
+                self.assertNotIn('agent_admission_signal 1',metrics)
+                self.assertNotIn('agent_tasks{',metrics)
+
+    def test_output_success_then_unreadable_cursor_invalidates(self):
+        with tempfile.TemporaryDirectory(prefix='f17-cursor-') as directory:
+            root=Path(directory);source=root/'snapshot.json';source.write_text(json.dumps(snapshot()))
+            self.assertEqual(self.run_cli(source,root).returncode,0)
+            self.assertEqual(self.run_cli(source,root,root/'missing-cursor.json').returncode,2)
+            self.assertFalse(json.loads((root/'agents.json').read_text())['export_available'])
+
+    def test_report_consumer_checks_current_time_not_frozen_age(self):
+        data=snapshot()
+        for task in data['tasks']:
+            if task['state'] in t.CRITICAL_EVIDENCE_STATES:task['evidence_at']=data['observed_at']
+            if task['state']=='RUNNING':task['lease_until']='2026-10-25T12:05:00Z'
+        report=t.render(data,NOW)
+        self.assertTrue(t.report_is_current(report,NOW))
+        self.assertFalse(t.report_is_current(report,'2026-10-25T12:04:00Z'))
+        self.assertFalse(t.report_is_current(report,report['valid_until']))
+        metrics=t.prometheus(report)
+        self.assertIn('agent_export_timestamp_seconds ',metrics)
+        self.assertIn('agent_export_valid_until_timestamp_seconds ',metrics)
+        self.assertIn('agent_snapshot_observed_timestamp_seconds ',metrics)
+
+    def test_tiny_reservation_exceeds_cap_under_any_decimal_precision(self):
+        for precision in (2,28,80):
+            for swapped in (False,True):
+                with self.subTest(precision=precision,swapped=swapped),localcontext() as context:
+                    context.prec=precision
+                    data=snapshot();data['dispatch_inputs']['total_spend_usd']=1
+                    pair=('1.00','0.'+'0'*29+'1')
+                    if swapped:pair=pair[::-1]
+                    data['accounting']['api_spent_usd'],data['accounting']['api_reserved_usd']=pair
+                    report=t.render(data,NOW)
+                    self.assertIn('api_budget_exceeded',report['admission_hold_reasons'])
+                    self.assertFalse(report['admission_signal'])
+
+    def test_exact_equal_and_below_budget_do_not_round_up(self):
+        for precision in (2,28,80):
+            with localcontext() as context:
+                context.prec=precision
+                data=snapshot();data['dispatch_inputs']['total_spend_usd']=1
+                data['accounting']['api_spent_usd']='0.'+'9'*30
+                data['accounting']['api_reserved_usd']='0.'+'0'*29+'1'
+                self.assertNotIn('api_budget_exceeded',t.render(data,NOW)['admission_hold_reasons'])
+                data['accounting']['api_reserved_usd']='0.00'
+                self.assertNotIn('api_budget_exceeded',t.render(data,NOW)['admission_hold_reasons'])
+
+    def test_partial_output_replacement_does_not_leave_previous_positive(self):
+        import export_snapshot as exporter
+        with tempfile.TemporaryDirectory(prefix='f17-replace-') as directory:
+            root=Path(directory);write_reports(root,t.render(snapshot(),NOW))
+            original=exporter.os.replace;calls=[]
+            def failing_replace(source,target):
+                calls.append(target)
+                if len(calls)==2:raise OSError('synthetic publication failure')
+                return original(source,target)
+            with patch.object(exporter.os,'replace',side_effect=failing_replace),self.assertRaises(OSError):
+                write_reports(root,t.render(snapshot(),NOW))
+            self.assertFalse((root/'agents.json').exists());self.assertFalse((root/'agents.prom').exists())
 if __name__=='__main__':unittest.main(verbosity=2)
 
 

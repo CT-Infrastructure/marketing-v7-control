@@ -126,6 +126,29 @@ def validate(snapshot,now):
     require(len(canonical(snapshot).encode())<=MAX_BYTES)
     return current,observed,dispatch_blockers
 
+def sum_exceeds(left,right,limit):
+    """Exact rational comparison, independent of ambient Decimal precision/traps."""
+    ln,ld=left.as_integer_ratio();rn,rd=right.as_integer_ratio();cn,cd=limit.as_integer_ratio()
+    return (ln*rd+rn*ld)*cd>cn*ld*rd
+
+
+def unavailable_report(now):
+    try:
+        stamp=time(now).isoformat().replace('+00:00','Z')
+    except (ValueError,TypeError,OverflowError):
+        stamp=None
+    return {'schema_version':'1.0','status':'INVALID_SNAPSHOT','export_available':False,
+            'rendered_at':stamp,'valid_until':stamp,'admission_signal':False,'dispatch_authorized':False}
+
+
+def report_is_current(report,now):
+    """Consumers must check this at read time; admission remains advisory only."""
+    try:
+        return (type(report) is dict and report.get('export_available') is True
+                and time(report['rendered_at'])<=time(now)<time(report['valid_until']))
+    except (ValueError,TypeError,KeyError,OverflowError):
+        return False
+
 def render(snapshot,now,previous=None):
     current,observed,dispatch_blockers=validate(snapshot,now)
     digest=hashlib.sha256(canonical(snapshot).encode()).hexdigest()
@@ -192,11 +215,18 @@ def render(snapshot,now,previous=None):
     if any(row['capacity']==0 and row['allocated'] not in (0,None) for row in snapshot['resources'].values()):reasons.append('resource_overallocated')
     cap=snapshot['dispatch_inputs']['total_spend_usd']
     if spent is None or reserved is None or not f08.number(cap):reasons.append('api_accounting_unset')
-    elif spent+reserved>Decimal(str(cap)):reasons.append('api_budget_exceeded')
+    elif sum_exceeds(spent,reserved,Decimal(str(cap))):reasons.append('api_budget_exceeded')
     sub=[accounting[k] for k in ('subscription_task_limit','subscription_tasks_used','subscription_tasks_reserved')]
     if any(value is None for value in sub):reasons.append('subscription_quota_unset')
     elif sub[1]+sub[2]>=sub[0] or sub[1]+sub[2]+accounting['requested_subscription_tasks']>sub[0]:reasons.append('subscription_budget_exhausted')
-    report={'schema_version':'1.0','observed_at':snapshot['observed_at'],'rendered_at':now,'cursor':cursor,
+    deadlines=[current+timedelta(seconds=FRESHNESS_SECONDS),observed+timedelta(seconds=FRESHNESS_SECONDS)]
+    for task in snapshot['tasks']:
+        if task['state'] in CRITICAL_EVIDENCE_STATES and task['evidence_at'] is not None:
+            deadlines.append(time(task['evidence_at'])+timedelta(seconds=FRESHNESS_SECONDS))
+        if task['state']=='RUNNING':deadlines.append(time(task['lease_until']))
+    valid_until=min(deadlines).isoformat().replace('+00:00','Z')
+    report={'schema_version':'1.0','status':'AVAILABLE','export_available':True,'valid_until':valid_until,
+            'observed_at':snapshot['observed_at'],'rendered_at':now,'cursor':cursor,
             'counts':counts,'snapshot_age_seconds':(current-observed).total_seconds(),'active_leases':active_leases,'expired_running_leases':expired_running,
             'queue_oldest_age_seconds':max(queue_ages,default=0),'merge_wait_oldest_seconds':max(merge_ages,default=0),
             'evidence_oldest_age_seconds':max(evidence_ages) if evidence_ages else None,'missing_evidence_count':missing_evidence,
@@ -209,11 +239,17 @@ def render(snapshot,now,previous=None):
 
 def prometheus(report):
     # No task refs, agent refs, model names, paths or arbitrary input strings become labels.
+    if report.get('export_available') is False:
+        return '# F17 unavailable export; no dispatch authority\nagent_export_available 0\nagent_admission_signal 0\nagent_dispatch_authorized 0\n'
     lines=['# F17 bounded snapshot gauges; no dispatch authority']
     def gauge(name,value,labels=''):
         if value is None:return
         require(type(value) in (int,float,Decimal) and math.isfinite(value) and 0<=value<=10**12)
         lines.append(name+labels+' '+format(value,'f') if isinstance(value,Decimal) else name+labels+' '+str(value))
+    gauge('agent_export_available',1)
+    gauge('agent_export_timestamp_seconds',time(report['rendered_at']).timestamp())
+    gauge('agent_export_valid_until_timestamp_seconds',time(report['valid_until']).timestamp())
+    gauge('agent_snapshot_observed_timestamp_seconds',time(report['observed_at']).timestamp())
     for state in STATES:gauge('agent_tasks',report['counts'][state],'{state="'+state+'"}')
     for key in ('snapshot_age_seconds','active_leases','expired_running_leases','queue_oldest_age_seconds','merge_wait_oldest_seconds','missing_evidence_count'):
         gauge('agent_'+key,report[key])

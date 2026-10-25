@@ -7,19 +7,36 @@ import tempfile
 import telemetry
 
 
+def invalidate_reports(directory):
+    path=Path(directory)
+    if not path.is_dir() or path.is_symlink():
+        raise ValueError('existing nonsymlink output directory required')
+    errors=[]
+    for name in ('agents.json','agents.prom'):
+        try:(path/name).unlink(missing_ok=True)
+        except OSError as error:errors.append(error)
+    if errors:raise OSError('could not invalidate unavailable export')
+
+
 def write_reports(directory,report):
     path=Path(directory)
     if not path.is_dir() or path.is_symlink():
         raise ValueError('existing nonsymlink output directory required')
     contents={'agents.json':telemetry.canonical(report)+'\n','agents.prom':telemetry.prometheus(report)}
-    for name,body in contents.items():
-        temp=None
-        try:
+    staged=[]
+    try:
+        for name,body in contents.items():
             with tempfile.NamedTemporaryFile(mode='w',encoding='utf-8',dir=path,prefix='.f17-',delete=False) as stream:
-                temp=Path(stream.name);stream.write(body)
-            os.replace(temp,path/name)
-        finally:
-            if temp is not None and temp.exists():temp.unlink()
+                temp=Path(stream.name);staged.append((temp,path/name))
+                stream.write(body);stream.flush();os.fsync(stream.fileno())
+        for temp,target in staged:os.replace(temp,target)
+    except (OSError,ValueError):
+        # Never leave a prior positive or mixed-generation report after a failed write.
+        invalidate_reports(path)
+        raise
+    finally:
+        for temp,_ in staged:
+            if temp.exists():temp.unlink()
 
 
 def main():
@@ -38,9 +55,16 @@ def main():
         print(telemetry.prometheus(report) if args.prometheus else telemetry.canonical(report))
         return 0
     except (ValueError,TypeError,KeyError,OSError,OverflowError):
-        # Never echo input values, file paths, exception text or raw provider records.
-        print(json.dumps({'status':'INVALID_SNAPSHOT','admission_signal':False,'dispatch_authorized':False}))
+        # No input values, paths, exception text or provider records in diagnostics.
+        report=telemetry.unavailable_report(args.now)
+        if args.output_dir:
+            try:write_reports(args.output_dir,report)
+            except (ValueError,TypeError,KeyError,OSError,OverflowError):
+                try:invalidate_reports(args.output_dir)
+                except (ValueError,OSError):pass
+        print(telemetry.prometheus(report) if args.prometheus else telemetry.canonical(report))
         return 2
+
 
 if __name__=='__main__':
     raise SystemExit(main())
