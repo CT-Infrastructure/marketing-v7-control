@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "receipt_id": "synthetic-receipt-1",
+  "action_identity": {
+    "client_id": "synthetic-client",
+    "source_system": "WordPress",
+    "source_event_id": "synthetic-event-0001",
+    "action_scope": "publish",
+    "approved_revision": "revision-1"
+  },
+  "action_key": "sha256:275e4b76af8e7b725800806b12a12535175a726a7c39d4fad63012706b0a7e2f",
+  "event_id": "synthetic-event-0001",
+  "correlation_id": "synthetic-correlation",
+  "approval_ref": "synthetic-approval",
+  "destination": "synthetic-wordpress-site",
+  "attempt": 1,
+  "recorded_at": "2026-10-25T12:01:00Z",
+  "status": "UNKNOWN",
+  "provider_object_ref": null,
+  "evidence_ref": "synthetic-evidence",
+  "reconciliation_ref": null,
+  "outbound_state": "HOLD",
+  "reservation_retained": true,
+  "reconciliation_outcome": null
+}

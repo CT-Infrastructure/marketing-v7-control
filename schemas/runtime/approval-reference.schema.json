@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:marketing-v7:runtime:approval-reference:1.0",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "approval_id": {
+      "$ref": "urn:marketing-v7:runtime:common:1.0#/$defs/id"
+    },
+    "source_system": {
+      "const": "OpenProject"
+    },
+    "source_object_ref": {
+      "$ref": "urn:marketing-v7:runtime:common:1.0#/$defs/id"
+    },
+    "client_id": {
+      "$ref": "urn:marketing-v7:runtime:common:1.0#/$defs/id"
+    },
+    "approved_revision": {
+      "$ref": "urn:marketing-v7:runtime:common:1.0#/$defs/id"
+    },
+    "asset_sha256s": {
+      "type": "array",
+      "items": {
+        "$ref": "urn:marketing-v7:runtime:common:1.0#/$defs/sha256"
+      },
+      "uniqueItems": true
+    },
+    "destination": {
+      "$ref": "urn:marketing-v7:runtime:common:1.0#/$defs/id"
+    },
+    "action_scope": {
+      "$ref": "urn:marketing-v7:runtime:common:1.0#/$defs/id"
+    },
+    "approved_by_ref": {
+      "$ref": "urn:marketing-v7:runtime:common:1.0#/$defs/id"
+    },
+    "approved_at": {
+      "$ref": "urn:marketing-v7:runtime:common:1.0#/$defs/datetime"
+    },
+    "expires_at": {
+      "$ref": "urn:marketing-v7:runtime:common:1.0#/$defs/datetime"
+    },
+    "status": {
+      "enum": [
+        "APPROVED",
+        "REVOKED",
+        "REJECTED"
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "approval_id",
+    "source_system",
+    "source_object_ref",
+    "client_id",
+    "approved_revision",
+    "asset_sha256s",
+    "destination",
+    "action_scope",
+    "approved_by_ref",
+    "approved_at",
+    "expires_at",
+    "status"
+  ],
+  "additionalProperties": false
+}

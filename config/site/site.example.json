@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "purpose": "nonsecret-planning-example",
+  "engineering": {
+    "github_org": "CT-Infrastructure",
+    "repository_visibility": "public",
+    "repository_license": "MIT",
+    "model": "GPT-6.1-Sol",
+    "reasoning_effort": "low",
+    "model_access": "ChatGPT subscription",
+    "code_review": "Copilot review"
+  },
+  "production": {
+    "domains": null,
+    "cidrs": null,
+    "hardware": null,
+    "accounts": null,
+    "supported_versions": null,
+    "native_workers": null,
+    "timezone": null,
+    "client_owners": null,
+    "rpo_seconds": null,
+    "rto_seconds": null,
+    "provider_approvals": null,
+    "secret_references": null,
+    "backup_restore": null,
+    "data_residency": null,
+    "channel_permissions": null,
+    "budget_limits": null
+  },
+  "safety": {
+    "production_authorized": false,
+    "deployment_hold": true,
+    "outbound_state": "HOLD",
+    "dns_change_hold": true,
+    "publication_hold": true,
+    "spend_hold": true,
+    "provider_effects_hold": true,
+    "approval_ref": null
+  }
+}
