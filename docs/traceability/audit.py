@@ -171,6 +171,22 @@ def reconcile(data, mapping):
         ready = {k for k, dependencies in pending.items() if not dependencies}
         require(bool(ready), 'build prerequisite cycle')
         pending = {k: d - ready for k, d in pending.items() if k not in ready}
+    # All nodes/edges and cycles are validated above. A VERIFY or other
+    # intermediary must not hide implementation work from ordinary test authors.
+    for task in tasks.values():
+        if task['kind'] != 'test-authoring':
+            continue
+        ancestry = list(task['depends_on'])
+        visited = set()
+        while ancestry:
+            dependency = ancestry.pop()
+            if dependency in visited:
+                continue
+            visited.add(dependency)
+            prerequisite = tasks[dependency]
+            require(prerequisite['kind'] != 'implementation',
+                    'test writing waits on implementation through ancestry: ' + task['key'])
+            ancestry.extend(prerequisite['depends_on'])
     edges = data['catalog']['connections']
     require(len(edges) == 1847, 'runtime edge count changed')
     for edge in edges:

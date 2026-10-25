@@ -117,6 +117,20 @@ class CoverageTests(unittest.TestCase):
             mapping['acceptance_routes'].append(conflicting)
         self.rejected(duplicate, 'duplicate source_test_id')
 
+    def test_indirect_implementation_via_verify_rejected(self):
+        def mutate(data, mapping):
+            for rows in (data['graph']['tasks'], data['issues']['issues']):
+                next(t for t in rows if t['key']=='WF-I01-TEST')['depends_on'].append('WF-I02-VERIFY')
+        self.rejected(mutate, 'test writing waits on implementation through ancestry')
+
+    def test_safe_foundation_ancestry_remains_allowed(self):
+        data = copy.deepcopy(self.source)
+        for rows in (data['graph']['tasks'], data['issues']['issues']):
+            next(t for t in rows if t['key']=='WF-I01-TEST')['depends_on'].append('F18')
+        report = audit.reconcile(data, self.mapping)
+        self.assertEqual(report['local_source_coverage'], 'COMPLETE')
+        self.assertEqual(report['runtime_execution']['NOT_RUN'], 576)
+
     def test_source_bytes_allow_only_reversible_checkout_endings(self):
         original=b'one\ntwo\n'
         self.assertEqual(audit.source_bytes(original.replace(b'\n',b'\r\n')),original)
