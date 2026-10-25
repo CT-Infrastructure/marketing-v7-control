@@ -1,0 +1,36 @@
+{
+  "counts": {
+    "IDENTICAL": 1286,
+    "CRLF_TO_LF": 4
+  },
+  "diff": [
+    {
+      "path": "backlog/acceptance_traceability.csv",
+      "kind": "CRLF_TO_LF",
+      "source_bytes": 67687,
+      "git_bytes": 67110,
+      "git_sha256": "98f4859c21eebbba6bbb68c80342e1942346d27758ae014f0496bf631f240c22"
+    },
+    {
+      "path": "backlog/component_traceability.csv",
+      "kind": "CRLF_TO_LF",
+      "source_bytes": 13631,
+      "git_bytes": 13483,
+      "git_sha256": "8ca39f9cde0e31a9c7879b062b9a21705d6ebf12588b16fae6e3d3ea8724f30b"
+    },
+    {
+      "path": "backlog/issue_index.csv",
+      "kind": "CRLF_TO_LF",
+      "source_bytes": 167204,
+      "git_bytes": 166418,
+      "git_sha256": "b143fd8d218cde41a22d6e2e82df9e3dd6e0225bf5d64c35ea85c6aab064de07"
+    },
+    {
+      "path": "reference/acceptance/Original_Acceptance_Matrix.csv",
+      "kind": "CRLF_TO_LF",
+      "source_bytes": 142752,
+      "git_bytes": 142175,
+      "git_sha256": "bb646bb34d992437a6912f30649effcacf36c23b2e668717ff4d298fe68787bb"
+    }
+  ]
+}
