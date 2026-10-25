@@ -1,0 +1,102 @@
+{
+  "task_key": "F15",
+  "agent": "native/site/templates",
+  "base_revision": "a9aa1f1ef2b532a4c2a9f1c6e4ddc9861feac18b",
+  "tested_revision": null,
+  "candidate_commit": null,
+  "candidate_tree": null,
+  "graph_sha256": "240bfc59615c0e058b08e1955325dc3e5bb7411fc7216e3be97cbc25eba4070e",
+  "policy_sha256": "0fdc1b8c1c61f65e7a59cd1324bbe5b9c4f6f25f853d023b6c73be890b3848c1",
+  "input_sha256": "3dbdceddcfe970c95318eb64b94c5861d718b91d4aab0e070015a433bba01a68",
+  "fence": 1,
+  "lease_until": 1792966677.5612118,
+  "workspace": "isolated exported F15-1/workspace; no Git metadata accessed",
+  "branch": "UNSET: exported snapshot",
+  "resources": {
+    "integration": 0,
+    "memory_mib": 1536,
+    "cpu": 1,
+    "slots": 1,
+    "gpu": 0
+  },
+  "owned_paths": [
+    "config/site/",
+    "docs/decisions/site/"
+  ],
+  "production_authorized": false,
+  "issue_body_sha256": "18f780bd2b12c19da5658e76169670fc0b521ab1b8ee357e5afed69e9c86829f",
+  "checks": [
+    {
+      "detail": "Matches packet body_sha256.",
+      "status": "PASS",
+      "id": "issue-binding",
+      "exit_code": 0,
+      "command": "Get-FileHash -Algorithm SHA256 -LiteralPath <workspace>/backlog/issues/F15.md"
+    },
+    {
+      "detail": "Checks authored files only; not Python execution or independent verification.",
+      "status": "PASS",
+      "id": "powershell-structural-smoke",
+      "exit_code": 0,
+      "command": "Non-login PowerShell: ConvertFrom-Json on both JSON files; assert sixteen null production fields, unique UNSET decision per field, owner and blocker present, approval fields null, every hold true, production false and outbound HOLD."
+    },
+    {
+      "detail": "Incorrect PowerShell collection count expression; corrected with @(...).Count in successful structural smoke. No contract relaxed.",
+      "status": "FAIL",
+      "id": "initial-property-count-check",
+      "exit_code": 1,
+      "command": "Non-login PowerShell: $site.production.psobject.Properties.Count -ne 16"
+    },
+    {
+      "detail": "Python execution prohibited in this sandbox; root must run on exact candidate.",
+      "status": "NOT_RUN",
+      "id": "python-unit-suite",
+      "exit_code": null,
+      "command": "python -B -m unittest discover -s config/site -p test_validate_site.py -v"
+    },
+    {
+      "id": "python-validator",
+      "exit_code": null,
+      "detail": "No execution claimed.",
+      "expected_exit_code": 0,
+      "command": "python -B config/site/validate_site.py config/site/site.example.json docs/decisions/site/decision-register.json",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "production-denial",
+      "exit_code": null,
+      "detail": "Expected denial, not a production approval.",
+      "expected_exit_code": 2,
+      "command": "python -B config/site/validate_site.py config/site/site.example.json docs/decisions/site/decision-register.json --require-production-ready",
+      "status": "NOT_RUN"
+    }
+  ],
+  "artifact_hashes": {
+    "config/site/site.example.json": "73cbfee640e9578064376b7919035ea94a843fc779cd798199746e1a75db317a",
+    "config/site/test_validate_site.py": "f3c4f7c77e243b3f18eeb834c09f208d769abe72c95e283fdf1f064c9021ffdb",
+    "config/site/test_verify_evidence.py": "b27409559b986e30de8dd686a5ca2c26dca5c81944d5db4471d9492de7d5e3f4",
+    "config/site/validate_site.py": "70f03a9208e20a89c32ab2b719c0d332db84640c4199a987d754cbf8ad9d7870",
+    "config/site/verify_evidence.py": "7f090f121e5aba57f6d20d34152739fa88f430810cd909e3b526a37df4cf4e5d",
+    "docs/decisions/site/README.md": "4e116a77af935e74258c69444508f97b9abe4928a6c720f1c21ad02bbeb93972",
+    "docs/decisions/site/RUNBOOK.md": "c7fab7f867a6af1296ee6f86cdc0a752a82fc7b68c96b17820a0d62af8ead3d0",
+    "docs/decisions/site/decision-register.json": "3c8d7e028e98ba382398d568e417b5d0269f2f2653e8e9f62670bbae719b8de7"
+  },
+  "manifest_excludes_itself": true,
+  "independent_executor": null,
+  "limitations": [
+    "No Git/candidate revision created or independently inspected. Base and dependency acceptance are supplied by controller, not proven here.",
+    "Python tests and CLI are authored but NOT_RUN. PowerShell smoke is author evidence only.",
+    "No production inventory, installed versions, identities or approval receipts supplied. All sixteen production inputs remain null.",
+    "No deployment, network, installation, secrets access, agent launch or host change performed.",
+    "Initial relative-path reads failed because shell started at C:/; absolute permitted file paths were then used. No denied data was read."
+  ],
+  "unblock_owner": "Trusted integration controller for exact-candidate Python execution and independent review; production roles in decision-register.json for site facts.",
+  "hash_policy": {
+    "algorithm": "SHA-256",
+    "encoding": "UTF-8 without BOM",
+    "line_endings": "LF",
+    "normalization": "Only uniform CRLF may be explicitly converted to LF; mixed endings and lone CR reject; all other bytes preserved",
+    "default_verification": "raw canonical LF bytes",
+    "windows_verification_flag": "--normalize-crlf"
+  }
+}
