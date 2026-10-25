@@ -3,11 +3,14 @@
 import argparse
 import json
 import math
+import sys
 from pathlib import Path
 
 
 def number(value, positive=False):
-    return type(value) in (int, float) and math.isfinite(value) and (value > 0 if positive else value >= 0)
+    # Bound integers before math.isfinite converts them to a float.
+    return (type(value) in (int, float) and abs(value) <= sys.float_info.max
+            and math.isfinite(value) and (value > 0 if positive else value >= 0))
 
 
 def blockers(record, measurements=None):

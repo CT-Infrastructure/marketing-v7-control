@@ -5,7 +5,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from check_dispatch_inputs import blockers, measurement_blockers
+from check_dispatch_inputs import blockers, measurement_blockers, number
 
 
 class InputChecks(unittest.TestCase):
@@ -15,11 +15,11 @@ class InputChecks(unittest.TestCase):
     def test_valid_is_only_input_validation(self):
         self.assertEqual(blockers(self.valid()), [])
 
-    def run_cli(self, measurements):
+    def run_cli(self, measurements, record=None):
         with tempfile.TemporaryDirectory() as directory:
             input_path = Path(directory) / 'dispatch.json'
             measurements_path = Path(directory) / 'measurements.json'
-            input_path.write_text(json.dumps(self.valid()))
+            input_path.write_text(json.dumps(self.valid() if record is None else record))
             measurements_path.write_text(json.dumps(measurements))
             result = subprocess.run(
                 [sys.executable, '-B', str(Path(__file__).with_name('check_dispatch_inputs.py')),
@@ -42,6 +42,32 @@ class InputChecks(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertEqual(result, {
             'live_dispatch': 'INPUTS_PRESENT_QUALIFICATION_STILL_REQUIRED', 'missing': []})
+
+    def test_numeric_range(self):
+        for value in (10 ** 400, -(10 ** 400), int(sys.float_info.max) + 1):
+            for positive in (False, True):
+                with self.subTest(value=value, positive=positive):
+                    self.assertFalse(number(value, positive=positive))
+        for value in (1, 1.5, sys.float_info.max, int(sys.float_info.max)):
+            self.assertTrue(number(value, positive=True))
+        self.assertTrue(number(0))
+        self.assertFalse(number(0, positive=True))
+
+    def test_cli_rejects_huge_integers(self):
+        measurements = json.loads(Path(__file__).with_name('measurements.json').read_text())
+        for location in ('provider_rpm', 'approved_headroom', 'measurements.windows.logical_cpu'):
+            with self.subTest(location=location):
+                record = self.valid()
+                snapshot = copy.deepcopy(measurements)
+                if location == 'provider_rpm':
+                    record['provider_rpm'] = 10 ** 400
+                elif location == 'approved_headroom':
+                    record['approved_headroom']['cpu'] = 10 ** 400
+                else:
+                    snapshot['windows']['logical_cpu'] = 10 ** 400
+                code, result = self.run_cli(snapshot, record)
+                self.assertEqual(code, 2)
+                self.assertEqual(result, {'live_dispatch': 'HOLD', 'missing': [location]})
 
     def test_wrong_container(self):
         for value in (None, [], 'x', 1):
