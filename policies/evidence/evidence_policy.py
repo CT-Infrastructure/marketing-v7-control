@@ -63,6 +63,11 @@ def verified_receipt(reference, kind, subject, expected, trusted_receipts, autho
     return receipt
 
 
+def execution_subject(plan_ref, case_id):
+    """Bind one execution to its immutable trusted plan and case ID."""
+    require(ref(plan_ref) and ref(case_id), 'Plan/case reference required')
+    return digest({'plan_ref':plan_ref,'case_id':case_id})
+
 def evaluate_evidence(claim, expected, trusted_receipts):
     """Check a trusted plan's exact scope. Does not mutate registry or grant approval."""
     exact(expected,'identity now author_ref level plan_ref required_case_ids production_scope')
@@ -83,12 +88,13 @@ def evaluate_evidence(claim, expected, trusted_receipts):
         seen.add(case['case_id'])
         require(case['status']=='PASS','FAIL/NOT_RUN/NOT_APPLICABLE cannot qualify without a separate reviewed plan')
         require(ref(case['executor_ref']),'Independent executor required')
-        verified_receipt(case['evidence_ref'],'test_execution',case['case_id'],expected,trusted_receipts,claim['author_ref'],actor=case['executor_ref'])
+        verified_receipt(case['evidence_ref'],'test_execution',execution_subject(expected['plan_ref'],case['case_id']),expected,trusted_receipts,claim['author_ref'],actor=case['executor_ref'])
     require(seen==set(ids),'Case coverage differs from trusted plan')
     requirements={**COMMON,**EXTRA[claim['level']]}
     require(type(claim['supporting']) is dict and set(claim['supporting'])==set(requirements),'Required level evidence missing')
+    supporting_receipts={} 
     for key,kind in requirements.items():
-        verified_receipt(claim['supporting'][key],kind,claim['plan_ref'],expected,trusted_receipts,claim['author_ref'])
+        supporting_receipts[key]=verified_receipt(claim['supporting'][key],kind,claim['plan_ref'],expected,trusted_receipts,claim['author_ref'])
     if claim['level']=='PRODUCTION_APPROVED':
         production=claim['production']
         exact(production,'approval_ref target_ref channel limits_sha256')
@@ -96,7 +102,9 @@ def evaluate_evidence(claim, expected, trusted_receipts):
         scope={k:v for k,v in production.items() if k!='approval_ref'}
         require(scope==expected['production_scope'],'Wrong expected production scope')
         subject=digest({'plan_ref':claim['plan_ref'],**scope})
-        verified_receipt(production['approval_ref'],'human_production_approval',subject,expected,trusted_receipts,claim['author_ref'])
+        approval=verified_receipt(production['approval_ref'],'human_production_approval',subject,expected,trusted_receipts,claim['author_ref'])
+        approved_at=instant(approval['issued_at'])
+        require(all(approved_at>=instant(supporting_receipts[key]['issued_at']) for key in ('staging','recovery')),'Production approval predates staging or recovery evidence')
     else:
         require(claim['production'] is None and expected['production_scope'] is None,'Lower level cannot assert production approval')
     return {'eligible_for_independent_decision':True,'requested_level':claim['level'],'level_awarded':None,'production_action_authorized':False}

@@ -3,7 +3,7 @@ import copy
 import json
 from pathlib import Path
 import unittest
-from evidence_policy import LEVELS,evaluate_evidence,validate_register
+from evidence_policy import LEVELS,evaluate_evidence,validate_register,execution_subject
 from synthetic_fixtures import evidence_fixture
 
 ROOT=Path(__file__).resolve().parents[2]
@@ -72,6 +72,36 @@ class EvidenceTests(unittest.TestCase):
         with self.assertRaises(ValueError):evaluate_evidence(c,e,t)
         c,e,t=evidence_fixture();c['production']={}
         with self.assertRaises(ValueError):evaluate_evidence(c,e,t)
+    def test_execution_from_another_plan_cannot_be_reused(self):
+        c,e,t=evidence_fixture()
+        c['plan_ref']=e['plan_ref']='synthetic-plan-b'
+        # Reissue all supporting records for B; retain only execution from A.
+        for reference in c['supporting'].values():
+            t[reference]['subject']='synthetic-plan-b'
+        with self.assertRaises(ValueError):evaluate_evidence(c,e,t)
+    def test_execution_explicitly_reissued_for_new_plan_is_valid(self):
+        c,e,t=evidence_fixture()
+        c['plan_ref']=e['plan_ref']='synthetic-plan-b'
+        for reference in c['supporting'].values():
+            t[reference]['subject']='synthetic-plan-b'
+        t['synthetic-case-receipt']['subject']=execution_subject('synthetic-plan-b','synthetic-case')
+        self.assertIsNone(evaluate_evidence(c,e,t)['level_awarded'])
+    def test_production_approval_must_not_predate_either_prerequisite(self):
+        for later in ('synthetic-staging','synthetic-recovery'):
+            c,e,t=evidence_fixture('PRODUCTION_APPROVED')
+            t['synthetic-staging']['issued_at']='2026-10-25T11:40:00Z'
+            t['synthetic-recovery']['issued_at']='2026-10-25T11:40:00Z'
+            t[later]['issued_at']='2026-10-25T12:00:00Z'
+            t['synthetic-human-approval']['issued_at']='2026-10-25T11:50:00Z'
+            with self.subTest(later=later),self.assertRaises(ValueError):evaluate_evidence(c,e,t)
+    def test_production_approval_at_or_after_both_receipts_is_valid(self):
+        c,e,t=evidence_fixture('PRODUCTION_APPROVED')
+        t['synthetic-staging']['issued_at']='2026-10-25T11:20:00Z'
+        t['synthetic-recovery']['issued_at']='2026-10-25T11:30:00Z'
+        for approved_at in ('2026-10-25T11:30:00Z','2026-10-25T11:50:00Z'):
+            t['synthetic-human-approval']['issued_at']=approved_at
+            result=evaluate_evidence(c,e,t)
+            self.assertIsNone(result['level_awarded']);self.assertFalse(result['production_action_authorized'])
     def test_all_original_ids_mapped_and_annotations_separate(self):
         register=json.loads((ROOT/'policies/evidence/acceptance-register.json').read_text(encoding='utf-8-sig'))
         self.assertEqual(validate_register(register,ROOT),dict(runtime_total=576,runtime_not_run=576,source_open_blockers=12,runtime_pass=0))

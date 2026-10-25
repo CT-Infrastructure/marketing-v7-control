@@ -45,3 +45,9 @@ Both suites are synthetic policy tests. Preserve exact source/environment/lock i
 ## Independent-review remediation
 
 The trusted expected context must now contain author_ref from independently established attribution. Claims must match it exactly; a missing trusted author never falls back to claimant input. All receipt independence checks use that bound identity, so changing a claimed alias cannot hide self-execution. The synthetic fixture helper supplies only an illustrative trusted author, never a real person or authenticated assertion.
+
+## Plan-scoped executions and production approval chronology
+
+A test execution receipt subject is the canonical SHA256 digest of the object containing `plan_ref` and `case_id` (via `execution_subject`). The expected plan reference must identify an immutable, trusted qualification plan. A PASS for the same case under a different plan cannot be reused, even when commit, dependency locks and environment are unchanged. Producers must issue a new independently verified execution record for the new plan; changing claim metadata does not retag old evidence.
+
+Production human approval must be issued at or after both the verified staging-boundary receipt and recovery-qualification receipt. An older but still unexpired approval is insufficient. Equal timestamps are allowed; all existing current-identity, plan/scope, independent-attribution and expiry checks remain required. Successful validation still awards no level and authorizes no production action.

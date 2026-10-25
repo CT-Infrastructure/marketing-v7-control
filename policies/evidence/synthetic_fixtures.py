@@ -1,6 +1,6 @@
 """Constructed examples only: no identities, approvals or runtime claims are real."""
 import copy
-from evidence_policy import COMMON, EXTRA, digest
+from evidence_policy import COMMON, EXTRA, digest, execution_subject
 
 IDENTITY={'commit':'a'*40,'dependency_lock_sha256':'b'*64,'environment_sha256':'c'*64}
 NOW='2026-10-25T12:00:00Z'
@@ -15,7 +15,7 @@ def receipt(kind,subject,outcome='PASS',actor='synthetic-executor'):
 def evidence_fixture(level='CODE_MERGED'):
     expected=dict(identity=copy.deepcopy(IDENTITY),now=NOW,author_ref='synthetic-author',level=level,plan_ref='synthetic-plan',required_case_ids=['synthetic-case'],production_scope=None)
     claim=dict(schema_version='1.0',level=level,identity=copy.deepcopy(IDENTITY),author_ref='synthetic-author',plan_ref='synthetic-plan',cases=[dict(case_id='synthetic-case',status='PASS',executor_ref='synthetic-executor',evidence_ref='synthetic-case-receipt')],supporting={},production=None)
-    trusted={'synthetic-case-receipt':receipt('test_execution','synthetic-case')}
+    trusted={'synthetic-case-receipt':receipt('test_execution',execution_subject(expected['plan_ref'],'synthetic-case'))}
     for key,kind in {**COMMON,**EXTRA[level]}.items():
         reference='synthetic-'+key;claim['supporting'][key]=reference;trusted[reference]=receipt(kind,'synthetic-plan')
     if level=='PRODUCTION_APPROVED':
