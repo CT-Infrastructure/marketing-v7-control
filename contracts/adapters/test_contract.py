@@ -5,7 +5,7 @@ import hmac
 import json
 import unittest
 
-from contract import ADAPTERS, CATALOG, CallbackProof, Journal, accept_callback, error_decision, validate_request
+from contract import ADAPTERS, CATALOG, ERRORS, CallbackProof, Journal, accept_callback, error_decision, validate_request
 
 
 def request(adapter="wordpress", action="post.draft", account="synthetic-account"):
@@ -116,6 +116,24 @@ class ContractTests(unittest.TestCase):
                 self.assertEqual(error_decision(code, submitted=True), "UNKNOWN")
         for invalid in ["false", 0, None]:
             with self.assertRaises(ValueError): error_decision("PERMISSION", submitted=invalid)
+
+    def test_all_error_categories_preserve_post_submission_uncertainty(self):
+        expected = {
+            "INVALID_REQUEST": "REJECTED", "AUTHENTICATION": "REJECTED",
+            "PERMISSION": "REJECTED", "POLICY_HOLD": "HELD", "CONFLICT": "HELD",
+            "NOT_FOUND": "REJECTED", "UNSUPPORTED_CAPABILITY": "HELD",
+            "RATE_LIMITED_BEFORE_SUBMIT": "HELD", "TRANSIENT_BEFORE_SUBMIT": "HELD",
+            "TIMEOUT_AFTER_SUBMIT": "UNKNOWN", "AMBIGUOUS_RESPONSE": "UNKNOWN",
+            "MALFORMED_CALLBACK": "HELD", "STALE_EVIDENCE": "HELD",
+        }
+        self.assertEqual(ERRORS, expected)
+        for code, before in expected.items():
+            with self.subTest(code=code):
+                self.assertEqual(error_decision(code, submitted=False), before)
+                self.assertEqual(error_decision(code, submitted=True), "UNKNOWN")
+        # AUTHORIZATION is not a supported category: unknown names fail closed.
+        for submitted in (False, True):
+            with self.assertRaises(ValueError): error_decision("AUTHORIZATION", submitted=submitted)
 
     def callback(self, *, changes=None, tamper=False, journal=None):
         payload = dict(adapter="postiz", account_ref="synthetic-account", provider_object_ref="native-1", event_id="callback-1", occurred_at=100)
