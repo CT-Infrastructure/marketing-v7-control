@@ -50,7 +50,8 @@ def error_decision(code, *, submitted):
     require(code in ERRORS, "unknown error category")
     # Once delivery may have occurred, a transport failure never proves absence.
     if submitted and code in {"NOT_FOUND", "RATE_LIMITED_BEFORE_SUBMIT", "TRANSIENT_BEFORE_SUBMIT",
-                              "TIMEOUT_AFTER_SUBMIT", "AMBIGUOUS_RESPONSE"}:
+                              "TIMEOUT_AFTER_SUBMIT", "AMBIGUOUS_RESPONSE",
+                              "MALFORMED_CALLBACK", "STALE_EVIDENCE"}:
         return "UNKNOWN"
     return ERRORS[code]
 

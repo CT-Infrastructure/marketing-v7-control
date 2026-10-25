@@ -110,6 +110,10 @@ class ContractTests(unittest.TestCase):
         self.assertEqual(error_decision("PERMISSION", submitted=False), "REJECTED")
         self.assertEqual(error_decision("NOT_FOUND", submitted=False), "REJECTED")
         self.assertEqual(error_decision("NOT_FOUND", submitted=True), "UNKNOWN")
+        for code in ("MALFORMED_CALLBACK", "STALE_EVIDENCE"):
+            with self.subTest(code=code):
+                self.assertEqual(error_decision(code, submitted=False), "HELD")
+                self.assertEqual(error_decision(code, submitted=True), "UNKNOWN")
         for invalid in ["false", 0, None]:
             with self.assertRaises(ValueError): error_decision("PERMISSION", submitted=invalid)
 
