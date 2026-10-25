@@ -5,6 +5,26 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'policies/evidence'))
 from evidence_policy import exact, require, ref, sha, identity, instant, digest, verified_receipt
 
 
+def require_consistent_remote_readbacks(effect, expected, trusted_receipts, author, restored):
+    """A claimant cannot hide a conflicting current trusted observation by choosing a ref."""
+    now=instant(expected['now'])
+    outcomes=set()
+    for reference, candidate in trusted_receipts.items():
+        if (type(candidate) is not dict or candidate.get('kind')!='authoritative_remote_readback'
+                or candidate.get('subject')!=effect['effect_id']
+                or candidate.get('identity')!=expected['identity']):
+            continue
+        # Malformed matching-scope evidence cannot be safely classified as stale.
+        exact(candidate,'kind identity subject actor_ref verified_by outcome artifact_sha256 issued_at expires_at')
+        issued,expires=instant(candidate['issued_at']),instant(candidate['expires_at'])
+        if issued<restored or issued>now or expires<=now:
+            continue
+        require(candidate['outcome'] in ('OCCURRED','NOT_OCCURRED'), 'Current remote observation is unresolved')
+        verified_receipt(reference,'authoritative_remote_readback',effect['effect_id'],expected,
+                         trusted_receipts,author,outcome=candidate['outcome'])
+        outcomes.add(candidate['outcome'])
+    require(outcomes=={effect['outcome']}, 'Conflicting current remote observations require reconciliation')
+
 def evaluate_recovery(record, expected, trusted_receipts):
     exact(expected,'identity now author_ref restore_id backup_generation suppression_cutoff remote_effect_ids credential_refs')
     identity(expected['identity'])
@@ -42,6 +62,7 @@ def evaluate_recovery(record, expected, trusted_receipts):
         require(effect['outcome'] in ('OCCURRED','NOT_OCCURRED'),'UNKNOWN remote outcome retains HOLD')
         receipt=verified_receipt(effect['readback_ref'],'authoritative_remote_readback',effect['effect_id'],expected,trusted_receipts,record['author_ref'],outcome=effect['outcome'])
         require(instant(receipt['issued_at'])>=restored,'Readback predates restore')
+        require_consistent_remote_readbacks(effect,expected,trusted_receipts,record['author_ref'],restored)
     require(seen==set(expected['remote_effect_ids']),'Missing remote effects or unreviewed scope')
     require(type(record['credentials']) is list,'Credential proofs required')
     seen=set()
@@ -55,3 +76,4 @@ def evaluate_recovery(record, expected, trusted_receipts):
         require(instant(receipt['issued_at'])>=restored,'Credential test predates restore')
     require(seen==set(expected['credential_refs']),'Missing required credential usability test')
     return {'release_eligible_for_human_review':True,'state':'HOLD','production_authorized':False,'automatic_retry_allowed':False}
+

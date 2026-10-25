@@ -21,3 +21,12 @@ Run `python -B -m unittest discover -s contracts/recovery -p test_*.py -v` only 
 ## Independent-review remediation
 
 Recovery expected context also requires the independently attributed author_ref and rejects mismatched or absent attribution. Restore-execution proof issuance must be at or after the claimed completed restored_at, in addition to the existing backup/restore chronology, identity, expiry and independently verified subject checks. Exact-time completion proof remains valid; earlier proof cannot establish a completed restore. All successful evaluations still return HOLD.
+
+
+## Conflicting current remote observations
+
+Selecting a readback_ref cannot hide another current authoritative readback for the same effect ID and exact commit/lock/environment identity. The validator examines all matching receipts in the caller-authenticated registry. A receipt is current for this check when issued at or after this restore, no later than the trusted current time, and not expired. Same-time or newer opposite OCCURRED/NOT_OCCURRED observations fail closed regardless of which reference the claimant selected; this implementation also conservatively holds older contradictory observations that are still current. Current UNKNOWN outcomes hold as unresolved.
+
+A trusted controller must reconcile contradictions and supply a consistent current observation set before another eligibility check; the claimant cannot drop inconvenient receipts. Expired, pre-restore, future-dated, other-effect, other-identity and nonauthoritative cache records do not qualify as current matching readbacks. Malformed matching-scope metadata holds because it cannot safely establish whether that observation is current. Consistent duplicate observations are allowed, but every successful result still returns HOLD, no automatic retry and no production authorization.
+
+Five added synthetic regressions cover same-time and newer opposing observations under either selected reference, stale/nonmatching scope controls, consistent duplicate readbacks and current UNKNOWN. Existing evidence-level and recovery tests remain intact. This remains offline contract logic; the trusted registry's authentication, completeness and actual provider reconciliation require separate execution evidence.

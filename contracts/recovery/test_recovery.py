@@ -86,4 +86,54 @@ class RecoveryTests(unittest.TestCase):
         r,e,t=recovery_fixture();t['synthetic-restore-proof']['verified_by']=r['author_ref']
         with self.assertRaises(ValueError):evaluate_recovery(r,e,t)
 
+    def test_same_time_opposite_readback_cannot_be_selected_away(self):
+        for selected in ('synthetic-readback','synthetic-opposite'):
+            r,e,t=recovery_fixture()
+            opposite=copy.deepcopy(t['synthetic-readback']);opposite['outcome']='OCCURRED'
+            t['synthetic-opposite']=opposite
+            r['remote_effects'][0].update(readback_ref=selected,outcome=t[selected]['outcome'])
+            with self.subTest(selected=selected),self.assertRaises(ValueError):evaluate_recovery(r,e,t)
+
+    def test_newer_opposite_readback_cannot_be_selected_away(self):
+        for selected in ('synthetic-readback','synthetic-opposite'):
+            r,e,t=recovery_fixture();e['now']='2026-10-25T12:10:00Z'
+            opposite=copy.deepcopy(t['synthetic-readback'])
+            opposite.update(outcome='OCCURRED',issued_at='2026-10-25T12:05:00Z')
+            t['synthetic-opposite']=opposite
+            r['remote_effects'][0].update(readback_ref=selected,outcome=t[selected]['outcome'])
+            with self.subTest(selected=selected),self.assertRaises(ValueError):evaluate_recovery(r,e,t)
+
+    def test_stale_future_and_nonmatching_readbacks_do_not_conflict(self):
+        for case in ('expired','pre-restore','future','other-effect','other-commit','other-locks','other-environment','cache'):
+            r,e,t=recovery_fixture();e['now']='2026-10-25T12:10:00Z'
+            other=copy.deepcopy(t['synthetic-readback']);other['outcome']='OCCURRED'
+            if case=='expired':other['expires_at']=e['now']
+            if case=='pre-restore':other['issued_at']='2026-10-25T10:59:59Z'
+            if case=='future':other['issued_at']='2026-10-25T12:10:01Z'
+            if case=='other-effect':other['subject']='synthetic-other-effect'
+            if case=='other-commit':other['identity']['commit']='1'*40
+            if case=='other-locks':other['identity']['dependency_lock_sha256']='2'*64
+            if case=='other-environment':other['identity']['environment_sha256']='3'*64
+            if case=='cache':other['kind']='cache_observation'
+            t['synthetic-other']=other
+            with self.subTest(case=case):
+                result=evaluate_recovery(r,e,t)
+                self.assertTrue(result['release_eligible_for_human_review'])
+                self.assertEqual(result['state'],'HOLD')
+                self.assertFalse(result['production_authorized'])
+
+    def test_consistent_current_readbacks_keep_hold_semantics(self):
+        r,e,t=recovery_fixture()
+        t['synthetic-second-readback']=copy.deepcopy(t['synthetic-readback'])
+        result=evaluate_recovery(r,e,t)
+        self.assertEqual(result['state'],'HOLD')
+        self.assertFalse(result['automatic_retry_allowed'])
+        self.assertFalse(result['production_authorized'])
+
+    def test_current_unknown_readback_cannot_be_ignored(self):
+        r,e,t=recovery_fixture()
+        unknown=copy.deepcopy(t['synthetic-readback']);unknown['outcome']='UNKNOWN'
+        t['synthetic-unknown']=unknown
+        with self.assertRaises(ValueError):evaluate_recovery(r,e,t)
 if __name__=='__main__':unittest.main(verbosity=2)
+
