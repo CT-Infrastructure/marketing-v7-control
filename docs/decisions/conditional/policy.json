@@ -1,0 +1,42 @@
+{
+  "schema_version": "1.0",
+  "default_decision": "DEFERRED",
+  "production_authorized": false,
+  "project_license_scope": "MIT covers original project work only. It does not relicense third-party applications, dependencies, plugins, model weights, datasets, fonts or media.",
+  "unknown_rights_action": "BLOCK_ADOPTION",
+  "authority": "Named human selection approval permits scoped engineering only. Independent reviewer and trusted integration controller own acceptance. OpenProject retains business/budget/publication approval.",
+  "adoption": [
+    "Record a measured unmet need and compare the named baseline without disabling it. Assign a named owner and review date.",
+    "Identify exact upstream repository, immutable version/digest, edition and feature boundaries; collect authoritative license texts and terms with hashes/date. Source labels are unverified claims.",
+    "Inventory all transitive dependencies, DB/cache supported versions, native workers, image layers, plugins, model weights, training/dataset rights where relevant, fonts/codecs/media, provider/account terms. Mark N/A only with reviewed rationale. Unknown blocks selection.",
+    "Review redistribution, modification, notices, source-offer/copyleft/network-use obligations, commercial restrictions and output rights with authorized legal/security reviewers; do not infer rights from project MIT.",
+    "Document least privilege, data flows, retention, health, upgrades, backup/restore, resource and spend ceilings, synthetic acceptance tests and rollback. Do not turn CLI/library/plugin/provider/capacity into an invented service.",
+    "Obtain named human decision bound to evidence/version/edition, scope, owner, budget, expiry and rollback. Record independent review. No agent self-approval.",
+    "Request separately scoped controller-owned graph/task changes and accepted prerequisites; this register never enables tasks. Qualify in disposable offline/mock scope first.",
+    "Obtain independent exact-candidate test/review and trusted merge receipt; production remains disabled pending separate verified human gates."
+  ],
+  "rollback": [
+    "Default feature flag off; keep baseline route and data authority usable. Rehearse fallback with optional dependency absent and unavailable.",
+    "Hold new submissions; reconcile native/provider IDs and UNKNOWN outcomes before retry or switching routes. Retain receipts and reservations.",
+    "Export portable data and verify isolated restore; undo scoped configuration and routes using reviewed migration reversal. Never assume an external effect is undone by snapshot restore.",
+    "Revoke only candidate-scoped access through an authorized operator; preserve audit and notices under retention policy. Record rollback evidence and return decision to DEFERRED through reviewed change."
+  ],
+  "special_cases": [
+    "Activepieces remains cross-application orchestrator; Postiz-internal Temporal is baseline and is distinct from CP100 general-purpose use.",
+    "LiveKit is an architectural alternative to Asterisk/Pipecat, not an automatic add-on; FreeSWITCH does not silently replace Asterisk.",
+    "SIPp is test-only; python-email-validator, CookieConsent and Google Ads client are libraries; WooCommerce and Site Reviews are WordPress plugins.",
+    "mailcow or Mailu requires choosing one only; compound bundles require separate rights/dependency review for every member.",
+    "Model/checkpoint/node rights require exact artifact-level review distinct from runtime code licenses; OSS-core labels grant no paid-edition entitlement.",
+    "External provider, dedicated IP and capacity are not installable software licenses. No DNS, relay, ad, spend or publication effects are authorized.",
+    "SOPS/age and Keycloak alternatives confer no decryption authority. Native/firmware/OS management is not containerized by default."
+  ],
+  "evidence_requirements": [
+    "Exact version/source/digest and license/edition rights review",
+    "Full dependency and supported DB/cache/native-worker matrix",
+    "Named human owner, rationale, evidence, review date and approval expiry",
+    "Threat model and least privilege",
+    "Measured baseline gap and resource/cost ceiling",
+    "Offline/mock tests, failure fallback and isolated rollback evidence",
+    "Independent review and trusted controller receipts"
+  ]
+}
