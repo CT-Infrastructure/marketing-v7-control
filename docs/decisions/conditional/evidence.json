@@ -180,5 +180,10 @@
     "status": "controller_credentials_removed",
     "scope": "All controller lease fields removed recursively from current and nested historical evidence.",
     "history_note": "Existing historical source or artifact hashes can identify prior private material; they are retained for audit only and do not authorize disclosure of unredacted content."
+  },
+  "current_controller_verification": {
+    "ref": "controller-verification.json",
+    "tested_revision": "bb1abed74563fe42af6f07578c4a6e4644bf5c50",
+    "scope": "20 implementation tests in normal and optimized Linux Python plus6 independent tests; exact tested source hashes in receipt; no runtime qualification"
   }
 }
