@@ -48,6 +48,24 @@ def exact(value, fields, label):
     require(type(value) is dict and set(value) == set(fields.split()), 'Malformed ' + label)
 
 
+AUTHORITY = 'independent reviewer + trusted integration controller'
+CODE_KINDS = {'foundation', 'component', 'implementation', 'test-authoring', 'preservation', 'provider'}
+RUNTIME_KINDS = {'verification', 'integration'}
+
+
+def acceptance_requirement(task):
+    require(task.get('completion_authority') == AUTHORITY, 'Missing or unsupported completion authority')
+    kind = task.get('kind')
+    require(kind in CODE_KINDS | RUNTIME_KINDS | {'selection', 'human-gate'}, 'Missing or unsupported task kind')
+    if kind in {'selection', 'human-gate'} or task.get('manual'):
+        return None
+    declared = task.get('evidence_level')
+    if kind in CODE_KINDS:
+        require(declared in (None, 'CODE_MERGED', 'CODE_MERGED_ONLY'), 'Code task cannot substitute runtime-only evidence')
+        return ('CODE_MERGED', 'verified-github-merge')
+    require(declared in (None, 'SANDBOX_QUALIFIED', 'SANDBOX_QUALIFIED_ONLY'), 'Runtime task requires independent executor evidence')
+    return ('SANDBOX_QUALIFIED', 'verified-independent-executor')
+
 def result_digest(result):
     """Bind sanitized result content plus attempt identity; never include bearer token."""
     return canonical_hash({k: v for k, v in result.items() if k != 'lease_token'})
@@ -99,6 +117,7 @@ class LocalController(_REFERENCE.Scheduler):
         require(all(string(k) and number(v) for k, v in policy['capacities'].items()), 'Invalid capacities')
         for task in tasks:
             require(type(task) is dict and string(task.get('key')), 'Invalid task')
+            acceptance_requirement(task)
             require(type(task.get('resources')) is dict, 'Missing resource reservation')
             require(set(task['resources']) <= set(policy['capacities']) and all(number(v) for v in task['resources'].values()), 'Unknown or invalid task resource')
             for key in ('write_paths', 'locks', 'depends_on'):
@@ -112,9 +131,19 @@ class LocalController(_REFERENCE.Scheduler):
         with self._connection() as db:
             db.execute('''CREATE TABLE IF NOT EXISTS f11_attempts (
                 task_key TEXT NOT NULL, fence INTEGER NOT NULL, input_sha256 TEXT NOT NULL,
-                base_revision TEXT NOT NULL, process_ref TEXT,
+                base_revision TEXT NOT NULL, launch_ref TEXT NOT NULL, process_ref TEXT,
                 candidate_revision TEXT, manifest_sha256 TEXT, result_sha256 TEXT,
                 reconciliation TEXT, PRIMARY KEY (task_key, fence))''')
+            columns = {r['name'] for r in db.execute('PRAGMA table_info(f11_attempts)')}
+            require('launch_ref' in columns, 'Old wrapper schema requires reviewed migration, not implicit adoption')
+            # The reference claim UPDATE and this INSERT share one SQLite transaction.
+            db.execute('''CREATE TRIGGER IF NOT EXISTS f11_atomic_claim
+                AFTER UPDATE OF state, fence ON tasks
+                WHEN NEW.state='RUNNING' AND (OLD.state!='RUNNING' OR OLD.fence!=NEW.fence)
+                BEGIN
+                  INSERT INTO f11_attempts(task_key,fence,input_sha256,base_revision,launch_ref)
+                  VALUES(NEW.key,NEW.fence,NEW.input_sha256,NEW.base_revision,'launch:' || NEW.input_sha256);
+                END''')
             mode = 'offline-fixture' if fixture_only else 'trusted-live-admission'
             db.execute('BEGIN IMMEDIATE')
             prior = db.execute("SELECT value FROM metadata WHERE key='f11_mode'").fetchone()
@@ -163,6 +192,9 @@ class LocalController(_REFERENCE.Scheduler):
         # Reference claim uses BEGIN IMMEDIATE for resources, paths and explicit locks.
         return super().claim(agent, base_revision, requested_key)
 
+    def _runnable(self, rows, agent=None):
+        return [key for key in super()._runnable(rows, agent) if acceptance_requirement(self.tasks[key]) is not None]
+
     def status(self):
         self._config()
         return super().status()
@@ -179,21 +211,25 @@ class LocalController(_REFERENCE.Scheduler):
             row = self._current(db, key, token, fence)
             require(row['input_sha256'] == input_sha256 and row['base_revision'] == base_revision, 'Wrong launch input')
             old = db.execute('SELECT * FROM f11_attempts WHERE task_key=? AND fence=?', (key, fence)).fetchone()
-            if old:
-                require(old['process_ref'] == process_ref, 'Process binding cannot be replaced')
-            else:
-                db.execute('INSERT INTO f11_attempts(task_key,fence,input_sha256,base_revision,process_ref) VALUES (?,?,?,?,?)', (key, fence, input_sha256, base_revision, process_ref))
+            require(old is not None and old['input_sha256']==input_sha256 and old['base_revision']==base_revision, 'Missing atomic launch attempt')
+            require(old['process_ref'] is None or old['process_ref']==process_ref, 'Process binding cannot be replaced')
+            db.execute('UPDATE f11_attempts SET process_ref=? WHERE task_key=? AND fence=?', (process_ref,key,fence))
             self._event(db, key, 'PROCESS_BOUND', {'fence':fence})
 
     def _proof(self, db, row, proof):
-        exact(proof, 'task_key fence input_sha256 base_revision process_ref terminated effects_reconciled verified_by evidence_ref', 'reconciliation proof')
-        require(proof['terminated'] is True and proof['effects_reconciled'] is True, 'Positive process and outcome reconciliation required')
-        require(string(proof['verified_by']) and proof['verified_by'] != row['agent'] and string(proof['evidence_ref']), 'Independent trusted proof references required')
-        require(type(proof['fence']) is int and all(proof[k] == row[k] for k in ('task_key', 'fence', 'input_sha256', 'base_revision') if k != 'task_key') and proof['task_key'] == row['key'], 'Wrong reconciliation attempt')
         attempt = db.execute('SELECT * FROM f11_attempts WHERE task_key=? AND fence=?', (row['key'], row['fence'])).fetchone()
-        require(attempt is not None and string(proof['process_ref']) and proof['process_ref'] == attempt['process_ref'], 'Wrong or unbound process')
+        require(attempt is not None, 'Missing durable launch attempt; reviewed migration required')
+        common = 'task_key fence input_sha256 base_revision effects_reconciled verified_by evidence_ref'
+        if attempt['process_ref'] is None:
+            exact(proof, common + ' launch_ref no_launch_confirmed', 'positive no-launch reconciliation')
+            require(proof['no_launch_confirmed'] is True and proof['launch_ref']==attempt['launch_ref'], 'Positive independent no-launch proof required')
+        else:
+            exact(proof, common + ' process_ref terminated', 'process reconciliation')
+            require(proof['terminated'] is True and proof['process_ref']==attempt['process_ref'], 'Positive bound-process termination proof required')
+        require(proof['effects_reconciled'] is True, 'Positive external outcome reconciliation required')
+        require(string(proof['verified_by']) and proof['verified_by'] != row['agent'] and string(proof['evidence_ref']), 'Independent trusted proof references required')
+        require(type(proof['fence']) is int and all(proof[k] == row[k] for k in ('fence', 'input_sha256', 'base_revision')) and proof['task_key'] == row['key'], 'Wrong reconciliation attempt')
         return attempt
-
     def finish(self, result, *, reconciliation, candidate_revision, manifest_sha256, trusted_cost=None):
         # Validation belongs inside the savepoint so rejected late/malformed results still persist expiry.
         with self._transaction() as db:
@@ -202,7 +238,8 @@ class LocalController(_REFERENCE.Scheduler):
             row = self._current(db, result['task_key'], result['lease_token'], result['fence'])
             require(result['input_sha256'] == row['input_sha256'] and result['base_revision'] == row['base_revision'], 'Wrong immutable result input')
             require(revision(candidate_revision) and sha(manifest_sha256), 'Trusted candidate revision/manifest binding required')
-            self._proof(db, row, reconciliation)
+            attempt=self._proof(db, row, reconciliation)
+            require(attempt['process_ref'] is not None, 'A result requires a bound process; no-launch proof is recovery-only')
             require(trusted_cost is None or number(trusted_cost), 'Invalid trusted cost')
             self._settle(db, row, trusted_cost)
             sanitized = {k:v for k,v in result.items() if k != 'lease_token'}
@@ -227,7 +264,7 @@ class LocalController(_REFERENCE.Scheduler):
 
     def accept(self, key, receipt):
         with self._transaction() as db:
-            exact(receipt,'task_key fence input_sha256 base_revision revision manifest_sha256 result_sha256 graph_sha256 policy_sha256 verified_by independent_review checks_verified evidence_level source verification_ref','acceptance receipt')
+            exact(receipt,'task_key fence input_sha256 base_revision revision candidate_revision manifest_sha256 result_sha256 graph_sha256 policy_sha256 verified_by independent_review checks_verified evidence_level source verification_ref','acceptance receipt')
             row=db.execute('SELECT * FROM tasks WHERE key=?',(key,)).fetchone()
             require(row is not None and row['state']=='REVIEW' and not self.tasks[key].get('manual'),'Only candidate review may be accepted by this adapter')
             attempt=db.execute('SELECT * FROM f11_attempts WHERE task_key=? AND fence=?',(key,row['fence'])).fetchone()
@@ -235,10 +272,10 @@ class LocalController(_REFERENCE.Scheduler):
             require(receipt['task_key']==key and type(receipt['fence']) is int and receipt['fence']==row['fence'],'Wrong acceptance attempt')
             require(receipt['input_sha256']==row['input_sha256'] and receipt['base_revision']==row['base_revision'],'Wrong acceptance input')
             require(receipt['graph_sha256']==self.graph_hash and receipt['policy_sha256']==self.policy_hash,'Wrong acceptance configuration')
-            require(receipt['revision']==attempt['candidate_revision'] and receipt['manifest_sha256']==attempt['manifest_sha256'] and receipt['result_sha256']==attempt['result_sha256'],'Wrong candidate/evidence identity')
+            require(revision(receipt['revision']) and receipt['candidate_revision']==attempt['candidate_revision'] and receipt['manifest_sha256']==attempt['manifest_sha256'] and receipt['result_sha256']==attempt['result_sha256'],'Wrong candidate/evidence identity')
             require(receipt['independent_review'] is True and receipt['checks_verified'] is True,'Positive independent checks required')
             require(string(receipt['verified_by']) and receipt['verified_by']!=row['agent'] and string(receipt['verification_ref']),'Independent verifier required')
-            require((receipt['evidence_level'],receipt['source']) in {('CODE_MERGED','verified-merge-receipt'),('SANDBOX_QUALIFIED','verified-independent-executor')},'Unsupported qualification authority')
+            require((receipt['evidence_level'],receipt['source'])==acceptance_requirement(self.tasks[key]),'Evidence level/source does not satisfy task kind and authority')
             require(all(db.execute('SELECT state FROM tasks WHERE key=?',(dep,)).fetchone()[0]=='ACCEPTED' for dep in self.tasks[key].get('depends_on',[])),'Unaccepted prerequisite')
             db.execute('UPDATE tasks SET state=?,receipt=?,updated=? WHERE key=?',('ACCEPTED',json.dumps(receipt,sort_keys=True),self.clock(),key))
             self._event(db,key,'ACCEPTED',{'revision':receipt['revision'],'fence':row['fence'],'level':receipt['evidence_level']})

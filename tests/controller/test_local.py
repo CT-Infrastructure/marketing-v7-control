@@ -10,14 +10,14 @@ import unittest
 
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'orchestration/controller'))
-from local import LocalController, canonical_hash, result_digest
+from local import LocalController, canonical_hash, result_digest, AUTHORITY
 
 BASE='a'*40
 HEAD='b'*40
 MANIFEST='c'*64
 
-def task(key, scope=None, locks=None, cpu=1, deps=None):
-    return dict(key=key,resources=dict(cpu=cpu,memory_mib=64,gpu=0,slots=1,integration=0),
+def task(key, scope=None, locks=None, cpu=1, deps=None, kind='foundation', evidence_level=None):
+    return dict(key=key,kind=kind,completion_authority=AUTHORITY,evidence_level=evidence_level,resources=dict(cpu=cpu,memory_mib=64,gpu=0,slots=1,integration=0),
                 depends_on=deps or [],write_paths=[scope or 'src/'+key+'/'],locks=locks or [],
                 enabled_by_default=True,manual=False,priority='P1')
 
@@ -53,10 +53,10 @@ class ControllerTests(unittest.TestCase):
         s.finish(result(p),reconciliation=proof(p),candidate_revision=HEAD,manifest_sha256=MANIFEST,**kwargs)
     def receipt(self,s,p):
         return {**{k:p[k] for k in ('task_key','fence','input_sha256','base_revision')},
-                'revision':HEAD,'manifest_sha256':MANIFEST,'result_sha256':result_digest(result(p)),
+                'revision':HEAD,'candidate_revision':HEAD,'manifest_sha256':MANIFEST,'result_sha256':result_digest(result(p)),
                 'graph_sha256':s.graph_hash,'policy_sha256':s.policy_hash,'verified_by':'independent-reviewer',
                 'independent_review':True,'checks_verified':True,'evidence_level':'CODE_MERGED',
-                'source':'verified-merge-receipt','verification_ref':'synthetic-exact-head-check'}
+                'source':'verified-github-merge','verification_ref':'synthetic-exact-head-check'}
     def test_atomic_same_task_across_controller_instances(self):
         self.make(); barrier=threading.Barrier(8)
         def attempt(n):
@@ -148,7 +148,7 @@ class ControllerTests(unittest.TestCase):
         s.accept('A',self.receipt(s,p));self.assertIsNotNone(self.claim(s,'B'))
     def test_old_candidate_or_input_receipt_rejected(self):
         s=self.make();p=self.claim(s);self.bind(s,p);self.finish(s,p)
-        for key,value in [('revision','e'*40),('manifest_sha256','f'*64),('result_sha256','0'*64),('input_sha256','0'*64),('fence',p['fence']+1),('policy_sha256','0'*64)]:
+        for key,value in [('candidate_revision','e'*40),('manifest_sha256','f'*64),('result_sha256','0'*64),('input_sha256','0'*64),('fence',p['fence']+1),('policy_sha256','0'*64)]:
             receipt=self.receipt(s,p);receipt[key]=value
             with self.subTest(field=key),self.assertRaises(ValueError):s.accept('A',receipt)
         self.assertEqual(s.record('A')['state'],'REVIEW')
@@ -189,6 +189,80 @@ class ControllerTests(unittest.TestCase):
         self.tasks[0]['manual']=True;s=self.make();self.assertIsNone(self.claim(s))
         self.path=Path(self.tmp.name)/'deferred.sqlite3';self.tasks[0]['manual']=False;self.tasks[0]['enabled_by_default']=False
         s=self.make();self.assertIsNone(self.claim(s))
+    def no_launch_proof(self,s,p):
+        with s._connection() as db:
+            attempt=db.execute('SELECT * FROM f11_attempts WHERE task_key=? AND fence=?',(p['task_key'],p['fence'])).fetchone()
+        return {**{k:p[k] for k in ('task_key','fence','input_sha256','base_revision')},
+                'launch_ref':attempt['launch_ref'],'no_launch_confirmed':True,'effects_reconciled':True,
+                'verified_by':'trusted-supervisor','evidence_ref':'synthetic-no-launch-readback'}
+    def test_claim_crash_before_binding_has_atomic_recoverable_attempt(self):
+        s=self.make();p=self.claim(s)
+        proof_record=self.no_launch_proof(s,p)
+        self.now[0]+=11;s=self.make()
+        self.assertEqual(s.status()['counts']['ORPHANED'],1)
+        s.reconcile_orphan('A',proof_record,retry=True,trusted_cost=0)
+        p2=self.claim(s,agent='replacement')
+        self.assertGreater(p2['fence'],p['fence'])
+    def test_no_launch_requires_positive_current_independent_evidence(self):
+        s=self.make();p=self.claim(s);good=self.no_launch_proof(s,p);self.now[0]+=11
+        for field,value in [('no_launch_confirmed',False),('effects_reconciled',False),('launch_ref','wrong'),('fence',p['fence']+1),('input_sha256','0'*64),('verified_by','author')]:
+            bad=dict(good);bad[field]=value
+            with self.subTest(field=field),self.assertRaises(ValueError):s.reconcile_orphan('A',bad,retry=True)
+        missing=dict(good);del missing['no_launch_confirmed']
+        with self.assertRaises(ValueError):s.reconcile_orphan('A',missing,retry=True)
+        self.assertEqual(s.record('A')['state'],'ORPHANED');self.assertEqual(s.record('A')['reserved_cost'],1)
+    def test_bound_process_cannot_use_no_launch_proof(self):
+        s=self.make();p=self.claim(s);no_launch=self.no_launch_proof(s,p);self.bind(s,p);self.now[0]+=11
+        with self.assertRaises(ValueError):s.reconcile_orphan('A',no_launch,retry=True)
+    def test_no_launch_proof_cannot_finish_a_candidate(self):
+        s=self.make();p=self.claim(s)
+        with self.assertRaises(ValueError):s.finish(result(p),reconciliation=self.no_launch_proof(s,p),candidate_revision=HEAD,manifest_sha256=MANIFEST)
+        self.assertEqual(s.record('A')['state'],'RUNNING')
+    def test_failed_claim_rolls_back_attempt_row_and_reservations(self):
+        class RejectEvent(LocalController):
+            def _event(self,db,key,kind,detail):
+                if kind=='CLAIM':raise RuntimeError('synthetic-before-commit-crash')
+                return super()._event(db,key,kind,detail)
+        s=RejectEvent(self.path,self.tasks,self.pol,clock=lambda:self.now[0],fixture_only=True)
+        with self.assertRaises(RuntimeError):self.claim(s)
+        self.assertEqual(s.record('A')['state'],'BACKLOG')
+        with s._connection() as db:self.assertEqual(db.execute('SELECT COUNT(*) FROM f11_attempts').fetchone()[0],0)
+    def test_old_no_launch_proof_cannot_release_replacement(self):
+        s=self.make();p=self.claim(s);old=self.no_launch_proof(s,p);self.now[0]+=11
+        s.reconcile_orphan('A',old,retry=True);p2=self.claim(s,agent='replacement');self.now[0]+=11
+        with self.assertRaises(ValueError):s.reconcile_orphan('A',old,retry=True)
+        self.assertEqual(s.record('A')['fence'],p2['fence']);self.assertEqual(s.record('A')['state'],'ORPHANED')
+    def test_normal_and_squash_merge_keep_distinct_candidate_and_merge_ids(self):
+        for merge in ('e'*40,'f'*40):
+            self.path=Path(self.tmp.name)/(merge[:1]+'.sqlite3')
+            s=self.make();p=self.claim(s);self.bind(s,p);self.finish(s,p)
+            receipt=self.receipt(s,p);receipt['revision']=merge
+            s.accept('A',receipt)
+            stored=json.loads(s.record('A')['receipt'])
+            self.assertEqual(stored['candidate_revision'],HEAD);self.assertEqual(stored['revision'],merge)
+    def test_verification_sandbox_only_rejects_code_merge(self):
+        self.tasks=[task('A',kind='verification',evidence_level='SANDBOX_QUALIFIED_ONLY')]
+        s=self.make();p=self.claim(s);self.bind(s,p);self.finish(s,p)
+        with self.assertRaises(ValueError):s.accept('A',self.receipt(s,p))
+        receipt=self.receipt(s,p);receipt.update(evidence_level='SANDBOX_QUALIFIED',source='verified-independent-executor')
+        s.accept('A',receipt);self.assertEqual(s.record('A')['state'],'ACCEPTED')
+    def test_build_and_foundation_cannot_accept_sandbox_alone(self):
+        for kind in ('foundation','implementation'):
+            self.path=Path(self.tmp.name)/(kind+'.sqlite3');self.tasks=[task('A',kind=kind)]
+            s=self.make();p=self.claim(s);self.bind(s,p);self.finish(s,p)
+            receipt=self.receipt(s,p);receipt.update(evidence_level='SANDBOX_QUALIFIED',source='verified-independent-executor')
+            with self.assertRaises(ValueError):s.accept('A',receipt)
+    def test_omitted_runtime_level_defaults_to_sandbox_not_code(self):
+        self.tasks=[task('A',kind='integration')];s=self.make();p=self.claim(s);self.bind(s,p);self.finish(s,p)
+        with self.assertRaises(ValueError):s.accept('A',self.receipt(s,p))
+    def test_missing_kind_authority_and_contradictory_levels_rejected(self):
+        for field in ('kind','completion_authority'):
+            self.tasks=[task('A')];del self.tasks[0][field]
+            with self.assertRaises(ValueError):self.make()
+        self.tasks=[task('A',kind='verification',evidence_level='CODE_MERGED')]
+        with self.assertRaises(ValueError):self.make()
+        self.tasks=[task('A',kind='foundation',evidence_level='SANDBOX_QUALIFIED_ONLY')]
+        with self.assertRaises(ValueError):self.make()
     def test_stop_prevents_dispatch_and_preserves_active(self):
         s=self.make();p=self.claim(s);s.stop('synthetic-stop');self.assertIsNone(self.claim(s));self.assertEqual(s.record('A')['state'],'RUNNING')
 
