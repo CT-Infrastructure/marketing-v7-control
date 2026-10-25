@@ -8,18 +8,29 @@
   "policy_sha256": "0fdc1b8c1c61f65e7a59cd1324bbe5b9c4f6f25f853d023b6c73be890b3848c1",
   "fence": 1,
   "evidence_date": "2026-10-25",
-  "timestamp_limit": "Rule and environment timestamps are original API object timestamps, not snapshot capture times. No fresher live verification performed.",
+  "timestamp_limit": "Historical main/CI/bootstrap/ruleset fields retain original bounds. Later scoped readbacks below have separate source timestamps; the access payload supplies no capture timestamp. No worker live API verification or global refresh performed.",
   "authority": {
     "organization": "CT-Infrastructure",
-    "account_type": "Organization per trusted task; standalone authenticated owner membership and plan payload not supplied",
+    "account_type": "Organization; authenticated governance-access-live.json readback reports enterprise plan and active admin membership for CompleteDotTech. Capture timestamp absent.",
     "human_codeowner": "CompleteDotTech",
     "codeowners_sha256": "8d2e4bde6ea56a90e9761a0bc4824800c01ed726cacd534a5735fb9d4fb7b791",
     "original_design": "private monorepo",
     "authorized_destination": "eight PUBLIC MIT repositories, explicitly chosen by user; not a workaround for private protection availability",
-    "private_repository_plan_support": "not established by supplied public repository evidence",
+    "private_repository_plan_support": "Enterprise plan observed, with admin access to the eight public repositories; private-repository protection enforcement was not separately exercised.",
     "production_authorized": false,
     "production_credentials": "absent per trusted task; no credential inventory supplied",
-    "copilot": "Requested for subsequent PR reviews by user; no review receipt or enablement readback supplied. Does not replace required human or G gate approval."
+    "copilot": "Original snapshot contained no review receipt or enablement readback. User later selected Copilot review and waived human code review for engineering; this does not approve G gates or production. Each candidate still needs applicable review/check and integration receipts.",
+    "engineering_review_policy": {
+      "source": "Root-provided user authorization in F02-review3 documentation extension",
+      "captured_at": null,
+      "human_code_review_waived_for": "engineering",
+      "selected_review": "Copilot review",
+      "scope_exclusions": [
+        "G01-G12 gate approval",
+        "production authorization"
+      ],
+      "effect": "Does not itself prove review completion or authorize candidate acceptance."
+    }
   },
   "repositories": [
     {
@@ -1348,9 +1359,50 @@
     ],
     "saved_views": {
       "names_filters_layout": "exist per trusted task; exact payload not supplied",
-      "grouping": "unverified"
+      "grouping": "unverified",
+      "grouping_scope": "Historical snapshot grouping was unverified; current scoped grouping API evidence is in grouping_readback.",
+      "grouping_readback": {
+        "source": "project-grouping-results.json",
+        "source_sha256": "08b317d8bc51c811fa5074a7a47d42488896e6116098a8a554d15bd68656050f",
+        "verified_at": "2026-10-25T22:11:22.421592+00:00",
+        "status": "API_VERIFIED",
+        "browser_render_verified": false,
+        "scope": "Group-by fields and preserved original view identities only; not project import completeness or browser rendering.",
+        "views": [
+          {
+            "name": "By workstream",
+            "number": 9,
+            "id": "PVTV_lADOFL4oqs4BotOwzgMPVEA",
+            "layout": "BOARD_LAYOUT",
+            "group_by_fields": [
+              "Workstream"
+            ],
+            "preserved_original": {
+              "number": 6,
+              "id": "PVTV_lADOFL4oqs4BotOwzgMPTXg",
+              "name": "By workstream (original ungrouped)"
+            },
+            "browser_render_verified": false
+          },
+          {
+            "name": "Roadmap",
+            "number": 10,
+            "id": "PVTV_lADOFL4oqs4BotOwzgMPVEU",
+            "layout": "ROADMAP_LAYOUT",
+            "group_by_fields": [
+              "Phase"
+            ],
+            "preserved_original": {
+              "number": 8,
+              "id": "PVTV_lADOFL4oqs4BotOwzgMPTX8",
+              "name": "Roadmap (original ungrouped)"
+            },
+            "browser_render_verified": false
+          }
+        ]
+      }
     },
-    "metadata": "Partial import in progress; full 785 issue hierarchy, fields, labels, milestones, parent and dependency links and acceptance not established",
+    "metadata": "Partial import remains separate unfinished program work; six original mappings retained. Full 785-issue import, hierarchy, fields, labels, milestones and dependencies are not claimed complete and are not a prerequisite for this F02 governance capability candidate.",
     "write_budget_per_hour": 300,
     "verified_issue_mappings": [
       {
@@ -1488,6 +1540,24 @@
       "source": "task.json",
       "sha256": "166df1cffd7fd9426873646df3d7acb31e2cfada60f3c4f1f74f7a4f7a83f34f",
       "timestamp_basis": "No capture timestamp in supplied file; filesystem timestamp is not asserted as API observation time."
+    },
+    {
+      "source": "governance-access-live.json",
+      "sha256": "8567ac86dc5ef8a2c4730a26806669ff9666a66bf3e8a21d677fb51bb52d6f5c",
+      "timestamp_basis": "No capture timestamp in supplied payload; filesystem timestamp not substituted.",
+      "scope": "Authenticated access, plan and membership only"
+    },
+    {
+      "source": "private-vulnerability-reporting.json",
+      "sha256": "60b644703965b8b105637a5e6afe37f42dd489f34dc59d98083bc8440f0d0bd8",
+      "timestamp_basis": "2026-10-25T22:23:02.008775+00:00",
+      "scope": "Private reporting enablement/URLs only"
+    },
+    {
+      "source": "project-grouping-results.json",
+      "sha256": "08b317d8bc51c811fa5074a7a47d42488896e6116098a8a554d15bd68656050f",
+      "timestamp_basis": "2026-10-25T22:11:22.421592+00:00",
+      "scope": "Project view grouping API readback only; browser unverified"
     }
   ],
   "limitations": [
@@ -1495,12 +1565,125 @@
     "Bootstrap merge receipts prove bootstrap only, not F02 acceptance, deployment, or runtime qualification.",
     "Environment administrators can bypass reviewers; approval policy must still be followed.",
     "GitHub branch rulesets have no bypass actors in supplied readback; environment bypass is distinct.",
-    "Independent review, trusted integration and applicable human gate receipts remain required."
+    "Engineering human code-review waiver does not approve G gates, production, or self-acceptance; applicable candidate Copilot/check/integration receipts remain necessary.",
+    "New readbacks are scope-specific; original main/CI/bootstrap/ruleset timestamps are not refreshed.",
+    "Grouping is API-verified; browser rendering is unverified. The separate full 785-issue import remains unfinished."
   ],
   "environment_identity_readback": {
     "captured_at": "2026-10-25T21:56:13.901676+00:00",
     "source": "authenticated GitHub REST environments readback",
     "scope": "Only environment reviewer identity, self-review, branch restrictions and admin bypass were refreshed. Other snapshot fields retain their stated dates.",
     "evidence_sha256": "b8120b02d06a5b6d1454f1ff4623380c2bb96ea683f873a611f26278ce34afd4"
+  },
+  "governance_access_readback": {
+    "source": "governance-access-live.json",
+    "source_sha256": "8567ac86dc5ef8a2c4730a26806669ff9666a66bf3e8a21d677fb51bb52d6f5c",
+    "captured_at": null,
+    "timestamp_basis": "No capture timestamp in supplied sanitized payload; filesystem time not substituted.",
+    "scope": "Authenticated user, organization plan/type, active admin membership, and admin/public status on the eight named repositories. Earlier private-reporting flags are superseded by private_vulnerability_reporting_readback only.",
+    "authenticated_user": "CompleteDotTech",
+    "organization_type": "Organization",
+    "plan": "enterprise",
+    "membership_role": "admin",
+    "membership_state": "active",
+    "repositories": [
+      {
+        "repository": "CT-Infrastructure/marketing-v7-control",
+        "admin": true,
+        "visibility": "public"
+      },
+      {
+        "repository": "CT-Infrastructure/marketing-v7-infrastructure",
+        "admin": true,
+        "visibility": "public"
+      },
+      {
+        "repository": "CT-Infrastructure/marketing-v7-integrations",
+        "admin": true,
+        "visibility": "public"
+      },
+      {
+        "repository": "CT-Infrastructure/marketing-v7-content",
+        "admin": true,
+        "visibility": "public"
+      },
+      {
+        "repository": "CT-Infrastructure/marketing-v7-email",
+        "admin": true,
+        "visibility": "public"
+      },
+      {
+        "repository": "CT-Infrastructure/marketing-v7-voice",
+        "admin": true,
+        "visibility": "public"
+      },
+      {
+        "repository": "CT-Infrastructure/marketing-v7-marketing",
+        "admin": true,
+        "visibility": "public"
+      },
+      {
+        "repository": "CT-Infrastructure/marketing-v7-legacy",
+        "admin": true,
+        "visibility": "public"
+      }
+    ]
+  },
+  "private_vulnerability_reporting_readback": {
+    "source": "private-vulnerability-reporting.json",
+    "source_sha256": "60b644703965b8b105637a5e6afe37f42dd489f34dc59d98083bc8440f0d0bd8",
+    "verified_at": "2026-10-25T22:23:02.008775+00:00",
+    "scope": "Private vulnerability reporting enabled and report URLs read back on all eight named repositories; no advisories created. Does not refresh repository main, CI, rules, or other controls.",
+    "repositories": [
+      {
+        "repository": "CT-Infrastructure/marketing-v7-control",
+        "enabled": true,
+        "report_url": "https://github.com/CT-Infrastructure/marketing-v7-control/security/advisories/new",
+        "security_owner": "CompleteDotTech"
+      },
+      {
+        "repository": "CT-Infrastructure/marketing-v7-infrastructure",
+        "enabled": true,
+        "report_url": "https://github.com/CT-Infrastructure/marketing-v7-infrastructure/security/advisories/new",
+        "security_owner": "CompleteDotTech"
+      },
+      {
+        "repository": "CT-Infrastructure/marketing-v7-integrations",
+        "enabled": true,
+        "report_url": "https://github.com/CT-Infrastructure/marketing-v7-integrations/security/advisories/new",
+        "security_owner": "CompleteDotTech"
+      },
+      {
+        "repository": "CT-Infrastructure/marketing-v7-content",
+        "enabled": true,
+        "report_url": "https://github.com/CT-Infrastructure/marketing-v7-content/security/advisories/new",
+        "security_owner": "CompleteDotTech"
+      },
+      {
+        "repository": "CT-Infrastructure/marketing-v7-email",
+        "enabled": true,
+        "report_url": "https://github.com/CT-Infrastructure/marketing-v7-email/security/advisories/new",
+        "security_owner": "CompleteDotTech"
+      },
+      {
+        "repository": "CT-Infrastructure/marketing-v7-voice",
+        "enabled": true,
+        "report_url": "https://github.com/CT-Infrastructure/marketing-v7-voice/security/advisories/new",
+        "security_owner": "CompleteDotTech"
+      },
+      {
+        "repository": "CT-Infrastructure/marketing-v7-marketing",
+        "enabled": true,
+        "report_url": "https://github.com/CT-Infrastructure/marketing-v7-marketing/security/advisories/new",
+        "security_owner": "CompleteDotTech"
+      },
+      {
+        "repository": "CT-Infrastructure/marketing-v7-legacy",
+        "enabled": true,
+        "report_url": "https://github.com/CT-Infrastructure/marketing-v7-legacy/security/advisories/new",
+        "security_owner": "CompleteDotTech"
+      }
+    ],
+    "reports_created": 0
   }
 }

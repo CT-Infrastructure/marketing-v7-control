@@ -1,6 +1,7 @@
 """Offline consistency check; not live verification or acceptance."""
 import hashlib
 import json
+import re
 from pathlib import Path
 
 def require(condition):
@@ -27,6 +28,7 @@ require(len({r["repository"] for r in doc["repositories"]}) == 8)
 for repo in doc["repositories"]:
     require(repo["visibility"] == "public" and repo["license"] == "MIT")
     require(repo["main_protected"] is True)
+    require(isinstance(repo["main_sha"], str) and re.fullmatch(r"[a-f0-9]{40}", repo["main_sha"]) is not None)
     require(repo["main_sha"] == repo["bootstrap"]["merge_sha"])
     require(repo["bootstrap"]["review_rule_restored"] is True)
     require(repo["token_policy"]["can_approve_pull_request_reviews"] is False)
@@ -48,6 +50,7 @@ for repo in doc["repositories"]:
         check = rules["required_status_checks"]["parameters"]
         require(check["strict_required_status_checks_policy"] is True)
         require({"context": "package-validation", "integration_id": 15368} in check["required_status_checks"])
+    require(len(repo["environments"]) == 2)
     require({e["name"] for e in repo["environments"]} == {"staging", "production"})
     for env in repo["environments"]:
         require(env["can_admins_bypass"] is True)

@@ -224,5 +224,28 @@ class SnapshotTests(unittest.TestCase):
                 copy.deepcopy(d['repositories'][0]['environments'][0]['required_reviewers'][0])), optimized=optimized)
 
 
+    def test_main_sha_requires_exact_lowercase_commit(self):
+        for optimized in (False, True):
+            for value in (None, True, 0, [], {}, '', ' ', '\t\n', 'a' * 39, 'a' * 41,
+                          'A' * 40, 'g' * 40, 'a' * 40 + '\n', ' ' + 'a' * 40):
+                def mutate(d):
+                    repo = d['repositories'][0]
+                    repo['main_sha'] = value
+                    repo['bootstrap']['merge_sha'] = value
+                    for check in repo['ci']:
+                        check['head_sha'] = value
+                with self.subTest(main_sha=value, optimized=optimized):
+                    self.reject(mutate, optimized=optimized)
+
+    def test_duplicate_environment_records_rejected(self):
+        for optimized in (False, True):
+            for environment_name in ('staging', 'production'):
+                def mutate(d):
+                    repo = d['repositories'][0]
+                    duplicate = next(e for e in repo['environments'] if e['name'] == environment_name)
+                    repo['environments'].append(copy.deepcopy(duplicate))
+                with self.subTest(environment=environment_name, optimized=optimized):
+                    self.reject(mutate, optimized=optimized)
+
 if __name__ == '__main__':
     unittest.main()
