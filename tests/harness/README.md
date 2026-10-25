@@ -4,7 +4,7 @@ This is test-only scaffolding around the accepted F04 core contracts. No Python,
 
 ## Modules and boundaries
 
-`synthetic.py` loads `contracts/core/validate.py` from the supplied snapshot and reuses its canonical action key, approval checks, receipt validation and allowed transitions. It does not fork those schemas or replace Activepieces, OpenProject or PostgreSQL. `test_synthetic.py` authors 22 positive and adversarial test methods. Shared JSON under `tests/fixtures/shared/` is synthetic input, not an acceptance receipt.
+`synthetic.py` loads `contracts/core/validate.py` from the supplied snapshot and reuses its canonical action key, approval checks, receipt validation and allowed transitions. It does not fork those schemas or replace Activepieces, OpenProject or PostgreSQL. `test_synthetic.py` authors 26 positive and adversarial test methods. Shared JSON under `tests/fixtures/shared/` is synthetic input, not an acceptance receipt.
 
 `FakeProvider` uses an exact registry of `fake://` endpoints for WordPress, Postiz, Mautic, voice, payments and ads. Calls are direct Python method calls that only mutate an in-memory dictionary. There are no listeners, HTTP clients, DNS lookups, SMTP transports, carrier connections, SDK fallbacks or child services. Real schemes, unrecognized endpoints, user-info, query strings and fragments are denied before state is reserved. The fake provider's ACCEPT result only simulates provider acceptance; it is not delivery, publication, charging, dialing or spend.
 
@@ -47,3 +47,10 @@ The environment marker is intent, not attestation. The probe connects only to li
 All future PASS/FAIL evidence must identify the tested source digest and actual isolated execution. Test authoring and schema-shaped output cannot establish acceptance. Keep native provider behavior, production network isolation, real approval revocation, production retention and G gates explicitly held. No actual services or production facts are required to review this harness candidate.
 
 
+
+
+## Late callback acknowledgment
+
+A valid callback may arrive after explicit authoritative fake readback has already reconciled OCCURRED, or a new event ID may describe the same object after an earlier callback. After signature, shape, freshness, client/provider/destination/action and current readback checks, the harness records an unseen event and returns the existing OCCURRED receipt. It does not attempt a second F04 transition, create another receipt or resubmit. A duplicate event returns that same receipt without another callback row. The event-to-action binding still rejects cross-action replay.
+
+Idempotent acknowledgment never bypasses signature or identity validation. A stored NOT_OCCURRED outcome or changed established provider object rejects the callback and preserves the existing receipt. Four additional regression methods cover explicit-readback-first, new-event-after-callback, duplicate acknowledgments, bad signatures and contradictory outcome/object readback. The original22 tests remain unchanged; all26 are authored for root-only execution.

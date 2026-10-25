@@ -226,8 +226,59 @@ class HarnessTests(unittest.TestCase):
         self.assertFalse(policy['production_credentials_allowed'])
         self.assertFalse(policy['raw_payload_export_allowed'])
 
+    def test_late_callback_after_explicit_readback_is_recorded(self):
+        with self.harness(provider=s.FakeProvider('TIMEOUT_AFTER_ACCEPT')) as h:
+            pending=h.submit(self.identity,'synthetic-approval')
+            confirmed=h.reconcile(pending['action_key'])
+            history=h.db.execute('SELECT count(*) FROM history').fetchone()[0]
+            body,signature=h.provider.callback(pending['action_key'],h.clock)
+            self.assertEqual(h.consume_callback(body,signature),confirmed)
+            self.assertEqual(h.consume_callback(body,signature),confirmed)
+            self.assertEqual(h.db.execute('SELECT count(*) FROM callbacks').fetchone()[0],1)
+            self.assertEqual(h.db.execute('SELECT count(*) FROM history').fetchone()[0],history)
+            self.assertEqual(len(h.provider.calls),1)
+
+    def test_new_callback_event_for_reconciled_object_is_acknowledged(self):
+        with self.harness(provider=s.FakeProvider('TIMEOUT_AFTER_ACCEPT')) as h:
+            pending=h.submit(self.identity,'synthetic-approval')
+            first=h.consume_callback(*h.provider.callback(pending['action_key'],h.clock,'synthetic-event-1'))
+            history=h.db.execute('SELECT count(*) FROM history').fetchone()[0]
+            second=h.provider.callback(pending['action_key'],h.clock,'synthetic-event-2')
+            self.assertEqual(h.consume_callback(*second),first)
+            self.assertEqual(h.consume_callback(*second),first)
+            self.assertEqual(h.db.execute('SELECT count(*) FROM callbacks').fetchone()[0],2)
+            self.assertEqual(h.db.execute('SELECT count(*) FROM history').fetchone()[0],history)
+            self.assertEqual(len(h.provider.calls),1)
+
+    def test_reconciled_callback_still_requires_valid_signature(self):
+        with self.harness(provider=s.FakeProvider('TIMEOUT_AFTER_ACCEPT')) as h:
+            pending=h.submit(self.identity,'synthetic-approval')
+            h.consume_callback(*h.provider.callback(pending['action_key'],h.clock,'synthetic-event-1'))
+            for event in ('synthetic-event-1','synthetic-event-2'):
+                body,signature=h.provider.callback(pending['action_key'],h.clock,event)
+                with self.subTest(event=event),self.assertRaises(ValueError):
+                    h.consume_callback(body,'0'*64)
+            self.assertEqual(h.db.execute('SELECT count(*) FROM callbacks').fetchone()[0],1)
+
+    def test_reconciled_callback_rejects_conflicting_outcome_or_object(self):
+        for conflict in ('outcome','object'):
+            mode='TIMEOUT_BEFORE_ACCEPT' if conflict=='outcome' else 'TIMEOUT_AFTER_ACCEPT'
+            with self.subTest(conflict=conflict),self.harness(provider=s.FakeProvider(mode)) as h:
+                pending=h.submit(self.identity,'synthetic-approval')
+                confirmed=h.reconcile(pending['action_key'])
+                # Simulate contradictory later native readback without making a new harness submission.
+                h.provider._objects[pending['action_key']]={
+                    'provider':'WordPress','destination':'synthetic-wordpress-site',
+                    'client_id':'synthetic-client','action_key':pending['action_key'],
+                    'provider_object_ref':'synthetic-conflicting-object'}
+                body,signature=h.provider.callback(pending['action_key'],h.clock)
+                with self.assertRaises(ValueError):h.consume_callback(body,signature)
+                self.assertEqual(h.receipt(pending['action_key']),confirmed)
+                self.assertEqual(h.db.execute('SELECT count(*) FROM callbacks').fetchone()[0],0)
+                self.assertEqual(len(h.provider.calls),1)
 if __name__=='__main__':
     unittest.main(verbosity=2)
+
 
 
 

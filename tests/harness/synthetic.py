@@ -240,15 +240,26 @@ class Harness:
         obj=self.provider.readback(doc['action_key'])
         if obj is None or any(doc[k]!=obj[k] for k in ('provider','destination','client_id','action_key','provider_object_ref')):
             raise ValueError('callback identity mismatch')
+        if (receipt['provider_object_ref'] is not None and
+                receipt['provider_object_ref'] != doc['provider_object_ref']):
+            raise ValueError('callback conflicts with established provider object')
+        if receipt['status']=='RECONCILED':
+            if (receipt['reconciliation_outcome']!='OCCURRED' or
+                    receipt['provider_object_ref']!=doc['provider_object_ref']):
+                raise ValueError('callback conflicts with reconciled outcome')
+        elif receipt['status'] not in ('UNKNOWN','ACCEPTED'):
+            raise ValueError('callback cannot acknowledge this receipt state')
         seen=self.db.execute('SELECT action_key FROM callbacks WHERE provider=? AND client_id=? AND event_id=?',
                              (doc['provider'],doc['client_id'],doc['event_id'])).fetchone()
         if seen:
             if seen[0] != doc['action_key']:
                 raise ValueError('callback event replayed for another action')
             return receipt
-        result=self.reconcile(doc['action_key'])
+        # A late/new event for the same confirmed object is an acknowledgment, not another transition.
+        result=receipt if receipt['status']=='RECONCILED' else self.reconcile(doc['action_key'])
         with self.db:
             self.db.execute('INSERT INTO callbacks VALUES (?,?,?,?)',(doc['provider'],doc['client_id'],doc['event_id'],doc['action_key']))
         return result
+
 
 
