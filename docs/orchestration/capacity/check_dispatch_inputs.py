@@ -17,7 +17,7 @@ def blockers(record, measurements=None):
     if not isinstance(record, dict):
         return ["dispatch_input_must_be_object"]
     missing = []
-    for key in ("provider", "agent_image_digest", "credential_broker_ref", "g02_approval_ref"):
+    for key in ("agent_image_digest", "credential_broker_ref", "g02_approval_ref"):
         if not isinstance(record.get(key), str) or not record[key].strip():
             missing.append(key)
     for key in ("provider_rpm", "provider_tpm", "provider_concurrency", "task_timeout_seconds"):
@@ -37,7 +37,7 @@ def blockers(record, measurements=None):
     for key in ("production_actions_allowed", "api_key_auth_allowed", "extra_usage_purchase_allowed"):
         if record.get(key) is not False:
             missing.append(key + "_must_be_false")
-    for key, expected in (("billing_mode", "ChatGPT subscription"), ("implementation_model", "GPT-6.1-Sol"), ("implementation_reasoning_effort", "low"), ("review_provider", "GitHub Copilot")):
+    for key, expected in (("provider", "codex-cli"), ("billing_mode", "ChatGPT subscription"), ("implementation_model", "GPT-6.1-Sol"), ("implementation_reasoning_effort", "low"), ("review_provider", "GitHub Copilot")):
         if record.get(key) != expected:
             missing.append(key)
     if measurements is not None:

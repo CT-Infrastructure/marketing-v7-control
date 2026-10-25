@@ -15,6 +15,38 @@ class InputChecks(unittest.TestCase):
     def test_valid_is_only_input_validation(self):
         self.assertEqual(blockers(self.valid()), [])
 
+    def test_provider_requires_exact_supported_value(self):
+        for value in ('openai-api', 'claude', '', ' ', ' codex-cli', 'codex-cli ',
+                      'CODEX-CLI', 'Codex-cli', 'codex-cli\n', None, True, False,
+                      0, 1.5, [], {}, ['codex-cli']):
+            with self.subTest(value=value):
+                record = self.valid()
+                record['provider'] = value
+                self.assertEqual(blockers(record), ['provider'])
+        record = self.valid()
+        del record['provider']
+        self.assertEqual(blockers(record), ['provider'])
+
+    def test_other_fixed_identity_values_are_exact(self):
+        for key in ('billing_mode', 'implementation_model',
+                    'implementation_reasoning_effort', 'review_provider'):
+            expected = self.valid()[key]
+            for value in (expected + ' ', expected.upper(), '', None, True, 1, [], {}):
+                with self.subTest(key=key, value=value):
+                    record = self.valid()
+                    record[key] = value
+                    self.assertEqual(blockers(record), [key])
+
+    def test_cli_rejects_unsupported_provider(self):
+        measurements = json.loads(Path(__file__).with_name('measurements.json').read_text())
+        for value in ('openai-api', ' codex-cli', 'CODEX-CLI', None, True, []):
+            with self.subTest(value=value):
+                record = self.valid()
+                record['provider'] = value
+                code, result = self.run_cli(measurements, record)
+                self.assertEqual(code, 2)
+                self.assertEqual(result, {'live_dispatch': 'HOLD', 'missing': ['provider']})
+
     def run_cli(self, measurements, record=None):
         with tempfile.TemporaryDirectory() as directory:
             input_path = Path(directory) / 'dispatch.json'
