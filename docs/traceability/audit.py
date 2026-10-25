@@ -9,6 +9,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
+EXTRA_MERMAID_NAMES = ('A00.mmd', 'A01.mmd', 'A02.mmd', 'A03.mmd', 'A04.mmd', 'A05.mmd', 'D-C01.mmd', 'D-C02.mmd', 'D-C03.mmd', 'D-C04.mmd', 'D-C05.mmd', 'D-C06.mmd', 'D-C07.mmd', 'D-C08.mmd', 'D-C09.mmd', 'D-E.mmd', 'D-I.mmd', 'D-L.mmd', 'D-M01.mmd', 'D-M02.mmd', 'D-M03.mmd', 'D-M04.mmd', 'D-M05.mmd', 'D-V.mmd', 'D-X.mmd')
 PATHS = {
     'catalog': 'reference/workflow_catalog.json',
     'registry': 'reference/components/component_registry.json',
@@ -41,6 +42,24 @@ def load_sources(root=ROOT):
         text = normalized.decode('utf-8')
         data[name] = (list(csv.DictReader(io.StringIO(text))) if path.endswith('.csv')
                       else json.loads(text) if path.endswith('.json') else text)
+    # Each workflow JSON and all individual/shared Mermaid sources are frozen.
+    workflow_ids = list(indexed(data['catalog']['workflows'], 'id'))
+    if len(workflow_ids) != 190:
+        raise ValueError('individual workflow source count changed')
+    artifact_paths = {path for wid in workflow_ids for path in (
+        'reference/workflows/' + wid + '.json',
+        'reference/mermaid/' + wid + '.mmd')} | {
+        'reference/mermaid/' + name for name in (EXTRA_MERMAID_NAMES)}
+
+    if set(pins) != set(PATHS.values()) | artifact_paths:
+        raise ValueError('individual workflow source manifest coverage changed')
+    for path in sorted(artifact_paths):
+        try:
+            raw = source_bytes((root / path).read_bytes())
+        except OSError as exc:
+            raise ValueError('individual workflow source missing: ' + path) from exc
+        if hashlib.sha256(raw).hexdigest() != pins[path]['sha256_lf']:
+            raise ValueError('individual workflow source hash changed: ' + path)
     # Body custody is checked separately from the catalog's semantic coverage.
     for issue in data['issues']['issues']:
         path = Path(issue['body_path'])
@@ -109,7 +128,7 @@ def reconcile(data, mapping):
         require({'WF-' + wid + '-BUILD', 'WF-' + wid + '-TEST'} <= set(verify['depends_on']),
                 'VERIFY lacks BUILD/TEST: ' + wid)
     require(set(original) == set(trace), 'orphan original acceptance IDs')
-    routing_review = {r['source_test_id']: r for r in mapping['acceptance_routes']}
+    routing_review = indexed(mapping['acceptance_routes'], 'source_test_id')
     require(set(routing_review) == {k for k, r in original.items() if r['workflow_id'] not in workflows},
             'acceptance route review coverage')
     for wid, workflow in workflows.items():

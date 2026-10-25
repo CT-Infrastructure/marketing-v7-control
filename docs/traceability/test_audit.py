@@ -2,6 +2,8 @@
 import copy
 import json
 import unittest
+from unittest.mock import patch
+from pathlib import Path
 import audit
 
 
@@ -77,6 +79,43 @@ class CoverageTests(unittest.TestCase):
 
     def test_unknown_runtime_endpoint_rejected(self):
         self.rejected(lambda d,m: d['catalog']['connections'][0].update(to='UNKNOWN'), 'orphan runtime')
+
+    def test_individual_sources_detect_mutation_and_deletion(self):
+        original = Path.read_bytes
+        for relative in ('reference/workflows/C01.json',
+                         'reference/mermaid/C01.mmd', 'reference/mermaid/D-C01.mmd'):
+            target = audit.ROOT / relative
+            for missing in (False, True):
+                def changed(path):
+                    if path == target:
+                        if missing:
+                            raise FileNotFoundError(str(path))
+                        return original(path) + b' altered'
+                    return original(path)
+                with self.subTest(path=relative, missing=missing):
+                    with patch.object(Path, 'read_bytes', autospec=True, side_effect=changed):
+                        with self.assertRaisesRegex(ValueError, 'individual workflow source'):
+                            audit.load_sources()
+
+    def test_individual_manifest_omission_is_rejected(self):
+        original = Path.read_text
+        def omitted(path, *args, **kwargs):
+            text = original(path, *args, **kwargs)
+            if path == audit.HERE / 'source-hashes.json':
+                manifest = json.loads(text)
+                manifest['sources'].pop('reference/mermaid/D-C01.mmd')
+                return json.dumps(manifest)
+            return text
+        with patch.object(Path, 'read_text', autospec=True, side_effect=omitted):
+            with self.assertRaisesRegex(ValueError, 'manifest coverage'):
+                audit.load_sources()
+
+    def test_conflicting_duplicate_acceptance_review_rejected(self):
+        def duplicate(data, mapping):
+            conflicting = copy.deepcopy(mapping['acceptance_routes'][0])
+            conflicting['mapped_workflow'] = 'I01'
+            mapping['acceptance_routes'].append(conflicting)
+        self.rejected(duplicate, 'duplicate source_test_id')
 
     def test_source_bytes_allow_only_reversible_checkout_endings(self):
         original=b'one\ntwo\n'
