@@ -1,0 +1,29 @@
+{
+  "timestamp_utc": "2026-10-25T21:35:28Z",
+  "scope": "development_only",
+  "windows": {
+    "logical_cpu": 32,
+    "total_memory_mib": 64665,
+    "available_memory_mib": 14701,
+    "workspace_free_gib": 974.39
+  },
+  "wsl": {
+    "logical_cpu": 24,
+    "memory_total_mib": 32094,
+    "memory_available_mib": 29438,
+    "root_free_gib": 815,
+    "podman_available": false
+  },
+  "gpu": {
+    "model": "NVIDIA GeForce RTX 3060",
+    "memory_total_mib": 12288,
+    "memory_used_mib": 3652
+  },
+  "codex_cli_version": "0.164.0",
+  "native_collaboration_slot_limit": 4,
+  "not_additive": [
+    "windows_memory",
+    "wsl_memory"
+  ],
+  "live_worker_slots_authorized": 0
+}
