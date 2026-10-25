@@ -77,6 +77,42 @@ class Contracts(unittest.TestCase):
         core.validate('action-receipt',held)
         submitted=dict(held,receipt_id='next',status='SUBMITTED')
         with self.assertRaises(ValidationError):core.check_transition(held,submitted)
+    def test_pending_approval_can_bind_only_on_initial_submission(self):
+        held=self.fixture('action-receipt');held.update(status='HELD',approval_ref=None)
+        submitted=dict(held,receipt_id='submitted',status='SUBMITTED',approval_ref='new-approval')
+        core.check_transition(held,submitted)
+        # Existing bindings cannot be changed, even at initial submission.
+        bound=dict(held,approval_ref='established-approval')
+        with self.assertRaises(ValueError):core.check_transition(bound,submitted)
+        unchanged=dict(submitted,approval_ref='established-approval')
+        core.check_transition(bound,unchanged)
+        unknown=dict(submitted,receipt_id='unknown',status='UNKNOWN',approval_ref='replacement')
+        with self.assertRaises(ValueError):core.check_transition(submitted,unknown)
+        for ref in (None,''):
+            with self.subTest(ref=ref),self.assertRaises(ValidationError):
+                core.check_transition(held,dict(submitted,approval_ref=ref))
+        with self.assertRaises(ValueError):
+            core.check_transition(held,dict(submitted,status='HELD'))
+
+    def test_identifier_strict_end_rejects_line_terminators(self):
+        validator=Draft202012Validator(core.SCHEMAS['common']['$defs']['id'])
+        validator.validate('opaque:valid-id')
+        for suffix in ('\n','\r','\r\n','\u2028','\u2029',' ', '\t'):
+            with self.subTest(suffix=repr(suffix)),self.assertRaises(ValidationError):
+                validator.validate('opaque:valid-id'+suffix)
+            receipt=self.fixture('action-receipt');receipt['approval_ref']+=suffix
+            with self.assertRaises(ValidationError):core.validate('action-receipt',receipt)
+
+    def test_money_strict_end_rejects_line_terminators(self):
+        validator=Draft202012Validator(core.SCHEMAS['common']['$defs']['money'])
+        for amount in ('0','-0','12.30','-12.30'):
+            validator.validate({'amount':amount,'currency':'USD'})
+        for field in ('amount','currency'):
+            for suffix in ('\n','\r','\r\n','\u2028','\u2029',' ', '\t'):
+                money={'amount':'12.30','currency':'USD'};money[field]+=suffix
+                with self.subTest(field=field,suffix=repr(suffix)),self.assertRaises(ValidationError):
+                    validator.validate(money)
+
     def test_known_provider_identity_is_immutable(self):
         old=self.fixture('action-receipt');old.update(status='ACCEPTED',outbound_state='CONFIRMED',provider_object_ref='native-1')
         new=dict(old,receipt_id='next',status='RECONCILED',reconciliation_ref='readback',reconciliation_outcome='OCCURRED')

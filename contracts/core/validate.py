@@ -62,9 +62,14 @@ def check_transition(previous, current):
     """Check append-only receipt linkage, not external truth or database atomicity."""
     validate('action-receipt', previous)
     validate('action-receipt', current)
-    for field in ('action_key', 'action_identity', 'event_id', 'correlation_id', 'approval_ref', 'destination'):
+    for field in ('action_key', 'action_identity', 'event_id', 'correlation_id', 'destination'):
         if previous[field] != current[field]:
             raise ValueError('receipt identity changed')
+    if previous['approval_ref'] != current['approval_ref']:
+        initial_binding = (previous['status'] == 'HELD' and current['status'] == 'SUBMITTED'
+                           and previous['approval_ref'] is None and current['approval_ref'] is not None)
+        if not initial_binding:
+            raise ValueError('established approval reference changed')
     if previous['provider_object_ref'] is not None and current['provider_object_ref'] != previous['provider_object_ref']:
         raise ValueError('established provider object identity changed')
     if current['receipt_id'] == previous['receipt_id'] or instant(current['recorded_at']) < instant(previous['recorded_at']):
