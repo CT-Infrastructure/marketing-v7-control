@@ -1,4 +1,9 @@
 import copy
+import json
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
 import unittest
 from check_dispatch_inputs import blockers, measurement_blockers
 
@@ -9,6 +14,34 @@ class InputChecks(unittest.TestCase):
 
     def test_valid_is_only_input_validation(self):
         self.assertEqual(blockers(self.valid()), [])
+
+    def run_cli(self, measurements):
+        with tempfile.TemporaryDirectory() as directory:
+            input_path = Path(directory) / 'dispatch.json'
+            measurements_path = Path(directory) / 'measurements.json'
+            input_path.write_text(json.dumps(self.valid()))
+            measurements_path.write_text(json.dumps(measurements))
+            result = subprocess.run(
+                [sys.executable, '-B', str(Path(__file__).with_name('check_dispatch_inputs.py')),
+                 '--input', str(input_path), '--measurements', str(measurements_path)],
+                capture_output=True, text=True, check=False)
+        self.assertEqual(result.stderr, '')
+        return result.returncode, json.loads(result.stdout)
+
+    def test_cli_rejects_nonobject_measurements(self):
+        for value in (None, [], 'snapshot', 1, 1.5, True, False):
+            with self.subTest(value=value):
+                code, result = self.run_cli(value)
+                self.assertEqual(code, 2)
+                self.assertEqual(result, {
+                    'live_dispatch': 'HOLD', 'missing': ['measurements_must_be_object']})
+
+    def test_cli_valid_measurements_require_qualification(self):
+        measurements = json.loads(Path(__file__).with_name('measurements.json').read_text())
+        code, result = self.run_cli(measurements)
+        self.assertEqual(code, 0)
+        self.assertEqual(result, {
+            'live_dispatch': 'INPUTS_PRESENT_QUALIFICATION_STILL_REQUIRED', 'missing': []})
 
     def test_wrong_container(self):
         for value in (None, [], 'x', 1):
@@ -32,8 +65,6 @@ class InputChecks(unittest.TestCase):
         self.assertIn('adapter_qualified', blockers(record))
 
     def test_measurements(self):
-        import json
-        from pathlib import Path
         record = json.loads(Path(__file__).with_name('measurements.json').read_text())
         self.assertEqual(measurement_blockers(record), [])
         for value in (-1, float('nan'), '10', True):

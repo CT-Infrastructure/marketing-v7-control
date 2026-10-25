@@ -72,7 +72,9 @@ def main():
     parser.add_argument("--measurements", type=Path, default=Path(__file__).with_name("measurements.json"))
     args = parser.parse_args()
     try:
-        missing = blockers(json.loads(args.input.read_text()), json.loads(args.measurements.read_text()))
+        record = json.loads(args.input.read_text())
+        measurements = json.loads(args.measurements.read_text())
+        missing = blockers(record) + measurement_blockers(measurements)
     except (OSError, ValueError) as error:
         missing = ["unreadable_or_invalid_json:" + type(error).__name__]
     print(json.dumps({"live_dispatch": "HOLD" if missing else "INPUTS_PRESENT_QUALIFICATION_STILL_REQUIRED", "missing": missing}, indent=2))
