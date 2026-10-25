@@ -6,13 +6,17 @@ packaging choice. It does not change V7 native application ownership, the 785
 stable issue keys, the 4,848 build prerequisites, or the 576 original acceptance
 IDs. All runtime acceptance remains NOT_RUN.
 
-`config/repositories.json` maps each issue to exactly one private repository.
+`config/repositories.json` maps each issue to exactly one repository.
 marketing-v7-control holds the canonical source catalog, full issue briefs,
 shared contracts, DAG, tooling, integrated scenarios and human gates. The
 infrastructure, integrations, content, email, voice, marketing and legacy
 repositories own their assigned implementation paths. Reference copies in
 those repositories are frozen source inputs. The single private organization
-Project is a projection of these repositories, not scheduler authority.
+Project is a projection of these repositories, not scheduler authority. The
+user subsequently authorized all eight repositories to become public and
+selected MIT for original project code and documentation. The organization
+Project remains private. Third-party licenses remain in effect. This explicit
+user direction overrides the imported package's private-only default.
 
 `tools/seed_github_multi.py` provides plan, workspace, issues, relationships and
 project phases. A single private journal binds the layout hash and rate budget
@@ -35,7 +39,7 @@ repository membership and CODEOWNERS do not supply independent review by
 themselves. No production secrets or environment deployment credentials belong
 in these seeds.
 
-Source disclosure scope: the reviewed package source, sanitized design briefs,
+Public source disclosure scope: the reviewed package source, sanitized design briefs,
 opaque legacy row references, schemas, diagrams and engineering tooling. The
 original ZIP, raw legacy inventories, local configs, journal, host inventory,
 credentials and recovery data remain outside GitHub.

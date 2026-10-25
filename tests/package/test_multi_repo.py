@@ -4,11 +4,13 @@ import json
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
+from io import StringIO
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools"))
-from seed_github_multi import bind_journal, load_layout, plan, relationships
+from seed_github_multi import bind_journal, load_layout, main, plan, relationships
 
 
 class Journal:
@@ -64,6 +66,28 @@ class LayoutTests(unittest.TestCase):
         changed["issue_repositories"]["F01"] = "marketing-v7-email"
         with self.assertRaises(ValueError):
             bind_journal(journal, changed)
+
+    def test_public_mode_requires_explicit_disclosure_approval(self):
+        config = json.loads((ROOT / "config/github.example.json").read_text())
+        config.update(owner=self.layout["owner"], repository=self.layout["hub"], visibility="public")
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "public.json"
+            path.write_text(json.dumps(config))
+            with patch.object(sys, "argv", ["seed_github_multi", "--config", str(path), "--plan"]):
+                with self.assertRaisesRegex(ValueError, "Public disclosure"):
+                    main()
+
+    def test_approved_public_plan_performs_no_network_request(self):
+        config = json.loads((ROOT / "config/github.example.json").read_text())
+        config.update(owner=self.layout["owner"], repository=self.layout["hub"], visibility="public",
+                      public_source_reviewed=True, public_publication_approval_ref="explicit-test-approval")
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "public.json"
+            path.write_text(json.dumps(config))
+            output = StringIO()
+            with patch.object(sys, "argv", ["seed_github_multi", "--config", str(path), "--plan"]), patch("sys.stdout", output):
+                main()
+            self.assertEqual(json.loads(output.getvalue())["visibility"], "public")
 
     def test_cross_repository_relationship_targets_actual_parent(self):
         issues = [{"key": "P", "parent_key": None, "depends_on": []},

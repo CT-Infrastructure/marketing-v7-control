@@ -2,7 +2,7 @@
   "schema_version": "1",
   "owner": "CT-Infrastructure",
   "hub": "marketing-v7-control",
-  "visibility": "private",
+  "visibility": "public",
   "authority": "User direction: CT-Infrastructure with separate repositories for project portions; original build DAG and issue keys unchanged",
   "repositories": [
     {
@@ -824,5 +824,6 @@
     "G10": "marketing-v7-control",
     "G11": "marketing-v7-control",
     "G12": "marketing-v7-control"
-  }
+  },
+  "public_disclosure_authorization": "Explicit user instruction on 2026-10-25: make these open source; MIT"
 }
