@@ -13,7 +13,7 @@ def receipt(kind,subject,outcome='PASS',actor='synthetic-executor'):
 
 
 def evidence_fixture(level='CODE_MERGED'):
-    expected=dict(identity=copy.deepcopy(IDENTITY),now=NOW,level=level,plan_ref='synthetic-plan',required_case_ids=['synthetic-case'],production_scope=None)
+    expected=dict(identity=copy.deepcopy(IDENTITY),now=NOW,author_ref='synthetic-author',level=level,plan_ref='synthetic-plan',required_case_ids=['synthetic-case'],production_scope=None)
     claim=dict(schema_version='1.0',level=level,identity=copy.deepcopy(IDENTITY),author_ref='synthetic-author',plan_ref='synthetic-plan',cases=[dict(case_id='synthetic-case',status='PASS',executor_ref='synthetic-executor',evidence_ref='synthetic-case-receipt')],supporting={},production=None)
     trusted={'synthetic-case-receipt':receipt('test_execution','synthetic-case')}
     for key,kind in {**COMMON,**EXTRA[level]}.items():
@@ -26,7 +26,7 @@ def evidence_fixture(level='CODE_MERGED'):
 
 
 def recovery_fixture():
-    expected=dict(identity=copy.deepcopy(IDENTITY),now=NOW,restore_id='synthetic-restore',backup_generation='synthetic-generation',suppression_cutoff=NOW,remote_effect_ids=['synthetic-effect'],credential_refs=['synthetic-credential'])
+    expected=dict(identity=copy.deepcopy(IDENTITY),now=NOW,author_ref='synthetic-author',restore_id='synthetic-restore',backup_generation='synthetic-generation',suppression_cutoff=NOW,remote_effect_ids=['synthetic-effect'],credential_refs=['synthetic-credential'])
     record=dict(schema_version='1.0',identity=copy.deepcopy(IDENTITY),restore_id='synthetic-restore',author_ref='synthetic-author',state='HOLD',
                 backup=dict(generation_ref='synthetic-generation',manifest_sha256='f'*64,created_at='2026-10-25T10:00:00Z',restore_test_ref='synthetic-restore-proof'),
                 restored_at='2026-10-25T11:00:00Z',hold_ref='synthetic-hold-proof',

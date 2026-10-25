@@ -6,7 +6,7 @@ from evidence_policy import exact, require, ref, sha, identity, instant, digest,
 
 
 def evaluate_recovery(record, expected, trusted_receipts):
-    exact(expected,'identity now restore_id backup_generation suppression_cutoff remote_effect_ids credential_refs')
+    exact(expected,'identity now author_ref restore_id backup_generation suppression_cutoff remote_effect_ids credential_refs')
     identity(expected['identity'])
     now=instant(expected['now']);cutoff=instant(expected['suppression_cutoff'])
     require(cutoff<=now,'Suppression cutoff cannot be future')
@@ -18,13 +18,14 @@ def evaluate_recovery(record, expected, trusted_receipts):
     require(record['schema_version']=='1.0' and record['state']=='HOLD','Restore must remain HOLD')
     identity(record['identity'])
     require(record['identity']==expected['identity'] and record['restore_id']==expected['restore_id'],'Wrong restore identity')
-    require(ref(record['author_ref']),'Recovery author required')
+    require(ref(expected['author_ref']) and record['author_ref']==expected['author_ref'],'Recovery author must match trusted attribution')
     backup=record['backup'];exact(backup,'generation_ref manifest_sha256 created_at restore_test_ref')
     require(backup['generation_ref']==expected['backup_generation'] and sha(backup['manifest_sha256']),'Wrong backup generation/manifest')
     created,restored=instant(backup['created_at']),instant(record['restored_at'])
     require(created<=restored<=now,'Invalid backup/restore chronology')
     backup_subject=digest({'restore_id':record['restore_id'],'generation_ref':backup['generation_ref'],'manifest_sha256':backup['manifest_sha256'],'created_at':backup['created_at'],'restored_at':record['restored_at']})
-    verified_receipt(backup['restore_test_ref'],'restore_execution',backup_subject,expected,trusted_receipts,record['author_ref'])
+    restore_receipt=verified_receipt(backup['restore_test_ref'],'restore_execution',backup_subject,expected,trusted_receipts,record['author_ref'])
+    require(instant(restore_receipt['issued_at'])>=restored,'Restore execution proof predates completion')
     verified_receipt(record['hold_ref'],'restore_hold',record['restore_id'],expected,trusted_receipts,record['author_ref'])
     suppression=record['suppression'];exact(suppression,'after_backup through replay_ref')
     through=instant(suppression['through'])

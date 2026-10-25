@@ -17,3 +17,7 @@ The expected restore ID, generation, current suppression cutoff, complete effect
 `trusted_receipts` is already-authenticated independent evidence supplied by the caller, not a worker-owned dictionary. Its validation establishes shape/bindings/time and cannot authenticate a signer or prove a remote observation. `restore_execution`, `restore_hold`, `suppression_replay`, `authoritative_remote_readback` and `credential_access_test` are evidence categories, not new runtime services. Approved existing backup tools, native APIs and the scoped credential broker retain execution ownership.
 
 Run `python -B -m unittest discover -s contracts/recovery -p test_*.py -v` only in the authorized test environment. Record actual output and immutable source identity. Real restore, credential usability, remote reconciliation, measured RPO/RTO, carrier/provider behavior and native suppression remain NOT_RUN for this task.
+
+## Independent-review remediation
+
+Recovery expected context also requires the independently attributed author_ref and rejects mismatched or absent attribution. Restore-execution proof issuance must be at or after the claimed completed restored_at, in addition to the existing backup/restore chronology, identity, expiry and independently verified subject checks. Exact-time completion proof remains valid; earlier proof cannot establish a completed restore. All successful evaluations still return HOLD.

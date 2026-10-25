@@ -41,3 +41,7 @@ python -B -m unittest discover -s contracts/recovery -p test_*.py -v
 ```
 
 Both suites are synthetic policy tests. Preserve exact source/environment/lock identities and actual exit codes; tests are NOT_RUN until that executor records them. Independently verify all original ID mappings and compare the register against immutable source/traceability inputs. Test malformed, stale, self-authored and missing evidence before integrating the API. Changes to identity, plan or constraints require renewed evidence. This task includes no live application test, credential use, provider readback, restore, release of HOLD or production approval.
+
+## Independent-review remediation
+
+The trusted expected context must now contain author_ref from independently established attribution. Claims must match it exactly; a missing trusted author never falls back to claimant input. All receipt independence checks use that bound identity, so changing a claimed alias cannot hide self-execution. The synthetic fixture helper supplies only an illustrative trusted author, never a real person or authenticated assertion.

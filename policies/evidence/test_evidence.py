@@ -48,6 +48,19 @@ class EvidenceTests(unittest.TestCase):
         for field in ('actor_ref','verified_by'):
             c,e,t=evidence_fixture();t['synthetic-case-receipt'][field]=c['author_ref']
             with self.assertRaises(ValueError):evaluate_evidence(c,e,t)
+    def test_claim_author_alias_cannot_hide_self_execution(self):
+        c,e,t=evidence_fixture()
+        c['cases'][0]['executor_ref']=e['author_ref']
+        t['synthetic-case-receipt']['actor_ref']=e['author_ref']
+        with self.assertRaises(ValueError):evaluate_evidence(c,e,t)
+        c['author_ref']='synthetic-new-alias'
+        with self.assertRaises(ValueError):evaluate_evidence(c,e,t)
+    def test_missing_or_changed_trusted_author_never_falls_back(self):
+        for value in (None,'','synthetic-other-author'):
+            c,e,t=evidence_fixture();e['author_ref']=value
+            with self.assertRaises(ValueError):evaluate_evidence(c,e,t)
+        c,e,t=evidence_fixture();del e['author_ref']
+        with self.assertRaises(ValueError):evaluate_evidence(c,e,t)
     def test_expiry_and_future_proof_fail(self):
         for field,value in [('expires_at','2026-10-25T12:00:00Z'),('issued_at','2026-10-25T12:00:01Z')]:
             c,e,t=evidence_fixture();t['synthetic-case-receipt'][field]=value

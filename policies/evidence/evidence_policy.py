@@ -47,6 +47,7 @@ def identity(value):
 
 def verified_receipt(reference, kind, subject, expected, trusted_receipts, author, *, outcome='PASS', actor=None):
     """trusted_receipts is populated ONLY by independently authenticated controller I/O."""
+    require(ref(expected.get('author_ref')) and author==expected['author_ref'],'Author must match trusted attribution')
     require(ref(reference) and type(trusted_receipts) is dict and reference in trusted_receipts,'Verified receipt missing')
     receipt=trusted_receipts[reference]
     exact(receipt,'kind identity subject actor_ref verified_by outcome artifact_sha256 issued_at expires_at')
@@ -64,7 +65,7 @@ def verified_receipt(reference, kind, subject, expected, trusted_receipts, autho
 
 def evaluate_evidence(claim, expected, trusted_receipts):
     """Check a trusted plan's exact scope. Does not mutate registry or grant approval."""
-    exact(expected,'identity now level plan_ref required_case_ids production_scope')
+    exact(expected,'identity now author_ref level plan_ref required_case_ids production_scope')
     identity(expected['identity']); instant(expected['now'])
     require(expected['level'] in LEVELS and ref(expected['plan_ref']),'Unknown level/plan')
     ids=expected['required_case_ids']
@@ -73,7 +74,7 @@ def evaluate_evidence(claim, expected, trusted_receipts):
     require(claim['schema_version']=='1.0' and claim['level']==expected['level'],'Wrong version/level')
     identity(claim['identity'])
     require(claim['identity']==expected['identity'] and claim['plan_ref']==expected['plan_ref'],'Stale claim or plan')
-    require(ref(claim['author_ref']),'Author reference required')
+    require(ref(expected['author_ref']) and claim['author_ref']==expected['author_ref'],'Author must match trusted attribution')
     require(type(claim['cases']) is list,'Cases must be a list')
     seen=set()
     for case in claim['cases']:

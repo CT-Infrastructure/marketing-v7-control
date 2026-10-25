@@ -65,6 +65,21 @@ class RecoveryTests(unittest.TestCase):
         with self.assertRaises(ValueError):evaluate_recovery(r,e,t)
         r,e,t=recovery_fixture();r['backup']['created_at']='2026-10-25T09:00:00Z'
         with self.assertRaises(ValueError):evaluate_recovery(r,e,t)
+    def test_recovery_author_alias_and_missing_attribution_fail(self):
+        r,e,t=recovery_fixture();r['author_ref']='synthetic-new-alias'
+        with self.assertRaises(ValueError):evaluate_recovery(r,e,t)
+        r,e,t=recovery_fixture();del e['author_ref']
+        with self.assertRaises(ValueError):evaluate_recovery(r,e,t)
+        r,e,t=recovery_fixture();t['synthetic-access-proof']['actor_ref']=e['author_ref']
+        with self.assertRaises(ValueError):evaluate_recovery(r,e,t)
+    def test_restore_execution_proof_cannot_predate_completion(self):
+        r,e,t=recovery_fixture()
+        t['synthetic-restore-proof']['issued_at']='2026-10-25T10:30:00Z'
+        with self.assertRaises(ValueError):evaluate_recovery(r,e,t)
+    def test_restore_execution_proof_at_completion_is_valid(self):
+        r,e,t=recovery_fixture()
+        t['synthetic-restore-proof']['issued_at']=r['restored_at']
+        self.assertEqual(evaluate_recovery(r,e,t)['state'],'HOLD')
     def test_missing_isolation_or_self_attestation_blocks(self):
         r,e,t=recovery_fixture();del t['synthetic-hold-proof']
         with self.assertRaises(ValueError):evaluate_recovery(r,e,t)
