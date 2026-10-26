@@ -24,6 +24,7 @@ SOURCE = (
     '.github/scripts/validate-f07-harness.sh',
     'tests/harness/ci_evidence.py', 'tests/harness/test_ci_evidence.py',
     'tests/harness/requirements-ci.lock', 'tests/harness/README.md',
+    'tests/harness/native-ci.lock.json',
     'tests/harness/test_synthetic.py', 'tests/harness/test_probe_network.py',
     'tests/harness/test_export_retention.py', 'tests/harness/synthetic.py',
     'tests/harness/probe_network.py', 'tests/harness/export_retention.py',
@@ -278,8 +279,10 @@ def cleanup(root, runtime_only=False):
     root = canonical_root(root)
     parent = canonical_root(os.environ['RUNNER_TEMP'])
     require(root.parent == parent and re.fullmatch(r'f07-ci\.[A-Za-z0-9]{12}', root.name) is not None)
-    allowed = {'runtime'} if runtime_only else {'runtime', 'upload', 'deps'}
-    require(set(p.name for p in root.iterdir()) <= {'runtime', 'upload', 'deps'})
+    allowed = {'runtime'} if runtime_only else {'runtime', 'upload', 'deps', 'native'}
+    require(set(p.name for p in root.iterdir()) <= {'runtime', 'upload', 'deps', 'native'})
+    if (root/'native').exists():
+        validate_native_tree(root/'native', native_lock(), complete=False)
     # Validate the entire bounded private tree before deleting anything. No links followed.
     paths = []
     for name in allowed:
@@ -304,13 +307,218 @@ def cleanup(root, runtime_only=False):
     print('{"cleanup":"observed-owned-runtime"}' if runtime_only else '{"cleanup":"observed-owned-root"}')
 
 
+# Root reviewed signed Ubuntu metadata and exact data archive membership.
+NATIVE_LOCK_SHA256 = '246f1a7da1690b533e72e08640f7b3d18008b17835c9273813850d9093fd26f2'
+PHASE = 'entry'
+PHASES = {'entry', 'python-version', 'os-architecture', 'native-lock', 'native-download',
+          'native-size-sha256', 'native-decode', 'native-extract', 'native-binary-notice',
+          'private-bwrap-version', 'python-library', 'namespace', 'harness', 'cleanup'}
+
+
+def diagnostic(phase, status):
+    require(phase in PHASES and status in ('PASS', 'FAIL', 'START'))
+    print(json.dumps({'scope':'f07-ci-bootstrap', 'phase':phase, 'status':status},
+                     sort_keys=True, separators=(',', ':')), file=sys.stderr)
+
+
+def phase(name):
+    global PHASE
+    require(name in PHASES)
+    PHASE = name
+    diagnostic(name, 'START')
+
+
+def validate_native_lock(doc):
+    # This is a closed immutable public manifest, not a generic package manager.
+    require(type(doc) is dict and hashlib.sha256(encoded(doc)).hexdigest() == NATIVE_LOCK_SHA256,
+            'native lock differs from root-reviewed bytes')
+    return doc
+
+
+def native_lock():
+    path = ROOT/'tests/harness/native-ci.lock.json'
+    info = path.lstat()
+    require(stat.S_ISREG(info.st_mode) and info.st_nlink == 1 and info.st_size <= 16384 and not path.is_symlink())
+    raw = path.read_bytes()
+    doc = json.loads(raw, object_pairs_hook=unique)
+    require(raw == encoded(doc))
+    return validate_native_lock(doc)
+
+
+def validate_native_platform(os_id, os_version, architecture, system):
+    require((os_id, os_version, architecture, system) == ('ubuntu', '24.04', 'x86_64', 'Linux'),
+            'unsupported native runner')
+
+
+def validate_native_bytes(raw, lock):
+    validate_native_lock(lock)
+    expected = lock['package']
+    require(type(raw) is bytes and len(raw) == expected['size'] and
+            hashlib.sha256(raw).hexdigest() == expected['sha256'], 'native size or SHA256 mismatch')
+
+
+def validate_native_members(members, lock):
+    validate_native_lock(lock)
+    require(type(members) is list and len(members) == lock['max_members'])
+    require(encoded(members) == encoded(lock['members']), 'native tar member set differs')
+    for item in members:
+        require(type(item) is dict and set(item) == {'name', 'type', 'size', 'link'})
+        name = item['name']
+        require(name == '.' or (name.startswith('./') and
+                re.fullmatch(r'[A-Za-z0-9_./-]+', name[2:]) is not None and
+                all(part not in ('', '.', '..') for part in name[2:].split('/'))))
+        require(item['type'] in ('0', '5') and item['link'] == '' and type(item['size']) is int)
+    return members
+
+
+def validate_native_tree(root, lock, complete=True):
+    """Only the fresh private native subtree; no traversal or following links."""
+    root = canonical_root(root)
+    validate_native_lock(lock)
+    allowed = {'payload':('5', 0), 'package.deb':('0', lock['package']['size'])}
+    for item in lock['members']:
+        if item['name'] != '.':
+            allowed['payload/'+item['name'][2:]] = (item['type'], item['size'])
+    seen = set()
+    for base, dirs, files in os.walk(root, followlinks=False):
+        for entry in [*(Path(base)/n for n in dirs+files)]:
+            name = entry.relative_to(root).as_posix()
+            require(name in allowed, 'unexpected native cleanup member')
+            info = entry.lstat()
+            kind, size = allowed[name]
+            require(not entry.is_symlink() and info.st_nlink >= 1)
+            require((kind == '5' and stat.S_ISDIR(info.st_mode)) or
+                    (kind == '0' and stat.S_ISREG(info.st_mode) and info.st_nlink == 1 and info.st_size == size))
+            seen.add(name)
+            require(len(seen) <= 31)
+    require(not complete or seen == set(allowed))
+    if complete:
+        for name, digest in (('package.deb', lock['package']['sha256']),
+                             ('payload/'+lock['package']['binary'], lock['package']['binary_sha256']),
+                             ('payload/'+lock['package']['copyright'], lock['package']['copyright_sha256'])):
+            require(hashlib.sha256((root/name).read_bytes()).hexdigest() == digest)
+
+
+def extract_native_tar(raw, root, lock):
+    import tarfile
+    require(type(raw) is bytes and len(raw) <= lock['max_tar_bytes'])
+    root = canonical_root(root)
+    require(not list(root.iterdir()), 'native payload root not empty')
+    with tarfile.open(fileobj=io.BytesIO(raw), mode='r:') as archive:
+        infos = archive.getmembers()
+        rows = [dict(name=m.name, type=m.type.decode('ascii'), size=m.size, link=m.linkname) for m in infos]
+        validate_native_members(rows, lock)
+        # Validate ALL entries before the first write. No extractall, links or control archive.
+        require(all(not m.pax_headers and (m.type in (tarfile.REGTYPE, tarfile.DIRTYPE)) for m in infos))
+        require(sum(m.size for m in infos) <= lock['max_tar_bytes'])
+        for info in infos:
+            if info.name == '.':
+                continue
+            path = root/info.name[2:]
+            require(path.parent.resolve().is_relative_to(root))
+            if info.isdir():
+                path.mkdir(mode=0o755)
+            else:
+                stream = archive.extractfile(info)
+                require(stream is not None)
+                with stream:
+                    data = stream.read(info.size+1)
+                require(len(data) == info.size)
+                with path.open('xb') as output:
+                    require(output.write(data) == info.size)
+                path.chmod(0o755 if info.name == './usr/bin/bwrap' else 0o644)
+
+
+def python_library_path(prefix, libdir):
+    prefix, libdir = Path(prefix), Path(libdir)
+    approved = Path('/opt/hostedtoolcache/Python/3.12.3/x64')
+    require(prefix == approved and prefix.resolve() == approved)
+    require(libdir == approved/'lib' and libdir.resolve() == libdir and libdir.is_dir())
+    library = libdir/'libpython3.12.so.1.0'
+    require(library.is_file() and not library.is_symlink() and library.resolve().parent == libdir)
+    return str(libdir)
+
+
+def validate_namespace_exit(code):
+    require(type(code) is int and code == 0, 'namespace or harness unsupported/failed')
+
+
+def native_bootstrap(root):
+    import platform
+    import sysconfig
+    phase('python-version')
+    require(platform.python_version() == '3.12.3')
+    diagnostic(PHASE, 'PASS')
+    phase('os-architecture')
+    os_release = platform.freedesktop_os_release()
+    validate_native_platform(os_release.get('ID'), os_release.get('VERSION_ID'), platform.machine(), platform.system())
+    diagnostic(PHASE, 'PASS')
+    phase('native-lock')
+    lock = native_lock()
+    diagnostic(PHASE, 'PASS')
+    root = canonical_root(root)
+    parent = canonical_root(os.environ['RUNNER_TEMP'])
+    require(root.parent == parent and re.fullmatch(r'f07-ci\.[A-Za-z0-9]{12}', root.name) is not None)
+    native = root/'native'
+    native.mkdir(mode=0o700)
+    phase('native-download')
+    # Exact reviewed HTTPS URL, no headers/credentials/proxies/redirects or index.
+    request = urllib.request.Request(lock['package']['url'])
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
+    with opener.open(request, timeout=30) as response:
+        require(response.status == 200)
+        length = response.headers.get('Content-Length')
+        require(length is None or length == str(lock['package']['size']))
+        raw = response.read(lock['package']['size']+1)
+    diagnostic(PHASE, 'PASS')
+    phase('native-size-sha256')
+    validate_native_bytes(raw, lock)
+    with (native/'package.deb').open('xb') as stream:
+        require(stream.write(raw) == len(raw))
+    diagnostic(PHASE, 'PASS')
+    phase('native-decode')
+    # Read-only data decoder. NEVER dpkg -i, control extraction or maintainer scripts.
+    decoded = subprocess.run(['/usr/bin/dpkg-deb', '--fsys-tarfile', str(native/'package.deb')],
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=20, check=False)
+    require(decoded.returncode == 0 and len(decoded.stdout) <= lock['max_tar_bytes'])
+    diagnostic(PHASE, 'PASS')
+    phase('native-extract')
+    payload = native/'payload'
+    payload.mkdir(mode=0o700)
+    extract_native_tar(decoded.stdout, payload, lock)
+    diagnostic(PHASE, 'PASS')
+    phase('native-binary-notice')
+    validate_native_tree(native, lock)
+    diagnostic(PHASE, 'PASS')
+    phase('private-bwrap-version')
+    version = subprocess.run([str(payload/lock['package']['binary']), '--version'],
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=10, check=False)
+    require(version.returncode == 0 and version.stdout == b'bubblewrap 0.9.0\n')
+    diagnostic(PHASE, 'PASS')
+    phase('python-library')
+    python_library_path(sys.base_prefix, sysconfig.get_config_var('LIBDIR'))
+    diagnostic(PHASE, 'PASS')
+
 def main():
     action, *args = sys.argv[1:]
     if action == 'suite':
         require(args in (['original'], ['helper']))
         print(encoded(suite(list(ORIGINAL) if args[0] == 'original' else ['test_ci_evidence'],
                             54 if args[0] == 'original' else None)).decode(), end='')
+    elif action == 'native-bootstrap':
+        native_bootstrap(*args)
+    elif action == 'python-library':
+        import sysconfig
+        phase('python-library')
+        print(python_library_path(sys.base_prefix, sysconfig.get_config_var('LIBDIR')))
+    elif action == 'namespace-result':
+        phase('namespace')
+        validate_namespace_exit(int(args[0]))
+        diagnostic(PHASE, 'PASS')
+    elif action == 'diagnostic':
+        diagnostic(*args)
     elif action == 'run':
+        phase('harness')
         run(*args)
     elif action == 'check':
         validate_bundle(*args, expected_sources=source_hashes())
@@ -327,5 +535,5 @@ if __name__ == '__main__':
         main()
     except Exception:
         # Fixed failure marker avoids urllib exception/header/path leakage.
-        print('{"status":"FAIL","scope":"f07-ci-gate"}', file=sys.stderr)
+        diagnostic(PHASE, 'FAIL')
         sys.exit(1)

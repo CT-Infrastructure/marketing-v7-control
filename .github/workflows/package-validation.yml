@@ -22,7 +22,7 @@ jobs:
       - name: Test local tooling
         run: python3 -m unittest discover -s tests/package -v
   f07-harness-qualified-offline:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 12
     permissions:
       contents: read

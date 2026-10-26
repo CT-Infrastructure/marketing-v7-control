@@ -206,4 +206,118 @@ class MetadataTests(unittest.TestCase):
         with self.assertRaises(ValueError):c.NoRedirect().redirect_request(None,None,302,'',{},'https://example.invalid')
 
 
+
+class NativeBootstrapTests(unittest.TestCase):
+    def lock(self):
+        return json.loads((Path(c.__file__).parent/'native-ci.lock.json').read_text())
+
+    def test_closed_reviewed_native_lock(self):
+        lock=self.lock()
+        self.assertEqual(c.validate_native_lock(lock),lock)
+        self.assertEqual(lock['max_members'],30)
+        self.assertEqual(lock['package']['version'],'0.9.0-1ubuntu0.3')
+        self.assertEqual(lock['package']['size'],50436)
+        self.assertEqual(c.validate_native_members(lock['members'],lock),lock['members'])
+
+    def test_os_version_architecture_rejects_without_fallback(self):
+        c.validate_native_platform('ubuntu','24.04','x86_64','Linux')
+        for args in (('ubuntu','22.04','x86_64','Linux'),('debian','24.04','x86_64','Linux'),
+                     ('ubuntu','24.04','aarch64','Linux'),('ubuntu','24.04','x86_64','Windows'),
+                     ('ubuntu',24.04,'x86_64','Linux')):
+            with self.subTest(args=args),self.assertRaises(ValueError):c.validate_native_platform(*args)
+
+    def test_native_url_version_size_hash_pins_are_closed(self):
+        for key,value in (('url','https://example.invalid/package.deb'),('version','0.9.0'),
+                          ('sha256','a'*64),('binary_sha256','b'*64),('copyright_sha256','c'*64),
+                          ('size',50437),('size',True),('architecture','arm64'),('os_version','26.04'),
+                          ('binary','../bwrap'),('copyright','/copyright')):
+            lock=self.lock();lock['package'][key]=value
+            with self.subTest(key=key),self.assertRaises(ValueError):c.validate_native_lock(lock)
+        lock=self.lock();lock['unreviewed']='synthetic'
+        with self.assertRaises(ValueError):c.validate_native_lock(lock)
+
+    def test_native_package_size_and_digest_fail_closed(self):
+        for raw in (b'',b's'*50435,b's'*50436,b's'*50437,False):
+            with self.subTest(size=len(raw) if type(raw) is bytes else None),self.assertRaises(ValueError):
+                c.validate_native_bytes(raw,self.lock())
+
+    def test_tar_members_path_link_type_count_size_reject(self):
+        lock=self.lock()
+        for key,value in (('name','../escape'),('name','/escape'),('name','./usr/../escape'),
+                          ('name','./usr//escape'),('name','./usr\\escape'),('type','2'),
+                          ('type','1'),('type','6'),('type','3'),('link','/escape'),('size',True),('size',72161)):
+            rows=copy.deepcopy(lock['members']);rows[3][key]=value
+            with self.subTest(key=key,value=value),self.assertRaises(ValueError):c.validate_native_members(rows,lock)
+        for rows in (lock['members'][:-1],lock['members']+[lock['members'][0]],list(reversed(lock['members']))):
+            with self.assertRaises(ValueError):c.validate_native_members(rows,lock)
+
+    def synthetic_tar(self, mutate=None):
+        import io
+        import tarfile
+        stream=io.BytesIO()
+        with tarfile.open(fileobj=stream,mode='w',format=tarfile.USTAR_FORMAT) as archive:
+            for index,row in enumerate(self.lock()['members']):
+                info=tarfile.TarInfo(row['name']);info.type=row['type'].encode('ascii');info.size=row['size']
+                if mutate is not None:mutate(index,info)
+                archive.addfile(info,io.BytesIO(b's'*info.size) if info.type == tarfile.REGTYPE else None)
+        return stream.getvalue()
+
+    def test_manual_extract_regular_directories_only_and_notice_preserved(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp).resolve()
+            c.extract_native_tar(self.synthetic_tar(),root,self.lock())
+            self.assertEqual((root/'usr/bin/bwrap').stat().st_size,72160)
+            self.assertEqual((root/'usr/share/doc/bubblewrap/copyright').stat().st_size,3388)
+            self.assertTrue((root/'usr/share/doc/bubblewrap/copyright').is_file())
+            self.assertFalse((root/'postinst').exists())
+
+    def test_unsafe_tar_rejects_before_any_write(self):
+        import tarfile
+        def traversal(index,info):
+            if index == 3:info.name='../escape'
+        def symlink(index,info):
+            if index == 3:info.type=tarfile.SYMTYPE;info.linkname='/escape';info.size=0
+        def special(index,info):
+            if index == 3:info.type=tarfile.FIFOTYPE;info.size=0
+        for mutate in (traversal,symlink,special):
+            with tempfile.TemporaryDirectory() as temp:
+                root=Path(temp).resolve()
+                with self.assertRaises(ValueError):c.extract_native_tar(self.synthetic_tar(mutate),root,self.lock())
+                self.assertEqual(list(root.iterdir()),[])
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp).resolve()
+            with self.assertRaises(ValueError):c.extract_native_tar(b's'*262145,root,self.lock())
+            self.assertEqual(list(root.iterdir()),[])
+
+    def test_native_cleanup_scope_unknown_special_and_links_reject(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp).resolve();(root/'unexpected').write_text('preserve')
+            with self.assertRaises(ValueError):c.validate_native_tree(root,self.lock(),complete=False)
+            self.assertEqual((root/'unexpected').read_text(),'preserve')
+            (root/'unexpected').unlink();(root/'payload').symlink_to(root,target_is_directory=True)
+            with self.assertRaises(ValueError):c.validate_native_tree(root,self.lock(),complete=False)
+            (root/'payload').unlink();os.mkfifo(root/'package.deb')
+            with self.assertRaises(ValueError):c.validate_native_tree(root,self.lock(),complete=False)
+
+    def test_namespace_unsupported_never_qualifies(self):
+        c.validate_namespace_exit(0)
+        for value in (1,2,126,127,-9,None,False,'0'):
+            with self.subTest(value=value),self.assertRaises(ValueError):c.validate_namespace_exit(value)
+
+    def test_python_library_not_inherited_from_arbitrary_environment(self):
+        for prefix,libdir in (('/tmp/python','/tmp/python/lib'),
+                              ('/opt/hostedtoolcache/Python/3.12.3/x64','/tmp/lib'),
+                              ('/opt/hostedtoolcache/Python/3.14.0/x64','/opt/hostedtoolcache/Python/3.14.0/x64/lib')):
+            with self.subTest(prefix=prefix),self.assertRaises(ValueError):c.python_library_path(prefix,libdir)
+
+    def test_diagnostics_only_allow_closed_phase_and_status(self):
+        import io
+        stream=io.StringIO()
+        with patch.object(c.sys,'stderr',stream):
+            c.diagnostic('native-size-sha256','PASS')
+            with self.assertRaises(ValueError):c.diagnostic('synthetic-private-path','FAIL')
+            with self.assertRaises(ValueError):c.diagnostic('namespace','synthetic-token')
+        self.assertEqual(json.loads(stream.getvalue()),
+                         {'scope':'f07-ci-bootstrap','phase':'native-size-sha256','status':'PASS'})
+
 if __name__ == '__main__':unittest.main()
