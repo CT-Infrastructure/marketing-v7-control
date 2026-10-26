@@ -17,7 +17,10 @@ class ProbeTests(unittest.TestCase):
         output=io.StringIO()
         with patch.object(sys,'argv',argv),patch.dict(os.environ,env,clear=True),patch.object(probe.socket,'socket',factory),contextlib.redirect_stdout(output):
             code=probe.main()
-        return code,json.loads(output.getvalue())
+        lines=output.getvalue().splitlines()
+        self.assertEqual(len(lines),1)
+        self.assertNotIn('synthetic-',output.getvalue())
+        return code,json.loads(lines[0])
 
     def test_both_opt_in_conditions_are_required_without_socket_creation(self):
         for flag,environment in ((False,False),(False,True),(True,False)):
@@ -61,6 +64,29 @@ class ProbeTests(unittest.TestCase):
             connection.settimeout.assert_called_once_with(2)
             connection.connect.assert_called_once_with(('192.0.2.1',9))
 
+    def test_primary_error_survives_cleanup_error(self):
+        cases=(
+            ('connect',OSError(errno.ECONNREFUSED,'synthetic-primary'),errno.EPERM,2,'INCONCLUSIVE'),
+            ('connect',OSError(errno.ECONNREFUSED,'synthetic-primary'),errno.EACCES,2,'INCONCLUSIVE'),
+            ('connect',TimeoutError('synthetic-primary'),errno.EPERM,2,'INCONCLUSIVE'),
+            ('timeout_setup',OSError(errno.EINVAL,'synthetic-primary'),errno.EPERM,2,'INCONCLUSIVE'),
+            ('connect',OSError(errno.EPERM,'synthetic-primary'),errno.ECONNREFUSED,0,'DENY_OBSERVED'),
+        )
+        for phase,primary,cleanup,expected_code,status in cases:
+            with self.subTest(phase=phase,primary=primary.errno,cleanup=cleanup):
+                connection=MagicMock();connection.__enter__.return_value=connection
+                operation=connection.connect if phase=='connect' else connection.settimeout
+                operation.side_effect=primary
+                connection.__exit__.side_effect=OSError(cleanup,'synthetic-cleanup')
+                code,result=self.run_probe(MagicMock(return_value=connection))
+                self.assertEqual(code,expected_code);self.assertEqual(result['status'],status)
+                self.assertEqual(result['phase'],phase);self.assertEqual(result['errno'],primary.errno)
+                connection.__exit__.assert_called_once()
+                if phase=='timeout_setup':
+                    connection.connect.assert_not_called()
+                else:
+                    connection.connect.assert_called_once_with(('192.0.2.1',9))
+
     def test_successful_connection_is_deny_failed(self):
         connection=MagicMock();connection.__enter__.return_value=connection
         code,result=self.run_probe(MagicMock(return_value=connection))
@@ -71,6 +97,7 @@ class ProbeTests(unittest.TestCase):
         connection.__exit__.side_effect=OSError(errno.EPERM,'synthetic-close-error')
         code,result=self.run_probe(MagicMock(return_value=connection))
         self.assertEqual(code,1);self.assertEqual(result['status'],'DENY_FAILED')
+        connection.__exit__.assert_called_once()
 
 
 if __name__=='__main__':unittest.main(verbosity=2)

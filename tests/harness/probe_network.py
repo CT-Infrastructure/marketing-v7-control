@@ -20,20 +20,28 @@ def main():
     # Literal documentation address, no resolver and no data transmission.
     phase='socket_creation'
     connected=False
+    primary_error=None
     try:
         with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as connection:
-            phase='timeout_setup'
-            connection.settimeout(2)
-            phase='connect'
-            connection.connect(('192.0.2.1',9))
-            connected=True
-            phase='cleanup'
+            try:
+                phase='timeout_setup'
+                connection.settimeout(2)
+                phase='connect'
+                connection.connect(('192.0.2.1',9))
+                connected=True
+                phase='cleanup'
+            except OSError as exc:
+                # Preserve the operation result before __exit__ can replace it.
+                primary_error=(exc,phase)
+                raise
     except OSError as exc:
         # A successful connect cannot be relabelled denied by a later close error.
         if connected:
             print(json.dumps({'status':'DENY_FAILED','target':'192.0.2.1:9','phase':phase}))
             return 1
-        if exc.errno in (errno.ENETUNREACH,errno.EHOSTUNREACH,errno.EACCES,errno.EPERM):
+        if primary_error is not None:
+            exc,phase=primary_error
+        if phase!='cleanup' and exc.errno in (errno.ENETUNREACH,errno.EHOSTUNREACH,errno.EACCES,errno.EPERM):
             print(json.dumps({'status':'DENY_OBSERVED','target':'192.0.2.1:9','errno':exc.errno,'phase':phase,'scope':'one TCP TEST-NET probe only'}))
             return 0
         print(json.dumps({'status':'INCONCLUSIVE','errno':exc.errno,'phase':phase,'scope':'TEST-NET only'}))
