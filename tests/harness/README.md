@@ -1,72 +1,29 @@
 # F07 isolated synthetic harness
 
-This is test-only scaffolding around the accepted F04 core contracts. No Python, database fixture, socket probe, provider, service or test has been executed by the authoring worker. All execution and runtime qualification remain **NOT_RUN** until the trusted isolated runner supplies evidence. No production endpoint, credential, contact, account, payment or provider SDK is present.
+This is test-only scaffolding around the supplied F04 contracts. Production remains disabled. G02/F12 and F07 as a whole remain unqualified. This candidate provides local unit evidence only; independent validation, review and acceptance belong to the trusted controller.
 
-## Modules and boundaries
+`synthetic.py` reuses `contracts/core/validate.py` for action keys, approval checks, receipt validation and transitions. Fake providers are direct in-process calls selected by exact fake:// endpoint allowlists; there are no real provider SDKs, listeners or network fallbacks. The disposable SQLite fixture is not evidence for PostgreSQL durability or concurrency. Fake approval authority does not replace OpenProject. Public synthetic callback HMAC material is not a production credential. Deterministic model fixtures are untrusted data and never executable instructions.
 
-`synthetic.py` loads `contracts/core/validate.py` from the supplied snapshot and reuses its canonical action key, approval checks, receipt validation and allowed transitions. It does not fork those schemas or replace Activepieces, OpenProject or PostgreSQL. `test_synthetic.py` authors 32 positive and adversarial test methods. Shared JSON under `tests/fixtures/shared/` is synthetic input, not an acceptance receipt.
+All 40 pre-existing test methods in test_synthetic.py and test_probe_network.py are retained unchanged. Their complete execution requires the accepted jsonschema dependency, unavailable in this authoring interpreter. No dependency installation or real network probe was authorized. Mocked socket tests exercise only application semantics, not OS egress enforcement. probe_network.py requires a separately authorized trusted isolated runner; do not use it as a general connectivity probe.
 
-`FakeProvider` uses an exact registry of `fake://` endpoints for WordPress, Postiz, Mautic, voice, payments and ads. Calls are direct Python method calls that only mutate an in-memory dictionary. There are no listeners, HTTP clients, DNS lookups, SMTP transports, carrier connections, SDK fallbacks or child services. Real schemes, unrecognized endpoints, user-info, query strings and fragments are denied before state is reserved. The fake provider's ACCEPT result only simulates provider acceptance; it is not delivery, publication, charging, dialing or spend.
+## Local export retention
 
-`FakeClock` starts at an explicit synthetic UTC instant and can only advance by nonnegative integer seconds. `FakeAuthority` stores detached copies of an F04-validated synthetic approval and can simulate unavailable, revoked and expired authority. Every new submission checks its client, exact revision, destination, asset hash set and action scope using the accepted core. Replaying a previously reserved action retrieves its existing receipt without a new external operation; this retrieval does not renew its authority.
+`export_retention.Exports(root, owner, clock)` accepts an absolute, canonical, existing disposable root supplied by the controller and a controller-assigned 32-character lowercase hex ownership ID. The controller must exclusively own the root and serialize all readers/writers/mutations while an operation runs. This path-based helper is not hardened against a concurrent malicious filesystem writer. Do not use it on shared or production directories. Symlink/junction roots, root replacement, owned symlinks/reparse points, directories, special files and multi-link files reject. Operations inspect only direct children matching the exact synthetic ownership namespace; they never recurse. Unrelated files and other ownership namespaces are preserved. Ownership names are a convention inside this trusted disposable root, not an authentication boundary.
 
-`FakeModel` returns detached deterministic fixtures selected by a closed case identifier. Its malformed JSON and instruction-injection cases are untrusted test data; the harness does not execute model text. Missing measurement data stays null/UNKNOWN. There is no model endpoint or token.
+The helper reads tests/fixtures/shared/retention.json without modifying it, enforces exactly seven days and 1,048,576 bytes per artifact, and rejects unsafe/invalid policy values. The fixture's historical enforcement note describes the separately owned CI obligation; this candidate adds local enforcement only. Clock is a callable returning canonical UTC timestamps with six fractional digits, e.g. 2026-10-01T00:00:00.000000Z. Missing timezone, alternate/ambiguous encodings, invalid dates, duplicate fields and future artifact timestamps fail closed. Age exactly seven days expires; timestamps come from the injected clock and artifact envelope, never filesystem mtime.
 
-## Receipts, callbacks and replay
+`export(case, repeats=0)` permits only four hard-coded synthetic case IDs and generated synthetic padding. It accepts no arbitrary payload, path, model output or receipt text. This closed vocabulary is not a filter that detects arbitrary secrets. Size is checked before creating a partial file. A bounded partial is exclusively created, flushed and fsynced, then renamed to the final JSON name after a collision check. No success receipt returns on write, sync, rename or cleanup failure. Caught interruptions remove the owned partial; a hard process kill or cleanup denial can leave a partial. Sweep validates owned partials and final files and removes only those at or beyond seven days. Malformed/truncated partials fail closed and require disposal of the isolated scratch root by its controller; the helper never guesses their age or recursively deletes them. Rename and process-level success are not power-loss durability evidence.
 
-A caller provides an existing disposable temporary parent. The harness creates its own randomly named child directory and fixed `synthetic.sqlite` file; it never opens a caller-specified existing database or the controller ledger. SQLite enforces a unique action key and stores receipt history and callback deduplication. Context exit closes the database and removes only that generated child directory. Tests verify sibling preservation and fresh-instance isolation. An interrupted runner may leave files; the trusted runner must destroy its disposable scratch filesystem after preserving sanitized test evidence.
+`sweep()` validates the complete owned candidate set before deleting expired entries. Fresh files remain. Repeated successful sweeps are idempotent. A deletion failure raises rather than returning a success list; earlier completed deletions may have occurred, and a later explicit sweep reconciles them. There is no automatic background deletion. Sibling and parent paths are never deletion targets.
 
-The simulated flow is HELD -> SUBMITTED -> ACCEPTED/REJECTED/UNKNOWN. A null initial approval reference binds at SUBMITTED as accepted F04 permits. UNKNOWN remains HOLD with its reservation and cannot resubmit. A separate fake readback resolves OCCURRED or NOT_OCCURRED; neither result triggers an automatic retry. Established provider IDs remain immutable through the accepted core transition check. A released fake reservation retains its historical row, so repeated submission still cannot send again.
+## Runbook and evidence limits
 
-Callbacks are canonical JSON bytes with an HMAC using explicitly public synthetic test material embedded in the fixture module. That value is not a real secret and must never be used by a live service. Signature, exact fields, duplicate JSON keys, 300-second freshness, action/client/provider/destination/object identity and replay IDs are checked before a receipt transition. The callback handler additionally obtains independent fake readback; it does not trust callback text as external truth. The static signed-callback.json fixture was constructed with local .NET SHA-256/HMAC primitives without executing Python; an authored test compares its exact bytes and signature to the fake signer. These are synthetic contract semantics, not proof of any vendor signing scheme or production key custody.
-
-This SQLite fixture is intentionally single-process and temporary. It is not evidence for production PostgreSQL concurrency, crash consistency, backups, migrations, distributed coordination, callback delivery guarantees or trusted authorization. Those require separately scoped native integration tests.
-
-## Default network denial and root-run probe
-
-The normal unit suite does not make socket connections. It verifies the fake endpoint allowlist and patches socket creation to fail if used. This tests the application seam, not OS enforcement; arbitrary Python could bypass an in-process guard. Root must run the suite inside the actual network-denied sandbox, with no credentials or host/controller sockets mounted.
-
-Commands for the **trusted runner only**, from the exported workspace:
+Use only a controller-supplied disposable artifact root. Run synthetic unit tests with the existing interpreter and dependencies, using absolute paths:
 
 ```
-python -B tests/harness/test_synthetic.py
+python -B -m unittest discover -s <absolute-workspace>/tests/harness -p test_*.py
 ```
 
-`probe_network.py` is deliberately separate from normal tests. Root may run it only inside the approved, isolated network namespace, with `F07_NETWORK_NAMESPACE_EXPECTED=1` and the explicit switch:
+The added test_export_retention.py covers size boundaries, just-before/at/after expiry, mixed ages, repeat sweeps, siblings, policy/timestamp rejection, publication collision, partial writes, cleanup/delete failures, traversal, special-file rejection and symlinks. Actual symlink creation may skip when the sandbox denies that capability; root must validate on its intended Linux filesystem. No actual provider, upload, store or network namespace probe is run here. runtime_cases_run remains zero.
 
-```
-python -B tests/harness/probe_network.py --probe-test-net
-```
-
-The environment marker is intent, not attestation. The probe connects only to literal TEST-NET `192.0.2.1:9`, never resolves a hostname, sends no application payload, and has a two-second timeout. Network-unreachable/host-unreachable/permission-denied errors produce exit 0 with a scoped DENY_OBSERVED result. A successful connection produces exit 1. Timeout/refusal/other errors are inconclusive and exit 2; absent opt-in also exits 2 with NOT_RUN. A single-address observation does not prove IPv6, DNS, proxy, VPN, metadata or complete production egress denial. Root records the actual wrapper/namespace, command, result and limitations; the worker has not run this probe.
-
-## Retention and evidence
-
-`tests/fixtures/shared/retention.json` requires immediate context cleanup of disposable databases and a maximum seven-day retention / 1 MiB size for exported test artifacts. The database cleanup is implemented and has an authored test. Exported-artifact expiry and size must be enforced by the trusted CI/scratch-store configuration; this repository change does not configure CI storage. They remain NOT_RUN. Export only test IDs, commands, versions, exit codes, hashes, scoped failure reasons and synthetic receipt references. Never export raw model/provider payloads, private source inputs, production identities, credentials or task lease packets. Only the private agent result carries required lease metadata.
-
-All future PASS/FAIL evidence must identify the tested source digest and actual isolated execution. Test authoring and schema-shaped output cannot establish acceptance. Keep native provider behavior, production network isolation, real approval revocation, production retention and G gates explicitly held. No actual services or production facts are required to review this harness candidate.
-
-
-
-
-## Late callback acknowledgment
-
-A valid callback may arrive after explicit authoritative fake readback has already reconciled OCCURRED, or a new event ID may describe the same object after an earlier callback. After signature, shape, freshness, client/provider/destination/action and current readback checks, the harness records an unseen event and returns the existing OCCURRED receipt. It does not attempt a second F04 transition, create another receipt or resubmit. A duplicate event returns that same receipt without another callback row. The event-to-action binding still rejects cross-action replay.
-
-Idempotent acknowledgment never bypasses signature or identity validation. A stored NOT_OCCURRED outcome or changed established provider object rejects the callback and preserves the existing receipt. Four additional regression methods cover explicit-readback-first, new-event-after-callback, duplicate acknowledgments, bad signatures and contradictory outcome/object readback. The original22 tests remain unchanged; all26 are authored for root-only execution.
-
-
-## Reconciliation readback identity
-
-Before resolving a reserved receipt to OCCURRED, direct readback must match the receipt action_key, source provider, client and destination exactly. Missing or conflicting action/provider fields fail closed without adding a receipt, changing UNKNOWN or releasing its reservation. Callback signature checks and late-event acknowledgments retain their prior behavior. Two added regression methods cover mismatched and missing action/provider fields; all26 prior tests remain intact, for28 authored tests. Runtime/provider execution still requires separate qualification.
-
-
-## Fractional fake-clock precision
-
-FakeClock preserves supported fractional UTC instants to microsecond precision. Its UTC output uses six fractional digits when nonzero and retains the original whole-second Z format when the fraction is zero. Integer-second advances preserve the fractional part. Approval expiry remains exclusive and callback timestamps are compared without truncating now: a future microsecond rejects, exactly300 seconds of age is allowed, and300 seconds plus one microsecond rejects. Four new regression methods cover these boundaries while keeping all28 earlier methods unchanged. This is synthetic time behavior, not a host-clock or runtime timing qualification.
-
-## Probe setup denials
-
-The opt-in TEST-NET probe now handles OSError from socket creation and timeout setup as well as connect. EPERM, EACCES, ENETUNREACH and EHOSTUNREACH retain DENY_OBSERVED classification; other OS errors remain INCONCLUSIVE. The JSON includes the phase so a denied socket syscall is not represented as an actual connection attempt or full network qualification. A successful connection remains DENY_FAILED even if cleanup subsequently errors.
-
-Both the explicit flag and F07_NETWORK_NAMESPACE_EXPECTED=1 are still mandatory. Seven new unit tests mock all socket calls and cover creation/setup denial, other errno handling, no-opt-in behavior, connect outcomes and cleanup. The original 32 harness tests are unchanged. Real TEST-NET execution remains restricted to the trusted isolated runner; this change does not itself run that probe or establish DNS/IPv6/production isolation.
+Local retention enforcement is separate from actual CI/upload/store enforcement. A separately owned CI packet must configure and validate upload size gates, remote-store expiry, permissions, cleanup after killed jobs and independent execution on the target filesystem. This candidate changes neither .github nor shared CI policy. Passing these unit tests cannot establish F07 acceptance or qualify G02/F12.
