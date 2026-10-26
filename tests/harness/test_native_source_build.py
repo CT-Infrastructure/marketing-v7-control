@@ -386,4 +386,112 @@ class SourceInterfaceRegressionTests(unittest.TestCase):
         with self.assertRaises(ValueError):s.validate_link_model(bad)
 
 
+class LocalMtimeMetadataTests(unittest.TestCase):
+    def _record(self,key=b'mtime',value=b'1711487335.0'):
+        body=b' '+key+b'='+value+b'\n';length=len(body)+2
+        while len(str(length).encode()+body)!=length:length=len(str(length).encode()+body)
+        return str(length).encode()+body
+
+    def _block(self,name='file',kind=tarfile.REGTYPE,payload=b's',link=''):
+        info=tarfile.TarInfo(name);info.type=kind;info.size=len(payload);info.linkname=link;info.mtime=1711487335
+        return info.tobuf(format=tarfile.USTAR_FORMAT)+payload+bytes((-len(payload))%512)
+
+    def _archive(self,record=None,kind=tarfile.XHDTYPE,member=None):
+        if record is None:record=self._record()
+        return self._block('PaxHeaders/file',kind,record)+(self._block() if member is None else member)+bytes(1024)
+
+    def test_all_67_authenticated_timestamp_forms_and_member_bindings(self):
+        # Metadata pattern copied from exhaustive authenticated raw-header facts:
+        # root directory and LICENSE link carry the two special fractional times.
+        raw=b'';expected={}
+        names=['bubblewrap-0.9.0','bubblewrap-0.9.0/LICENSE']+['bubblewrap-0.9.0/'+('COPYING' if i==0 else 'file'+str(i)) for i in range(65)]
+        values=[b'1711487622.584252',b'1711487622.5802522']+[b'1711487335.0']*65
+        for i,(name,value) in enumerate(zip(names,values)):
+            raw+=self._block('PaxHeaders/member'+str(i),tarfile.XHDTYPE,self._record(value=value))
+            kind=tarfile.DIRTYPE if i==0 else tarfile.SYMTYPE if i==1 else tarfile.REGTYPE
+            raw+=self._block(name,kind,b's' if i>1 else b'',link='COPYING' if i==1 else '')
+            if i>1:expected[name]=b's'
+        raw+=bytes(1024)
+        rows,data=s.archive_rows(raw,'tar');headers=s.raw_tar_headers(raw,s.time.monotonic()+15)
+        self.assertEqual(len(rows),67);self.assertEqual(data,expected)
+        self.assertEqual([h['pax']['mtime'] for h in headers],[v.decode() for v in values])
+        self.assertEqual(len({h['local_pax']['header_offset'] for h in headers}),67)
+        self.assertEqual(rows[1]['link'],'COPYING');self.assertEqual(rows[1]['type'],'symlink')
+
+    def test_local_mtime_does_not_change_content_tree_or_ustar_contract(self):
+        plain=self._block()+bytes(1024);with_pax=self._archive()
+        self.assertEqual(s.archive_rows(plain,'tar'),s.archive_rows(with_pax,'tar'))
+        self.assertEqual(s.tree_digest(s.archive_rows(plain,'tar')[1]),s.tree_digest(s.archive_rows(with_pax,'tar')[1]))
+        for value in (b'0.0',b'1711487622.584252',b'1711487622.5802522',b'253402300799.999999999'):
+            self.assertEqual(s.local_pax_mtime(self._record(value=value)),value.decode())
+
+    def test_semantic_sparse_ownership_unknown_pax_keys_always_reject(self):
+        for key in (b'path',b'linkpath',b'size',b'uid',b'gid',b'uname',b'gname',b'mode',b'atime',b'ctime',b'GNU.sparse.map',b'SCHILY.xattr.user.foo',b'unknown'):
+            for value in (b'1711487335.0',b'../escape',b'/outside'):
+                with self.subTest(key=key,value=value),self.assertRaises(ValueError):s.archive_rows(self._archive(self._record(key,value)),'tar')
+
+    def test_global_duplicate_conflicting_and_multiple_local_headers_reject(self):
+        record=self._record()
+        for raw in (self._archive(kind=tarfile.XGLTYPE),self._archive(record+record),
+                    self._archive(record+self._record(value=b'1711487622.584252')),
+                    self._block('PaxHeaders/a',tarfile.XHDTYPE,record)+self._archive()):
+            with self.assertRaises(ValueError):s.archive_rows(raw,'tar')
+
+    def test_noncanonical_timestamp_bytes_types_and_bounds_reject(self):
+        for value in (b'',b'-1.0',b'+1.0',b'01.0',b'1',b'1.',b'1.0000000000',b'1e3',b'NaN',b'Inf',b' 1.0',b'1.0 ',b'1.0\n',b'1.0\x00',b'\xff',b'253402300800.0',b'9999999999999.0'):
+            with self.subTest(value=value),self.assertRaises(ValueError):s.local_pax_mtime(self._record(value=value))
+        for payload in (True,False,None,1,'22 mtime=1711487335.0\n',b'x'*65):
+            with self.subTest(payload=payload),self.assertRaises(ValueError):s.local_pax_mtime(payload)
+
+    def test_raw_self_count_length_key_and_payload_padding_are_exact(self):
+        record=self._record()
+        for bad in (b'0'+record,record.replace(b'22 ',b'23 '),record[:-1],record+b'x',record.replace(b'mtime=',b'mtime =')):
+            with self.assertRaises(ValueError):s.archive_rows(self._archive(bad),'tar')
+        raw=bytearray(self._archive());raw[512+len(record)]=1
+        with self.assertRaises(ValueError):s.archive_rows(bytes(raw),'tar')
+        with self.assertRaises(ValueError):s.archive_rows(self._archive(b'x'*65),'tar')
+
+    def test_dangling_truncated_corrupt_and_unsupported_extension_headers_reject(self):
+        record=self._record();dangling=self._block('PaxHeaders/a',tarfile.XHDTYPE,record)+bytes(1024)
+        for raw in (dangling,self._archive()[:520],self._archive()[:-512],
+                    self._archive(kind=tarfile.GNUTYPE_LONGNAME),self._archive(kind=tarfile.GNUTYPE_LONGLINK)):
+            with self.assertRaises(ValueError):s.archive_rows(raw,'tar')
+        raw=bytearray(self._archive());raw[0]^=1
+        with self.assertRaises(ValueError):s.archive_rows(bytes(raw),'tar')
+
+    def test_timestamp_exception_preserves_special_path_and_symlink_guards(self):
+        for kind in (tarfile.LNKTYPE,tarfile.FIFOTYPE,tarfile.CHRTYPE,tarfile.BLKTYPE):
+            with self.assertRaises(ValueError):s.archive_rows(self._archive(member=self._block('bad',kind,b'')),'tar')
+        for name in ('../escape','/escape','a/../../escape'):
+            with self.assertRaises(ValueError):s.archive_rows(self._archive(member=self._block(name)),'tar')
+        raw=self._archive(member=self._block('link',tarfile.SYMTYPE,b'',link='../escape'))
+        rows,data=s.archive_rows(raw,'tar')
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp).resolve()
+            with self.assertRaises(ValueError):s.extract_checked(rows,data,root,rows)
+            self.assertEqual(list(root.iterdir()),[])
+
+    def test_effective_metadata_must_match_the_independent_raw_member(self):
+        # Tamper only with the separate parser's TarInfo to prove cross-checking;
+        # a PAX map alone may not authorize a changed structural/ownership field.
+        raw=self._archive();original_open=tarfile.open
+        for field,value in (('name','elsewhere'),('linkname','../outside'),('size',0),('type',tarfile.SYMTYPE),('uid',99),('gid',99),('uname','other'),('gname','other'),('mode',0o777)):
+            with self.subTest(field=field):
+                class ChangedArchive:
+                    def __enter__(self):return self
+                    def __exit__(self,*args):pass
+                    def __iter__(self):
+                        with original_open(fileobj=io.BytesIO(raw),mode='r:') as archive:
+                            for member in archive:
+                                setattr(member,field,value);yield member
+                with patch.object(s.tarfile,'open',return_value=ChangedArchive()),self.assertRaises(ValueError):s.archive_rows(raw,'tar')
+
+    def test_raw_metadata_member_count_deadline_and_zero_trailer_bounds(self):
+        record=self._record()
+        two=self._block('PaxHeaders/a',tarfile.XHDTYPE,record)+self._block('a')+self._block('PaxHeaders/b',tarfile.XHDTYPE,record)+self._block('b')+bytes(1024)
+        with patch.object(s,'MAX_ENTRIES',1),self.assertRaises(ValueError):s.archive_rows(two,'tar')
+        with self.assertRaises(ValueError):s.raw_tar_headers(self._archive(),s.time.monotonic()-1)
+        with self.assertRaises(ValueError):s.archive_rows(self._archive()+bytes(10240),'tar')
+
+
 if __name__=='__main__':unittest.main()

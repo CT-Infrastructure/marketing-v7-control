@@ -1,8 +1,11 @@
 """Explicit Jammy source variant. Inventory is not build or runtime authority."""
 from __future__ import annotations
 import hashlib
+import bz2
+import gzip
 import io
 import json
+import lzma
 import os
 from pathlib import Path, PurePosixPath
 import re
@@ -171,6 +174,65 @@ def normalized_member(name):
     return relative(name.rstrip('/'))
 
 
+def local_pax_mtime(payload):
+    # Inspect the raw self-counted record, not tarfile's merged metadata dict.
+    check(type(payload) is bytes and 0<len(payload)<=64)
+    match=re.fullmatch(rb'([1-9][0-9]{0,2}) mtime=((?:0|[1-9][0-9]{0,11})\.[0-9]{1,9})\n',payload)
+    check(match is not None and int(match[1])==len(payload))
+    check(int(match[2].split(b'.')[0])<=253402300799)
+    return match[2].decode('ascii')
+
+
+def raw_tar_headers(raw, deadline):
+    # A separate bounded raw pass must precede effective TarInfo acceptance.
+    # Only one LOCAL x header / one mtime record may bind the next member.
+    source=io.BytesIO(raw)
+    if raw.startswith(b'\xfd7zXZ\x00'):stream=lzma.LZMAFile(source)
+    elif raw.startswith(b'\x1f\x8b'):stream=gzip.GzipFile(fileobj=source)
+    elif raw.startswith(b'BZh'):stream=bz2.BZ2File(source)
+    else:stream=source
+    decoded=0;total=0;headers=[];pending=None;offset=0;pax_count=0
+    def read(size):
+        nonlocal decoded
+        check(time.monotonic()<deadline and 0<size<=65536)
+        value=stream.read(size);decoded+=len(value)
+        check(decoded<=MAX_TOTAL+MAX_ENTRIES*2048+10240)
+        return value
+    with stream:
+        while True:
+            block=read(512);check(len(block)==512)
+            if block==bytes(512):
+                check(pending is None)
+                trailer=read(512);check(trailer==bytes(512));padding=1024
+                while True:
+                    trailer=read(512)
+                    if not trailer:break
+                    padding+=len(trailer);check(len(trailer)==512 and not any(trailer) and padding<=10240)
+                break
+            try:info=tarfile.TarInfo.frombuf(block,'utf-8','strict')
+            except (tarfile.HeaderError,UnicodeError) as exc:raise ValueError('invalid raw tar header') from exc
+            size=integer(info.size,MAX_FILE)
+            check(info.type in (tarfile.REGTYPE,tarfile.DIRTYPE,tarfile.SYMTYPE,tarfile.XHDTYPE))
+            if info.type==tarfile.XHDTYPE:
+                check(pending is None and 0<size<=64);pax_count+=1;check(pax_count<=MAX_ENTRIES)
+                payload=read(size);check(len(payload)==size)
+                pending=dict(mtime=local_pax_mtime(payload),header_offset=offset,payload_sha256=digest(payload))
+            else:
+                check(len(headers)<MAX_ENTRIES)
+                check(info.type==tarfile.REGTYPE or size==0)
+                total+=size;check(total<=MAX_TOTAL)
+                attributes={k:getattr(info,k) for k in ('name','linkname','size','type','mode','uid','gid','uname','gname','devmajor','devminor')}
+                headers.append(dict(attributes=attributes,pax={} if pending is None else {'mtime':pending['mtime']},
+                                    header_offset=offset,local_pax=pending,mtime=info.mtime))
+                pending=None;remaining=size
+                while remaining:
+                    chunk=read(min(65536,remaining));check(bool(chunk));remaining-=len(chunk)
+            pad=(-size)%512
+            if pad:padding=read(pad);check(len(padding)==pad and not any(padding))
+            offset+=512+size+pad
+    return headers
+
+
 def archive_rows(raw, kind, deadline=None):
     # Data only, bounded in decoded bytes/count. .deb decoded sidecars require
     # separate root-pinned parent linkage; no dpkg/control/maintainer execution.
@@ -202,12 +264,17 @@ def archive_rows(raw, kind, deadline=None):
                 if not info.is_dir(): data[name]=value
                 check(len(rows)<=MAX_ENTRIES)
     else:
+        headers=raw_tar_headers(raw,deadline);index=0
         with tarfile.open(fileobj=io.BytesIO(raw),mode='r:*') as archive:
             for info in archive:
                 check(time.monotonic()<deadline)
+                check(index<len(headers));header=headers[index];index+=1
+                check(all(getattr(info,k)==v for k,v in header['attributes'].items()))
+                check(info.pax_headers==header['pax'])
+                check(info.mtime==(header['mtime'] if not header['pax'] else float(header['pax']['mtime'])))
                 if info.name in ('.','./'): continue
                 name=normalized_member(info.name);size=integer(info.size,MAX_FILE)
-                check(not info.pax_headers and info.type in (tarfile.REGTYPE,tarfile.DIRTYPE,tarfile.SYMTYPE))
+                check(info.type in (tarfile.REGTYPE,tarfile.DIRTYPE,tarfile.SYMTYPE))
                 total+=size;check(total<=MAX_TOTAL)
                 value=b''
                 if info.isfile():
@@ -217,6 +284,7 @@ def archive_rows(raw, kind, deadline=None):
                 rows.append(dict(name=name,type='file' if info.isfile() else 'directory' if info.isdir() else 'symlink',
                                  bytes=size,sha256=digest(value) if info.isfile() else None,link=info.linkname))
                 check(len(rows)<=MAX_ENTRIES)
+        check(index==len(headers))
     check(len({r['name'] for r in rows})==len(rows))
     return rows,data
 
