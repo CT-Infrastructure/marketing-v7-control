@@ -355,8 +355,192 @@ class SupplyChain(unittest.TestCase):
                        'https://example.invalid/stable-tools/repository',
                        'git@example.invalid:owner/repository'):
             entry=self.entry();entry['origin']=origin
+            if origin.startswith(('git@','ssh://')):entry['artifact_type']='APPLICATION'
             manifest=self.manifest();manifest['entries']=[entry if e['id']==entry['id'] else e for e in manifest['entries']]
             with self.subTest(origin=origin):
                 lock.validate_manifest(manifest);self.assertEqual(lock.adoption_blockers(entry,NOW),[])
+
+    def test_full_origin_branch_namespaces_rejected(self):
+        for namespace in ('refs/heads/', 'refs/remotes/origin/',
+                          'ReFs/HeAdS/', 'REFS/REMOTES/origin/'):
+            for boundary in ('/', '@'):
+                for kind in ('APPLICATION','OCI','TOOL','MODEL'):
+                    entry=self.entry()
+                    entry.update(artifact_type=kind,
+                                 origin='https://example.invalid/repo'+boundary+namespace+'release-1.0')
+                    with self.subTest(namespace=namespace,boundary=boundary,kind=kind):
+                        self.assert_rejected_at_both_entry_boundaries(entry)
+
+    def test_origin_digest_qualifiers_fail_closed(self):
+        for qualifier in ('sha512:deadbeef','SHA256:'+'a'*64,'sha256:deadbeef',
+                          'sha256:'+'A'*64,'sha256:'+'a'*63,
+                          'sha256:'+'a'*65,'sha256:'+'g'*64,'sha256:'):
+            for kind in ('APPLICATION','OCI','TOOL','MODEL'):
+                entry=self.entry()
+                entry.update(artifact_type=kind,origin='registry.invalid/repo@'+qualifier)
+                with self.subTest(qualifier=qualifier,kind=kind):
+                    self.assert_rejected_at_both_entry_boundaries(entry)
+
+    def test_origin_digest_binds_locked_subject(self):
+        for kind in ('APPLICATION','OCI','TOOL','MODEL'):
+            entry=self.entry()
+            entry.update(artifact_type=kind,origin='registry.invalid/repo@sha256:'+'b'*64)
+            with self.subTest(kind=kind):
+                self.assert_rejected_at_both_entry_boundaries(entry)
+
+    def test_exact_origin_identity_positive_controls(self):
+        origins=('registry.invalid/repo@sha256:'+'a'*64,
+                 'https://example.invalid/repository',
+                 'registry.invalid:5000/owner/repo',
+                 'registry.invalid:5000/repo:1.2.3-rc.1',
+                 'registry.invalid/repo@v2.0.0-beta+build.7',
+                 'https://example.invalid/latest-version/stable-tools',
+                 'git@example.invalid:owner/repository',
+                 'git@example.invalid:repository',
+                 'ssh://git@example.invalid:2222/owner/repository')
+        for origin in origins:
+            entry=self.entry();entry['origin']=origin
+            if origin.startswith(('git@','ssh://')) or '@v2.0.0-beta+build.7' in origin:
+                entry['artifact_type']='APPLICATION'
+            for scan in entry['scans']:
+                scan['tool_release']='registry/scanner@sha256:'+'b'*64
+            manifest=self.manifest()
+            manifest['entries']=[entry if e['id']==entry['id'] else e for e in manifest['entries']]
+            with self.subTest(origin=origin):
+                lock.validate_manifest(manifest)
+                self.assertEqual(lock.adoption_blockers(entry,NOW),[])
+
+    def test_short_origin_digest_qualifiers_cannot_be_scp_remotes(self):
+        for qualifier in ('sha256:'+'b'*64, 'sha256:deadbeef',
+                          'SHA256:'+'a'*64, 'sha512:deadbeef',
+                          'sha256:'+'A'*64, 'sha256:'+'a'*63,
+                          'sha256:'+'a'*65, 'sha256:'+'g'*64, 'sha256:'):
+            for kind in ('APPLICATION','OCI','TOOL','MODEL'):
+                entry=self.entry()
+                entry.update(artifact_type=kind,origin='alpine@'+qualifier)
+                with self.subTest(qualifier=qualifier,kind=kind):
+                    with self.assertRaises(ValueError):lock.validate_entry(entry)
+                    self.assert_rejected_at_both_entry_boundaries(entry)
+        for kind in ('APPLICATION','OCI','TOOL','MODEL'):
+            entry=self.entry()
+            entry.update(artifact_type=kind,origin='alpine@sha256:'+'a'*64)
+            if kind=='MODEL':entry['model_rights']['state']='REVIEWED'
+            manifest=self.manifest()
+            manifest['entries']=[entry if e['id']==entry['id'] else e for e in manifest['entries']]
+            with self.subTest(matching_kind=kind):
+                lock.validate_entry(entry)
+                lock.validate_manifest(manifest)
+                self.assertEqual(lock.adoption_blockers(entry,NOW),[])
+
+    def test_scp_repository_branch_namespaces_rejected(self):
+        for host in ('host','example.invalid'):
+            for namespace in ('refs/heads/', 'refs/remotes/origin/',
+                              'ReFs/HeAdS/', 'REFS/REMOTES/origin/'):
+                entry=self.entry()
+                entry.update(artifact_type='APPLICATION',origin='git@'+host+':'+namespace+'release-1.0')
+                with self.subTest(host=host,namespace=namespace):
+                    with self.assertRaises(ValueError):lock.validate_entry(entry)
+                    self.assert_rejected_at_both_entry_boundaries(entry)
+
+
+    def test_oci_origin_digest_table_at_entry_and_manifest(self):
+        qualifiers=(('md5:deadbeef',False),('blake2:deadbeef',False),
+                    ('blake:deadbeef',False),('arbitrary-algorithm:deadbeef',False),
+                    ('sha256:'+'b'*64,False),('sha256:'+'a'*64,True),
+                    ('sha256:deadbeef',False),('sha256:'+'A'*64,False),
+                    ('sha256:'+'a'*63,False),('sha256:'+'a'*65,False))
+        for repository in ('alpine','registry.invalid/owner/alpine',
+                           'registry.invalid:5000/owner/alpine'):
+            for qualifier,valid in qualifiers:
+                entry=self.entry()
+                entry.update(artifact_type='OCI',origin=repository+'@'+qualifier)
+                manifest=self.manifest()
+                manifest['entries']=[entry if e['id']==entry['id'] else e
+                                     for e in manifest['entries']]
+                for validator,value in ((lock.validate_entry,entry),
+                                        (lock.validate_manifest,manifest)):
+                    with self.subTest(origin=entry['origin'],validator=validator.__name__):
+                        if valid:validator(value)
+                        else:
+                            with self.assertRaises(ValueError):validator(value)
+
+    def test_git_transport_paths_at_entry_and_manifest(self):
+        for kind,prefix in (('APPLICATION','git@host:'),
+                            ('APPLICATION','git@example.invalid:'),
+                            ('APPLICATION','ssh://git@example.invalid:2222/'),
+                            ('APPLICATION','https://git@example.invalid/'),
+                            ('ACTION','builder@host:')):
+            for path,valid in (('owner/repository',True),('repository',True),
+                               ('refs/heads/release-1.0',False),
+                               ('refs/remotes/origin/release-1.0',False),
+                               ('owner/repo@refs/heads/release-1.0',False)):
+                entry=self.entry()
+                entry.update(artifact_type=kind,origin=prefix+path)
+                if kind=='ACTION':
+                    entry.update(release='a'*40,digest={'algorithm':'git-sha1','value':'a'*40})
+                manifest=self.manifest()
+                manifest['entries']=[entry if e['id']==entry['id'] else e
+                                     for e in manifest['entries']]
+                for validator,value in ((lock.validate_entry,entry),
+                                        (lock.validate_manifest,manifest)):
+                    with self.subTest(origin=entry['origin'],validator=validator.__name__):
+                        if valid:validator(value)
+                        else:
+                            with self.assertRaises(ValueError):validator(value)
+
+
+    def test_total_oci_at_grammar_at_all_public_boundaries(self):
+        digest='a'*64
+        qualifiers=('sha256','sha512','v1.2.3','md5','',
+                    'sha256:','sha512:'+digest,'md5:deadbeef',
+                    'unknown:'+digest,'SHA256:'+digest,'sha256:'+'A'*64,
+                    'sha256:'+'a'*63,'sha256:'+'a'*65,'sha256:'+'g'*64,
+                    'sha256:deadbeef','sha256:'+'b'*64,
+                    'md5:deadbeef@sha256:'+digest,'@sha256:'+digest,
+                    'sha256:'+digest+'@','sha256:'+digest+'\n')
+        cases=[(repository+'@'+selector,False)
+               for repository in ('alpine','registry.invalid/owner/alpine',
+                                  'https://registry.invalid/owner/alpine')
+               for selector in qualifiers]
+        cases.extend((origin,False) for origin in (
+            '@sha256:'+digest,
+            'https://u@registry.invalid/path@sha256:'+digest,
+            'https://u@registry.invalid/path',
+            'git@host:owner/repository',
+            'ssh://git@registry.invalid/owner/repository'))
+        cases.extend((origin,True) for origin in (
+            'alpine@sha256:'+digest,
+            'registry.invalid/owner/alpine@sha256:'+digest,
+            'https://registry.invalid/owner/alpine@sha256:'+digest,
+            'alpine:1.2.3','registry.invalid:5000/owner/alpine:1.2.3-rc.1'))
+        for origin,valid in cases:
+            entry=self.entry();entry.update(artifact_type='OCI',origin=origin)
+            manifest=self.manifest()
+            manifest['entries']=[entry if e['id']==entry['id'] else e
+                                 for e in manifest['entries']]
+            for name,check in (
+                ('validate_entry',lambda:lock.validate_entry(entry)),
+                ('validate_manifest',lambda:lock.validate_manifest(manifest)),
+                ('adoption_blockers',lambda:lock.adoption_blockers(entry,NOW))):
+                with self.subTest(origin=origin,boundary=name):
+                    if valid:
+                        result=check()
+                        if name=='adoption_blockers':self.assertEqual(result,[])
+                    else:
+                        with self.assertRaises(ValueError):check()
+
+    def test_non_oci_git_userinfo_at_all_public_boundaries(self):
+        for origin in ('git@host:repository','git@example.invalid:owner/repository',
+                       'ssh://git@example.invalid:2222/owner/repository',
+                       'https://git@example.invalid/owner/repository',
+                       'registry.invalid/repo@v2.0.0-beta+build.7'):
+            entry=self.entry();entry.update(artifact_type='APPLICATION',origin=origin)
+            manifest=self.manifest()
+            manifest['entries']=[entry if e['id']==entry['id'] else e
+                                 for e in manifest['entries']]
+            with self.subTest(origin=origin):
+                lock.validate_entry(entry)
+                lock.validate_manifest(manifest)
+                self.assertEqual(lock.adoption_blockers(entry,NOW),[])
 
 if __name__=='__main__':unittest.main(verbosity=2)

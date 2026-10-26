@@ -76,6 +76,52 @@ def exact_release(value):
     if re.search(r'(?:^|\.)[xX](?:$|[.\-+])',terminal):return False
     return True
 
+def origin_identity(origin, artifact_type, source_algorithm):
+    """Validate explicit selectors and return an artifact digest, if present.
+
+    Userinfo in URL/SCP Git authorities is not an artifact qualifier.
+    Branch namespaces must be checked before discarding repository paths.
+    """
+    if re.search(r'(?:^|[/@])refs/(?:heads|remotes)/',origin,re.I):
+        raise ValueError('floating origin branch forbidden')
+    # Every OCI '@' is a digest delimiter in the full original origin.
+    # Validate before URL authority stripping or any Git transport parsing.
+    if artifact_type=='OCI' and '@' in origin:
+        if origin.count('@')!=1 or not re.fullmatch(r'[^@]+@sha256:[a-f0-9]{64}',origin):
+            raise ValueError('noncanonical OCI origin digest')
+        return {'algorithm':'sha256','value':origin.rsplit('@sha256:',1)[1]}
+    path=origin
+    # OCI references have artifact qualifiers, never Git userinfo. Select the
+    # transport grammar from artifact/source context before parsing any '@'.
+    git_source=(artifact_type!='OCI' and
+                (artifact_type in ('ACTION','COMFY_NODE') or
+                 source_algorithm=='git-sha1' or origin.startswith('git@')))
+    if '://' in origin:
+        remainder=origin.split('://',1)[1]
+        authority,separator,path=remainder.partition('/')
+        if artifact_type=='OCI' and '@' in authority:
+            raise ValueError('OCI authority cannot contain Git userinfo')
+        if not separator:return None
+    elif git_source:
+        scp=re.match(r'[^/@:]+@[^/@:]+:',origin)
+        if scp:path=origin[scp.end():]
+    if re.search(r'(?:^|[/@])refs/(?:heads|remotes)/',path,re.I):
+        raise ValueError('floating origin branch forbidden')
+    digest=None
+    if '@' in path:
+        selector=path.rsplit('@',1)[1]
+        if ':' in selector:
+            if not re.fullmatch(r'sha256:[a-f0-9]{64}',selector):
+                raise ValueError('noncanonical origin digest')
+            digest={'algorithm':'sha256','value':selector.split(':',1)[1]}
+        elif not exact_release(selector):
+            raise ValueError('floating origin selector forbidden')
+    else:
+        terminal=path.rsplit('/',1)[-1]
+        if ':' in terminal and not exact_release(terminal.rsplit(':',1)[1]):
+            raise ValueError('floating origin selector forbidden')
+    return digest
+
 def validate_entry(e):
     """Shared local invariants; registry/dependency checks remain manifest-wide."""
     schema=json.loads((HERE/'lock-manifest.schema.json').read_text())['properties']['entries']['items']
@@ -84,16 +130,9 @@ def validate_entry(e):
     check_digest(e['digest'])
     if e['purpose']=='engineering-observation' and e['state']!='OBSERVED':
         raise ValueError('engineering observations cannot be adoption candidates')
-    # Repository names are not selectors: latest-version may be a valid name.
-    origin=e['origin']
-    terminal=origin.rsplit('/',1)[-1]
-    selector=terminal.rsplit('@',1)[-1] if '@' in terminal else (
-        terminal.rsplit(':',1)[-1] if ':' in terminal else None)
-    if selector is not None:
-        exact_selector=(exact_release('origin@'+selector) if '@' in terminal and selector.startswith('sha256:')
-                        else exact_release(selector))
-        if not exact_selector:
-            raise ValueError('floating origin selector forbidden')
+    origin_digest=origin_identity(e['origin'],e['artifact_type'],e['digest']['algorithm'])
+    if origin_digest is not None and origin_digest!=e['digest']:
+        raise ValueError('origin digest must match locked subject')
     if known(e['release']):
         # Native package revisions (including Debian pre-release '~') are exact
         # versions, not dependency range expressions. Keep other types strict.
