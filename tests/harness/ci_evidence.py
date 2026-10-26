@@ -388,7 +388,8 @@ def validate_native_tree(root, lock, complete=True):
             kind, size = allowed[name]
             require(not entry.is_symlink() and info.st_nlink >= 1)
             require((kind == '5' and stat.S_ISDIR(info.st_mode)) or
-                    (kind == '0' and stat.S_ISREG(info.st_mode) and info.st_nlink == 1 and info.st_size == size))
+                    (kind == '0' and stat.S_ISREG(info.st_mode) and info.st_nlink == 1 and
+                     (info.st_size == size if complete else 0 <= info.st_size <= size)))
             seen.add(name)
             require(len(seen) <= 31)
     require(not complete or seen == set(allowed))

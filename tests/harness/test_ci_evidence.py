@@ -451,4 +451,140 @@ class NamespaceDiagnosticTests(unittest.TestCase):
         self.assertEqual(state['reason'],'DRAIN_INCOMPLETE');self.assertTrue(state['drain']);self.assertTrue(state['reaped'])
         self.assertFalse(self.receipt(state)['stderr_complete'])
 
+
+class NativePartialCleanupTests(unittest.TestCase):
+    def lock(self):
+        return json.loads((Path(c.__file__).parent/'native-ci.lock.json').read_text())
+
+    def owned_root(self, native=True):
+        temp=tempfile.TemporaryDirectory();self.addCleanup(temp.cleanup)
+        parent=Path(temp.name).resolve()
+        root=parent/'f07-ci.abcdefghijkl';root.mkdir()
+        (root/'runtime').mkdir();(root/'runtime/synthetic-runtime').write_text('discard')
+        (root/'upload').mkdir()
+        if native:(root/'native').mkdir()
+        sibling=parent/'unrelated-root';sibling.mkdir();(sibling/'sentinel').write_text('preserve')
+        return parent,root,sibling
+
+    def cleanup_both(self,parent,root,sibling):
+        with patch.dict(os.environ,{'RUNNER_TEMP':str(parent)}),patch.object(c,'native_lock',return_value=self.lock()):
+            c.cleanup(root,runtime_only=True)
+            self.assertFalse((root/'runtime').exists())
+            self.assertTrue((root/'native').exists())
+            self.assertEqual((sibling/'sentinel').read_text(),'preserve')
+            c.cleanup(root)
+        self.assertFalse(root.exists())
+        self.assertEqual((sibling/'sentinel').read_text(),'preserve')
+
+    def partial(self,root,name,size):
+        path=root/'native'/name;path.parent.mkdir(parents=True,exist_ok=True)
+        path.write_bytes(b's'*size)
+        return path
+
+    def test_zero_and_short_package_cleanup_and_execution_refusal(self):
+        for size in (0,7,50435):
+            with self.subTest(size=size):
+                parent,root,sibling=self.owned_root()
+                self.partial(root,'package.deb',size)
+                c.validate_native_tree(root/'native',self.lock(),complete=False)
+                with self.assertRaises(ValueError):c.validate_native_tree(root/'native',self.lock(),complete=True)
+                with self.assertRaises(ValueError):c.validate_native_bytes(b's'*size,self.lock())
+                with patch.dict(os.environ,{'RUNNER_TEMP':str(parent)}),patch.object(c,'native_lock',return_value=self.lock()), \
+                     patch.object(c,'capture_namespace_process',side_effect=AssertionError('partial must never execute')):
+                    with self.assertRaises(ValueError):c.namespace_supervise(root,TESTED,CANDIDATE,'42','1')
+                self.cleanup_both(parent,root,sibling)
+
+    def test_zero_and_short_allowlisted_payload_cleanup(self):
+        for name,expected in (('payload/usr/bin/bwrap',72160),('payload/usr/share/doc/bubblewrap/copyright',3388)):
+            for size in (0,7,expected-1):
+                with self.subTest(name=name,size=size):
+                    parent,root,sibling=self.owned_root()
+                    self.partial(root,name,size)
+                    c.validate_native_tree(root/'native',self.lock(),complete=False)
+                    with self.assertRaises(ValueError):c.validate_native_tree(root/'native',self.lock(),complete=True)
+                    self.cleanup_both(parent,root,sibling)
+
+    def broken_open(self,target,amount):
+        real=Path.open
+        class BrokenWriter:
+            def __init__(self,path):self.stream=real(path,'xb')
+            def __enter__(self):return self
+            def __exit__(self,*args):self.stream.close()
+            def write(self,data):
+                self.stream.write(data[:amount]);self.stream.flush()
+                raise OSError(28,'synthetic caught ENOSPC')
+        def opening(path,*args,**kwargs):
+            return BrokenWriter(path) if path == target and args == ('xb',) else real(path,*args,**kwargs)
+        return opening
+
+    def test_actual_caught_package_write_failure_allows_both_cleanup_paths(self):
+        from unittest.mock import MagicMock
+        # Synthetic prerequisites isolate the REAL native_bootstrap package-write
+        # failure. No network/provenance/namespace success is simulated as proof.
+        for amount in (0,7):
+            with self.subTest(amount=amount):
+                parent,root,sibling=self.owned_root(native=False)
+                target=root/'native/package.deb'
+                response=MagicMock();response.__enter__.return_value=response
+                response.status=200;response.headers={'Content-Length':'50436'};response.read.return_value=b's'*50436
+                opener=MagicMock();opener.open.return_value=response
+                with patch('platform.python_version',return_value='3.12.3'), \
+                     patch('platform.freedesktop_os_release',return_value={'ID':'ubuntu','VERSION_ID':'24.04'}), \
+                     patch('platform.machine',return_value='x86_64'),patch('platform.system',return_value='Linux'), \
+                     patch.dict(os.environ,{'RUNNER_TEMP':str(parent)}),patch.object(c,'native_lock',return_value=self.lock()), \
+                     patch.object(c.urllib.request,'build_opener',return_value=opener), \
+                     patch.object(c,'validate_native_bytes',return_value=None), \
+                     patch.object(c.subprocess,'run',side_effect=AssertionError('must not decode partial package')), \
+                     patch.object(Path,'open',self.broken_open(target,amount)):
+                    with self.assertRaises(OSError) as caught:c.native_bootstrap(root)
+                self.assertEqual(caught.exception.errno,28)
+                self.assertEqual(target.stat().st_size,amount)
+                self.cleanup_both(parent,root,sibling)
+
+    def test_actual_caught_payload_write_failure_allows_both_cleanup_paths(self):
+        raw=NativeBootstrapTests().synthetic_tar()
+        for amount in (0,7):
+            with self.subTest(amount=amount):
+                parent,root,sibling=self.owned_root()
+                payload=root/'native/payload';payload.mkdir()
+                target=payload/'usr/bin/bwrap'
+                with patch.object(Path,'open',self.broken_open(target,amount)):
+                    with self.assertRaises(OSError) as caught:c.extract_native_tar(raw,payload,self.lock())
+                self.assertEqual(caught.exception.errno,28)
+                self.assertEqual(target.stat().st_size,amount)
+                self.cleanup_both(parent,root,sibling)
+
+    def test_incomplete_cleanup_rejects_oversize_unknown_link_and_special(self):
+        for case in ('oversize-package','oversize-payload','unknown','symlink','hardlink','fifo'):
+            with self.subTest(case=case):
+                parent,root,sibling=self.owned_root()
+                target=root/'native/package.deb'
+                if case == 'oversize-package':target.write_bytes(b's'*50437)
+                elif case == 'oversize-payload':self.partial(root,'payload/usr/bin/bwrap',72161)
+                elif case == 'unknown':(root/'native/unknown').write_bytes(b'')
+                elif case == 'symlink':target.symlink_to(sibling/'sentinel')
+                elif case == 'hardlink':os.link(sibling/'sentinel',target)
+                else:os.mkfifo(target)
+                with self.assertRaises(ValueError):c.validate_native_tree(root/'native',self.lock(),complete=False)
+                with patch.dict(os.environ,{'RUNNER_TEMP':str(parent)}),patch.object(c,'native_lock',return_value=self.lock()):
+                    for runtime_only in (True,False):
+                        with self.assertRaises(ValueError):c.cleanup(root,runtime_only=runtime_only)
+                        self.assertTrue((root/'runtime/synthetic-runtime').exists())
+                        self.assertEqual((sibling/'sentinel').read_text(),'preserve')
+
+    def test_complete_native_gate_keeps_exact_sizes_and_hashes(self):
+        parent,root,sibling=self.owned_root()
+        lock=self.lock();payload=root/'native/payload';payload.mkdir()
+        self.partial(root,'package.deb',lock['package']['size'])
+        for item in lock['members']:
+            if item['name'] == '.':continue
+            path=payload/item['name'][2:]
+            if item['type'] == '5':path.mkdir(exist_ok=True)
+            else:path.write_bytes(b's'*item['size'])
+        c.validate_native_tree(root/'native',lock,complete=False)
+        # All sizes/members now exact, but synthetic package/binary/notice hashes
+        # still reject. Cleanup permissiveness never becomes execution authority.
+        with self.assertRaises(ValueError):c.validate_native_tree(root/'native',lock,complete=True)
+        self.cleanup_both(parent,root,sibling)
+
 if __name__ == '__main__':unittest.main()
