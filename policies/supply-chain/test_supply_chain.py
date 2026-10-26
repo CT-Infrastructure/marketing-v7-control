@@ -543,4 +543,290 @@ class SupplyChain(unittest.TestCase):
                 lock.validate_manifest(manifest)
                 self.assertEqual(lock.adoption_blockers(entry,NOW),[])
 
+    def git_commit_candidate(self, kind, origin):
+        entry=self.entry()
+        subject={'algorithm':'git-sha1','value':'a'*40}
+        entry.update(artifact_type=kind,origin=origin,release='a'*40,
+                     digest=copy.deepcopy(subject))
+        entry['model_rights']['state']='REVIEWED'
+        entry['sbom']['subject_digest']=copy.deepcopy(subject)
+        for scan in entry['scans']:
+            scan['subject_digest']=copy.deepcopy(subject)
+        manifest=self.manifest()
+        manifest['entries']=[entry if e['id']==entry['id'] else e
+                             for e in manifest['entries']]
+        return entry,manifest
+
+    def git_commit_origins(self, commit):
+        return tuple(prefix+commit for prefix in (
+            'owner/repository@',
+            'https://example.invalid/owner/repository@',
+            'https://git@example.invalid/owner/repository@',
+            'ssh://git@example.invalid:2222/owner/repository@',
+            'git@host:repository@',
+            'git@example.invalid:owner/repository@',
+            'builder@host:owner/repository@'))
+
+    def test_matching_full_git_origin_commit_at_all_public_boundaries(self):
+        for kind in ('ACTION','COMFY_NODE'):
+            for origin in self.git_commit_origins('a'*40):
+                entry,manifest=self.git_commit_candidate(kind,origin)
+                with self.subTest(kind=kind,origin=origin):
+                    lock.validate_entry(entry)
+                    self.assertIs(lock.validate_manifest(manifest),manifest)
+                    self.assertEqual(lock.adoption_blockers(entry,NOW),[])
+
+    def test_mismatched_full_git_origin_commit_at_all_public_boundaries(self):
+        # Same complete fixture as the positive control: only origin differs.
+        # OLD source accepts it at each boundary; the binding must reject it.
+        for kind in ('ACTION','COMFY_NODE'):
+            for origin in self.git_commit_origins('b'*40):
+                entry,manifest=self.git_commit_candidate(kind,origin)
+                for name,check in (
+                    ('validate_entry',lambda:lock.validate_entry(entry)),
+                    ('validate_manifest',lambda:lock.validate_manifest(manifest)),
+                    ('adoption_blockers',lambda:lock.adoption_blockers(entry,NOW))):
+                    with self.subTest(kind=kind,origin=origin,boundary=name):
+                        with self.assertRaisesRegex(ValueError,'origin digest must match locked subject'):
+                            check()
+
+
+    def assert_git_origin_rejected_at_all_public_boundaries(self, kind, origin, message):
+        entry,manifest=self.git_commit_candidate(kind,origin)
+        for name,check in (
+            ('entry',lambda:lock.validate_entry(entry)),
+            ('manifest',lambda:lock.validate_manifest(manifest)),
+            ('adoption',lambda:lock.adoption_blockers(entry,NOW))):
+            with self.subTest(kind=kind,origin=origin,boundary=name):
+                with self.assertRaisesRegex(ValueError,message):check()
+
+    def test_noncanonical_git_origin_commits_at_all_public_boundaries(self):
+        # OLDRED/newGREEN expectations only; execution requires root admission.
+        # Include matching and contradictory identities: canonical-case policy
+        # must reject both rather than treating a case variant as an unbound tag.
+        for kind in ('ACTION','COMFY_NODE'):
+            for selector in ('A'*40,'B'*40,'aA'*20,'bB'*20):
+                for origin in self.git_commit_origins(selector):
+                    self.assert_git_origin_rejected_at_all_public_boundaries(
+                        kind,origin,'noncanonical origin commit')
+
+    def test_repeated_git_origin_selectors_at_all_public_boundaries(self):
+        # OLDRED/newGREEN: the final matching commit previously hid each prefix.
+        # @main and @stable are moving branches/tags even without refs/heads/.
+        for kind in ('ACTION','COMFY_NODE'):
+            for hidden in ('b'*40,'a'*40,'main','stable','v1.2.3',''):
+                for origin in self.git_commit_origins(hidden+'@'+'a'*40):
+                    self.assert_git_origin_rejected_at_all_public_boundaries(
+                        kind,origin,'repeated origin selectors forbidden')
+
+    def test_hidden_git_branch_namespaces_at_all_public_boundaries(self):
+        # Preserve the full-origin branch guard as well as the delimiter guard.
+        for kind in ('ACTION','COMFY_NODE'):
+            for hidden in ('refs/heads/release-1.0',
+                           'refs/remotes/origin/release-1.0',
+                           'ReFs/HeAdS/release-1.0'):
+                for origin in self.git_commit_origins(hidden+'@'+'a'*40):
+                    self.assert_git_origin_rejected_at_all_public_boundaries(
+                        kind,origin,'floating origin branch forbidden')
+
+    def test_git_transport_authority_positive_controls_at_all_public_boundaries(self):
+        # Same complete evidence as the negatives; authority @ is not a selector.
+        # Cover no selector and one matching commit for URL, SCP and userinfo.
+        for kind in ('ACTION','COMFY_NODE'):
+            for repository in ('owner/repository',
+                               'https://example.invalid/owner/repository',
+                               'https://builder@example.invalid/owner/repository',
+                               'ssh://builder@example.invalid:2222/owner/repository',
+                               'builder@host:repository',
+                               'builder@example.invalid:owner/repository'):
+                for suffix in ('','@'+'a'*40):
+                    origin=repository+suffix
+                    entry,manifest=self.git_commit_candidate(kind,origin)
+                    with self.subTest(kind=kind,origin=origin):
+                        lock.validate_entry(entry)
+                        self.assertIs(lock.validate_manifest(manifest),manifest)
+                        self.assertEqual(lock.adoption_blockers(entry,NOW),[])
+
+    def test_git_query_fragment_rejected_before_selector_interpretation(self):
+        # Authored OLDRED/newGREEN expectations; execution NOT_RUN.
+        # Even a matching commit with URI syntax is unsupported, not unbound.
+        for kind in ('ACTION','COMFY_NODE','COMPONENT'):
+            for selector in ('a'*40,'b'*40,'A'*40,'B'*40,'main','v1.2.3'):
+                for suffix in ('?docs/v1.2.3','#docs/v1.2.3','?','#',
+                               '?ref=main#docs/v1.2.3'):
+                    for origin in self.git_commit_origins(selector+suffix):
+                        self.assert_git_origin_rejected_at_all_public_boundaries(
+                            kind,origin,'unsupported Git locator')
+            # The same rule applies to locators without an explicit selector.
+            for origin in self.git_commit_origins('a'*40):
+                repository=origin.rsplit('@',1)[0]
+                for suffix in ('?docs/v1.2.3','#docs/v1.2.3'):
+                    self.assert_git_origin_rejected_at_all_public_boundaries(
+                        kind,repository+suffix,'unsupported Git locator')
+
+    def test_git_selector_grammar_and_binding_in_all_source_contexts(self):
+        # COMPONENT + git-sha1 exercises the source-algorithm context, beyond
+        # the two special artifact kinds. Existing controls cover transports.
+        for kind in ('ACTION','COMFY_NODE','COMPONENT'):
+            for selector in ('a'*40,'v1.2.3','tags/v1.2.3'):
+                for origin in self.git_commit_origins(selector):
+                    entry,manifest=self.git_commit_candidate(kind,origin)
+                    with self.subTest(kind=kind,origin=origin):
+                        lock.validate_entry(entry)
+                        self.assertIs(lock.validate_manifest(manifest),manifest)
+                        expected=['artifact_type_UNSET'] if kind=='COMPONENT' else []
+                        self.assertEqual(lock.adoption_blockers(entry,NOW),expected)
+            for selector,message in (
+                ('b'*40,'origin digest must match locked subject'),
+                ('A'*40,'noncanonical origin commit'),
+                ('main','floating origin selector forbidden'),
+                ('main@'+'a'*40,'repeated origin selectors forbidden'),
+                ('v1.2.3//tag','unsupported Git origin selector'),
+                ('main%23docs/v1.2.3','unsupported Git origin selector'),
+                ('main%3Fdocs/v1.2.3','unsupported Git origin selector')):
+                for origin in self.git_commit_origins(selector):
+                    self.assert_git_origin_rejected_at_all_public_boundaries(
+                        kind,origin,message)
+
+    def test_git_user_prefix_context_cannot_escape_commit_binding(self):
+        # git@ selects Git parsing even for a SHA-256 application artifact.
+        for selector in ('a'*40,'b'*40):
+            entry=self.entry()
+            entry['origin']='git@host:owner/repository@'+selector
+            with self.subTest(selector=selector):
+                with self.assertRaisesRegex(ValueError,'origin digest must match locked subject'):
+                    lock.validate_entry(entry)
+                self.assert_rejected_at_both_entry_boundaries(entry)
+        for suffix in ('?docs/v1.2.3','#docs/v1.2.3'):
+            entry=self.entry();entry['origin']='git@host:owner/repository@main'+suffix
+            with self.subTest(suffix=suffix):
+                with self.assertRaisesRegex(ValueError,'unsupported Git locator'):
+                    lock.validate_entry(entry)
+                self.assert_rejected_at_both_entry_boundaries(entry)
+
+
+    def assert_generic_pin_case(self, entry, expected, label):
+        manifest=self.manifest()
+        manifest['entries']=[entry if x['id']==entry['id'] else x
+                             for x in manifest['entries']]
+        checks=[('manifest',lambda:lock.validate_manifest(manifest)),
+                ('adoption',lambda:lock.adoption_blockers(entry,NOW))]
+        # validate_entry checks scan structure, not scanner release pinning.
+        # Preserve that contract; scanner pins belong to these two callers.
+        if expected!='scanner-reject':
+            checks.insert(0,('entry',lambda:lock.validate_entry(entry)))
+        for boundary,check in checks:
+            with self.subTest(case=label,boundary=boundary):
+                if expected=='accept':
+                    result=check()
+                    if boundary=='adoption':self.assertEqual(result,[])
+                elif expected=='scanner-reject' and boundary=='adoption':
+                    self.assertTrue(any(x.endswith('_scanner_release_unpinned')
+                                        for x in check()))
+                else:
+                    with self.assertRaises((ValueError,ValidationError)):check()
+        return len(checks)
+
+    def test_review03_generic_suffix_68_public_boundary_cases(self):
+        # Same 68 boundary expectations as the supplied independent probe.
+        # OLDRED is evidenced by root's supplied 18/68 normal/-O receipt.
+        # Candidate execution remains NOT_RUN pending isolated root admission.
+        cases=[]
+        for kind in ('APPLICATION','TOOL','MODEL'):
+            for tail in ('?docs/v1.2.3','#docs/v1.2.3',
+                         '%3Fdocs/v1.2.3','%23docs/v1.2.3'):
+                e=self.entry();e['artifact_type']=kind
+                e['model_rights']['state']='REVIEWED'
+                e['origin']='https://example.invalid/owner/repo@main'+tail
+                cases.append((e,'reject','origin-'+kind+'-'+tail))
+        for tail in ('?docs/v1.2.3','#docs/v1.2.3'):
+            e=self.entry();e['release']='registry/repo:latest'+tail
+            cases.append((e,'reject','release-'+tail))
+            for i in (0,1):
+                e=self.entry()
+                e['scans'][i]['tool_release']='registry/scanner:latest'+tail
+                cases.append((e,'scanner-reject','scanner-'+str(i)+'-'+tail))
+        for origin in ('https://example.invalid/latest-version/repository',
+                       'registry/repo@v1.2.3','registry/repo@sha256:'+'a'*64):
+            e=self.entry();e['origin']=origin
+            cases.append((e,'accept','positive-origin-'+origin))
+        for release in ('v1.2.3-rc.1','registry/repo:1.2.3',
+                        'registry/repo@sha256:'+'a'*64):
+            e=self.entry();e['release']=release
+            for scan in e['scans']:scan['tool_release']=release
+            cases.append((e,'accept','positive-release-'+release))
+        boundaries=0
+        for entry,expected,label in cases:
+            boundaries+=self.assert_generic_pin_case(entry,expected,label)
+        self.assertEqual(boundaries,68)
+
+    def test_generic_origin_whole_selector_grammar(self):
+        # URI suffixes are unsupported even when the selected tag is exact.
+        # Encodings are not decoded into a different selector grammar.
+        for kind in ('APPLICATION','TOOL','MODEL'):
+            for selector in ('main','v1.2.3','sha256:'+'a'*64):
+                for tail in ('?','#','%3fdocs/v1.2.3','%23docs/v1.2.3',
+                             '%253Fdocs/v1.2.3','/bad%2Fsegment/v1.2.3',
+                             '/bad!/v1.2.3','//v1.2.3'):
+                    e=self.entry();e.update(artifact_type=kind)
+                    e['model_rights']['state']='REVIEWED'
+                    e['origin']='https://example.invalid/owner/repo@'+selector+tail
+                    self.assert_generic_pin_case(e,'reject',e['origin'])
+            for origin in ('registry/repo:main/docs/v1.2.3',
+                           'repo:latest/docs/v1.2.3',
+                           'registry/repo:latest#docs/v1.2.3',
+                           'registry/repo:main?docs/v1.2.3',
+                           'registry/repo%40main%23docs/v1.2.3',
+                           'registry/repo%3Alatest%3Fdocs/v1.2.3',
+                           'registry/repo@v1.2.3@v2.0.0'):
+                e=self.entry();e.update(artifact_type=kind,origin=origin)
+                e['model_rights']['state']='REVIEWED'
+                self.assert_generic_pin_case(e,'reject',origin)
+
+    def test_shared_release_and_both_scanner_whole_reference_grammar(self):
+        bad=('registry/repo:latest%23docs/v1.2.3',
+             'registry/repo:main%3Fdocs/v1.2.3',
+             'registry/repo:1.2.3#docs/v2.0.0',
+             'registry/repo:1.2.3?docs/v2.0.0',
+             'registry/bad!/v1.2.3','registry//v1.2.3',
+             'registry/repo:main/docs/v1.2.3',
+             'registry/repo%2Fextra/v1.2.3',
+             'registry/repo@sha256:'+'a'*64+'#docs/v1.2.3')
+        for value in bad:
+            self.assertFalse(lock.exact_release(value))
+            e=self.entry();e['release']=value
+            self.assert_generic_pin_case(e,'reject','release-'+value)
+            for index in (0,1):
+                e=self.entry();e['scans'][index]['tool_release']=value
+                self.assert_generic_pin_case(e,'scanner-reject',
+                                             'scanner-'+str(index)+'-'+value)
+
+    def test_generic_pin_matching_controls_preserve_downloads_and_identities(self):
+        for kind in ('APPLICATION','TOOL','MODEL'):
+            for origin in (
+                'https://example.invalid/download/v1.2.3.tar.gz',
+                'https://example.invalid/download?file=v1.2.3#checksum',
+                'https://example.invalid/files/package%20name.tar.gz',
+                'https://builder@example.invalid/owner/repo@v1.2.3',
+                'ssh://builder@example.invalid:2222/owner/repo@tags/v1.2.3',
+                'git@host:owner/repo@tags/v1.2.3',
+                'registry.invalid:5000/latest-version/repo:1.2.3',
+                'registry/repo@sha256:'+'a'*64):
+                e=self.entry();e.update(artifact_type=kind,origin=origin)
+                e['model_rights']['state']='REVIEWED'
+                for scan in e['scans']:
+                    scan['tool_release']='registry/scanner@sha256:'+'b'*64
+                self.assert_generic_pin_case(e,'accept',kind+'-'+origin)
+        for release in ('tags/v1.2.3','latest-version/repo:1.2.3',
+                        'registry.invalid:5000/repo:1.2.3-rc.1',
+                        'https://example.invalid/repo/v1.2.3',
+                        'registry/repo@sha256:'+'a'*64):
+            self.assertTrue(lock.exact_release(release))
+            e=self.entry();e['release']=release
+            for scan in e['scans']:scan['tool_release']=release
+            self.assert_generic_pin_case(e,'accept','shared-'+release)
+        # Exact native revisions bypass non-OS release grammar by design.
+        e=self.entry();e.update(artifact_type='OS_PACKAGE',release='2:1.2.3~rc1-1')
+        self.assert_generic_pin_case(e,'accept','native-version')
+
 if __name__=='__main__':unittest.main(verbosity=2)

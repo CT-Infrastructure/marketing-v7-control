@@ -56,6 +56,20 @@ def require_nonblank(value):
     elif isinstance(value,list):
         for item in value:require_nonblank(item)
 
+def qualified_reference_syntax(value):
+    """Validate the whole supported pin before extracting its terminal token.
+
+    Qualified pins use slash-separated name/tag components, an optional
+    registry port or URL scheme, and at most one artifact selector. URI
+    queries, fragments, escapes and empty components are not pin syntax.
+    URL/SCP transport userinfo is handled by the origin parsers instead.
+    """
+    component=r'[A-Za-z0-9][A-Za-z0-9._+\-]*'
+    repository=(r'(?:[A-Za-z][A-Za-z0-9+.\-]*://)?'+component+
+                r'(?::[0-9]+)?(?:/'+component+r')*(?::'+component+r')?')
+    selector=r'(?:sha256:[a-f0-9]{64}|'+component+r'(?:/'+component+r')*)'
+    return re.fullmatch(repository+r'(?:@'+selector+r')?',value) is not None
+
 def exact_release(value):
     """Check a concrete version/tag or source hash, including qualified refs.
 
@@ -63,7 +77,7 @@ def exact_release(value):
     moving terminal tags are not concrete releases, even with a registry prefix.
     """
     if not isinstance(value,str) or not value or value=='UNSET':return False
-    if re.search(r'[\s*^~<>=|]',value):return False
+    if not qualified_reference_syntax(value):return False
     # Explicit branch namespaces stay mutable regardless of terminal spelling.
     if re.search(r'(?:^|/)refs/(?:heads|remotes)/',value,re.I):return False
     if '@' in value:
@@ -76,6 +90,54 @@ def exact_release(value):
     if re.search(r'(?:^|\.)[xX](?:$|[.\-+])',terminal):return False
     return True
 
+def git_origin_identity(origin):
+    """Parse a Git locator before applying any generic qualified-release rule.
+
+    Supported locators are bare repositories, scheme://authority/path and
+    user@host:path, optionally followed by one @selector. URL authority
+    userinfo is transport syntax. Query/fragment syntax is unsupported; do not
+    let its slash-bearing tail become a tag or conceal the actual revision.
+    Selectors are concrete slash-separated tag components, full commits, or
+    canonical sha256 qualifications. No decoding or URI-tail fallback occurs.
+    """
+    if re.search(r'[?#\s]',origin):
+        raise ValueError('unsupported Git locator query, fragment or whitespace')
+    path=origin
+    if '://' in origin:
+        authority,separator,path=origin.split('://',1)[1].partition('/')
+        if not authority or not separator or not path:
+            raise ValueError('Git locator requires authority and repository path')
+    else:
+        scp=re.match(r'[^/@:]+@[^/@:]+:',origin)
+        if scp:path=origin[scp.end():]
+    if re.search(r'(?:^|[/@])refs/(?:heads|remotes)/',path,re.I):
+        raise ValueError('floating origin branch forbidden')
+    if path.count('@')>1:
+        raise ValueError('repeated origin selectors forbidden')
+    if '@' not in path:
+        # Preserve bare repository controls and legacy explicit colon tags.
+        terminal=path.rsplit('/',1)[-1]
+        if ':' not in terminal:return None
+        repository,selector=path.rsplit(':',1)
+    else:
+        repository,selector=path.split('@',1)
+    if not repository or not selector:
+        raise ValueError('Git locator requires repository and selector')
+    if ':' in selector:
+        if not re.fullmatch(r'sha256:[a-f0-9]{64}',selector):
+            raise ValueError('noncanonical origin digest')
+        return {'algorithm':'sha256','value':selector.split(':',1)[1]}
+    # Validate the entire selector, not only its final slash component.
+    if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._+\-]*(?:/[A-Za-z0-9][A-Za-z0-9._+\-]*)*',selector):
+        raise ValueError('unsupported Git origin selector')
+    if re.fullmatch(r'[a-fA-F0-9]{40}',selector):
+        if selector!=selector.lower():
+            raise ValueError('noncanonical origin commit')
+        return {'algorithm':'git-sha1','value':selector}
+    if not exact_release(selector):
+        raise ValueError('floating origin selector forbidden')
+    return None
+
 def origin_identity(origin, artifact_type, source_algorithm):
     """Validate explicit selectors and return an artifact digest, if present.
 
@@ -87,7 +149,8 @@ def origin_identity(origin, artifact_type, source_algorithm):
     # Every OCI '@' is a digest delimiter in the full original origin.
     # Validate before URL authority stripping or any Git transport parsing.
     if artifact_type=='OCI' and '@' in origin:
-        if origin.count('@')!=1 or not re.fullmatch(r'[^@]+@sha256:[a-f0-9]{64}',origin):
+        if (not qualified_reference_syntax(origin) or origin.count('@')!=1 or
+                not re.fullmatch(r'[^@]+@sha256:[a-f0-9]{64}',origin)):
             raise ValueError('noncanonical OCI origin digest')
         return {'algorithm':'sha256','value':origin.rsplit('@sha256:',1)[1]}
     path=origin
@@ -96,20 +159,35 @@ def origin_identity(origin, artifact_type, source_algorithm):
     git_source=(artifact_type!='OCI' and
                 (artifact_type in ('ACTION','COMFY_NODE') or
                  source_algorithm=='git-sha1' or origin.startswith('git@')))
+    if git_source:return git_origin_identity(origin)
     if '://' in origin:
         remainder=origin.split('://',1)[1]
         authority,separator,path=remainder.partition('/')
         if artifact_type=='OCI' and '@' in authority:
             raise ValueError('OCI authority cannot contain Git userinfo')
         if not separator:return None
-    elif git_source:
-        scp=re.match(r'[^/@:]+@[^/@:]+:',origin)
-        if scp:path=origin[scp.end():]
     if re.search(r'(?:^|[/@])refs/(?:heads|remotes)/',path,re.I):
         raise ValueError('floating origin branch forbidden')
+    # Detect artifact selectors on the locator, before any URI suffix can
+    # hide a moving tag. Ordinary download URLs without a selector retain
+    # their query/fragment syntax; those fields are not release pins.
+    locator=re.split(r'[?#]',path,1)[0]
+    parts=locator.split('/')
+    explicit=('@' in locator or any(':' in part for part in parts[1:]) or
+              (':' in parts[0] and
+               re.fullmatch(r'[^:]+:[0-9]+',parts[0]) is None))
+    if re.search(r'%(?:40|3a)',locator,re.I):
+        raise ValueError('encoded origin selector delimiter forbidden')
+    if explicit and not qualified_reference_syntax(path):
+        raise ValueError('unsupported qualified origin selector')
+    if not explicit:return None
     digest=None
     if '@' in path:
-        selector=path.rsplit('@',1)[1]
+        # Transport userinfo is already removed; every remaining @ selects
+        # the artifact. Never hide an earlier commit, tag or branch selector.
+        if path.count('@')!=1:
+            raise ValueError('repeated origin selectors forbidden')
+        selector=path.split('@',1)[1]
         if ':' in selector:
             if not re.fullmatch(r'sha256:[a-f0-9]{64}',selector):
                 raise ValueError('noncanonical origin digest')
