@@ -5,6 +5,8 @@ import sqlite3
 from unittest.mock import patch
 import copy
 import json
+import os
+import subprocess
 from pathlib import Path
 import sys
 import tempfile
@@ -455,7 +457,12 @@ class ControllerTests(unittest.TestCase):
         def observed(path, *args, **kwargs):
             stream = original(path, *args, **kwargs)
             return ObservedStream(stream, path.stat().st_size)
-        with patch.object(Path, 'open', observed):
+        original_read = os.read
+        def observed_read(fd, amount):
+            requests.append(amount)
+            self.assertLessEqual(amount, min(64*1024, os.fstat(fd).st_size+1))
+            return original_read(fd, amount)
+        with patch.object(os, 'read', observed_read), patch.object(Path, 'open', observed):
             captured = read_ledger_files(self.path)
         self.assertTrue(requests)
         self.assertEqual(captured[''], self.path.read_bytes())
@@ -470,6 +477,83 @@ class ControllerTests(unittest.TestCase):
         with patch('local.PREFLIGHT_ATTEMPTS',3), patch('local.read_ledger_files',side_effect=[{'': bytes([n])} for n in range(6)]) as read:
             with self.assertRaises(ValueError):stable_ledger_copy(self.path)
             self.assertEqual(read.call_count,6)
+
+    @unittest.skipUnless(sys.platform == 'linux', 'Requires executor Linux FIFO/no-follow semantics')
+    def test_sidecars_reject_special_files_and_open_replacement_without_hanging(self):
+        # Each case owns one bounded child. Old FIFO opens hang and fail this
+        # assertion only after that exact child is killed and reaped.
+        child_code = r"""
+import os, sys
+from pathlib import Path
+from unittest.mock import patch
+sys.path.insert(0, sys.argv[1])
+from local import read_ledger_files
+ledger, suffix, variant = Path(sys.argv[2]), sys.argv[3], sys.argv[4]
+sidecar = Path(str(ledger) + suffix)
+real_open, path_open = os.open, Path.open
+swapped = False
+def replace():
+    global swapped
+    if swapped: return
+    swapped = True
+    sidecar.unlink()
+    kind = variant.removeprefix('race-')
+    if kind == 'fifo': os.mkfifo(sidecar, 0o600)
+    elif kind == 'symlink': sidecar.symlink_to(ledger)
+    elif kind == 'directory': sidecar.mkdir()
+    else: sidecar.write_bytes(b'replacement')
+def descriptor_open(path, *args, **kwargs):
+    if Path(path) == sidecar: replace()
+    return real_open(path, *args, **kwargs)
+def pathname_open(path, *args, **kwargs):
+    if path == sidecar: replace()
+    return path_open(path, *args, **kwargs)
+try:
+    if variant.startswith('race-'):
+        with patch.object(os, 'open', descriptor_open), patch.object(Path, 'open', pathname_open):
+            captured = read_ledger_files(ledger)
+    else:
+        captured = read_ledger_files(ledger)
+except (ValueError, OSError):
+    print('REJECTED', flush=True)
+else:
+    print('ACCEPTED' if captured[suffix] == b'' else 'WRONG_CONTENT', flush=True)
+"""
+        for suffix in ('-wal', '-journal'):
+            for variant in ('regular', 'fifo', 'symlink', 'directory',
+                            'race-fifo', 'race-symlink', 'race-directory', 'race-regular'):
+                with self.subTest(suffix=suffix, variant=variant):
+                    case = Path(self.tmp.name) / (suffix[1:]+'-'+variant)
+                    case.mkdir()
+                    ledger = case / 'synthetic.sqlite3'
+                    ledger.write_bytes(b'synthetic-ledger')
+                    sidecar = Path(str(ledger)+suffix)
+                    if variant == 'fifo': os.mkfifo(sidecar, 0o600)
+                    elif variant == 'symlink': sidecar.symlink_to(ledger)
+                    elif variant == 'directory': sidecar.mkdir()
+                    else: sidecar.write_bytes(b'')
+                    before = ledger.read_bytes()
+                    child = subprocess.Popen(
+                        [sys.executable, '-B', '-c', child_code,
+                         str(ROOT/'orchestration/controller'), str(ledger), suffix, variant],
+                        stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                        env={k:v for k,v in os.environ.items() if k not in ('PYTHONPATH','PYTHONHOME')})
+                    timed_out = False
+                    try:
+                        stdout, stderr = child.communicate(timeout=3)
+                    except subprocess.TimeoutExpired:
+                        timed_out = True
+                        child.kill()  # Only this test's exact Popen handle.
+                        stdout, stderr = child.communicate(timeout=3)
+                    finally:
+                        if child.poll() is None:
+                            child.kill()
+                            child.communicate(timeout=3)
+                    self.assertIsNotNone(child.returncode)
+                    self.assertFalse(timed_out, 'Sidecar open blocked; owned child killed/reaped')
+                    self.assertEqual(child.returncode, 0, stderr.decode(errors='replace'))
+                    self.assertEqual(stdout.strip(), b'ACCEPTED' if variant=='regular' else b'REJECTED')
+                    self.assertEqual(ledger.read_bytes(), before)
 
     def test_stop_prevents_dispatch_and_preserves_active(self):
         s=self.make();p=self.claim(s);s.stop('synthetic-stop');self.assertIsNone(self.claim(s));self.assertEqual(s.record('A')['state'],'RUNNING')

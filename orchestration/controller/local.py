@@ -9,6 +9,8 @@ import hashlib
 import importlib.util
 import json
 import math
+import os
+import stat
 from pathlib import Path
 import re
 import sqlite3
@@ -115,19 +117,34 @@ class SnapshotChanged(ValueError):
 
 
 def read_ledger_files(path):
+    # A pathname check alone cannot prevent replacement with a FIFO between
+    # validation and open. Nonblocking + no-follow is mandatory; fail closed
+    # where the executor platform cannot supply both descriptor guarantees.
+    require(hasattr(os, 'O_NONBLOCK') and hasattr(os, 'O_NOFOLLOW'),
+            'Preflight requires nonblocking no-follow descriptor support')
     result = {}
     remaining = PREFLIGHT_MAX_BYTES
+    def identity(info):
+        return (info.st_dev, info.st_ino, info.st_mode, info.st_size,
+                info.st_mtime_ns, info.st_ctime_ns)
     for suffix in ('', '-wal', '-journal'):
         source = Path(str(path) + suffix)
-        require(not source.is_symlink() and not getattr(source, 'is_junction', lambda: False)(), 'Linked ledger sidecar is forbidden')
         try:
-            with source.open('rb') as stream:
-                before = source.stat()
-                require(source.is_file() and before.st_size <= remaining, 'Ledger snapshot exceeds preflight bound')
+            named = source.lstat()
+            require(stat.S_ISREG(named.st_mode) and not getattr(source, 'is_junction', lambda: False)(),
+                    'Ledger must be a regular unlinked file')
+            fd = os.open(source, os.O_RDONLY | os.O_NONBLOCK | os.O_NOFOLLOW
+                         | getattr(os, 'O_CLOEXEC', 0))
+            try:
+                before = os.fstat(fd)
+                require(stat.S_ISREG(before.st_mode), 'Ledger must be a regular file')
+                if identity(named) != identity(before):
+                    raise SnapshotChanged('Ledger replaced during preflight')
+                require(before.st_size <= remaining, 'Ledger snapshot exceeds preflight bound')
                 chunks = []
                 unread = before.st_size + 1
                 while unread:
-                    chunk = stream.read(min(64 * 1024, unread))
+                    chunk = os.read(fd, min(64 * 1024, unread))
                     if not chunk:
                         break
                     chunks.append(chunk)
@@ -135,12 +152,16 @@ def read_ledger_files(path):
                 content = b''.join(chunks)
                 if len(content) != before.st_size:
                     raise SnapshotChanged('Ledger length changed during preflight')
-                after = source.stat()
-                if (before.st_ino, before.st_size, before.st_mtime_ns) != (after.st_ino, after.st_size, after.st_mtime_ns):
+                after = os.fstat(fd)
+                current = source.lstat()
+                require(stat.S_ISREG(current.st_mode), 'Ledger must remain a regular unlinked file')
+                if identity(before) != identity(after) or identity(after) != identity(current):
                     raise SnapshotChanged('Ledger changed during preflight')
                 require(len(content) <= remaining, 'Ledger snapshot exceeds preflight bound')
                 remaining -= len(content)
                 result[suffix] = content
+            finally:
+                os.close(fd)
         except FileNotFoundError:
             if suffix == '':
                 raise SnapshotChanged('Ledger disappeared during preflight')

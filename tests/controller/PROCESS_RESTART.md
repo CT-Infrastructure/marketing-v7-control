@@ -1,12 +1,30 @@
 # F11 subprocess restart candidate
 
-Run only under the trusted root executor's Linux bwrap isolation. No test reaches a real controller ledger. Existing test_local.py is unchanged (51 tests).
+Run only under the trusted root executor's Linux bwrap isolation. No test reaches a real controller ledger. The original 51 test_local.py tests are retained; additive sidecar regressions require bounded owned children.
 
 Provide an existing dedicated local durable directory through F11_PROCESS_TEST_ROOT. Mount it read/write into the sandbox; source should remain read-only. The fixture rejects links, UNC paths and filesystem types other than ext4, xfs and btrfs using the longest matching /proc/self/mountinfo mount. The executor must independently attest that the backing device is dedicated local durable storage: filesystem type cannot establish physical durability or exclude shared block storage. Overlay/tmpfs/NFS/CIFS and unknown types fail closed. Do not install missing dependencies.
 
 Example inside the approved sandbox, from the exported source root:
 
-    PYTHONDONTWRITEBYTECODE=1 F11_PROCESS_TEST_ROOT=/approved/f11-scratch python3 -B -m unittest discover -s tests/controller -p 'test_*.py' -v
+    PYTHONDONTWRITEBYTECODE=1 F11_PROCESS_TEST_ROOT=/approved/f11-scratch F11_PROCESS_EXPECTED_REVISION="$TRUSTED_COMMITTED_REVISION" F11_PROCESS_SOURCE_MANIFEST=/approved/executor/f11-source-manifest.json python3 -B -m unittest discover -s tests/controller -p 'test_*.py' -v
+
+The trusted executor must set TRUSTED_COMMITTED_REVISION to the canonical nonzero lowercase 40-hex Git commit and supply F11_PROCESS_SOURCE_MANIFEST as an absolute executor path visible inside the sandbox. Obtain that revision and all six raw-byte SHA-256 values from the same frozen committed tree. Mount those source bytes read-only. The JSON must contain exactly these two keys, and source_hashes must cover exactly these six paths (replace placeholders with actual lowercase hex values):
+
+```json
+{
+  "source_revision": "<same nonzero lowercase 40-hex committed revision>",
+  "source_hashes": {
+    "tests/controller/test_process_restart.py": "<64-hex SHA-256>",
+    "tests/controller/test_process_revision.py": "<64-hex SHA-256>",
+    "tests/controller/test_local.py": "<64-hex SHA-256>",
+    "orchestration/controller/local.py": "<64-hex SHA-256>",
+    "tools/scheduler.py": "<64-hex SHA-256>",
+    "docs/orchestration/capacity/check_dispatch_inputs.py": "<64-hex SHA-256>"
+  }
+}
+```
+
+Export mode verifies the supplied declaration and bytes; it does not independently authenticate Git history or establish runtime qualification. A file SHA-256 is not a Git commit. This unpublished candidate must first be committed, then rerun against its actual new HEAD with a regenerated manifest. Do not attach an ancestor revision to new candidate bytes. Checkout mode independently compares covered bytes to its current HEAD; the six-path binding does not assert whole-tree cleanliness.
 
 For process semantics only, set F11_PROCESS_TEMP_ROOT to a supplied scratch directory instead. Never set both variables. This mode records durability NOT_RUN, including when the directory happens to be on disk. Without either variable the added test skips, explicitly noting durability NOT_RUN. No durability qualification is inferred from the old temporary fixtures.
 
