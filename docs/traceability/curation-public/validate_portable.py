@@ -42,7 +42,7 @@ ARTIFACT_PATHS=frozenset(('docs/traceability/README.md',)+tuple(
  'docs/traceability/curation-public/'+name for name in (
  'component-curation.json','README.md','review-dispositions.json',
  'shared-contract-evidence.json','source-manifest.json','summary.json',
- 'test_portable.py','validate_portable.py')))
+ 'test_portable.py','validate_portable.py','offline-amendments.json')))
 
 def verify_artifacts(root,package=PACKAGE):
  """Separate artifact gate; semantic fixtures do not bypass or mask this gate."""
@@ -303,10 +303,71 @@ def validate(source_root,package=PACKAGE):
   guard_public_inventory(load(package,name))
  return {'status':'SOURCE_EVIDENCE_VALID','components':147,'workflows':190,'pending_findings':28,'qualified':False,'runtime_status':'NOT_RUN'}
 
+
+OFFLINE_AMENDMENT_SHA256 = '95938473a464f9b76b15c551dd71ec79fd99811a776b99298682d0424db76b9b'
+
+def validate_m29_gate(change):
+ """Preserve native authority/readiness independently of the proposal digest."""
+ expected='Applicable permission, approval and destination readiness valid?'
+ required=(
+  'Additionally, qualification requires a current E11 control receipt;',
+  'this does not replace permission, approval or destination readiness.',
+  'Missing, stale or ambiguous authority, readiness or E11 evidence is UNKNOWN and remains HOLD pending reconciliation.',
+  'Ordinary isolated fixture tests remain permitted.',
+  'No hard build edge is established.')
+ if not (type(change) is dict and change.get('path')=='reference/workflows/M29.json'
+  and change.get('pointer')=='/gate' and change.get('old_value')==expected
+  and type(change.get('proposed_value')) is str
+  and change['proposed_value'].startswith(expected+' ')
+  and all(fragment in change['proposed_value'] for fragment in required)):
+  raise ValueError('M29 gate preservation: native predicate, additive E11 and UNKNOWN/HOLD required')
+
+def validate_amendments(source_root,package=PACKAGE):
+ """Check the fixed proposal contract and its exact immutable field bindings."""
+ doc=load(package,'offline-amendments.json');guard_public_inventory(doc)
+ m29=[row for row in doc['rows'] if row['finding_key']=='O20-17:SA-02'];need(len(m29)==1)
+ need(len(m29[0]['changes'])==1);validate_m29_gate(m29[0]['changes'][0])
+ need(hashlib.sha256(json.dumps(doc,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()).hexdigest()==OFFLINE_AMENDMENT_SHA256)
+ need(doc['status']=='PROPOSED_NOT_ADOPTED' and doc['qualified'] is False)
+ need(doc['production_authorized'] is False and doc['accepted_decision_receipt'] is None)
+ need(doc['runtime_status']=='NOT_RUN' and doc['applied_graph_changes']==[])
+ review=load(package,'review-dispositions.json')
+ need(len(doc['rows'])==28 and len({r['finding_key'] for r in doc['rows']})==28)
+ need({r['finding_key'] for r in doc['rows']}=={r['finding_key'] for r in review['audit_findings']})
+ need(sum(r['kind']=='BOUNDED_AMENDMENT' for r in doc['rows'])==13)
+ pins={s['path']:s['sha256_lf'] for s in load(package,'source-manifest.json')['sources']}
+ public=doc['public_source_pins'];need(len(public)==413 and len({s['path'] for s in public})==413)
+ for source in public:
+  path=source['path'];pin=source['sha256_lf']
+  need(path not in pins or pins[path]==pin)
+  need(normalized_sha(source_root,path)==pin);pins[path]=pin
+ for row in doc['rows']:
+  ref=row['source_disposition']
+  need(ref['path']=='review-dispositions.json' and normalized_sha(package,ref['path'])==ref['sha256_lf'])
+  finding=get_pointer(review,ref['pointer']);need(finding['finding_key']==row['finding_key'])
+  need(hashlib.sha256(json.dumps(finding,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()).hexdigest()==ref['finding_sha256'])
+  need(row['selection'] is None and row['accepted_decision_receipt'] is None)
+  if row['kind']=='UNANSWERED_CHOICE':need(len(row['alternatives'])>=2 and not row['changes'])
+  else:need(bool(row['changes']))
+  for item in row.get('curated_evidence',[]):
+   need(normalized_sha(package,item['path'])==item['sha256_lf'])
+   need(get_pointer(load(package,item['path']),item['pointer'])==item['old_value'])
+  for item in row['source_evidence']+row['changes']:
+   path=item['path'];need(path in pins and item['sha256_lf']==pins[path])
+   need(normalized_sha(source_root,path)==pins[path])
+   if item.get('source_kind')=='TEXT_LINE':
+    match=re.fullmatch(r'/lines/([1-9][0-9]*)',item['pointer']);need(match is not None)
+    value=raw(source_root,path).decode('utf-8-sig').splitlines()[int(match[1])-1]
+   else:value=get_pointer(load(source_root,path),item['pointer'])
+   need(type(value) is type(item['old_value']) and value==item['old_value'])
+   need(hashlib.sha256(json.dumps(value,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()).hexdigest()==item['old_value_sha256'])
+ return {'status':'PROPOSAL_BINDINGS_VALID','bounded_amendments':13,'unanswered_choices':15,'adopted':False}
+
 def main():
  parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--source-root',type=Path,default=PACKAGE.parents[2]);args=parser.parse_args()
  try:
   verify_artifacts(PACKAGE.parents[2],PACKAGE)
+  validate_amendments(args.source_root,PACKAGE)
   print(json.dumps(validate(args.source_root)));return 0
  except (OSError,ValueError,TypeError,KeyError,IndexError,RecursionError):
   print(json.dumps({'status':'INVALID_SOURCE_EVIDENCE','qualified':False}));return 2

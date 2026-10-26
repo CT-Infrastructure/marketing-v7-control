@@ -13,8 +13,8 @@
     },
     {
       "path": "docs/traceability/curation-public/README.md",
-      "sha256": "24fa8edf917bdcfa61565c9e17bf5acbd606c7e36ba83e4dfb91604b02c33075",
-      "bytes": 3247
+      "sha256": "a5e3dc1a243a363f10efd5b1feb9d89a4d03a5381e0cad47eba0c78e7c56aa5b",
+      "bytes": 6078
     },
     {
       "path": "docs/traceability/curation-public/review-dispositions.json",
@@ -38,13 +38,18 @@
     },
     {
       "path": "docs/traceability/curation-public/test_portable.py",
-      "sha256": "bbd3c4f00836b28238e3847b3bfe50cea53df2e88513d1d746ccbb92f40226f7",
-      "bytes": 29637
+      "sha256": "ce4035d66b5e36d0c0af62f9a3f55ed7c0b4ffb6e79666ded615648cc7f57216",
+      "bytes": 41627
     },
     {
       "path": "docs/traceability/curation-public/validate_portable.py",
-      "sha256": "872050c921557ee0f61b3827b5f82aa5874ae721da5d5b4b1262682c0cbbcbbc",
-      "bytes": 18546
+      "sha256": "4d980ffff76b5bf22681d306c14966c400592480bd54c06dc84b03183f06150d",
+      "bytes": 22734
+    },
+    {
+      "path": "docs/traceability/curation-public/offline-amendments.json",
+      "sha256": "aeddb2c40ab261834f9a44d429ef469b494dc5f825a1cb75eaa09681b7f2eedf",
+      "bytes": 190201
     }
   ],
   "component_dispositions": 147,
@@ -53,7 +58,7 @@
   "qualified": false,
   "runtime_cases_run": 0,
   "original_sources_changed": false,
-  "note": "Artifact hashes bind candidate bytes with CRLF normalized to LF (Git text blob semantics); source citation hashes also normalize CRLF to LF only. Historical controller receipts apply only to the prior artifact set, not this candidate.",
+  "note": "Artifact hashes bind final candidate LF bytes; verification also accepts CRLF normalized to LF only. Ten-artifact integrity retains the exact original nine paths union offline-amendments.json. Root-approved single original-method exception strengthens full hash/size and CRLF coverage; other 40 original methods remain byte-identical. Historical controller receipts apply only to their prior artifact set, not this repaired candidate. Proposal only; runtime tests NOT_RUN.",
   "historical_controller_validation": {
     "status": "CONTROLLER_VALIDATED_SOURCE_EVIDENCE",
     "source_revision": "97df42d5a00c5a7131eff76526777bba4fbdacff",
@@ -79,6 +84,6 @@
     "actual_linux_symlink_case_executed": true,
     "verified_at": "2026-10-25T23:43:07.749027+00:00"
   },
-  "status": "CANDIDATE_PENDING_CONTROLLER_VALIDATION",
+  "status": "PROPOSED_NOT_ADOPTED",
   "source_revision": "348491b91120d51163c8c0015eabfb232abf647b"
 }

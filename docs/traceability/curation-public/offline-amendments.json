@@ -1,0 +1,5055 @@
+{
+  "schema_version": "1.0",
+  "status": "PROPOSED_NOT_ADOPTED",
+  "qualified": false,
+  "runtime_status": "NOT_RUN",
+  "production_authorized": false,
+  "accepted_decision_receipt": null,
+  "applied_graph_changes": [],
+  "rows": [
+    {
+      "finding_key": "O20-01:AUD-001",
+      "workflow_ids": [
+        "C02",
+        "C03",
+        "C04",
+        "C05",
+        "C06",
+        "C07",
+        "C08",
+        "C09"
+      ],
+      "component_ids": [
+        "CP027",
+        "CP029",
+        "CP032",
+        "CP033",
+        "CP034",
+        "CP035",
+        "CP053",
+        "CP054",
+        "CP055",
+        "CP056",
+        "CP057",
+        "CP058",
+        "CP059",
+        "CP061",
+        "CP080"
+      ],
+      "mapped_existing_task_keys": [
+        "CP027",
+        "CP029",
+        "CP032",
+        "CP033",
+        "CP034",
+        "CP035",
+        "CP053",
+        "CP054",
+        "CP055",
+        "CP056",
+        "CP057",
+        "CP058",
+        "CP059",
+        "CP061",
+        "CP080",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F18",
+        "F20",
+        "WF-C02-BUILD",
+        "WF-C02-TEST",
+        "WF-C02-VERIFY",
+        "WF-C03-BUILD",
+        "WF-C03-TEST",
+        "WF-C03-VERIFY",
+        "WF-C04-BUILD",
+        "WF-C04-TEST",
+        "WF-C04-VERIFY",
+        "WF-C05-BUILD",
+        "WF-C05-TEST",
+        "WF-C05-VERIFY",
+        "WF-C06-BUILD",
+        "WF-C06-TEST",
+        "WF-C06-VERIFY",
+        "WF-C07-BUILD",
+        "WF-C07-TEST",
+        "WF-C07-VERIFY",
+        "WF-C08-BUILD",
+        "WF-C08-TEST",
+        "WF-C08-VERIFY",
+        "WF-C09-BUILD",
+        "WF-C09-TEST",
+        "WF-C09-VERIFY",
+        "WF-X02-BUILD",
+        "WF-X02-VERIFY",
+        "WF-X03-BUILD",
+        "WF-X03-VERIFY",
+        "WF-X04-BUILD",
+        "WF-X05-BUILD",
+        "WF-X05-VERIFY",
+        "WF-X06-BUILD",
+        "WF-X06-VERIFY"
+      ],
+      "F20_acceptance_criterion": [
+        "190 workflow implementations/test suites/verifications and all 147 component records covered"
+      ],
+      "status": "PROPOSED_NOT_ADOPTED",
+      "qualified": false,
+      "runtime_status": "NOT_RUN",
+      "production_authorized": false,
+      "accepted_decision_receipt": null,
+      "selection": null,
+      "source_disposition": {
+        "path": "review-dispositions.json",
+        "pointer": "/audit_findings/0",
+        "sha256_lf": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+        "finding_sha256": "837d50dc67e625894fd7581c3716011f8017e52c4927c51eec3715a8286bb1f0"
+      },
+      "kind": "BOUNDED_AMENDMENT",
+      "responsible_role": "F20 curator and source custodian",
+      "decision_question": "Confirm whether old citations are context or intended membership; no business authorization is needed.",
+      "rationale": "D-C01 explicitly declares C01-C08 and D-C02 C09-C16. Applicable node membership is now independently reread. C09 appears in D-C01 only as a cross-domain handoff, not a declared workflow node. The private parent citation list remains opaque; its alleged wrong citations and intended context still require custodian disposition.",
+      "changes": [
+        {
+          "path": "reference/workflows/C09.json",
+          "pointer": "/id",
+          "sha256_lf": "8262099c722366413b2cbf127289c0fe074cafc93a5cc3d71f5f596f04eecf74",
+          "old_value": "C09",
+          "old_value_sha256": "45bea7ea30dbb62fd6c7cefb9adf58dcf5dbbc6d72895b65c170d3f4d992cc9d",
+          "operation": "ADD_ASSOCIATION_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": {
+            "C02": "D-C01",
+            "C03": "D-C01",
+            "C04": "D-C01",
+            "C05": "D-C01",
+            "C06": "D-C01",
+            "C07": "D-C01",
+            "C08": "D-C01",
+            "C09": "D-C02",
+            "context_selection": null
+          }
+        }
+      ],
+      "source_evidence": [
+        {
+          "path": "reference/workflows/C02.json",
+          "pointer": "/gate",
+          "sha256_lf": "d0288f6c95877d3157d01b3b6961b52c2c2d5dc3fb7ea9ca912fc5a14c05762b",
+          "old_value": "Exact artifact, rights and intended handoff approved?",
+          "old_value_sha256": "9ea0910de61283ce2d590b2a80eb813b74381297e8f3f2d961f67971a68335c1"
+        },
+        {
+          "path": "reference/workflows/C03.json",
+          "pointer": "/gate",
+          "sha256_lf": "b90d8f5e3102cadd97b93f0333b0f95db808dcde5fc61a302df22224aa0c57f8",
+          "old_value": "Exact artifact, rights and intended handoff approved?",
+          "old_value_sha256": "9ea0910de61283ce2d590b2a80eb813b74381297e8f3f2d961f67971a68335c1"
+        },
+        {
+          "path": "reference/workflows/C04.json",
+          "pointer": "/gate",
+          "sha256_lf": "0950d86dced8238decd51b78c604cac23fb2680ebb9b0eb5bc0516fe8035e43f",
+          "old_value": "Exact artifact, rights and intended handoff approved?",
+          "old_value_sha256": "9ea0910de61283ce2d590b2a80eb813b74381297e8f3f2d961f67971a68335c1"
+        },
+        {
+          "path": "reference/workflows/C05.json",
+          "pointer": "/gate",
+          "sha256_lf": "2c532f06eda675330669f6e6b43c3bd7cfa5eab8a0e863d84a533d610a4a94a4",
+          "old_value": "Exact artifact, rights and intended handoff approved?",
+          "old_value_sha256": "9ea0910de61283ce2d590b2a80eb813b74381297e8f3f2d961f67971a68335c1"
+        },
+        {
+          "path": "reference/workflows/C06.json",
+          "pointer": "/gate",
+          "sha256_lf": "31e42b1f6b5ec27fe4d7c424a06346d35e8b2c0185f9c87d1c4c02a02bc97956",
+          "old_value": "Exact artifact, rights and intended handoff approved?",
+          "old_value_sha256": "9ea0910de61283ce2d590b2a80eb813b74381297e8f3f2d961f67971a68335c1"
+        },
+        {
+          "path": "reference/workflows/C07.json",
+          "pointer": "/gate",
+          "sha256_lf": "565f51f57b1e2aaf3a38fa372b5c2fb626758589409f27754456f8ad209ea615",
+          "old_value": "Exact artifact, rights and intended handoff approved?",
+          "old_value_sha256": "9ea0910de61283ce2d590b2a80eb813b74381297e8f3f2d961f67971a68335c1"
+        },
+        {
+          "path": "reference/workflows/C08.json",
+          "pointer": "/gate",
+          "sha256_lf": "0702645bd96cd846d49fd795213219bd1ad9d6e1de054610346b947651ec46d3",
+          "old_value": "Exact artifact, rights and intended handoff approved?",
+          "old_value_sha256": "9ea0910de61283ce2d590b2a80eb813b74381297e8f3f2d961f67971a68335c1"
+        },
+        {
+          "path": "reference/workflows/C09.json",
+          "pointer": "/gate",
+          "sha256_lf": "8262099c722366413b2cbf127289c0fe074cafc93a5cc3d71f5f596f04eecf74",
+          "old_value": "Exact artifact, rights and intended handoff approved?",
+          "old_value_sha256": "9ea0910de61283ce2d590b2a80eb813b74381297e8f3f2d961f67971a68335c1"
+        },
+        {
+          "path": "reference/workflows/C02.json",
+          "pointer": "/id",
+          "sha256_lf": "d0288f6c95877d3157d01b3b6961b52c2c2d5dc3fb7ea9ca912fc5a14c05762b",
+          "old_value": "C02",
+          "old_value_sha256": "8938fbaa8b5d7f4807ef800262317fcab153445143f1b9d6959b11f75b12001a"
+        },
+        {
+          "path": "reference/workflows/C03.json",
+          "pointer": "/id",
+          "sha256_lf": "b90d8f5e3102cadd97b93f0333b0f95db808dcde5fc61a302df22224aa0c57f8",
+          "old_value": "C03",
+          "old_value_sha256": "0455428932f8f9b276b21cbd99fa08332498493c61cf04d5a22d817e9a68988b"
+        },
+        {
+          "path": "reference/workflows/C04.json",
+          "pointer": "/id",
+          "sha256_lf": "0950d86dced8238decd51b78c604cac23fb2680ebb9b0eb5bc0516fe8035e43f",
+          "old_value": "C04",
+          "old_value_sha256": "671500386034fb8506f3410c895502f38f75b9e27985b4e5620b21ca5a77f016"
+        },
+        {
+          "path": "reference/workflows/C05.json",
+          "pointer": "/id",
+          "sha256_lf": "2c532f06eda675330669f6e6b43c3bd7cfa5eab8a0e863d84a533d610a4a94a4",
+          "old_value": "C05",
+          "old_value_sha256": "9cfc6370d3e9e7758626fed2f7e7fd17514d527c7b61460b8bd79db616db605c"
+        },
+        {
+          "path": "reference/workflows/C06.json",
+          "pointer": "/id",
+          "sha256_lf": "31e42b1f6b5ec27fe4d7c424a06346d35e8b2c0185f9c87d1c4c02a02bc97956",
+          "old_value": "C06",
+          "old_value_sha256": "803de66ab64ecb086324df2be28803d9ebc662b277f04e8b2288464137aafcb6"
+        },
+        {
+          "path": "reference/workflows/C07.json",
+          "pointer": "/id",
+          "sha256_lf": "565f51f57b1e2aaf3a38fa372b5c2fb626758589409f27754456f8ad209ea615",
+          "old_value": "C07",
+          "old_value_sha256": "2fbe81e70eeea12393b046e64a3a9fb7c55d8c2aef575939cd5c6acf19fd4c24"
+        },
+        {
+          "path": "reference/workflows/C08.json",
+          "pointer": "/id",
+          "sha256_lf": "0702645bd96cd846d49fd795213219bd1ad9d6e1de054610346b947651ec46d3",
+          "old_value": "C08",
+          "old_value_sha256": "8a99fd63f8fb8fd6c9aaf1d9e7d28a9c6d47626149b73a24338416f1e55c607c"
+        },
+        {
+          "path": "reference/workflows/C09.json",
+          "pointer": "/id",
+          "sha256_lf": "8262099c722366413b2cbf127289c0fe074cafc93a5cc3d71f5f596f04eecf74",
+          "old_value": "C09",
+          "old_value_sha256": "45bea7ea30dbb62fd6c7cefb9adf58dcf5dbbc6d72895b65c170d3f4d992cc9d"
+        },
+        {
+          "path": "reference/mermaid/D-C01.mmd",
+          "pointer": "/lines/5",
+          "source_kind": "TEXT_LINE",
+          "sha256_lf": "2fe8c11774255c495e365306f772cf23f01d70cc1885d4f6380151a9c62bd7ed",
+          "old_value": "  C02[\"C02<br/>SEO keyword clustering\"]:::process",
+          "old_value_sha256": "c16ed3047f95377f0a96ffa8d4e71e7d4751777b53853321dd0bb6b8e5aec30a"
+        },
+        {
+          "path": "reference/mermaid/D-C01.mmd",
+          "pointer": "/lines/7",
+          "source_kind": "TEXT_LINE",
+          "sha256_lf": "2fe8c11774255c495e365306f772cf23f01d70cc1885d4f6380151a9c62bd7ed",
+          "old_value": "  C03[\"C03<br/>Competitor content-gap<br/>analysis\"]:::process",
+          "old_value_sha256": "41519aaad0212a35aaab529d6a8c9d0acaa02929b3e15a1b4dc57f323f2bbe48"
+        },
+        {
+          "path": "reference/mermaid/D-C01.mmd",
+          "pointer": "/lines/9",
+          "source_kind": "TEXT_LINE",
+          "sha256_lf": "2fe8c11774255c495e365306f772cf23f01d70cc1885d4f6380151a9c62bd7ed",
+          "old_value": "  C04[\"C04<br/>Audience pain-point research\"]:::process",
+          "old_value_sha256": "29fefc77ee9c603bb6a280f81e0858bb0c893c71c92c021107bdafa31c77d254"
+        },
+        {
+          "path": "reference/mermaid/D-C01.mmd",
+          "pointer": "/lines/11",
+          "source_kind": "TEXT_LINE",
+          "sha256_lf": "2fe8c11774255c495e365306f772cf23f01d70cc1885d4f6380151a9c62bd7ed",
+          "old_value": "  C05[\"C05<br/>Campaign concept generation\"]:::process",
+          "old_value_sha256": "710b54eb4c39af66ec7aecfe6c675cedc9b1c1977171f9f86eb8ee80eeb69413"
+        },
+        {
+          "path": "reference/mermaid/D-C01.mmd",
+          "pointer": "/lines/13",
+          "source_kind": "TEXT_LINE",
+          "sha256_lf": "2fe8c11774255c495e365306f772cf23f01d70cc1885d4f6380151a9c62bd7ed",
+          "old_value": "  C06[\"C06<br/>Topical authority mapping\"]:::process",
+          "old_value_sha256": "d45672b7d2d0187be9bb753e9e125f5a8b279b0eeac91cbe672a3568444382d7"
+        },
+        {
+          "path": "reference/mermaid/D-C01.mmd",
+          "pointer": "/lines/15",
+          "source_kind": "TEXT_LINE",
+          "sha256_lf": "2fe8c11774255c495e365306f772cf23f01d70cc1885d4f6380151a9c62bd7ed",
+          "old_value": "  C07[\"C07<br/>Fact-check and source pack\"]:::process",
+          "old_value_sha256": "970a7a2d6f9ae1ce1075e1301e4330e742da0b08d5ccac3920f29525f870ad9d"
+        },
+        {
+          "path": "reference/mermaid/D-C01.mmd",
+          "pointer": "/lines/17",
+          "source_kind": "TEXT_LINE",
+          "sha256_lf": "2fe8c11774255c495e365306f772cf23f01d70cc1885d4f6380151a9c62bd7ed",
+          "old_value": "  C08[\"C08<br/>Editorial calendar generation\"]:::process",
+          "old_value_sha256": "0bc4c7fce4bff22d0d34fb807dc7d9e1ce0db6c8bfbbb2f42b855a999013964e"
+        },
+        {
+          "path": "reference/mermaid/D-C02.mmd",
+          "pointer": "/lines/3",
+          "source_kind": "TEXT_LINE",
+          "sha256_lf": "f0d110c87364d155cb3bab4647636224f37df7b1bc9855ddbbfea6f650306da4",
+          "old_value": "  C09[\"C09<br/>SEO pillar article\"]:::process",
+          "old_value_sha256": "dd34f3bdba1f641862525e88a867be8ef1210e1f0435ed4b51c3cdb7dc1c3a18"
+        }
+      ],
+      "alternatives": [],
+      "boundaries": [
+        {
+          "producer": "C02",
+          "consumer": "F20",
+          "artifact_type": "DomainMembershipCitation",
+          "member_of": "D-C01",
+          "context_citation_intent": null
+        },
+        {
+          "producer": "C03",
+          "consumer": "F20",
+          "artifact_type": "DomainMembershipCitation",
+          "member_of": "D-C01",
+          "context_citation_intent": null
+        },
+        {
+          "producer": "C04",
+          "consumer": "F20",
+          "artifact_type": "DomainMembershipCitation",
+          "member_of": "D-C01",
+          "context_citation_intent": null
+        },
+        {
+          "producer": "C05",
+          "consumer": "F20",
+          "artifact_type": "DomainMembershipCitation",
+          "member_of": "D-C01",
+          "context_citation_intent": null
+        },
+        {
+          "producer": "C06",
+          "consumer": "F20",
+          "artifact_type": "DomainMembershipCitation",
+          "member_of": "D-C01",
+          "context_citation_intent": null
+        },
+        {
+          "producer": "C07",
+          "consumer": "F20",
+          "artifact_type": "DomainMembershipCitation",
+          "member_of": "D-C01",
+          "context_citation_intent": null
+        },
+        {
+          "producer": "C08",
+          "consumer": "F20",
+          "artifact_type": "DomainMembershipCitation",
+          "member_of": "D-C01",
+          "context_citation_intent": null
+        },
+        {
+          "producer": "C09",
+          "consumer": "F20",
+          "artifact_type": "DomainMembershipCitation",
+          "member_of": "D-C02",
+          "context_citation_intent": null
+        }
+      ],
+      "citation_proposal": {
+        "C02": "D-C01",
+        "C03": "D-C01",
+        "C04": "D-C01",
+        "C05": "D-C01",
+        "C06": "D-C01",
+        "C07": "D-C01",
+        "C08": "D-C01",
+        "C09": "D-C02",
+        "context_selection": null
+      }
+    },
+    {
+      "finding_key": "O20-02:D01",
+      "workflow_ids": [
+        "C10"
+      ],
+      "component_ids": [
+        "CP033",
+        "CP034",
+        "CP053",
+        "CP055",
+        "CP056",
+        "CP057",
+        "CP059",
+        "CP080"
+      ],
+      "mapped_existing_task_keys": [
+        "CP033",
+        "CP034",
+        "CP053",
+        "CP055",
+        "CP056",
+        "CP057",
+        "CP059",
+        "CP080",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F18",
+        "F20",
+        "WF-C10-BUILD",
+        "WF-C10-TEST",
+        "WF-C10-VERIFY",
+        "WF-X02-BUILD",
+        "WF-X02-VERIFY",
+        "WF-X03-BUILD",
+        "WF-X03-VERIFY",
+        "WF-X04-BUILD",
+        "WF-X05-BUILD",
+        "WF-X05-VERIFY",
+        "WF-X06-BUILD",
+        "WF-X06-VERIFY"
+      ],
+      "F20_acceptance_criterion": [
+        "190 workflow implementations/test suites/verifications and all 147 component records covered"
+      ],
+      "status": "PROPOSED_NOT_ADOPTED",
+      "qualified": false,
+      "runtime_status": "NOT_RUN",
+      "production_authorized": false,
+      "accepted_decision_receipt": null,
+      "selection": null,
+      "source_disposition": {
+        "path": "review-dispositions.json",
+        "pointer": "/audit_findings/1",
+        "sha256_lf": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+        "finding_sha256": "bd58e1e2b841ebe9af7555a769338a295bc262402024ab8e4d1cd0dc3f7463e0"
+      },
+      "kind": "BOUNDED_AMENDMENT",
+      "responsible_role": "F20 curator, F05 and WordPress engineering owners",
+      "decision_question": "No external decision needed; review exact link/revision action against F05 allowlist.",
+      "rationale": "C10 steps/1 labels link mutation SerpBear; F05 explicitly assigns WordPress web posts/revisions and SerpBear rank observations. Native ownership is already specified; workflow-level allocation is missing.",
+      "changes": [
+        {
+          "path": "reference/workflows/C10.json",
+          "pointer": "/steps/1/software",
+          "sha256_lf": "40d48169ff9ceae380248cdf892f9a0a7b90d94004f14d721cbd1431fec0e592",
+          "old_value": "SerpBear / bounded integration",
+          "old_value_sha256": "bbb103e27fb14a217f01cc35fd9948098ae385b53b9976e77b67824bcd05e8f8",
+          "operation": "REPLACE_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": "WordPress / approved staging revision API"
+        }
+      ],
+      "source_evidence": [
+        {
+          "path": "reference/workflows/C10.json",
+          "pointer": "/gate",
+          "sha256_lf": "40d48169ff9ceae380248cdf892f9a0a7b90d94004f14d721cbd1431fec0e592",
+          "old_value": "Exact artifact, rights and intended handoff approved?",
+          "old_value_sha256": "9ea0910de61283ce2d590b2a80eb813b74381297e8f3f2d961f67971a68335c1"
+        }
+      ],
+      "alternatives": [],
+      "boundaries": [
+        {
+          "producer": "C10",
+          "consumer": "C10",
+          "artifact_type": "ContextualLinkRevision",
+          "release": "HELD",
+          "native_owner": "WordPress"
+        }
+      ],
+      "rank_input_owner": "SerpBear"
+    },
+    {
+      "finding_key": "O20-02:D02",
+      "workflow_ids": [
+        "C15"
+      ],
+      "component_ids": [
+        "CP033",
+        "CP056",
+        "CP057",
+        "CP058",
+        "CP059",
+        "CP070",
+        "CP080"
+      ],
+      "mapped_existing_task_keys": [
+        "CP033",
+        "CP056",
+        "CP057",
+        "CP058",
+        "CP059",
+        "CP070",
+        "CP080",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F18",
+        "F20",
+        "WF-C15-BUILD",
+        "WF-C15-TEST",
+        "WF-C15-VERIFY",
+        "WF-X02-BUILD",
+        "WF-X02-VERIFY",
+        "WF-X03-BUILD",
+        "WF-X03-VERIFY",
+        "WF-X04-BUILD",
+        "WF-X05-BUILD",
+        "WF-X05-VERIFY",
+        "WF-X06-BUILD",
+        "WF-X06-VERIFY"
+      ],
+      "F20_acceptance_criterion": [
+        "190 workflow implementations/test suites/verifications and all 147 component records covered"
+      ],
+      "status": "PROPOSED_NOT_ADOPTED",
+      "qualified": false,
+      "runtime_status": "NOT_RUN",
+      "production_authorized": false,
+      "accepted_decision_receipt": null,
+      "selection": null,
+      "source_disposition": {
+        "path": "review-dispositions.json",
+        "pointer": "/audit_findings/2",
+        "sha256_lf": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+        "finding_sha256": "3cdac2d816357a8f2f5c4064230b7cec24155d3605d9518e7303abc939506a5e"
+      },
+      "kind": "BOUNDED_AMENDMENT",
+      "responsible_role": "F20 curator and media/F05 engineering owners",
+      "decision_question": "Is audio intended at all, or is Kokoro a stage-label error? This is an internal source interpretation.",
+      "rationale": "C15 narrative stage says Kokoro ONNX while source_software names llama.cpp. Existing component enumeration preserves both but does not define narrative/audio stage boundaries.",
+      "changes": [
+        {
+          "path": "reference/workflows/C15.json",
+          "pointer": "/steps/1/software",
+          "sha256_lf": "aba7dba5ef662bdb38ec1cb52fa2f62a9c932bfacfb797959ceb295e50599e17",
+          "old_value": "Kokoro ONNX / audio review",
+          "old_value_sha256": "f4a9c071ebb12b5bcfe0169eb48369125d0b592666770bb621afda14b4b6ebd9",
+          "operation": "REPLACE_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": "llama.cpp / OmniRoute"
+        }
+      ],
+      "source_evidence": [
+        {
+          "path": "reference/workflows/C15.json",
+          "pointer": "/gate",
+          "sha256_lf": "aba7dba5ef662bdb38ec1cb52fa2f62a9c932bfacfb797959ceb295e50599e17",
+          "old_value": "Exact artifact, rights and intended handoff approved?",
+          "old_value_sha256": "9ea0910de61283ce2d590b2a80eb813b74381297e8f3f2d961f67971a68335c1"
+        }
+      ],
+      "alternatives": [],
+      "boundaries": [
+        {
+          "producer": "C15",
+          "consumer": "C15",
+          "artifact_type": "NarrativeText",
+          "release": "HELD",
+          "native_owner": "llama.cpp"
+        }
+      ],
+      "optional_audio": {
+        "selection": null,
+        "alternatives": [
+          "No audio stage",
+          "Separately reviewed Kokoro ONNX audio stage"
+        ],
+        "not_part_of_narrative_generation": true
+      }
+    },
+    {
+      "finding_key": "O20-02:D03",
+      "workflow_ids": [
+        "C16"
+      ],
+      "component_ids": [
+        "CP033",
+        "CP055",
+        "CP056",
+        "CP057",
+        "CP059",
+        "CP061",
+        "CP080"
+      ],
+      "mapped_existing_task_keys": [
+        "CP033",
+        "CP055",
+        "CP056",
+        "CP057",
+        "CP059",
+        "CP061",
+        "CP080",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F18",
+        "F20",
+        "WF-C16-BUILD",
+        "WF-C16-TEST",
+        "WF-C16-VERIFY",
+        "WF-X02-BUILD",
+        "WF-X02-VERIFY",
+        "WF-X03-BUILD",
+        "WF-X03-VERIFY",
+        "WF-X04-BUILD",
+        "WF-X05-BUILD",
+        "WF-X05-VERIFY",
+        "WF-X06-BUILD",
+        "WF-X06-VERIFY"
+      ],
+      "F20_acceptance_criterion": [
+        "190 workflow implementations/test suites/verifications and all 147 component records covered"
+      ],
+      "status": "PROPOSED_NOT_ADOPTED",
+      "qualified": false,
+      "runtime_status": "NOT_RUN",
+      "production_authorized": false,
+      "accepted_decision_receipt": null,
+      "selection": null,
+      "source_disposition": {
+        "path": "review-dispositions.json",
+        "pointer": "/audit_findings/3",
+        "sha256_lf": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+        "finding_sha256": "23663fcd5a89184683c0cd63846f81de2dcf7ba2d7b19b5ba814fe179054ea5e"
+      },
+      "kind": "BOUNDED_AMENDMENT",
+      "responsible_role": "F20 curator, F05 and WordPress owners",
+      "decision_question": "No missing business approval blocks this engineering correction.",
+      "rationale": "C16 fact updates/revision creation remain labeled SerpBear. F05 already establishes WordPress revision ownership; it does not make rank software a revision writer.",
+      "changes": [
+        {
+          "path": "reference/workflows/C16.json",
+          "pointer": "/steps/1/software",
+          "sha256_lf": "9859050a8cdc3d72597e6231c96b2dce9b18dd3fe47c91fe0c6c5b24ee8a3940",
+          "old_value": "SerpBear / bounded integration",
+          "old_value_sha256": "bbb103e27fb14a217f01cc35fd9948098ae385b53b9976e77b67824bcd05e8f8",
+          "operation": "REPLACE_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": "llama.cpp / grounded fact generation"
+        },
+        {
+          "path": "reference/workflows/C16.json",
+          "pointer": "/steps/2/software",
+          "sha256_lf": "9859050a8cdc3d72597e6231c96b2dce9b18dd3fe47c91fe0c6c5b24ee8a3940",
+          "old_value": "SerpBear / bounded integration",
+          "old_value_sha256": "bbb103e27fb14a217f01cc35fd9948098ae385b53b9976e77b67824bcd05e8f8",
+          "operation": "REPLACE_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": "WordPress / approved staging revision API"
+        }
+      ],
+      "source_evidence": [
+        {
+          "path": "reference/workflows/C16.json",
+          "pointer": "/gate",
+          "sha256_lf": "9859050a8cdc3d72597e6231c96b2dce9b18dd3fe47c91fe0c6c5b24ee8a3940",
+          "old_value": "Exact artifact, rights and intended handoff approved?",
+          "old_value_sha256": "9ea0910de61283ce2d590b2a80eb813b74381297e8f3f2d961f67971a68335c1"
+        }
+      ],
+      "alternatives": [],
+      "boundaries": [
+        {
+          "producer": "C16",
+          "consumer": "C16",
+          "artifact_type": "FactUpdateDraft",
+          "release": "HELD",
+          "native_owner": "llama.cpp"
+        },
+        {
+          "producer": "C16",
+          "consumer": "C16",
+          "artifact_type": "WordPressRevision",
+          "release": "HELD",
+          "native_owner": "WordPress"
+        }
+      ],
+      "rank_input_owner": "SerpBear"
+    },
+    {
+      "finding_key": "O20-02:D04",
+      "workflow_ids": [
+        "C17"
+      ],
+      "component_ids": [
+        "CP032",
+        "CP033",
+        "CP056",
+        "CP059",
+        "CP060",
+        "CP076",
+        "CP077",
+        "CP080"
+      ],
+      "mapped_existing_task_keys": [
+        "CP032",
+        "CP033",
+        "CP056",
+        "CP059",
+        "CP060",
+        "CP076",
+        "CP077",
+        "CP080",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F18",
+        "F20",
+        "WF-C17-BUILD",
+        "WF-C17-TEST",
+        "WF-C17-VERIFY",
+        "WF-X02-BUILD",
+        "WF-X02-VERIFY",
+        "WF-X03-BUILD",
+        "WF-X03-VERIFY",
+        "WF-X04-BUILD",
+        "WF-X05-BUILD",
+        "WF-X05-VERIFY",
+        "WF-X06-BUILD",
+        "WF-X06-VERIFY"
+      ],
+      "F20_acceptance_criterion": [
+        "190 workflow implementations/test suites/verifications and all 147 component records covered"
+      ],
+      "status": "PROPOSED_NOT_ADOPTED",
+      "qualified": false,
+      "runtime_status": "NOT_RUN",
+      "production_authorized": false,
+      "accepted_decision_receipt": null,
+      "selection": null,
+      "source_disposition": {
+        "path": "review-dispositions.json",
+        "pointer": "/audit_findings/4",
+        "sha256_lf": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+        "finding_sha256": "5eae0070ed479bd1b0a57a30a9d73fd3da7f345553396c14b098ff3cad21ea4b"
+      },
+      "kind": "BOUNDED_AMENDMENT",
+      "responsible_role": "F20 curator and generation/media owners",
+      "decision_question": "Confirm intended stage responsibility in review, without selecting a new provider.",
+      "rationale": "C17 text generation says FFmpeg while source_software includes llama.cpp; literal tool labels are inconsistent and no runtime capability conclusion follows.",
+      "changes": [
+        {
+          "path": "reference/workflows/C17.json",
+          "pointer": "/steps/0/software",
+          "sha256_lf": "335840363f589afebb04ae60c93389abc751d9756bd80b5ec1e7849be2a02caf",
+          "old_value": "FFmpeg / bounded media job",
+          "old_value_sha256": "c394e64e4683ccfbeefbf116de375cc0eb05db386901f5b4e69ab3009bf35881",
+          "operation": "REPLACE_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": "llama.cpp / OmniRoute"
+        }
+      ],
+      "source_evidence": [
+        {
+          "path": "reference/workflows/C17.json",
+          "pointer": "/gate",
+          "sha256_lf": "335840363f589afebb04ae60c93389abc751d9756bd80b5ec1e7849be2a02caf",
+          "old_value": "Exact artifact, rights and intended handoff approved?",
+          "old_value_sha256": "9ea0910de61283ce2d590b2a80eb813b74381297e8f3f2d961f67971a68335c1"
+        }
+      ],
+      "alternatives": [],
+      "boundaries": [
+        {
+          "producer": "C17",
+          "consumer": "C17",
+          "artifact_type": "ChannelText",
+          "release": "HELD",
+          "native_owner": "llama.cpp"
+        }
+      ],
+      "media_work": {
+        "owner": "FFmpeg",
+        "required": null,
+        "not_text_generator": true
+      }
+    },
+    {
+      "finding_key": "O20-02:D05",
+      "workflow_ids": [
+        "C17"
+      ],
+      "component_ids": [
+        "CP032",
+        "CP033",
+        "CP056",
+        "CP059",
+        "CP060",
+        "CP076",
+        "CP077",
+        "CP080"
+      ],
+      "mapped_existing_task_keys": [
+        "CP032",
+        "CP033",
+        "CP056",
+        "CP059",
+        "CP060",
+        "CP076",
+        "CP077",
+        "CP080",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F18",
+        "F20",
+        "WF-C17-BUILD",
+        "WF-C17-TEST",
+        "WF-C17-VERIFY",
+        "WF-X02-BUILD",
+        "WF-X02-VERIFY",
+        "WF-X03-BUILD",
+        "WF-X03-VERIFY",
+        "WF-X04-BUILD",
+        "WF-X05-BUILD",
+        "WF-X05-VERIFY",
+        "WF-X06-BUILD",
+        "WF-X06-VERIFY"
+      ],
+      "F20_acceptance_criterion": [
+        "190 workflow implementations/test suites/verifications and all 147 component records covered"
+      ],
+      "status": "PROPOSED_NOT_ADOPTED",
+      "qualified": false,
+      "runtime_status": "NOT_RUN",
+      "production_authorized": false,
+      "accepted_decision_receipt": null,
+      "selection": null,
+      "source_disposition": {
+        "path": "review-dispositions.json",
+        "pointer": "/audit_findings/5",
+        "sha256_lf": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+        "finding_sha256": "5cdc5232a64a41e63fa49fd4955d79f0ea47943fc1d5ccddfdb34c76f0c9976a"
+      },
+      "kind": "UNANSWERED_CHOICE",
+      "responsible_role": "C17, Postiz, M15/M17 and F04/F05 contract owners",
+      "decision_question": "Does scheduled mean a non-dispatchable schedule proposal or a disabled native schedule, and what receipt proves hold?",
+      "rationale": "C17 output says scheduled posts, while final step and acceptance require staging until final release. F05 Postiz ownership is known, but held-schedule representation is not defined.",
+      "changes": [],
+      "source_evidence": [
+        {
+          "path": "reference/workflows/C17.json",
+          "pointer": "/gate",
+          "sha256_lf": "335840363f589afebb04ae60c93389abc751d9756bd80b5ec1e7849be2a02caf",
+          "old_value": "Exact artifact, rights and intended handoff approved?",
+          "old_value_sha256": "9ea0910de61283ce2d590b2a80eb813b74381297e8f3f2d961f67971a68335c1"
+        }
+      ],
+      "alternatives": [
+        "Non-dispatchable schedule proposal",
+        "Disabled native schedule with independently verified hold receipt"
+      ],
+      "boundaries": [
+        {
+          "producer": "C17",
+          "consumer": "C17",
+          "artifact_type": "UnresolvedSourceDecision",
+          "unknown": "HOLD",
+          "selected": null,
+          "proposal": "Draft held schedule artifact contract for C17 to M15/M17 including recipient readiness, revision and no release; submit for source review."
+        }
+      ]
+    },
+    {
+      "finding_key": "O20-06:D01",
+      "workflow_ids": [
+        "C50",
+        "C51",
+        "C52",
+        "C53"
+      ],
+      "component_ids": [
+        "CP033",
+        "CP034",
+        "CP035",
+        "CP053",
+        "CP056",
+        "CP059",
+        "CP069",
+        "CP070",
+        "CP077",
+        "CP080"
+      ],
+      "mapped_existing_task_keys": [
+        "CP033",
+        "CP034",
+        "CP035",
+        "CP053",
+        "CP056",
+        "CP059",
+        "CP069",
+        "CP070",
+        "CP077",
+        "CP080",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F18",
+        "F20",
+        "WF-C50-BUILD",
+        "WF-C50-TEST",
+        "WF-C50-VERIFY",
+        "WF-C51-BUILD",
+        "WF-C51-TEST",
+        "WF-C51-VERIFY",
+        "WF-C52-BUILD",
+        "WF-C52-TEST",
+        "WF-C52-VERIFY",
+        "WF-C53-BUILD",
+        "WF-C53-TEST",
+        "WF-C53-VERIFY",
+        "WF-X02-BUILD",
+        "WF-X02-VERIFY",
+        "WF-X03-BUILD",
+        "WF-X03-VERIFY",
+        "WF-X04-BUILD",
+        "WF-X05-BUILD",
+        "WF-X05-VERIFY",
+        "WF-X06-BUILD",
+        "WF-X06-VERIFY"
+      ],
+      "F20_acceptance_criterion": [
+        "190 workflow implementations/test suites/verifications and all 147 component records covered"
+      ],
+      "status": "PROPOSED_NOT_ADOPTED",
+      "qualified": false,
+      "runtime_status": "NOT_RUN",
+      "production_authorized": false,
+      "accepted_decision_receipt": null,
+      "selection": null,
+      "source_disposition": {
+        "path": "review-dispositions.json",
+        "pointer": "/audit_findings/6",
+        "sha256_lf": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+        "finding_sha256": "72cc0b8b7e335b23e8123aa49b53aec7ab5fd40f41c200194ed73b74fe7e37bb"
+      },
+      "kind": "BOUNDED_AMENDMENT",
+      "responsible_role": "Media workflow and F05 contract owners",
+      "decision_question": "Confirm whether labels describe orchestration or actual transformation engines; internal review can resolve this.",
+      "rationale": "C50-C53 JSON confirms the reported stage/source_software differences. Exact canonical mapping records tools without establishing visual generation, animation, subtitle burn, edit or reframe ownership.",
+      "changes": [
+        {
+          "path": "reference/workflows/C50.json",
+          "pointer": "/steps/0/software",
+          "sha256_lf": "38ea0252e2e0caeeb8894d1df4bfccec2fbb176cf3fcc840e9e8953f30024e3e",
+          "old_value": "llama.cpp / bounded integration",
+          "old_value_sha256": "93c4bb74c1dc24193c9f51abd2181bf8fa39a1db21aeacae3539a8110148e8ee",
+          "operation": "REPLACE_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": "llama.cpp / bounded integration"
+        },
+        {
+          "path": "reference/workflows/C50.json",
+          "pointer": "/steps/1/software",
+          "sha256_lf": "38ea0252e2e0caeeb8894d1df4bfccec2fbb176cf3fcc840e9e8953f30024e3e",
+          "old_value": "llama.cpp / OmniRoute",
+          "old_value_sha256": "f147439573351f5630b1245a4fea4aeab0b46a2a342a81a52ea6c48e08859a96",
+          "operation": "REPLACE_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": "ComfyUI / bounded visual job"
+        },
+        {
+          "path": "reference/workflows/C50.json",
+          "pointer": "/steps/2/software",
+          "sha256_lf": "38ea0252e2e0caeeb8894d1df4bfccec2fbb176cf3fcc840e9e8953f30024e3e",
+          "old_value": "Kokoro ONNX / audio review",
+          "old_value_sha256": "f4a9c071ebb12b5bcfe0169eb48369125d0b592666770bb621afda14b4b6ebd9",
+          "operation": "REPLACE_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": "FFmpeg / bounded animation job"
+        },
+        {
+          "path": "reference/workflows/C51.json",
+          "pointer": "/steps/1/software",
+          "sha256_lf": "42ad76995b77b1165fa948980d83195f3586948fd6d119db19efc8963f2feb97",
+          "old_value": "Faster-Whisper / bounded integration",
+          "old_value_sha256": "0108fb4b26eb804d885ceaaa4ebac14df071cc95535b4fe276c9c11dbd063a87",
+          "operation": "REPLACE_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": "Faster-Whisper / reviewed timing correction"
+        },
+        {
+          "path": "reference/workflows/C51.json",
+          "pointer": "/steps/2/software",
+          "sha256_lf": "42ad76995b77b1165fa948980d83195f3586948fd6d119db19efc8963f2feb97",
+          "old_value": "Faster-Whisper / bounded integration",
+          "old_value_sha256": "0108fb4b26eb804d885ceaaa4ebac14df071cc95535b4fe276c9c11dbd063a87",
+          "operation": "REPLACE_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": "FFmpeg / subtitle mux or burn"
+        },
+        {
+          "path": "reference/workflows/C52.json",
+          "pointer": "/steps/2/software",
+          "sha256_lf": "d256e0be9c74719f6fb1875034e4a5c4b9694bb1b63766664024e4623fc3676d",
+          "old_value": "Playwright / bounded integration",
+          "old_value_sha256": "09d88de1f4d0951b7cf9c4632feabadcde18f58008c6a166fe233899de139cda",
+          "operation": "REPLACE_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": "FFmpeg / bounded edit and annotation"
+        },
+        {
+          "path": "reference/workflows/C53.json",
+          "pointer": "/steps/1/software",
+          "sha256_lf": "78abb5b452ab3d7ed75346206a5b37c981a84118235eda37bbc3a69de9a809e3",
+          "old_value": "Faster-Whisper / bounded integration",
+          "old_value_sha256": "0108fb4b26eb804d885ceaaa4ebac14df071cc95535b4fe276c9c11dbd063a87",
+          "operation": "REPLACE_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": "llama.cpp / reviewed excerpt selection"
+        },
+        {
+          "path": "reference/workflows/C53.json",
+          "pointer": "/steps/2/software",
+          "sha256_lf": "78abb5b452ab3d7ed75346206a5b37c981a84118235eda37bbc3a69de9a809e3",
+          "old_value": "Faster-Whisper / bounded integration",
+          "old_value_sha256": "0108fb4b26eb804d885ceaaa4ebac14df071cc95535b4fe276c9c11dbd063a87",
+          "operation": "REPLACE_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": "FFmpeg / bounded reframe"
+        }
+      ],
+      "source_evidence": [
+        {
+          "path": "reference/workflows/C50.json",
+          "pointer": "/gate",
+          "sha256_lf": "38ea0252e2e0caeeb8894d1df4bfccec2fbb176cf3fcc840e9e8953f30024e3e",
+          "old_value": "Exact artifact, rights and intended handoff approved?",
+          "old_value_sha256": "9ea0910de61283ce2d590b2a80eb813b74381297e8f3f2d961f67971a68335c1"
+        },
+        {
+          "path": "reference/workflows/C51.json",
+          "pointer": "/gate",
+          "sha256_lf": "42ad76995b77b1165fa948980d83195f3586948fd6d119db19efc8963f2feb97",
+          "old_value": "Exact artifact, rights and intended handoff approved?",
+          "old_value_sha256": "9ea0910de61283ce2d590b2a80eb813b74381297e8f3f2d961f67971a68335c1"
+        },
+        {
+          "path": "reference/workflows/C52.json",
+          "pointer": "/gate",
+          "sha256_lf": "d256e0be9c74719f6fb1875034e4a5c4b9694bb1b63766664024e4623fc3676d",
+          "old_value": "Exact artifact, rights and intended handoff approved?",
+          "old_value_sha256": "9ea0910de61283ce2d590b2a80eb813b74381297e8f3f2d961f67971a68335c1"
+        },
+        {
+          "path": "reference/workflows/C53.json",
+          "pointer": "/gate",
+          "sha256_lf": "78abb5b452ab3d7ed75346206a5b37c981a84118235eda37bbc3a69de9a809e3",
+          "old_value": "Exact artifact, rights and intended handoff approved?",
+          "old_value_sha256": "9ea0910de61283ce2d590b2a80eb813b74381297e8f3f2d961f67971a68335c1"
+        }
+      ],
+      "alternatives": [],
+      "boundaries": [
+        {
+          "producer": "C50",
+          "consumer": "C50",
+          "artifact_type": "StoryboardText",
+          "native_owner": "llama.cpp",
+          "release": "HELD"
+        },
+        {
+          "producer": "C50",
+          "consumer": "C50",
+          "artifact_type": "VisualFrames",
+          "native_owner": "ComfyUI",
+          "release": "HELD"
+        },
+        {
+          "producer": "C50",
+          "consumer": "C50",
+          "artifact_type": "AnimatedVideo",
+          "native_owner": "FFmpeg",
+          "release": "HELD"
+        },
+        {
+          "producer": "C51",
+          "consumer": "C51",
+          "artifact_type": "TimedSubtitleText",
+          "native_owner": "Faster-Whisper",
+          "release": "HELD"
+        },
+        {
+          "producer": "C51",
+          "consumer": "C51",
+          "artifact_type": "CaptionedVideo",
+          "native_owner": "FFmpeg",
+          "release": "HELD"
+        },
+        {
+          "producer": "C52",
+          "consumer": "C52",
+          "artifact_type": "AnnotatedVideo",
+          "native_owner": "FFmpeg",
+          "release": "HELD"
+        },
+        {
+          "producer": "C53",
+          "consumer": "C53",
+          "artifact_type": "ExcerptPlan",
+          "native_owner": "llama.cpp",
+          "release": "HELD"
+        },
+        {
+          "producer": "C53",
+          "consumer": "C53",
+          "artifact_type": "ReframedVideo",
+          "native_owner": "FFmpeg",
+          "release": "HELD"
+        }
+      ],
+      "role_allocation": {
+        "selection": null,
+        "alternatives": [
+          "Labels describe orchestration with typed transformation jobs",
+          "Labels identify transformation owners directly"
+        ],
+        "narration_owner": null,
+        "narration_alternatives": [
+          "Kokoro ONNX if separately confirmed",
+          "No generated narration"
+        ],
+        "no_new_provider": true
+      }
+    },
+    {
+      "finding_key": "O20-06:D02",
+      "workflow_ids": [
+        "C47",
+        "C48"
+      ],
+      "component_ids": [
+        "CP029",
+        "CP033",
+        "CP034",
+        "CP036",
+        "CP056",
+        "CP057",
+        "CP059",
+        "CP066",
+        "CP069",
+        "CP080"
+      ],
+      "mapped_existing_task_keys": [
+        "CP029",
+        "CP033",
+        "CP034",
+        "CP036",
+        "CP056",
+        "CP057",
+        "CP059",
+        "CP066",
+        "CP069",
+        "CP080",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F18",
+        "F20",
+        "WF-C47-BUILD",
+        "WF-C47-TEST",
+        "WF-C47-VERIFY",
+        "WF-C48-BUILD",
+        "WF-C48-TEST",
+        "WF-C48-VERIFY",
+        "WF-X02-BUILD",
+        "WF-X02-VERIFY",
+        "WF-X03-BUILD",
+        "WF-X03-VERIFY",
+        "WF-X04-BUILD",
+        "WF-X05-BUILD",
+        "WF-X05-VERIFY",
+        "WF-X06-BUILD",
+        "WF-X06-VERIFY"
+      ],
+      "F20_acceptance_criterion": [
+        "190 workflow implementations/test suites/verifications and all 147 component records covered"
+      ],
+      "status": "PROPOSED_NOT_ADOPTED",
+      "qualified": false,
+      "runtime_status": "NOT_RUN",
+      "production_authorized": false,
+      "accepted_decision_receipt": null,
+      "selection": null,
+      "source_disposition": {
+        "path": "review-dispositions.json",
+        "pointer": "/audit_findings/7",
+        "sha256_lf": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+        "finding_sha256": "f07ebccab74eddaacc87bdaef5dcc21a3bac825068a12013d26740920ab9c0d2"
+      },
+      "kind": "UNANSWERED_CHOICE",
+      "responsible_role": "C47/C48, ResourceSpace and receiving workflow contract owners",
+      "decision_question": "Is approved audio intentional provenance, a container of text artifacts, or a mislabeled destination?",
+      "rationale": "C47 scripts and C48 transcript outputs both end at ResourceSpace approved audio. Storage ownership alone does not specify artifact kind or receiver schema.",
+      "changes": [],
+      "source_evidence": [
+        {
+          "path": "reference/workflows/C47.json",
+          "pointer": "/gate",
+          "sha256_lf": "a55e15fe7fb7a3151a831fd7cabaadaf529a3b2f2e2e2d364a04e047b32ff9ea",
+          "old_value": "Exact artifact, rights and intended handoff approved?",
+          "old_value_sha256": "9ea0910de61283ce2d590b2a80eb813b74381297e8f3f2d961f67971a68335c1"
+        },
+        {
+          "path": "reference/workflows/C48.json",
+          "pointer": "/gate",
+          "sha256_lf": "4962dfadcd0a17fbfa4fdbf1ef9e96bd7c74d2aa5f3993ca9016ef28d8428b04",
+          "old_value": "Exact artifact, rights and intended handoff approved?",
+          "old_value_sha256": "9ea0910de61283ce2d590b2a80eb813b74381297e8f3f2d961f67971a68335c1"
+        }
+      ],
+      "alternatives": [
+        "Approved audio is provenance for script/transcript",
+        "Approved audio is a text artifact container",
+        "Destination label requires correction"
+      ],
+      "boundaries": [
+        {
+          "producer": "C47",
+          "consumer": "C47",
+          "artifact_type": "UnresolvedSourceDecision",
+          "unknown": "HOLD",
+          "selected": null,
+          "proposal": "Propose typed script/transcript/audio-reference handoffs with rights/privacy and receiver checks."
+        }
+      ]
+    },
+    {
+      "finding_key": "O20-07:D01",
+      "workflow_ids": [
+        "C58"
+      ],
+      "component_ids": [
+        "CP033",
+        "CP035",
+        "CP056",
+        "CP057",
+        "CP059",
+        "CP077",
+        "CP079",
+        "CP080"
+      ],
+      "mapped_existing_task_keys": [
+        "CP033",
+        "CP035",
+        "CP056",
+        "CP057",
+        "CP059",
+        "CP077",
+        "CP079",
+        "CP080",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F18",
+        "F20",
+        "WF-C58-BUILD",
+        "WF-C58-TEST",
+        "WF-C58-VERIFY",
+        "WF-X02-BUILD",
+        "WF-X02-VERIFY",
+        "WF-X03-BUILD",
+        "WF-X03-VERIFY",
+        "WF-X04-BUILD",
+        "WF-X05-BUILD",
+        "WF-X05-VERIFY",
+        "WF-X06-BUILD",
+        "WF-X06-VERIFY"
+      ],
+      "F20_acceptance_criterion": [
+        "190 workflow implementations/test suites/verifications and all 147 component records covered"
+      ],
+      "status": "PROPOSED_NOT_ADOPTED",
+      "qualified": false,
+      "runtime_status": "NOT_RUN",
+      "production_authorized": false,
+      "accepted_decision_receipt": null,
+      "selection": null,
+      "source_disposition": {
+        "path": "review-dispositions.json",
+        "pointer": "/audit_findings/8",
+        "sha256_lf": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+        "finding_sha256": "e71352bb79656ec7bdd637b0d08873fece5a6a16b2d058bf4f9c0413ae057084"
+      },
+      "kind": "BOUNDED_AMENDMENT",
+      "responsible_role": "C58 and document/media component owners",
+      "decision_question": "Review supported output formats and engine allocation; no external business authorization needed.",
+      "rationale": "C58 document output EPUB/DOCX/PDF names FFmpeg render stage while source_software names Pandoc. CP079 exists; complete format-engine contract is absent.",
+      "changes": [
+        {
+          "path": "reference/workflows/C58.json",
+          "pointer": "/steps/3/software",
+          "sha256_lf": "11c923e26241e06b52fdfd6792a3e23011fca77f30291d16dc173b57d8c7efcd",
+          "old_value": "FFmpeg / bounded media job",
+          "old_value_sha256": "c394e64e4683ccfbeefbf116de375cc0eb05db386901f5b4e69ab3009bf35881",
+          "operation": "REPLACE_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": "Pandoc / bounded document export"
+        }
+      ],
+      "source_evidence": [
+        {
+          "path": "reference/workflows/C58.json",
+          "pointer": "/gate",
+          "sha256_lf": "11c923e26241e06b52fdfd6792a3e23011fca77f30291d16dc173b57d8c7efcd",
+          "old_value": "Exact artifact, rights and intended handoff approved?",
+          "old_value_sha256": "9ea0910de61283ce2d590b2a80eb813b74381297e8f3f2d961f67971a68335c1"
+        }
+      ],
+      "alternatives": [],
+      "boundaries": [
+        {
+          "producer": "C58",
+          "consumer": "C58",
+          "artifact_type": "EPUB_DOCX_PDF",
+          "release": "HELD",
+          "native_owner": "Pandoc"
+        }
+      ],
+      "format_contract": {
+        "EPUB": "Pandoc",
+        "DOCX": "Pandoc",
+        "PDF": "Pandoc with configured document engine",
+        "media_renderer": "FFmpeg",
+        "licensed_visuals_required": true,
+        "engine_configuration": null
+      }
+    },
+    {
+      "finding_key": "O20-07:D02",
+      "workflow_ids": [
+        "C59",
+        "C62"
+      ],
+      "component_ids": [
+        "CP033",
+        "CP034",
+        "CP053",
+        "CP056",
+        "CP057",
+        "CP059",
+        "CP079",
+        "CP080"
+      ],
+      "mapped_existing_task_keys": [
+        "CP033",
+        "CP034",
+        "CP053",
+        "CP056",
+        "CP057",
+        "CP059",
+        "CP079",
+        "CP080",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F18",
+        "F20",
+        "WF-C59-BUILD",
+        "WF-C59-TEST",
+        "WF-C59-VERIFY",
+        "WF-C62-BUILD",
+        "WF-C62-TEST",
+        "WF-C62-VERIFY",
+        "WF-X02-BUILD",
+        "WF-X02-VERIFY",
+        "WF-X03-BUILD",
+        "WF-X03-VERIFY",
+        "WF-X04-BUILD",
+        "WF-X05-BUILD",
+        "WF-X05-VERIFY",
+        "WF-X06-BUILD",
+        "WF-X06-VERIFY"
+      ],
+      "F20_acceptance_criterion": [
+        "190 workflow implementations/test suites/verifications and all 147 component records covered"
+      ],
+      "status": "PROPOSED_NOT_ADOPTED",
+      "qualified": false,
+      "runtime_status": "NOT_RUN",
+      "production_authorized": false,
+      "accepted_decision_receipt": null,
+      "selection": null,
+      "source_disposition": {
+        "path": "review-dispositions.json",
+        "pointer": "/audit_findings/9",
+        "sha256_lf": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+        "finding_sha256": "52823b59a757e627b77b3d20d22559834f350aade138419515e4a9f6f6e5d981"
+      },
+      "kind": "UNANSWERED_CHOICE",
+      "responsible_role": "C59/C62 and Pandoc/generation contract owners",
+      "decision_question": "Is llama.cpp orchestrating a Pandoc export or intended as renderer?",
+      "rationale": "C59/C62 export labels llama.cpp bounded integration and source_software includes Pandoc. An orchestration interpretation is possible, not specified.",
+      "changes": [],
+      "source_evidence": [
+        {
+          "path": "reference/workflows/C59.json",
+          "pointer": "/gate",
+          "sha256_lf": "4220a3999bbd54e48c2e605bec1f1c63f7c3a31dee0c5db8ca824737bf260349",
+          "old_value": "Exact artifact, rights and intended handoff approved?",
+          "old_value_sha256": "9ea0910de61283ce2d590b2a80eb813b74381297e8f3f2d961f67971a68335c1"
+        },
+        {
+          "path": "reference/workflows/C62.json",
+          "pointer": "/gate",
+          "sha256_lf": "36329fce8cfd2d9d7772b528624659bb57e1f7c6512dc8e0204690ec9214c049",
+          "old_value": "Exact artifact, rights and intended handoff approved?",
+          "old_value_sha256": "9ea0910de61283ce2d590b2a80eb813b74381297e8f3f2d961f67971a68335c1"
+        }
+      ],
+      "alternatives": [
+        "llama.cpp orchestrates Pandoc export",
+        "Renderer label requires correction to Pandoc"
+      ],
+      "boundaries": [
+        {
+          "producer": "C59",
+          "consumer": "C59",
+          "artifact_type": "UnresolvedSourceDecision",
+          "unknown": "HOLD",
+          "selected": null,
+          "proposal": "Draft explicit orchestrator versus renderer boundary, typed output and format-specific checks."
+        }
+      ]
+    },
+    {
+      "finding_key": "O20-09:D01",
+      "workflow_ids": [
+        "E01",
+        "E03",
+        "E04",
+        "E06",
+        "E07",
+        "E08",
+        "E09"
+      ],
+      "component_ids": [
+        "CP016",
+        "CP026",
+        "CP027",
+        "CP032",
+        "CP033",
+        "CP041",
+        "CP053",
+        "CP056",
+        "CP057",
+        "CP058",
+        "CP059",
+        "CP073",
+        "CP074",
+        "CP075",
+        "CP080"
+      ],
+      "mapped_existing_task_keys": [
+        "CP016",
+        "CP026",
+        "CP027",
+        "CP032",
+        "CP033",
+        "CP041",
+        "CP053",
+        "CP056",
+        "CP057",
+        "CP058",
+        "CP059",
+        "CP073",
+        "CP074",
+        "CP075",
+        "CP080",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F18",
+        "F20",
+        "WF-E01-BUILD",
+        "WF-E01-TEST",
+        "WF-E01-VERIFY",
+        "WF-E03-BUILD",
+        "WF-E03-TEST",
+        "WF-E03-VERIFY",
+        "WF-E04-BUILD",
+        "WF-E04-TEST",
+        "WF-E04-VERIFY",
+        "WF-E06-BUILD",
+        "WF-E06-TEST",
+        "WF-E06-VERIFY",
+        "WF-E07-BUILD",
+        "WF-E07-TEST",
+        "WF-E07-VERIFY",
+        "WF-E08-BUILD",
+        "WF-E08-TEST",
+        "WF-E08-VERIFY",
+        "WF-E09-BUILD",
+        "WF-E09-TEST",
+        "WF-E09-VERIFY",
+        "WF-X02-BUILD",
+        "WF-X02-VERIFY",
+        "WF-X03-BUILD",
+        "WF-X03-VERIFY",
+        "WF-X04-BUILD",
+        "WF-X04-VERIFY",
+        "WF-X06-BUILD",
+        "WF-X06-VERIFY",
+        "WF-X09-VERIFY"
+      ],
+      "F20_acceptance_criterion": [
+        "190 workflow implementations/test suites/verifications and all 147 component records covered",
+        "Build DAG acyclic and no epic or human production gate blocks ordinary test writing"
+      ],
+      "status": "PROPOSED_NOT_ADOPTED",
+      "qualified": false,
+      "runtime_status": "NOT_RUN",
+      "production_authorized": false,
+      "accepted_decision_receipt": null,
+      "selection": null,
+      "source_disposition": {
+        "path": "review-dispositions.json",
+        "pointer": "/audit_findings/10",
+        "sha256_lf": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+        "finding_sha256": "aa21690e4fc6aad4b79038898c8e6a22551f0d5f00f86010ec1e8d44f42507a7"
+      },
+      "kind": "BOUNDED_AMENDMENT",
+      "responsible_role": "E01/E03/E04/E06/E07/E08/E09 source owners, F04/F05 and root engineering reviewer",
+      "decision_question": "Source owner must choose executable ordering and evidence generation semantics. Actual provider identities/thresholds matter later for enablement, not offline proposal writing.",
+      "rationale": "Mermaid explicitly places E01 authentication/owned-mailbox gate before enabling transport and real-message validation; E03 approval before copy/revision review; E04 owned-account gate before delivery test; E06 applied-feedback gate before dedupe/classification/suppression update; E07 enough-data gate before ingestion; E08 cause/containment gate before transport HOLD; E09 recovery-evidence gate before held restore and repeat tests. These are documented ordering ambiguities, not an inevitable build cycle or observed incident. E08 failure and E09 held restore plus integration restore invariant constrain safe interpretation.",
+      "changes": [
+        {
+          "path": "reference/workflows/E01.json",
+          "pointer": "/gate",
+          "sha256_lf": "e382d0e5dd39d49f655d686cd81e83092c57dc17ebfaf6ee39362f69aa4a3335",
+          "old_value": "Authentication and owned-mailbox tests passed?",
+          "old_value_sha256": "fe70da06b354d8533d4fd0b6217030c24b7341e836508761a09b0683ee10d4a4",
+          "operation": "REPLACE_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": "Admission: isolated scoped work or identified fresh prior-generation receipt; completion: Authentication and owned-mailbox tests passed? UNKNOWN remains HOLD."
+        },
+        {
+          "path": "reference/workflows/E03.json",
+          "pointer": "/gate",
+          "sha256_lf": "3db0460a6343fb61aa0f07db2e2b6ee001a4e583360b9308e658e12ffbda8b92",
+          "old_value": "Content, offer and target segment approved?",
+          "old_value_sha256": "3b441d605b3298f8818a094ecf88e3db8c19e21d99cd55119ba7b7e53389bf16",
+          "operation": "REPLACE_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": "Admission: isolated scoped work or identified fresh prior-generation receipt; completion: Content, offer and target segment approved? UNKNOWN remains HOLD."
+        },
+        {
+          "path": "reference/workflows/E04.json",
+          "pointer": "/gate",
+          "sha256_lf": "1caef0a3b6dcf3678877e89229fdeb549ac06bf68466390a53310255f11bf6e8",
+          "old_value": "Staging and owned-account checks pass?",
+          "old_value_sha256": "fa7aec8b936996e44590be9ec3ccbce3f9c7d88ab069dff555486a7783358d0f",
+          "operation": "REPLACE_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": "Admission: isolated scoped work or identified fresh prior-generation receipt; completion: Staging and owned-account checks pass? UNKNOWN remains HOLD."
+        },
+        {
+          "path": "reference/workflows/E06.json",
+          "pointer": "/gate",
+          "sha256_lf": "0eece84923e730d4cddadaf108385e5140166c8bd2e91d78a06ba934820aa602",
+          "old_value": "Feedback applied to authoritative eligibility?",
+          "old_value_sha256": "57cea799ee3a2abe11ccd4d2f8412f3b90223811ebca84c64a1bfeecd230038c",
+          "operation": "REPLACE_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": "Admission: isolated scoped work or identified fresh prior-generation receipt; completion: Feedback applied to authoritative eligibility? UNKNOWN remains HOLD."
+        },
+        {
+          "path": "reference/workflows/E07.json",
+          "pointer": "/gate",
+          "sha256_lf": "f3e5e7ddcd8471525153a314f72e91ac5092fcec2d31021ff7a4cd251cffe0b7",
+          "old_value": "Enough reliable data to continue?",
+          "old_value_sha256": "a62c7dc06dd6bfe85c1c4e5df2ceb398ae614d48951f5c77200e9ff1acef4478",
+          "operation": "REPLACE_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": "Admission: isolated scoped work or identified fresh prior-generation receipt; completion: Enough reliable data to continue? UNKNOWN remains HOLD."
+        },
+        {
+          "path": "reference/workflows/E08.json",
+          "pointer": "/gate",
+          "sha256_lf": "487b89644417dd8e9062373298d0ac2e7305b4607a4059ea2aa9bf2cf350adf6",
+          "old_value": "Incident cause and containment understood?",
+          "old_value_sha256": "0bb4670ec0509493f490e8d753f23932d5d8482f03eefc22bbf0ecede725c126",
+          "operation": "REPLACE_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": "Admission: isolated scoped work or identified fresh prior-generation receipt; completion: Incident cause and containment understood? UNKNOWN remains HOLD."
+        },
+        {
+          "path": "reference/workflows/E09.json",
+          "pointer": "/gate",
+          "sha256_lf": "8a881ee54bbfa42ac4fc4418c72704150477f6f1b84216189a1588a370a79c2f",
+          "old_value": "Recovery evidence and policy approval passed?",
+          "old_value_sha256": "71c0d7892474681f2029ae8a301a292fd69a27913373f27faeda2017ef655091",
+          "operation": "REPLACE_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": "Admission: isolated scoped work or identified fresh prior-generation receipt; completion: Recovery evidence and policy approval passed? UNKNOWN remains HOLD."
+        }
+      ],
+      "source_evidence": [
+        {
+          "path": "reference/workflows/E01.json",
+          "pointer": "/gate",
+          "sha256_lf": "e382d0e5dd39d49f655d686cd81e83092c57dc17ebfaf6ee39362f69aa4a3335",
+          "old_value": "Authentication and owned-mailbox tests passed?",
+          "old_value_sha256": "fe70da06b354d8533d4fd0b6217030c24b7341e836508761a09b0683ee10d4a4"
+        },
+        {
+          "path": "reference/workflows/E03.json",
+          "pointer": "/gate",
+          "sha256_lf": "3db0460a6343fb61aa0f07db2e2b6ee001a4e583360b9308e658e12ffbda8b92",
+          "old_value": "Content, offer and target segment approved?",
+          "old_value_sha256": "3b441d605b3298f8818a094ecf88e3db8c19e21d99cd55119ba7b7e53389bf16"
+        },
+        {
+          "path": "reference/workflows/E04.json",
+          "pointer": "/gate",
+          "sha256_lf": "1caef0a3b6dcf3678877e89229fdeb549ac06bf68466390a53310255f11bf6e8",
+          "old_value": "Staging and owned-account checks pass?",
+          "old_value_sha256": "fa7aec8b936996e44590be9ec3ccbce3f9c7d88ab069dff555486a7783358d0f"
+        },
+        {
+          "path": "reference/workflows/E06.json",
+          "pointer": "/gate",
+          "sha256_lf": "0eece84923e730d4cddadaf108385e5140166c8bd2e91d78a06ba934820aa602",
+          "old_value": "Feedback applied to authoritative eligibility?",
+          "old_value_sha256": "57cea799ee3a2abe11ccd4d2f8412f3b90223811ebca84c64a1bfeecd230038c"
+        },
+        {
+          "path": "reference/workflows/E07.json",
+          "pointer": "/gate",
+          "sha256_lf": "f3e5e7ddcd8471525153a314f72e91ac5092fcec2d31021ff7a4cd251cffe0b7",
+          "old_value": "Enough reliable data to continue?",
+          "old_value_sha256": "a62c7dc06dd6bfe85c1c4e5df2ceb398ae614d48951f5c77200e9ff1acef4478"
+        },
+        {
+          "path": "reference/workflows/E08.json",
+          "pointer": "/gate",
+          "sha256_lf": "487b89644417dd8e9062373298d0ac2e7305b4607a4059ea2aa9bf2cf350adf6",
+          "old_value": "Incident cause and containment understood?",
+          "old_value_sha256": "0bb4670ec0509493f490e8d753f23932d5d8482f03eefc22bbf0ecede725c126"
+        },
+        {
+          "path": "reference/workflows/E09.json",
+          "pointer": "/gate",
+          "sha256_lf": "8a881ee54bbfa42ac4fc4418c72704150477f6f1b84216189a1588a370a79c2f",
+          "old_value": "Recovery evidence and policy approval passed?",
+          "old_value_sha256": "71c0d7892474681f2029ae8a301a292fd69a27913373f27faeda2017ef655091"
+        }
+      ],
+      "alternatives": [],
+      "boundaries": [
+        {
+          "producer": "E01",
+          "consumer": "E01",
+          "artifact_type": "GenerationBoundCompletionReceipt",
+          "admission": "ISOLATED_OR_PRIOR_FRESH_INDEPENDENT",
+          "completion": "AFTER_CURRENT_PRODUCER",
+          "prior_generation": "EXPLICIT_IDENTITY_AND_FRESHNESS_REQUIRED",
+          "unknown": "HOLD",
+          "policy_selection": null
+        },
+        {
+          "producer": "E03",
+          "consumer": "E03",
+          "artifact_type": "GenerationBoundCompletionReceipt",
+          "admission": "ISOLATED_OR_PRIOR_FRESH_INDEPENDENT",
+          "completion": "AFTER_CURRENT_PRODUCER",
+          "prior_generation": "EXPLICIT_IDENTITY_AND_FRESHNESS_REQUIRED",
+          "unknown": "HOLD",
+          "policy_selection": null
+        },
+        {
+          "producer": "E04",
+          "consumer": "E04",
+          "artifact_type": "GenerationBoundCompletionReceipt",
+          "admission": "ISOLATED_OR_PRIOR_FRESH_INDEPENDENT",
+          "completion": "AFTER_CURRENT_PRODUCER",
+          "prior_generation": "EXPLICIT_IDENTITY_AND_FRESHNESS_REQUIRED",
+          "unknown": "HOLD",
+          "policy_selection": null
+        },
+        {
+          "producer": "E06",
+          "consumer": "E06",
+          "artifact_type": "GenerationBoundCompletionReceipt",
+          "admission": "ISOLATED_OR_PRIOR_FRESH_INDEPENDENT",
+          "completion": "AFTER_CURRENT_PRODUCER",
+          "prior_generation": "EXPLICIT_IDENTITY_AND_FRESHNESS_REQUIRED",
+          "unknown": "HOLD",
+          "policy_selection": null
+        },
+        {
+          "producer": "E07",
+          "consumer": "E07",
+          "artifact_type": "GenerationBoundCompletionReceipt",
+          "admission": "ISOLATED_OR_PRIOR_FRESH_INDEPENDENT",
+          "completion": "AFTER_CURRENT_PRODUCER",
+          "prior_generation": "EXPLICIT_IDENTITY_AND_FRESHNESS_REQUIRED",
+          "unknown": "HOLD",
+          "policy_selection": null
+        },
+        {
+          "producer": "E08",
+          "consumer": "E08",
+          "artifact_type": "GenerationBoundCompletionReceipt",
+          "admission": "ISOLATED_OR_PRIOR_FRESH_INDEPENDENT",
+          "completion": "AFTER_CURRENT_PRODUCER",
+          "prior_generation": "EXPLICIT_IDENTITY_AND_FRESHNESS_REQUIRED",
+          "unknown": "HOLD",
+          "policy_selection": null
+        },
+        {
+          "producer": "E09",
+          "consumer": "E09",
+          "artifact_type": "GenerationBoundCompletionReceipt",
+          "admission": "ISOLATED_OR_PRIOR_FRESH_INDEPENDENT",
+          "completion": "AFTER_CURRENT_PRODUCER",
+          "prior_generation": "EXPLICIT_IDENTITY_AND_FRESHNESS_REQUIRED",
+          "unknown": "HOLD",
+          "policy_selection": null
+        }
+      ],
+      "containment": {
+        "E08": "IMMEDIATE_HOLD_BEFORE_CAUSE_UNDERSTOOD",
+        "E09": "RESTORE_IN_ISOLATION_AND_HOLD",
+        "canary": "SEPARATE_AUTHORITY_REQUIRED",
+        "first_event": "SUPPRESSION_BEFORE_FURTHER_EFFECTS",
+        "offline_test_writing": "NO_BUSINESS_GATE"
+      }
+    },
+    {
+      "finding_key": "O20-09:D02",
+      "workflow_ids": [
+        "E05"
+      ],
+      "component_ids": [
+        "CP027",
+        "CP032",
+        "CP056",
+        "CP058"
+      ],
+      "mapped_existing_task_keys": [
+        "CP027",
+        "CP032",
+        "CP056",
+        "CP058",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F18",
+        "F20",
+        "WF-E05-BUILD",
+        "WF-E05-TEST",
+        "WF-E05-VERIFY",
+        "WF-X02-BUILD",
+        "WF-X02-VERIFY",
+        "WF-X03-BUILD",
+        "WF-X03-VERIFY",
+        "WF-X04-BUILD",
+        "WF-X04-VERIFY",
+        "WF-X06-BUILD",
+        "WF-X06-VERIFY",
+        "WF-X09-VERIFY"
+      ],
+      "F20_acceptance_criterion": [
+        "190 workflow implementations/test suites/verifications and all 147 component records covered",
+        "Build DAG acyclic and no epic or human production gate blocks ordinary test writing"
+      ],
+      "status": "PROPOSED_NOT_ADOPTED",
+      "qualified": false,
+      "runtime_status": "NOT_RUN",
+      "production_authorized": false,
+      "accepted_decision_receipt": null,
+      "selection": null,
+      "source_disposition": {
+        "path": "review-dispositions.json",
+        "pointer": "/audit_findings/11",
+        "sha256_lf": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+        "finding_sha256": "814bd61f2c17fd289d57f6a9d88c60bc70ba47da54b56b51fe7b494f30b862cf"
+      },
+      "kind": "UNANSWERED_CHOICE",
+      "responsible_role": "E05/E06/E07 and health-policy contract owners",
+      "decision_question": "Which volume/generation feeds each gate, and what approved freshness/threshold policy applies? Missing policy values are not zero.",
+      "rationale": "E05 S2 enters CANARY, then GATE asks real health evidence for next volume before S3 send and S4 feedback evaluation. Prior-generation preflight can be valid, but the diagram does not bind generation/freshness or depict the repeat feedback decision; a same-canary completion reading is circular.",
+      "changes": [],
+      "source_evidence": [
+        {
+          "path": "reference/workflows/E05.json",
+          "pointer": "/gate",
+          "sha256_lf": "dd257be535992f5957eb91ae49bcfdbeda77d376686244f2b2c00704b5410b97",
+          "old_value": "Real health evidence supports next volume?",
+          "old_value_sha256": "45d840452d1e9899f2933705ad7bedc2b10fa0a751e7d77a726afee2551d5e29"
+        }
+      ],
+      "alternatives": [
+        "Admission uses identified fresh prior-generation independent evidence",
+        "Isolated admitted test produces current-generation completion evidence"
+      ],
+      "boundaries": [
+        {
+          "producer": "E05",
+          "consumer": "E05",
+          "artifact_type": "UnresolvedSourceDecision",
+          "unknown": "HOLD",
+          "selected": null,
+          "proposal": "Draft generation-bound preflight and repeat feedback decisions with unknown held; preserve separate canary authority."
+        }
+      ]
+    },
+    {
+      "finding_key": "O20-09:D03",
+      "workflow_ids": [
+        "E02"
+      ],
+      "component_ids": [
+        "CP027",
+        "CP058"
+      ],
+      "mapped_existing_task_keys": [
+        "CP027",
+        "CP058",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F18",
+        "F20",
+        "WF-E02-BUILD",
+        "WF-E02-TEST",
+        "WF-E02-VERIFY",
+        "WF-X02-BUILD",
+        "WF-X02-VERIFY",
+        "WF-X03-BUILD",
+        "WF-X03-VERIFY",
+        "WF-X04-BUILD",
+        "WF-X04-VERIFY",
+        "WF-X06-BUILD",
+        "WF-X06-VERIFY",
+        "WF-X09-VERIFY"
+      ],
+      "F20_acceptance_criterion": [
+        "190 workflow implementations/test suites/verifications and all 147 component records covered",
+        "Build DAG acyclic and no epic or human production gate blocks ordinary test writing"
+      ],
+      "status": "PROPOSED_NOT_ADOPTED",
+      "qualified": false,
+      "runtime_status": "NOT_RUN",
+      "production_authorized": false,
+      "accepted_decision_receipt": null,
+      "selection": null,
+      "source_disposition": {
+        "path": "review-dispositions.json",
+        "pointer": "/audit_findings/12",
+        "sha256_lf": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+        "finding_sha256": "7a8a3fdc506d1b962edaa2bdebe495dc6473e4318b1d0dd17bf62a0da40ed775"
+      },
+      "kind": "BOUNDED_AMENDMENT",
+      "responsible_role": "E02/Mautic and F04 contract owners",
+      "decision_question": "Review branch semantics; do not ask for permission to send or invent eligibility.",
+      "rationale": "E02 No/unknown goes only to generic HOLD; only Yes reaches S5 decision-reference persistence and OUT eligible cohort or explicit exclusion. Explicit known-ineligible terminal persistence is not shown on the negative path. JSON exclusion intent does not supply that branch; unknown must remain held.",
+      "changes": [
+        {
+          "path": "reference/workflows/E02.json",
+          "pointer": "/output",
+          "sha256_lf": "4bbb902119ad57a81accb42d11b75dce48839f40eb9fc7e52e0dbbaad60a5dd2",
+          "old_value": "Eligible cohort or explicit exclusion",
+          "old_value_sha256": "05b6652d144d0018f08d22b911bf1a7b9ee091346e09dd2ae591992257d2df37",
+          "operation": "REPLACE_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": "Eligible cohort, durable EXCLUDED decision for established ineligibility, or UNKNOWN/HOLD with minimal decision references"
+        }
+      ],
+      "source_evidence": [
+        {
+          "path": "reference/workflows/E02.json",
+          "pointer": "/gate",
+          "sha256_lf": "4bbb902119ad57a81accb42d11b75dce48839f40eb9fc7e52e0dbbaad60a5dd2",
+          "old_value": "Recipient eligible for this email purpose?",
+          "old_value_sha256": "650e7e669e7aae314e9db77a6585f9cdee91c0f2ba0d6375692b74bdf52f67a0"
+        }
+      ],
+      "alternatives": [],
+      "boundaries": [
+        {
+          "producer": "E02",
+          "consumer": "E02",
+          "artifact_type": "EligibilityDisposition",
+          "known_ineligible": "DURABLE_EXCLUDED",
+          "unknown": "HOLD",
+          "references": "MINIMAL_DECISION_REFERENCES",
+          "send_authority": false
+        }
+      ]
+    },
+    {
+      "finding_key": "O20-11:SOURCE-GATE-I07",
+      "workflow_ids": [
+        "I07"
+      ],
+      "component_ids": [
+        "CP001",
+        "CP002",
+        "CP003",
+        "CP040",
+        "CP053"
+      ],
+      "mapped_existing_task_keys": [
+        "CP001",
+        "CP002",
+        "CP003",
+        "CP026",
+        "CP040",
+        "CP053",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F18",
+        "F20",
+        "WF-I07-BUILD",
+        "WF-I07-TEST",
+        "WF-I07-VERIFY"
+      ],
+      "F20_acceptance_criterion": [
+        "190 workflow implementations/test suites/verifications and all 147 component records covered",
+        "Build DAG acyclic and no epic or human production gate blocks ordinary test writing"
+      ],
+      "status": "PROPOSED_NOT_ADOPTED",
+      "qualified": false,
+      "runtime_status": "NOT_RUN",
+      "production_authorized": false,
+      "accepted_decision_receipt": null,
+      "selection": null,
+      "source_disposition": {
+        "path": "review-dispositions.json",
+        "pointer": "/audit_findings/13",
+        "sha256_lf": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+        "finding_sha256": "2e2f5c5588f0abea594b777cf0dbb3037bed7b29e232ac4b1a7b396b4be8a2f3"
+      },
+      "kind": "UNANSWERED_CHOICE",
+      "responsible_role": "I07 source/engineering owner and root contract reviewer",
+      "decision_question": "Does I07 gate consume prior independent evidence or this run's evidence? Specify receipt identity/freshness and admission versus completion. This is an internal source-owner interpretation, not business authorization.",
+      "rationale": "I07: GATE exposure tests precedes S5 positive/negative vantage tests. Ordering is now directly reread in the public Mermaid. Specify prior independent receipt identity/freshness or separate admission from same-run completion; documented ambiguity does not prove a runtime failure or justify a hard build edge.",
+      "changes": [],
+      "source_evidence": [
+        {
+          "path": "reference/workflows/I07.json",
+          "pointer": "/gate",
+          "sha256_lf": "456276f4b77c115cb87adebf2cb6e296ee8244f6086481b255298561b9293926",
+          "old_value": "Positive and negative exposure tests pass?",
+          "old_value_sha256": "a252894db4166ea821de1733215328338fe9a2614e228cab50f7766cc7043a03"
+        }
+      ],
+      "alternatives": [
+        "Admission uses identified fresh prior-generation independent evidence",
+        "Isolated admitted test produces current-generation completion evidence"
+      ],
+      "boundaries": [
+        {
+          "producer": "I07",
+          "consumer": "I07",
+          "artifact_type": "UnresolvedSourceDecision",
+          "unknown": "HOLD",
+          "selected": null,
+          "proposal": "Draft a two-boundary contract: test permitted/denied paths in an isolated admitted sandbox before final exposure qualification; bind evidence to exact generation and keep unknown held."
+        }
+      ]
+    },
+    {
+      "finding_key": "O20-11:SOURCE-GATE-I11",
+      "workflow_ids": [
+        "I11"
+      ],
+      "component_ids": [
+        "CP014",
+        "CP015",
+        "CP016",
+        "CP043",
+        "CP044",
+        "CP045"
+      ],
+      "mapped_existing_task_keys": [
+        "CP014",
+        "CP015",
+        "CP016",
+        "CP028",
+        "CP043",
+        "CP044",
+        "CP045",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F18",
+        "F20",
+        "WF-I11-BUILD",
+        "WF-I11-TEST",
+        "WF-I11-VERIFY"
+      ],
+      "F20_acceptance_criterion": [
+        "190 workflow implementations/test suites/verifications and all 147 component records covered",
+        "Build DAG acyclic and no epic or human production gate blocks ordinary test writing"
+      ],
+      "status": "PROPOSED_NOT_ADOPTED",
+      "qualified": false,
+      "runtime_status": "NOT_RUN",
+      "production_authorized": false,
+      "accepted_decision_receipt": null,
+      "selection": null,
+      "source_disposition": {
+        "path": "review-dispositions.json",
+        "pointer": "/audit_findings/14",
+        "sha256_lf": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+        "finding_sha256": "0b894d07cf9dc62b779fdef6f6e65a6a6d7ea339a3f789272d7f4c5594f49de8"
+      },
+      "kind": "UNANSWERED_CHOICE",
+      "responsible_role": "I11 source/engineering owner and root contract reviewer",
+      "decision_question": "Does I11 gate consume prior independent evidence or this run's evidence? Specify receipt identity/freshness and admission versus completion. This is an internal source-owner interpretation, not business authorization.",
+      "rationale": "I11: GATE feature parity and single-owner test precedes S5 fencing old scheduler; S4 already permits application tests, so not every proof is necessarily future. Ordering is now directly reread in the public Mermaid. Specify prior independent receipt identity/freshness or separate admission from same-run completion; documented ambiguity does not prove a runtime failure or justify a hard build edge.",
+      "changes": [],
+      "source_evidence": [
+        {
+          "path": "reference/workflows/I11.json",
+          "pointer": "/gate",
+          "sha256_lf": "5b90b85058fa11278ec1ae5d4b4b08ff4a994bb8c424611589207f2e9cba99c2",
+          "old_value": "Feature parity and single-owner test passed?",
+          "old_value_sha256": "b9134aaff69352a3a7a969e3c5908d06cf69f36eab29b939b604e5a62c0cb93b"
+        }
+      ],
+      "alternatives": [
+        "Admission uses identified fresh prior-generation independent evidence",
+        "Isolated admitted test produces current-generation completion evidence"
+      ],
+      "boundaries": [
+        {
+          "producer": "I11",
+          "consumer": "I11",
+          "artifact_type": "UnresolvedSourceDecision",
+          "unknown": "HOLD",
+          "selected": null,
+          "proposal": "Draft a two-boundary contract: separate isolated parity testing, old scheduler fencing and new-owner activation; no overlapping owners; bind evidence to exact generation and keep unknown held."
+        }
+      ]
+    },
+    {
+      "finding_key": "O20-11:SOURCE-GATE-I12",
+      "workflow_ids": [
+        "I12"
+      ],
+      "component_ids": [
+        "CP016",
+        "CP022",
+        "CP024",
+        "CP025",
+        "CP026",
+        "CP056"
+      ],
+      "mapped_existing_task_keys": [
+        "CP016",
+        "CP022",
+        "CP024",
+        "CP025",
+        "CP026",
+        "CP056",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F18",
+        "F20",
+        "WF-I12-BUILD",
+        "WF-I12-TEST",
+        "WF-I12-VERIFY"
+      ],
+      "F20_acceptance_criterion": [
+        "190 workflow implementations/test suites/verifications and all 147 component records covered",
+        "Build DAG acyclic and no epic or human production gate blocks ordinary test writing"
+      ],
+      "status": "PROPOSED_NOT_ADOPTED",
+      "qualified": false,
+      "runtime_status": "NOT_RUN",
+      "production_authorized": false,
+      "accepted_decision_receipt": null,
+      "selection": null,
+      "source_disposition": {
+        "path": "review-dispositions.json",
+        "pointer": "/audit_findings/15",
+        "sha256_lf": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+        "finding_sha256": "250f7cb2d64416bcce1e7f60e5ef93c7be96a7b5a86101ae8f511181dba086c7"
+      },
+      "kind": "UNANSWERED_CHOICE",
+      "responsible_role": "I12 source/engineering owner and root contract reviewer",
+      "decision_question": "Does I12 gate consume prior independent evidence or this run's evidence? Specify receipt identity/freshness and admission versus completion. This is an internal source-owner interpretation, not business authorization.",
+      "rationale": "I12: GATE old access revoked precedes S5 revoke replaced identities; S4 staged rotation tests may supply identity proof. Ordering is now directly reread in the public Mermaid. Specify prior independent receipt identity/freshness or separate admission from same-run completion; documented ambiguity does not prove a runtime failure or justify a hard build edge.",
+      "changes": [],
+      "source_evidence": [
+        {
+          "path": "reference/workflows/I12.json",
+          "pointer": "/gate",
+          "sha256_lf": "58501e797b63ad3103e28623d89dae5ff2a8b04da3d078456183b709a0fe4c8d",
+          "old_value": "New identity proven and old access revoked?",
+          "old_value_sha256": "64db9a08e03c3d01f3a123eac24ce9230cb8607ebc087bab994965aee7f90261"
+        }
+      ],
+      "alternatives": [
+        "Admission uses identified fresh prior-generation independent evidence",
+        "Isolated admitted test produces current-generation completion evidence"
+      ],
+      "boundaries": [
+        {
+          "producer": "I12",
+          "consumer": "I12",
+          "artifact_type": "UnresolvedSourceDecision",
+          "unknown": "HOLD",
+          "selected": null,
+          "proposal": "Draft a two-boundary contract: separate scoped rotation admission, new identity validation, revocation and completion readback; bind evidence to exact generation and keep unknown held."
+        }
+      ]
+    },
+    {
+      "finding_key": "O20-11:SOURCE-GATE-I13",
+      "workflow_ids": [
+        "I13"
+      ],
+      "component_ids": [
+        "CP021",
+        "CP053",
+        "CP056"
+      ],
+      "mapped_existing_task_keys": [
+        "CP021",
+        "CP053",
+        "CP056",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F18",
+        "F20",
+        "WF-I13-BUILD",
+        "WF-I13-TEST",
+        "WF-I13-VERIFY"
+      ],
+      "F20_acceptance_criterion": [
+        "190 workflow implementations/test suites/verifications and all 147 component records covered",
+        "Build DAG acyclic and no epic or human production gate blocks ordinary test writing"
+      ],
+      "status": "PROPOSED_NOT_ADOPTED",
+      "qualified": false,
+      "runtime_status": "NOT_RUN",
+      "production_authorized": false,
+      "accepted_decision_receipt": null,
+      "selection": null,
+      "source_disposition": {
+        "path": "review-dispositions.json",
+        "pointer": "/audit_findings/16",
+        "sha256_lf": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+        "finding_sha256": "e470ad767d2df4106337115ce76f4c33ae24f9e2cc6b6afa863634d254eb743d"
+      },
+      "kind": "UNANSWERED_CHOICE",
+      "responsible_role": "I13 source/engineering owner and root contract reviewer",
+      "decision_question": "Does I13 gate consume prior independent evidence or this run's evidence? Specify receipt identity/freshness and admission versus completion. This is an internal source-owner interpretation, not business authorization.",
+      "rationale": "I13: GATE tenant/role proof precedes S5 cross-client denial and break-glass test. Ordering is now directly reread in the public Mermaid. Specify prior independent receipt identity/freshness or separate admission from same-run completion; documented ambiguity does not prove a runtime failure or justify a hard build edge.",
+      "changes": [],
+      "source_evidence": [
+        {
+          "path": "reference/workflows/I13.json",
+          "pointer": "/gate",
+          "sha256_lf": "c6456aab90d604b33b0030203a7a38fbdba2b331cbabcb6af9231a6048afe93c",
+          "old_value": "Tenant and role boundaries proven?",
+          "old_value_sha256": "3b32aa00263d562ee333cdb164036752b5c3992237da8abf2d2a26ebec6ad225"
+        }
+      ],
+      "alternatives": [
+        "Admission uses identified fresh prior-generation independent evidence",
+        "Isolated admitted test produces current-generation completion evidence"
+      ],
+      "boundaries": [
+        {
+          "producer": "I13",
+          "consumer": "I13",
+          "artifact_type": "UnresolvedSourceDecision",
+          "unknown": "HOLD",
+          "selected": null,
+          "proposal": "Draft a two-boundary contract: allow isolated denial tests before final role-boundary qualification; bind evidence to exact generation and keep unknown held."
+        }
+      ]
+    },
+    {
+      "finding_key": "O20-11:SOURCE-GATE-I14",
+      "workflow_ids": [
+        "I14"
+      ],
+      "component_ids": [
+        "CP016",
+        "CP020",
+        "CP024",
+        "CP026",
+        "CP040",
+        "CP053"
+      ],
+      "mapped_existing_task_keys": [
+        "CP016",
+        "CP020",
+        "CP024",
+        "CP026",
+        "CP040",
+        "CP053",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F18",
+        "F20",
+        "WF-I14-BUILD",
+        "WF-I14-TEST",
+        "WF-I14-VERIFY"
+      ],
+      "F20_acceptance_criterion": [
+        "190 workflow implementations/test suites/verifications and all 147 component records covered",
+        "Build DAG acyclic and no epic or human production gate blocks ordinary test writing"
+      ],
+      "status": "PROPOSED_NOT_ADOPTED",
+      "qualified": false,
+      "runtime_status": "NOT_RUN",
+      "production_authorized": false,
+      "accepted_decision_receipt": null,
+      "selection": null,
+      "source_disposition": {
+        "path": "review-dispositions.json",
+        "pointer": "/audit_findings/17",
+        "sha256_lf": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+        "finding_sha256": "4f738e867e0f818ff1f0f15694e9fa3c6c7f8c81813ba7490f16d7b47aa7c3c8"
+      },
+      "kind": "UNANSWERED_CHOICE",
+      "responsible_role": "I14 source/engineering owner and root contract reviewer",
+      "decision_question": "Does I14 gate consume prior independent evidence or this run's evidence? Specify receipt identity/freshness and admission versus completion. This is an internal source-owner interpretation, not business authorization.",
+      "rationale": "I14: GATE issue/deploy/reload/monitor chain precedes S4 deploy/reload and S5 trust/renewal tests. Ordering is now directly reread in the public Mermaid. Specify prior independent receipt identity/freshness or separate admission from same-run completion; documented ambiguity does not prove a runtime failure or justify a hard build edge.",
+      "changes": [],
+      "source_evidence": [
+        {
+          "path": "reference/workflows/I14.json",
+          "pointer": "/gate",
+          "sha256_lf": "536c71298a3b37bc07fb8aca7ecd92c1444d98b0904fb01d1b68887d0842cc6b",
+          "old_value": "Issue-deploy-reload-monitor chain proven?",
+          "old_value_sha256": "c7283735bafdd20ec9e574f21e3790953cd896d33aee57f1501d90d3ec4c6dbe"
+        }
+      ],
+      "alternatives": [
+        "Admission uses identified fresh prior-generation independent evidence",
+        "Isolated admitted test produces current-generation completion evidence"
+      ],
+      "boundaries": [
+        {
+          "producer": "I14",
+          "consumer": "I14",
+          "artifact_type": "UnresolvedSourceDecision",
+          "unknown": "HOLD",
+          "selected": null,
+          "proposal": "Draft a two-boundary contract: separate change admission, bounded deployment/reload and fresh hostname/auth/renewal evidence; bind evidence to exact generation and keep unknown held."
+        }
+      ]
+    },
+    {
+      "finding_key": "O20-12:S01",
+      "workflow_ids": [
+        "I15",
+        "I16",
+        "I18",
+        "I23",
+        "I24"
+      ],
+      "component_ids": [
+        "CP016",
+        "CP023",
+        "CP024",
+        "CP026",
+        "CP027",
+        "CP028",
+        "CP029",
+        "CP031",
+        "CP032",
+        "CP041",
+        "CP043",
+        "CP044",
+        "CP045",
+        "CP046",
+        "CP053",
+        "CP056",
+        "CP059",
+        "CP085",
+        "CP086",
+        "CP087",
+        "CP088",
+        "CP089"
+      ],
+      "mapped_existing_task_keys": [
+        "CP016",
+        "CP023",
+        "CP024",
+        "CP026",
+        "CP027",
+        "CP028",
+        "CP029",
+        "CP031",
+        "CP032",
+        "CP041",
+        "CP043",
+        "CP044",
+        "CP045",
+        "CP046",
+        "CP053",
+        "CP056",
+        "CP059",
+        "CP085",
+        "CP086",
+        "CP087",
+        "CP088",
+        "CP089",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F18",
+        "F20",
+        "WF-I15-BUILD",
+        "WF-I15-TEST",
+        "WF-I15-VERIFY",
+        "WF-I16-BUILD",
+        "WF-I16-TEST",
+        "WF-I16-VERIFY",
+        "WF-I18-BUILD",
+        "WF-I18-TEST",
+        "WF-I18-VERIFY",
+        "WF-I23-BUILD",
+        "WF-I23-TEST",
+        "WF-I23-VERIFY",
+        "WF-I24-BUILD",
+        "WF-I24-TEST",
+        "WF-I24-VERIFY"
+      ],
+      "F20_acceptance_criterion": [
+        "190 workflow implementations/test suites/verifications and all 147 component records covered",
+        "Build DAG acyclic and no epic or human production gate blocks ordinary test writing"
+      ],
+      "status": "PROPOSED_NOT_ADOPTED",
+      "qualified": false,
+      "runtime_status": "NOT_RUN",
+      "production_authorized": false,
+      "accepted_decision_receipt": null,
+      "selection": null,
+      "source_disposition": {
+        "path": "review-dispositions.json",
+        "pointer": "/audit_findings/18",
+        "sha256_lf": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+        "finding_sha256": "ef46f52f92ea542f2f84ea472e9d668369e3db0a18cfc4328c3f4e8c6c2bb25a"
+      },
+      "kind": "BOUNDED_AMENDMENT",
+      "responsible_role": "Infrastructure recovery and F04/F05 source owners",
+      "decision_question": "Confirm pre-restore isolation and prior-evidence mode; no program-wide phase barrier is justified.",
+      "rationale": "I15 restore/authorization gate precedes S5 restore testing; I16 compatibility/restore gate precedes real restore test; I18 consistent-restore gate precedes off-host backup; I23 independent-copy/restore gate precedes transfer and verification. I24 restores applications S2 before explicit dispatch block S3, and reconciliation acceptance precedes reconciliation S4. Integration_Contracts requires restore in isolation and HOLD. Bind prior receipts or separate admission/completion and make pre-restore isolation explicit; no actual unsafe restore is proved.",
+      "changes": [
+        {
+          "path": "reference/workflows/I15.json",
+          "pointer": "/gate",
+          "sha256_lf": "4a9ae123484bd1e353c526ada4283d38814d530f3ddf3d18bd9aa3e1d4c40200",
+          "old_value": "Database restore and authorization passed?",
+          "old_value_sha256": "e2dfaca86753f160a3133916429d74fb84f727caa7bc995093c417265d974181",
+          "operation": "REPLACE_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": "Admission: isolate before restore, bind backup generation and keep dispatch HOLD; completion after tests: Database restore and authorization passed?"
+        },
+        {
+          "path": "reference/workflows/I16.json",
+          "pointer": "/gate",
+          "sha256_lf": "1a6eccd3196e545754f186123eff35fc932faf01632d39524c1ceb5f49163721",
+          "old_value": "Per-app compatibility and restore passed?",
+          "old_value_sha256": "fa7efd174cedb4c5e9360dee4833a415a919b6cc11ba11029a11e1073c347b01",
+          "operation": "REPLACE_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": "Admission: isolate before restore, bind backup generation and keep dispatch HOLD; completion after tests: Per-app compatibility and restore passed?"
+        },
+        {
+          "path": "reference/workflows/I18.json",
+          "pointer": "/gate",
+          "sha256_lf": "490b7663225049864c1d3592d575e9709e1492edd23da095ced209bb27bf7c49",
+          "old_value": "Object and metadata restore consistent?",
+          "old_value_sha256": "a6dac994f298270a307b7eb53517595d8ac9c8c211f20bf797ef4d5cd17563e9",
+          "operation": "REPLACE_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": "Admission: isolate before restore, bind backup generation and keep dispatch HOLD; completion after tests: Object and metadata restore consistent?"
+        },
+        {
+          "path": "reference/workflows/I23.json",
+          "pointer": "/gate",
+          "sha256_lf": "d25809b704643ed8671f1e96dd2b653dd7b66b05a074b568c13e335b1d2866c6",
+          "old_value": "Independent copy and restore evidence present?",
+          "old_value_sha256": "4acd55e0248f61e7252b2c7a79f06df03232467b6dfa4f7ba8d53b596572cd23",
+          "operation": "REPLACE_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": "Admission: isolate before restore, bind backup generation and keep dispatch HOLD; completion after tests: Independent copy and restore evidence present?"
+        },
+        {
+          "path": "reference/workflows/I24.json",
+          "pointer": "/gate",
+          "sha256_lf": "8232968a4ad90a41257522d7f40e8b9ece6c11ef3adce2dab186df8410bfe817",
+          "old_value": "Restore and external-state reconciliation accepted?",
+          "old_value_sha256": "0b7c09392096c7cd8a1e300359fce60eb8eb9f52628bf155df11920e9f3d4cc5",
+          "operation": "REPLACE_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": "Admission: isolate before restore, bind backup generation and keep dispatch HOLD; completion after tests: Restore and external-state reconciliation accepted?"
+        }
+      ],
+      "source_evidence": [
+        {
+          "path": "reference/workflows/I15.json",
+          "pointer": "/gate",
+          "sha256_lf": "4a9ae123484bd1e353c526ada4283d38814d530f3ddf3d18bd9aa3e1d4c40200",
+          "old_value": "Database restore and authorization passed?",
+          "old_value_sha256": "e2dfaca86753f160a3133916429d74fb84f727caa7bc995093c417265d974181"
+        },
+        {
+          "path": "reference/workflows/I16.json",
+          "pointer": "/gate",
+          "sha256_lf": "1a6eccd3196e545754f186123eff35fc932faf01632d39524c1ceb5f49163721",
+          "old_value": "Per-app compatibility and restore passed?",
+          "old_value_sha256": "fa7efd174cedb4c5e9360dee4833a415a919b6cc11ba11029a11e1073c347b01"
+        },
+        {
+          "path": "reference/workflows/I18.json",
+          "pointer": "/gate",
+          "sha256_lf": "490b7663225049864c1d3592d575e9709e1492edd23da095ced209bb27bf7c49",
+          "old_value": "Object and metadata restore consistent?",
+          "old_value_sha256": "a6dac994f298270a307b7eb53517595d8ac9c8c211f20bf797ef4d5cd17563e9"
+        },
+        {
+          "path": "reference/workflows/I23.json",
+          "pointer": "/gate",
+          "sha256_lf": "d25809b704643ed8671f1e96dd2b653dd7b66b05a074b568c13e335b1d2866c6",
+          "old_value": "Independent copy and restore evidence present?",
+          "old_value_sha256": "4acd55e0248f61e7252b2c7a79f06df03232467b6dfa4f7ba8d53b596572cd23"
+        },
+        {
+          "path": "reference/workflows/I24.json",
+          "pointer": "/gate",
+          "sha256_lf": "8232968a4ad90a41257522d7f40e8b9ece6c11ef3adce2dab186df8410bfe817",
+          "old_value": "Restore and external-state reconciliation accepted?",
+          "old_value_sha256": "0b7c09392096c7cd8a1e300359fce60eb8eb9f52628bf155df11920e9f3d4cc5"
+        }
+      ],
+      "alternatives": [],
+      "boundaries": [
+        {
+          "producer": "I15",
+          "consumer": "I15",
+          "artifact_type": "BackupGenerationRestoreReceipt",
+          "isolation": "BEFORE_APPLICATION_RESTORE",
+          "unknown": "HOLD",
+          "completion": "AFTER_CURRENT_PRODUCER",
+          "prior_generation": "EXPLICIT_IDENTITY_AND_FRESHNESS_REQUIRED",
+          "release": "SEPARATE_AUTHORITY_REQUIRED"
+        },
+        {
+          "producer": "I16",
+          "consumer": "I16",
+          "artifact_type": "BackupGenerationRestoreReceipt",
+          "isolation": "BEFORE_APPLICATION_RESTORE",
+          "unknown": "HOLD",
+          "completion": "AFTER_CURRENT_PRODUCER",
+          "prior_generation": "EXPLICIT_IDENTITY_AND_FRESHNESS_REQUIRED",
+          "release": "SEPARATE_AUTHORITY_REQUIRED"
+        },
+        {
+          "producer": "I18",
+          "consumer": "I18",
+          "artifact_type": "BackupGenerationRestoreReceipt",
+          "isolation": "BEFORE_APPLICATION_RESTORE",
+          "unknown": "HOLD",
+          "completion": "AFTER_CURRENT_PRODUCER",
+          "prior_generation": "EXPLICIT_IDENTITY_AND_FRESHNESS_REQUIRED",
+          "release": "SEPARATE_AUTHORITY_REQUIRED"
+        },
+        {
+          "producer": "I23",
+          "consumer": "I23",
+          "artifact_type": "BackupGenerationRestoreReceipt",
+          "isolation": "BEFORE_APPLICATION_RESTORE",
+          "unknown": "HOLD",
+          "completion": "AFTER_CURRENT_PRODUCER",
+          "prior_generation": "EXPLICIT_IDENTITY_AND_FRESHNESS_REQUIRED",
+          "release": "SEPARATE_AUTHORITY_REQUIRED"
+        },
+        {
+          "producer": "I24",
+          "consumer": "I24",
+          "artifact_type": "BackupGenerationRestoreReceipt",
+          "isolation": "BEFORE_APPLICATION_RESTORE",
+          "unknown": "HOLD",
+          "completion": "AFTER_CURRENT_PRODUCER",
+          "prior_generation": "EXPLICIT_IDENTITY_AND_FRESHNESS_REQUIRED",
+          "release": "SEPARATE_AUTHORITY_REQUIRED"
+        }
+      ]
+    },
+    {
+      "finding_key": "O20-13:D01",
+      "workflow_ids": [
+        "I27"
+      ],
+      "component_ids": [
+        "CP016",
+        "CP027",
+        "CP028",
+        "CP047",
+        "CP048",
+        "CP066"
+      ],
+      "mapped_existing_task_keys": [
+        "CP016",
+        "CP027",
+        "CP028",
+        "CP047",
+        "CP048",
+        "CP066",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F18",
+        "F20",
+        "WF-I27-BUILD",
+        "WF-I27-TEST",
+        "WF-I27-VERIFY"
+      ],
+      "F20_acceptance_criterion": [
+        "190 workflow implementations/test suites/verifications and all 147 component records covered",
+        "Build DAG acyclic and no epic or human production gate blocks ordinary test writing",
+        "Zero orphan acceptance IDs; dependency modifications invalidate affected leases"
+      ],
+      "status": "PROPOSED_NOT_ADOPTED",
+      "qualified": false,
+      "runtime_status": "NOT_RUN",
+      "production_authorized": false,
+      "accepted_decision_receipt": null,
+      "selection": null,
+      "source_disposition": {
+        "path": "review-dispositions.json",
+        "pointer": "/audit_findings/19",
+        "sha256_lf": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+        "finding_sha256": "d2653c646bedf5762bac7f9b570b1ce23f49ec83d3ad18d1e5d3f8c6b3aad269"
+      },
+      "kind": "BOUNDED_AMENDMENT",
+      "responsible_role": "F20 curator, CP048 registry and I27 owners",
+      "decision_question": "Internal alias review only; deployed UPS readiness remains NOT_RUN.",
+      "rationale": "Original registry CP048 is Network UPS Tools with empty supports_workflows; I27 names NUT. Curated exact canonical matching does not equate this acronym. Existing mapped CP048 prerequisite for WF-I27-VERIFY remains retained, so a missing-package or missing-hard-edge claim is contradicted. Alias/consumer contract review remains internal.",
+      "changes": [
+        {
+          "path": "backlog/issues.json",
+          "pointer": "/issues/273/depends_on",
+          "sha256_lf": "b655da3025feda286daf723cd0aa4fb38f9ec2340cfb817b4611533bfdd604d7",
+          "old_value": [
+            "WF-I27-BUILD",
+            "WF-I27-TEST",
+            "F18",
+            "CP016",
+            "CP027",
+            "CP028",
+            "CP047",
+            "CP048",
+            "CP066"
+          ],
+          "old_value_sha256": "5d7c8ace992f708a620d7bae8ab5befd6458c714d7f2b626faf8ab87e3d80044",
+          "operation": "ADD_ASSOCIATION_PROPOSAL_ONLY",
+          "field_type": "list",
+          "proposed_value": {
+            "exact_source_token": "NUT",
+            "component_id": "CP048",
+            "canonical_field": "canonical_name",
+            "canonical_name": "Network UPS Tools",
+            "matching": "EXACT_ALIAS_PROPOSAL_NOT_SUBSTRING",
+            "reuse_task": "WF-I27-VERIFY",
+            "new_edge": false
+          }
+        }
+      ],
+      "source_evidence": [
+        {
+          "path": "reference/workflows/I27.json",
+          "pointer": "/gate",
+          "sha256_lf": "3aaa2ef0bb4ab764622213f5e98bcaf372f25add12a2c351b613bdc05f1d68d4",
+          "old_value": "Power, storage and dependency readiness restored?",
+          "old_value_sha256": "1e1a8cf5b6dcc72a42a004fdf2755ebe226b4831df68e5db883cebb59b8d5959"
+        },
+        {
+          "path": "reference/components/component_registry.json",
+          "pointer": "/components/47/name",
+          "sha256_lf": "de49779855eabdd7f5defc5ff6157d6a3e875f6164d64278c4a70338d029899e",
+          "old_value": "Network UPS Tools",
+          "old_value_sha256": "478b8d28904914d9351456a057c25b05bfeb4ba3113ae2dd48dff373de16f3df"
+        },
+        {
+          "path": "reference/workflows/I27.json",
+          "pointer": "/steps/0/software",
+          "sha256_lf": "3aaa2ef0bb4ab764622213f5e98bcaf372f25add12a2c351b613bdc05f1d68d4",
+          "old_value": "NUT",
+          "old_value_sha256": "735f4c5613775397388966f82da5cdcf660a837cb40b2221841429623554d8bc"
+        },
+        {
+          "path": "backlog/issues.json",
+          "pointer": "/issues/273/depends_on",
+          "sha256_lf": "b655da3025feda286daf723cd0aa4fb38f9ec2340cfb817b4611533bfdd604d7",
+          "old_value": [
+            "WF-I27-BUILD",
+            "WF-I27-TEST",
+            "F18",
+            "CP016",
+            "CP027",
+            "CP028",
+            "CP047",
+            "CP048",
+            "CP066"
+          ],
+          "old_value_sha256": "5d7c8ace992f708a620d7bae8ab5befd6458c714d7f2b626faf8ab87e3d80044"
+        }
+      ],
+      "alternatives": [],
+      "boundaries": [
+        {
+          "producer": "I27",
+          "consumer": "CP048",
+          "artifact_type": "UPSReadinessEvidence",
+          "runtime_status": "NOT_RUN"
+        }
+      ],
+      "alias_proposal": {
+        "exact_source_token": "NUT",
+        "component_id": "CP048",
+        "canonical_field": "canonical_name",
+        "canonical_name": "Network UPS Tools",
+        "matching": "EXACT_ALIAS_PROPOSAL_NOT_SUBSTRING",
+        "reuse_task": "WF-I27-VERIFY",
+        "new_edge": false
+      },
+      "curated_evidence": [
+        {
+          "path": "component-curation.json",
+          "pointer": "/components/47/canonical_name",
+          "sha256_lf": "cb00726e3b76432cf240e7257c7c2fa25b502c0db1532a205b75a5a441963ca2",
+          "old_value": "Network UPS Tools"
+        }
+      ]
+    },
+    {
+      "finding_key": "O20-14:A01",
+      "workflow_ids": [
+        "I35"
+      ],
+      "component_ids": [
+        "CP001",
+        "CP018",
+        "CP019",
+        "CP021",
+        "CP023",
+        "CP024",
+        "CP056"
+      ],
+      "mapped_existing_task_keys": [
+        "CP001",
+        "CP008",
+        "CP018",
+        "CP019",
+        "CP021",
+        "CP023",
+        "CP024",
+        "CP025",
+        "CP056",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F18",
+        "F20",
+        "WF-I35-BUILD",
+        "WF-I35-TEST",
+        "WF-I35-VERIFY"
+      ],
+      "F20_acceptance_criterion": [
+        "190 workflow implementations/test suites/verifications and all 147 component records covered",
+        "Build DAG acyclic and no epic or human production gate blocks ordinary test writing"
+      ],
+      "status": "PROPOSED_NOT_ADOPTED",
+      "qualified": false,
+      "runtime_status": "NOT_RUN",
+      "production_authorized": false,
+      "accepted_decision_receipt": null,
+      "selection": null,
+      "source_disposition": {
+        "path": "review-dispositions.json",
+        "pointer": "/audit_findings/20",
+        "sha256_lf": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+        "finding_sha256": "02edc2479cc77cb4a51ca6108f047474b16e807e5d914ecd1b4d077a68f740ca"
+      },
+      "kind": "UNANSWERED_CHOICE",
+      "responsible_role": "I35 source/engineering owner and root contract reviewer",
+      "decision_question": "Does I35 gate consume prior independent evidence or this run's evidence? Specify receipt identity/freshness and admission versus completion. This is an internal source-owner interpretation, not business authorization.",
+      "rationale": "I35: GATE normal access restored/emergency keys reconciled precedes S3 dependency restore, S4 audit/rotation and S5 normal-access test. Ordering is now directly reread in the public Mermaid. Specify prior independent receipt identity/freshness or separate admission from same-run completion; documented ambiguity does not prove a runtime failure or justify a hard build edge.",
+      "changes": [],
+      "source_evidence": [
+        {
+          "path": "reference/workflows/I35.json",
+          "pointer": "/gate",
+          "sha256_lf": "be17492221783216671d2016d35d3aee7f02a253349f66a6137fbe0fdec05c59",
+          "old_value": "Normal access restored and emergency keys reconciled?",
+          "old_value_sha256": "29c27024a02e60d59faa665c5fa900ad20f5fb5b2443d743024158d6a124b2ce"
+        }
+      ],
+      "alternatives": [
+        "Admission uses identified fresh prior-generation independent evidence",
+        "Isolated admitted test produces current-generation completion evidence"
+      ],
+      "boundaries": [
+        {
+          "producer": "I35",
+          "consumer": "I35",
+          "artifact_type": "UnresolvedSourceDecision",
+          "unknown": "HOLD",
+          "selected": null,
+          "proposal": "Draft a two-boundary contract: separate authenticated emergency admission from restore, rotation and normal-access completion; bind evidence to exact generation and keep unknown held."
+        }
+      ]
+    },
+    {
+      "finding_key": "O20-14:A02",
+      "workflow_ids": [
+        "I36"
+      ],
+      "component_ids": [
+        "CP019",
+        "CP032",
+        "CP038"
+      ],
+      "mapped_existing_task_keys": [
+        "CP019",
+        "CP032",
+        "CP038",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F18",
+        "F20",
+        "WF-I36-BUILD",
+        "WF-I36-TEST",
+        "WF-I36-VERIFY"
+      ],
+      "F20_acceptance_criterion": [
+        "190 workflow implementations/test suites/verifications and all 147 component records covered",
+        "Build DAG acyclic and no epic or human production gate blocks ordinary test writing"
+      ],
+      "status": "PROPOSED_NOT_ADOPTED",
+      "qualified": false,
+      "runtime_status": "NOT_RUN",
+      "production_authorized": false,
+      "accepted_decision_receipt": null,
+      "selection": null,
+      "source_disposition": {
+        "path": "review-dispositions.json",
+        "pointer": "/audit_findings/21",
+        "sha256_lf": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+        "finding_sha256": "b9fe5e2acca52c81c24a19923170ca6b8ed42adf3d2b0ff7b7f4ba856c3a4151"
+      },
+      "kind": "UNANSWERED_CHOICE",
+      "responsible_role": "I36 source/engineering owner and root contract reviewer",
+      "decision_question": "Does I36 gate consume prior independent evidence or this run's evidence? Specify receipt identity/freshness and admission versus completion. This is an internal source-owner interpretation, not business authorization.",
+      "rationale": "I36: entry GATE trustworthy time precedes S1 approved time configuration and S2 drift monitoring; already trustworthy prior state remains possible. Ordering is now directly reread in the public Mermaid. Specify prior independent receipt identity/freshness or separate admission from same-run completion; documented ambiguity does not prove a runtime failure or justify a hard build edge.",
+      "changes": [],
+      "source_evidence": [
+        {
+          "path": "reference/workflows/I36.json",
+          "pointer": "/gate",
+          "sha256_lf": "2fbc83e6ddcad7384742b33489bc565cf2e7f557989a31f00fad46059cd3b29c",
+          "old_value": "Time and local policy window trustworthy?",
+          "old_value_sha256": "d3892dc7f5256fa6eebbc73ac79e1872f7d74486de587052d703bee032e69964"
+        }
+      ],
+      "alternatives": [
+        "Admission uses identified fresh prior-generation independent evidence",
+        "Isolated admitted test produces current-generation completion evidence"
+      ],
+      "boundaries": [
+        {
+          "producer": "I36",
+          "consumer": "I36",
+          "artifact_type": "UnresolvedSourceDecision",
+          "unknown": "HOLD",
+          "selected": null,
+          "proposal": "Draft a two-boundary contract: allow isolated clock repair while scheduled effects remain held; revalidate timezone/DST and signatures; bind evidence to exact generation and keep unknown held."
+        }
+      ]
+    },
+    {
+      "finding_key": "O20-14:A03",
+      "workflow_ids": [
+        "L04"
+      ],
+      "component_ids": [
+        "CP003"
+      ],
+      "mapped_existing_task_keys": [
+        "CP003",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F15",
+        "F18",
+        "F20",
+        "WF-L04-BUILD",
+        "WF-L04-TEST",
+        "WF-L04-VERIFY"
+      ],
+      "F20_acceptance_criterion": [
+        "190 workflow implementations/test suites/verifications and all 147 component records covered",
+        "Build DAG acyclic and no epic or human production gate blocks ordinary test writing"
+      ],
+      "status": "PROPOSED_NOT_ADOPTED",
+      "qualified": false,
+      "runtime_status": "NOT_RUN",
+      "production_authorized": false,
+      "accepted_decision_receipt": null,
+      "selection": null,
+      "source_disposition": {
+        "path": "review-dispositions.json",
+        "pointer": "/audit_findings/22",
+        "sha256_lf": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+        "finding_sha256": "2aa1ad273a83e53882ac3938cf0a6d615d04472dc5b9ced5ce8705ddfa9d96f7"
+      },
+      "kind": "UNANSWERED_CHOICE",
+      "responsible_role": "L04 source/engineering owner and root contract reviewer",
+      "decision_question": "Does L04 gate consume prior independent evidence or this run's evidence? Specify receipt identity/freshness and admission versus completion. This is an internal source-owner interpretation, not business authorization.",
+      "rationale": "L04: GATE isolation proven precedes S5 permitted-access/no-leak tests; S3 rebuilding and S4 trust reconciliation may supply some evidence. Ordering is now directly reread in the public Mermaid. Specify prior independent receipt identity/freshness or separate admission from same-run completion; documented ambiguity does not prove a runtime failure or justify a hard build edge.",
+      "changes": [],
+      "source_evidence": [
+        {
+          "path": "reference/workflows/L04.json",
+          "pointer": "/gate",
+          "sha256_lf": "4b6ea6d9a79b8d78103e06711d0923128e06cd746a3ee850ed4957217a3147fd",
+          "old_value": "Sandbox and tunnel isolation proven?",
+          "old_value_sha256": "bc8d1f762eabd24400015d92637f3147cf5d392d2da3a16b887e3db8faec50ff"
+        }
+      ],
+      "alternatives": [
+        "Admission uses identified fresh prior-generation independent evidence",
+        "Isolated admitted test produces current-generation completion evidence"
+      ],
+      "boundaries": [
+        {
+          "producer": "L04",
+          "consumer": "L04",
+          "artifact_type": "UnresolvedSourceDecision",
+          "unknown": "HOLD",
+          "selected": null,
+          "proposal": "Draft a two-boundary contract: separate admitted isolated access tests from final isolation proof; bind evidence to exact generation and keep unknown held."
+        }
+      ]
+    },
+    {
+      "finding_key": "O20-14:A04",
+      "workflow_ids": [
+        "L05"
+      ],
+      "component_ids": [
+        "CP024",
+        "CP027",
+        "CP057",
+        "CP058"
+      ],
+      "mapped_existing_task_keys": [
+        "CP024",
+        "CP027",
+        "CP057",
+        "CP058",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F15",
+        "F18",
+        "F20",
+        "WF-L05-BUILD",
+        "WF-L05-TEST",
+        "WF-L05-VERIFY"
+      ],
+      "F20_acceptance_criterion": [
+        "190 workflow implementations/test suites/verifications and all 147 component records covered",
+        "Build DAG acyclic and no epic or human production gate blocks ordinary test writing"
+      ],
+      "status": "PROPOSED_NOT_ADOPTED",
+      "qualified": false,
+      "runtime_status": "NOT_RUN",
+      "production_authorized": false,
+      "accepted_decision_receipt": null,
+      "selection": null,
+      "source_disposition": {
+        "path": "review-dispositions.json",
+        "pointer": "/audit_findings/23",
+        "sha256_lf": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+        "finding_sha256": "ef026996fadb2a3391dd3afe72d00e00feb095b2bf496a66a7408d477c7ad6c2"
+      },
+      "kind": "UNANSWERED_CHOICE",
+      "responsible_role": "L05 source/engineering owner and root contract reviewer",
+      "decision_question": "Does L05 gate consume prior independent evidence or this run's evidence? Specify receipt identity/freshness and admission versus completion. This is an internal source-owner interpretation, not business authorization.",
+      "rationale": "L05: GATE non-mock acceptance precedes S5 real-versus-mock signature/path validation. Ordering is now directly reread in the public Mermaid. Specify prior independent receipt identity/freshness or separate admission from same-run completion; documented ambiguity does not prove a runtime failure or justify a hard build edge.",
+      "changes": [],
+      "source_evidence": [
+        {
+          "path": "reference/workflows/L05.json",
+          "pointer": "/gate",
+          "sha256_lf": "a35ea72d1c7f1ae74f2c2a683600850ada73abb0a23070cf1f3c110932ad9a57",
+          "old_value": "Owner, provider and non-mock acceptance passed?",
+          "old_value_sha256": "938892b46b25ec4d6b5a0b436d837bf591c8b4e71810ec013fa164791c70b9e2"
+        }
+      ],
+      "alternatives": [
+        "Admission uses identified fresh prior-generation independent evidence",
+        "Isolated admitted test produces current-generation completion evidence"
+      ],
+      "boundaries": [
+        {
+          "producer": "L05",
+          "consumer": "L05",
+          "artifact_type": "UnresolvedSourceDecision",
+          "unknown": "HOLD",
+          "selected": null,
+          "proposal": "Draft a two-boundary contract: separate offline mock tests, authentic provider acceptance and migration release; no mock receipt satisfies a real-provider gate; bind evidence to exact generation and keep unknown held."
+        }
+      ]
+    },
+    {
+      "finding_key": "O20-14:A05",
+      "workflow_ids": [
+        "L07"
+      ],
+      "component_ids": [
+        "CP056",
+        "CP106",
+        "CP107"
+      ],
+      "mapped_existing_task_keys": [
+        "CP056",
+        "CP106",
+        "CP107",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F15",
+        "F18",
+        "F20",
+        "WF-L07-BUILD",
+        "WF-L07-TEST",
+        "WF-L07-VERIFY"
+      ],
+      "F20_acceptance_criterion": [
+        "190 workflow implementations/test suites/verifications and all 147 component records covered",
+        "Build DAG acyclic and no epic or human production gate blocks ordinary test writing"
+      ],
+      "status": "PROPOSED_NOT_ADOPTED",
+      "qualified": false,
+      "runtime_status": "NOT_RUN",
+      "production_authorized": false,
+      "accepted_decision_receipt": null,
+      "selection": null,
+      "source_disposition": {
+        "path": "review-dispositions.json",
+        "pointer": "/audit_findings/24",
+        "sha256_lf": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+        "finding_sha256": "e064d6b62a90be98a9ee7549038318ec2be74615da9c1c0ece06c225e8e89262"
+      },
+      "kind": "UNANSWERED_CHOICE",
+      "responsible_role": "L07 source/engineering owner and root contract reviewer",
+      "decision_question": "Does L07 gate consume prior independent evidence or this run's evidence? Specify receipt identity/freshness and admission versus completion. This is an internal source-owner interpretation, not business authorization.",
+      "rationale": "L07: GATE feature justified and tested precedes S3 scoped restore and S4 client/firewall/data tests. Ordering is now directly reread in the public Mermaid. Specify prior independent receipt identity/freshness or separate admission from same-run completion; documented ambiguity does not prove a runtime failure or justify a hard build edge.",
+      "changes": [],
+      "source_evidence": [
+        {
+          "path": "reference/workflows/L07.json",
+          "pointer": "/gate",
+          "sha256_lf": "923f0606aa8c1ee5fe5ce783f36839c4aa2dd64dd5569c337ff1f5894cca5f1f",
+          "old_value": "Conditional feature justified and tested?",
+          "old_value_sha256": "09a54ec9dc57fa6d8824019d4d12bc227bfb62fb2ee11e0433a033eef1e89d85"
+        }
+      ],
+      "alternatives": [
+        "Admission uses identified fresh prior-generation independent evidence",
+        "Isolated admitted test produces current-generation completion evidence"
+      ],
+      "boundaries": [
+        {
+          "producer": "L07",
+          "consumer": "L07",
+          "artifact_type": "UnresolvedSourceDecision",
+          "unknown": "HOLD",
+          "selected": null,
+          "proposal": "Draft a two-boundary contract: separate conditional source selection, isolated restoration/tests and post-test qualification; bind evidence to exact generation and keep unknown held."
+        }
+      ]
+    },
+    {
+      "finding_key": "O20-17:SA-01",
+      "workflow_ids": [
+        "M22",
+        "M28",
+        "M30"
+      ],
+      "component_ids": [
+        "CP027",
+        "CP032",
+        "CP033",
+        "CP053",
+        "CP056",
+        "CP054"
+      ],
+      "mapped_existing_task_keys": [
+        "CP027",
+        "CP032",
+        "CP033",
+        "CP053",
+        "CP054",
+        "CP056",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F18",
+        "F20",
+        "WF-M22-BUILD",
+        "WF-M22-TEST",
+        "WF-M22-VERIFY",
+        "WF-M28-BUILD",
+        "WF-M28-TEST",
+        "WF-M28-VERIFY",
+        "WF-M30-BUILD",
+        "WF-M30-TEST",
+        "WF-M30-VERIFY",
+        "WF-X01-VERIFY",
+        "WF-X02-BUILD",
+        "WF-X02-VERIFY",
+        "WF-X03-BUILD",
+        "WF-X03-VERIFY",
+        "WF-X04-BUILD",
+        "WF-X04-VERIFY",
+        "WF-X06-BUILD",
+        "WF-X06-VERIFY",
+        "WF-X10-VERIFY"
+      ],
+      "F20_acceptance_criterion": [
+        "190 workflow implementations/test suites/verifications and all 147 component records covered"
+      ],
+      "status": "PROPOSED_NOT_ADOPTED",
+      "qualified": false,
+      "runtime_status": "NOT_RUN",
+      "production_authorized": false,
+      "accepted_decision_receipt": null,
+      "selection": null,
+      "source_disposition": {
+        "path": "review-dispositions.json",
+        "pointer": "/audit_findings/25",
+        "sha256_lf": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+        "finding_sha256": "14e2616c06b65a251475ec13c0a0751d7df1b6f0c887f621246416ab995fc8a7"
+      },
+      "kind": "BOUNDED_AMENDMENT",
+      "responsible_role": "CP054 and M22/M28/M30 shared interface owners",
+      "decision_question": "For M30, which permitted SearXNG/API interface and typed response contract is intended? Confirm procedure-only consumer mappings for M22/M28/M30; no new package selection is required.",
+      "rationale": "Original registry CP054 explicitly selects SearXNG; its declared supports_workflows omits M22/M28/M30. All three canonical source_procedure fields explicitly mention SearXNG (M30 says permitted SearXNG/API research). Curated exact-token consumer derivation does not by itself establish that procedure-only consumer/interface contract. No new package selection is required; M30 API alternative/interface and permitted-use contract still need internal review.",
+      "changes": [
+        {
+          "path": "reference/workflows/M30.json",
+          "pointer": "/source_procedure",
+          "sha256_lf": "25faae8ed4bfcd8b6fcf4bc0f0220e457376ea707bed41c89d436278c62bcd41",
+          "old_value": "Permitted SearXNG/API research → Activepieces/Playwright monitoring → llama.cpp classification → OpenProject resolution",
+          "old_value_sha256": "7e4c4e084644b1049273e93302958154c26be7f4d41458edeafed51fd2d43efb",
+          "operation": "ADD_ASSOCIATION_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": {
+            "component_id": "CP054",
+            "canonical_field": "direct_source_named_consumers",
+            "consumers": [
+              "M22",
+              "M28"
+            ],
+            "basis": "EXACT_SOURCE_PROCEDURE_SEARXNG",
+            "M30": {
+              "selection": null,
+              "alternatives": [
+                "Permitted SearXNG interface",
+                "Permitted API interface"
+              ],
+              "response_contract": null
+            },
+            "new_component_selection": false
+          }
+        }
+      ],
+      "source_evidence": [
+        {
+          "path": "reference/workflows/M22.json",
+          "pointer": "/gate",
+          "sha256_lf": "98d203ec202874d15e8fec6be12e8750775fa9525ef94ed19842ce70f81bb1be",
+          "old_value": "Applicable permission, approval and destination readiness valid?",
+          "old_value_sha256": "acc2385631d6ca82025bf354f19c8157842ca902f610d53db7bab85f9a08b262"
+        },
+        {
+          "path": "reference/workflows/M28.json",
+          "pointer": "/gate",
+          "sha256_lf": "44984ce641e37ae6e8771e9753433a19cdb1cc4e9b34ad9e102f233ee3b0d3ad",
+          "old_value": "Applicable permission, approval and destination readiness valid?",
+          "old_value_sha256": "acc2385631d6ca82025bf354f19c8157842ca902f610d53db7bab85f9a08b262"
+        },
+        {
+          "path": "reference/workflows/M30.json",
+          "pointer": "/gate",
+          "sha256_lf": "25faae8ed4bfcd8b6fcf4bc0f0220e457376ea707bed41c89d436278c62bcd41",
+          "old_value": "Applicable permission, approval and destination readiness valid?",
+          "old_value_sha256": "acc2385631d6ca82025bf354f19c8157842ca902f610d53db7bab85f9a08b262"
+        },
+        {
+          "path": "reference/workflows/M22.json",
+          "pointer": "/source_procedure",
+          "sha256_lf": "98d203ec202874d15e8fec6be12e8750775fa9525ef94ed19842ce70f81bb1be",
+          "old_value": "SearXNG discoveries → Playwright permitted snapshots → PostgreSQL differences → llama.cpp digest → OpenProject decision",
+          "old_value_sha256": "5e3c809e5542cba7f88df73017bfa22e0fcca48ef41ebcc2da0288e0866824b6"
+        },
+        {
+          "path": "reference/workflows/M28.json",
+          "pointer": "/source_procedure",
+          "sha256_lf": "44984ce641e37ae6e8771e9753433a19cdb1cc4e9b34ad9e102f233ee3b0d3ad",
+          "old_value": "SearXNG public research → llama.cpp summary → OpenProject shortlist/approval → authorized personalized outreach → referral/UTM measurement",
+          "old_value_sha256": "0eadb07124c2c2d189be819b0ef079ee0191674662ec337356eabc700dad4d9c"
+        },
+        {
+          "path": "reference/workflows/M30.json",
+          "pointer": "/source_procedure",
+          "sha256_lf": "25faae8ed4bfcd8b6fcf4bc0f0220e457376ea707bed41c89d436278c62bcd41",
+          "old_value": "Permitted SearXNG/API research → Activepieces/Playwright monitoring → llama.cpp classification → OpenProject resolution",
+          "old_value_sha256": "7e4c4e084644b1049273e93302958154c26be7f4d41458edeafed51fd2d43efb"
+        }
+      ],
+      "alternatives": [],
+      "boundaries": [
+        {
+          "producer": "CP054",
+          "consumer": "M22",
+          "artifact_type": "PermittedPublicSearchResult",
+          "fields": [
+            "source_url",
+            "retrieved_at",
+            "query_ref",
+            "result_ref"
+          ],
+          "rights": "PERMITTED_PUBLIC_ONLY",
+          "outreach_authority": false
+        },
+        {
+          "producer": "CP054",
+          "consumer": "M28",
+          "artifact_type": "PermittedPublicSearchResult",
+          "fields": [
+            "source_url",
+            "retrieved_at",
+            "query_ref",
+            "result_ref"
+          ],
+          "rights": "PERMITTED_PUBLIC_ONLY",
+          "outreach_authority": false
+        }
+      ],
+      "consumer_proposal": {
+        "component_id": "CP054",
+        "canonical_field": "direct_source_named_consumers",
+        "consumers": [
+          "M22",
+          "M28"
+        ],
+        "basis": "EXACT_SOURCE_PROCEDURE_SEARXNG",
+        "M30": {
+          "selection": null,
+          "alternatives": [
+            "Permitted SearXNG interface",
+            "Permitted API interface"
+          ],
+          "response_contract": null
+        },
+        "new_component_selection": false
+      },
+      "curated_evidence": [
+        {
+          "path": "component-curation.json",
+          "pointer": "/components/53/canonical_name",
+          "sha256_lf": "cb00726e3b76432cf240e7257c7c2fa25b502c0db1532a205b75a5a441963ca2",
+          "old_value": "SearXNG"
+        }
+      ]
+    },
+    {
+      "finding_key": "O20-17:SA-02",
+      "workflow_ids": [
+        "M29"
+      ],
+      "component_ids": [
+        "CP027",
+        "CP032",
+        "CP057",
+        "CP058"
+      ],
+      "mapped_existing_task_keys": [
+        "CP027",
+        "CP032",
+        "CP057",
+        "CP058",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F18",
+        "F20",
+        "WF-M29-BUILD",
+        "WF-M29-TEST",
+        "WF-M29-VERIFY",
+        "WF-X01-VERIFY",
+        "WF-X02-BUILD",
+        "WF-X02-VERIFY",
+        "WF-X03-BUILD",
+        "WF-X03-VERIFY",
+        "WF-X04-BUILD",
+        "WF-X04-VERIFY",
+        "WF-X06-BUILD",
+        "WF-X06-VERIFY",
+        "WF-X10-VERIFY"
+      ],
+      "F20_acceptance_criterion": [
+        "190 workflow implementations/test suites/verifications and all 147 component records covered",
+        "Build DAG acyclic and no epic or human production gate blocks ordinary test writing",
+        "Zero orphan acceptance IDs; dependency modifications invalidate affected leases"
+      ],
+      "status": "PROPOSED_NOT_ADOPTED",
+      "qualified": false,
+      "runtime_status": "NOT_RUN",
+      "production_authorized": false,
+      "accepted_decision_receipt": null,
+      "selection": null,
+      "source_disposition": {
+        "path": "review-dispositions.json",
+        "pointer": "/audit_findings/26",
+        "sha256_lf": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+        "finding_sha256": "f4bb8aca048359e8bd4f0b2fea21140dac71c3eb76ae5302014ae7970fb9b261"
+      },
+      "kind": "BOUNDED_AMENDMENT",
+      "responsible_role": "M29/E11 control owners and trusted DAG reviewer",
+      "decision_question": "Does M29 qualification consume an E11 receipt or an engineering prerequisite? Root reviews any edge and lease impact.",
+      "rationale": "M29 controls includes E11 and current VERIFY prerequisites omit WF-E11-VERIFY. This is not proof of a missing hard build dependency; runtime control and engineering DAG are distinct.",
+      "changes": [
+        {
+          "path": "reference/workflows/M29.json",
+          "pointer": "/gate",
+          "sha256_lf": "29ba8bc20e425ccecb4a8ccfdd348389c157f528f6c33170603c2553cf0af0da",
+          "old_value": "Applicable permission, approval and destination readiness valid?",
+          "old_value_sha256": "acc2385631d6ca82025bf354f19c8157842ca902f610d53db7bab85f9a08b262",
+          "operation": "REPLACE_PROPOSAL_ONLY",
+          "field_type": "str",
+          "proposed_value": "Applicable permission, approval and destination readiness valid? Additionally, qualification requires a current E11 control receipt; this does not replace permission, approval or destination readiness. Missing, stale or ambiguous authority, readiness or E11 evidence is UNKNOWN and remains HOLD pending reconciliation. Ordinary isolated fixture tests remain permitted. No hard build edge is established."
+        }
+      ],
+      "source_evidence": [
+        {
+          "path": "reference/workflows/M29.json",
+          "pointer": "/gate",
+          "sha256_lf": "29ba8bc20e425ccecb4a8ccfdd348389c157f528f6c33170603c2553cf0af0da",
+          "old_value": "Applicable permission, approval and destination readiness valid?",
+          "old_value_sha256": "acc2385631d6ca82025bf354f19c8157842ca902f610d53db7bab85f9a08b262"
+        }
+      ],
+      "alternatives": [],
+      "boundaries": [
+        {
+          "producer": "E11",
+          "consumer": "M29",
+          "artifact_type": "QualificationControlReceipt",
+          "scope": "QUALIFICATION_ONLY",
+          "ordinary_tests": "ISOLATED_FIXTURES",
+          "hard_build_edge": null
+        }
+      ]
+    },
+    {
+      "finding_key": "O20-19:D01",
+      "workflow_ids": [
+        "V09"
+      ],
+      "component_ids": [
+        "CP027",
+        "CP056",
+        "CP063",
+        "CP065",
+        "CP066",
+        "CP072",
+        "CP084"
+      ],
+      "mapped_existing_task_keys": [
+        "CP027",
+        "CP056",
+        "CP063",
+        "CP065",
+        "CP066",
+        "CP072",
+        "CP084",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F18",
+        "F20",
+        "WF-V09-BUILD",
+        "WF-V09-TEST",
+        "WF-V09-VERIFY",
+        "WF-X02-BUILD",
+        "WF-X02-VERIFY",
+        "WF-X03-BUILD",
+        "WF-X03-VERIFY",
+        "WF-X04-BUILD",
+        "WF-X04-VERIFY",
+        "WF-X05-BUILD",
+        "WF-X06-BUILD",
+        "WF-X06-VERIFY",
+        "WF-X09-VERIFY"
+      ],
+      "F20_acceptance_criterion": [
+        "190 workflow implementations/test suites/verifications and all 147 component records covered",
+        "Build DAG acyclic and no epic or human production gate blocks ordinary test writing"
+      ],
+      "status": "PROPOSED_NOT_ADOPTED",
+      "qualified": false,
+      "runtime_status": "NOT_RUN",
+      "production_authorized": false,
+      "accepted_decision_receipt": null,
+      "selection": null,
+      "source_disposition": {
+        "path": "review-dispositions.json",
+        "pointer": "/audit_findings/27",
+        "sha256_lf": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+        "finding_sha256": "df4b4dd78d3a7e8ee4beb90eab3a9f3be1562230bc16046d51f1cc7f32a57a36"
+      },
+      "kind": "UNANSWERED_CHOICE",
+      "responsible_role": "V09, X06 and F04/F05 shared-contract owners",
+      "decision_question": "Which branch records terminal outcome versus scheduled newly authorized retry? No retry is authorized by this report.",
+      "rationale": "V09 No/unknown from retry eligibility goes to generic HOLD; Yes goes to escalation of exhausted/ambiguous attempts then a combined terminal-or-authorized-retry output. Separate confirmed-terminal, unknown-reconciliation and freshly authorized retry routes are not specified. Integration contracts already settle UNKNOWN reconciliation and fresh authority; no retry is authorized here.",
+      "changes": [],
+      "source_evidence": [
+        {
+          "path": "reference/workflows/V09.json",
+          "pointer": "/gate",
+          "sha256_lf": "bdfd283cecf059c819efa976c791beab32054de42762507fbc18d67076ad2b0f",
+          "old_value": "Retry safe and newly eligible?",
+          "old_value_sha256": "82ebd5a03cda2415a09db3d846a6576e6b8388536ae205459a3c36e53853c83c"
+        }
+      ],
+      "alternatives": [
+        "Confirmed terminal/exhausted disposition",
+        "UNKNOWN reconciliation with reservations retained",
+        "Newly authorized bounded retry after authoritative reconciliation"
+      ],
+      "boundaries": [
+        {
+          "producer": "V09",
+          "consumer": "V09",
+          "artifact_type": "UnresolvedSourceDecision",
+          "unknown": "HOLD",
+          "selected": null,
+          "proposal": "Draft explicit terminal, exhausted, unknown and newly-authorized retry transitions preserving reservations and bounded policy; submit for source review."
+        }
+      ]
+    }
+  ],
+  "public_source_pins": [
+    {
+      "path": "reference/workflow_catalog.json",
+      "sha256_lf": "096fcc538f755fc055c9842e84352bf46d43b45251d206cfd203310659b6e98c"
+    },
+    {
+      "path": "reference/components/component_registry.json",
+      "sha256_lf": "de49779855eabdd7f5defc5ff6157d6a3e875f6164d64278c4a70338d029899e"
+    },
+    {
+      "path": "reference/acceptance/Original_Acceptance_Matrix.csv",
+      "sha256_lf": "bb646bb34d992437a6912f30649effcacf36c23b2e668717ff4d298fe68787bb"
+    },
+    {
+      "path": "backlog/acceptance_traceability.csv",
+      "sha256_lf": "98f4859c21eebbba6bbb68c80342e1942346d27758ae014f0496bf631f240c22"
+    },
+    {
+      "path": "backlog/issues.json",
+      "sha256_lf": "b655da3025feda286daf723cd0aa4fb38f9ec2340cfb817b4611533bfdd604d7"
+    },
+    {
+      "path": "orchestration/task_graph.json",
+      "sha256_lf": "63bcaafb8a535ebb62688cf544c41b5bb74ffdaf1f760996af0873aa45f8f4a8"
+    },
+    {
+      "path": "config/repositories.json",
+      "sha256_lf": "e8829958114b3aafa34d7304ebdf587e9f5f7596acf259b4d1ba771d4b84c375"
+    },
+    {
+      "path": "reference/architecture/Integration_Contracts.md",
+      "sha256_lf": "143a7a5844659dd7c0f36955ce3dea9b4480bd87d6544263b9ffd4f2d3bbbf37"
+    },
+    {
+      "path": "reference/mermaid/A00.mmd",
+      "sha256_lf": "9aefd6f8d606f9d029caff1d2d2642dd5cd8913644ba9ca50f44ab5c8259f866"
+    },
+    {
+      "path": "reference/mermaid/A01.mmd",
+      "sha256_lf": "06db168f8a14a3df01a7d91bcdc65917ae5ec904ed511ad89c3553931bb50802"
+    },
+    {
+      "path": "reference/mermaid/A02.mmd",
+      "sha256_lf": "c96bcf8ffa658408c41298c351237f80c4f11962d77ae691368b272fb9e416c9"
+    },
+    {
+      "path": "reference/mermaid/A03.mmd",
+      "sha256_lf": "c51c584a28b0cf4bc23b5bca93bd577ee5c815f953e0978eeee7bc872790ad2c"
+    },
+    {
+      "path": "reference/mermaid/A04.mmd",
+      "sha256_lf": "4041a8b57cdc701b16160180ed1b0499c9f88199892486426f384a83564e5647"
+    },
+    {
+      "path": "reference/mermaid/A05.mmd",
+      "sha256_lf": "fc267984ee8ba80f173f16bf59b347f5d17f276ba0da8d2b0055e29ef516ee15"
+    },
+    {
+      "path": "reference/mermaid/C01.mmd",
+      "sha256_lf": "71f5f9867634befeb7eb7c7f39430e3af2e0cadaa19345695c931c6ee0da4fb4"
+    },
+    {
+      "path": "reference/mermaid/C02.mmd",
+      "sha256_lf": "1368acdba65a3a4d30c059e154594fdecda322b157014296bcb997197265932a"
+    },
+    {
+      "path": "reference/mermaid/C03.mmd",
+      "sha256_lf": "4c5949b255ff1638f8460d902d4449e7a9cd686254c180ba9de466ba9ec37b3d"
+    },
+    {
+      "path": "reference/mermaid/C04.mmd",
+      "sha256_lf": "ba339db7242f531a96487f52278e9f7b90500ab77d5a63a5315cab67d407327e"
+    },
+    {
+      "path": "reference/mermaid/C05.mmd",
+      "sha256_lf": "0e0a54a1a69cda640cabaaa78bb41cf67842db2adfade4ca43847a4116a01688"
+    },
+    {
+      "path": "reference/mermaid/C06.mmd",
+      "sha256_lf": "65353de5fe448213d27c53766c9fe468842abeb302bee9250ee1bf2dac2fc491"
+    },
+    {
+      "path": "reference/mermaid/C07.mmd",
+      "sha256_lf": "e323e7696b001d8725f445c00cb2251fb6748fd463f75f1bd5dff8e90bb68bbe"
+    },
+    {
+      "path": "reference/mermaid/C08.mmd",
+      "sha256_lf": "2b9702e6fe11050c2e49217b48a964450bbb85309283fde1667ab507a9e3f463"
+    },
+    {
+      "path": "reference/mermaid/C09.mmd",
+      "sha256_lf": "f35654e9c8178039fdf03e1166dff882217741cfa2883f723b0a4a2cf4870d86"
+    },
+    {
+      "path": "reference/mermaid/C10.mmd",
+      "sha256_lf": "bd65d6ba12ef0ff51bd278471da70b288cb70a4c094af836199d7ed2851d95c3"
+    },
+    {
+      "path": "reference/mermaid/C11.mmd",
+      "sha256_lf": "7b9259f7b6fea865081830cc1c6902ce2349c8ac627b05539bc5d78cb9bfcf85"
+    },
+    {
+      "path": "reference/mermaid/C12.mmd",
+      "sha256_lf": "a546c9e0eb55748c7be08199788b05aea5d49794f3c14beffd088a4908912c44"
+    },
+    {
+      "path": "reference/mermaid/C13.mmd",
+      "sha256_lf": "d242f519e0f6c0c364888153eefa0c31580a3c7d7fc21b0a0ccd044348b61f35"
+    },
+    {
+      "path": "reference/mermaid/C14.mmd",
+      "sha256_lf": "9338b88133139b65083253825433eac1a99f9a21b983ccd37732189a73eb52eb"
+    },
+    {
+      "path": "reference/mermaid/C15.mmd",
+      "sha256_lf": "6db91f5cb07432718810e143196dce1cbce8b94cc4f529b5bf8e573a745398ba"
+    },
+    {
+      "path": "reference/mermaid/C16.mmd",
+      "sha256_lf": "cf3d0945f2f31dc37a3e682e299f5a8c10fa83f6ebb2b00a6e068d6a6baf6810"
+    },
+    {
+      "path": "reference/mermaid/C17.mmd",
+      "sha256_lf": "600ea3c9212497a131c9bdc7bd07eb0b917f9befed6cc24a374ff6aafe0c4121"
+    },
+    {
+      "path": "reference/mermaid/C18.mmd",
+      "sha256_lf": "8fe1e538e77579d0e67d03015fc771786ab0e2bbd94b3099e9e176ee00a52984"
+    },
+    {
+      "path": "reference/mermaid/C19.mmd",
+      "sha256_lf": "d6abbb3229508ee9d4ecb191cb9945aa7e5427acc1b35fcf5c5e505d08671f9e"
+    },
+    {
+      "path": "reference/mermaid/C20.mmd",
+      "sha256_lf": "ab825b188bc78db4e86ec8d076aef0a227494ea5d8b976f85ff1e3b1c885e085"
+    },
+    {
+      "path": "reference/mermaid/C21.mmd",
+      "sha256_lf": "288beab1a571c4a9d6d7686b8dd234dbd56429b6a2951d3b4c431187a25fe442"
+    },
+    {
+      "path": "reference/mermaid/C22.mmd",
+      "sha256_lf": "f961b1469cfb0a963ea3bb9835f01452d444bffbaab8edb51533efa374873f45"
+    },
+    {
+      "path": "reference/mermaid/C23.mmd",
+      "sha256_lf": "ab3be96ee0f6ef2f8c60ee05a4207335cf14daeae867c7b3b78d4451edae40ec"
+    },
+    {
+      "path": "reference/mermaid/C24.mmd",
+      "sha256_lf": "4cfef20f0a9dc1d9f1a2c37aa64efe77ad270429203185f8f812820992b3e628"
+    },
+    {
+      "path": "reference/mermaid/C25.mmd",
+      "sha256_lf": "b671ccc86e3f27f8266325a819a27b0a58befdc19b48d84394090f7ccdd0d51f"
+    },
+    {
+      "path": "reference/mermaid/C26.mmd",
+      "sha256_lf": "9c1579d5615e4f44c053a6b942b0f700791a618883c22a4e54f972ec714ed2f6"
+    },
+    {
+      "path": "reference/mermaid/C27.mmd",
+      "sha256_lf": "384347274f91f1c905b606c906596c1b4ab9078f322f1ec794ddeb21fc71f866"
+    },
+    {
+      "path": "reference/mermaid/C28.mmd",
+      "sha256_lf": "529cc4b92cd3e3a4541ca71909d169cb0b1434ec9587560c3caf001511066072"
+    },
+    {
+      "path": "reference/mermaid/C29.mmd",
+      "sha256_lf": "9e78e085a5a423994a3092a8304ec53db9b2325a2d72ef4fa0e865c1c9ca53c0"
+    },
+    {
+      "path": "reference/mermaid/C30.mmd",
+      "sha256_lf": "7f08bf301e5cb9ef0eb40b44b8336e6fe1d1716414c5b5b0371795bc003c6e7f"
+    },
+    {
+      "path": "reference/mermaid/C31.mmd",
+      "sha256_lf": "8f9ba72170f2e6ef01387334e7076eacfcf573b7d2ed25d51e277a04ac0fc872"
+    },
+    {
+      "path": "reference/mermaid/C32.mmd",
+      "sha256_lf": "88e38ddd4c0e6593d0e37b5e04e1a8b2c35c35fafe32ee1aa8d10a1210445ec6"
+    },
+    {
+      "path": "reference/mermaid/C33.mmd",
+      "sha256_lf": "5d367769a60086e97b7bf3a0a4cf7c0fe744373b8946c4ba76d718cace7e0d50"
+    },
+    {
+      "path": "reference/mermaid/C34.mmd",
+      "sha256_lf": "2decee258b28ca543facd74ab833443f9ae9a6d4510e2e92d84f0a9e3bfeb2b5"
+    },
+    {
+      "path": "reference/mermaid/C35.mmd",
+      "sha256_lf": "87cdd0debcbafdf18bf88f40c74c754e1f442f843294bfec69ae4e9c06248401"
+    },
+    {
+      "path": "reference/mermaid/C36.mmd",
+      "sha256_lf": "8236b87bc45867fe89eee56ea02ceb617ac9af9451d85e24d36c09a7420322a0"
+    },
+    {
+      "path": "reference/mermaid/C37.mmd",
+      "sha256_lf": "00de2eb2911e20edf40260e1a498d96b1cbea25ae57d6c31b9936c8a4e8243f4"
+    },
+    {
+      "path": "reference/mermaid/C38.mmd",
+      "sha256_lf": "8b44fb28e9914c6976a172774bd5fb9e879ce0a318d56920fceef19a1ca6db18"
+    },
+    {
+      "path": "reference/mermaid/C39.mmd",
+      "sha256_lf": "992c707b0e7dd034642de20c98166dacf61d28ff134d76649e60fd6dba67b3e7"
+    },
+    {
+      "path": "reference/mermaid/C40.mmd",
+      "sha256_lf": "136e8a5ac196a9f2c38b07a9f8d13e46c6b4ea747bd246d0452accba19f1d997"
+    },
+    {
+      "path": "reference/mermaid/C41.mmd",
+      "sha256_lf": "ac94f1e53da4246abe12055f87b245da88e6ab0eee623047803fc9e97cc041be"
+    },
+    {
+      "path": "reference/mermaid/C42.mmd",
+      "sha256_lf": "e317068c8224c1440bc571104d17b6f177ba3bf4eb5186a5ed2a4d634d266a9d"
+    },
+    {
+      "path": "reference/mermaid/C43.mmd",
+      "sha256_lf": "23fb78a4e740c9619b8fdab1171fbccffb18c6da3621bfab43e6fd68e09e6b3d"
+    },
+    {
+      "path": "reference/mermaid/C44.mmd",
+      "sha256_lf": "7af63b42b510d81f502e5edc0d837943772fecff06337adc91d208741cbf597d"
+    },
+    {
+      "path": "reference/mermaid/C45.mmd",
+      "sha256_lf": "9f9d711cf665f7444d736c21e021bd466e257430dce8a5d808a81e70cbcec0eb"
+    },
+    {
+      "path": "reference/mermaid/C46.mmd",
+      "sha256_lf": "be9b7e7ba4ac738ec010c4ba009a22bdfb4c6a1927618c8466498dbd346f02e2"
+    },
+    {
+      "path": "reference/mermaid/C47.mmd",
+      "sha256_lf": "da3347fb719e76a6d2d15df98da66564f137c2cd05c28569a8ffcfbb5497ae55"
+    },
+    {
+      "path": "reference/mermaid/C48.mmd",
+      "sha256_lf": "139f147293b5d8219d6faa1938c3b61e01995b11096d4e8a5530199512db499e"
+    },
+    {
+      "path": "reference/mermaid/C49.mmd",
+      "sha256_lf": "25d8c09b2a37bb634b8bb7c0976b2db680604539790418a02d1154d3e120efaf"
+    },
+    {
+      "path": "reference/mermaid/C50.mmd",
+      "sha256_lf": "5a00acd8019252c0b00da14ddf1c1f64283653f143e8d36800f0ef111ba93533"
+    },
+    {
+      "path": "reference/mermaid/C51.mmd",
+      "sha256_lf": "4f68269ffb4441e831df64c4ff9e8f8c55280d289d4cd39202a510dbfd83c197"
+    },
+    {
+      "path": "reference/mermaid/C52.mmd",
+      "sha256_lf": "57bf580b81a6d86b65360946f9d8c9b42e00d91f5a0a29a049cda0dccc1df0ae"
+    },
+    {
+      "path": "reference/mermaid/C53.mmd",
+      "sha256_lf": "296a30c8ef7ac1af06c903ea854e01839942c261f713fc960df7f72331bea123"
+    },
+    {
+      "path": "reference/mermaid/C54.mmd",
+      "sha256_lf": "dc2391d39827ce14252e4483cf9651b1d432572300cc6ba9080e1f135ad1ea1a"
+    },
+    {
+      "path": "reference/mermaid/C55.mmd",
+      "sha256_lf": "1f916320fec3e6feb2be053f3ab22421ac96a75ab252bb385b7633e30e64cc3b"
+    },
+    {
+      "path": "reference/mermaid/C56.mmd",
+      "sha256_lf": "a1fdbc5d9a1c60f2eba4791f3e83418942bf637580f4bda71fcec75c0f36e1bb"
+    },
+    {
+      "path": "reference/mermaid/C57.mmd",
+      "sha256_lf": "317f058b125392e7b73dd7148ad816cb538907e8b14beb1c61a575f58e303fc7"
+    },
+    {
+      "path": "reference/mermaid/C58.mmd",
+      "sha256_lf": "f5247340caeb4974fd9e089d06708a4aa15a78f0a7fa97dc335fccd9eef2c333"
+    },
+    {
+      "path": "reference/mermaid/C59.mmd",
+      "sha256_lf": "4d790263564ce3387f6d0b6c3815d78c9b26194b6090f6491254aadadb23c0f1"
+    },
+    {
+      "path": "reference/mermaid/C60.mmd",
+      "sha256_lf": "8ab698bddd3841ee70bbad20b1ed4889c2f5c85ea4dde38d4ad4294b049e6008"
+    },
+    {
+      "path": "reference/mermaid/C61.mmd",
+      "sha256_lf": "9998979a217fabfff8eb9dd107993a23436b754586af2117d613047c2295d97d"
+    },
+    {
+      "path": "reference/mermaid/C62.mmd",
+      "sha256_lf": "8fe787051c811b51595c9c6edabfa93d327979823931f09b288acaaa7df2e48f"
+    },
+    {
+      "path": "reference/mermaid/C63.mmd",
+      "sha256_lf": "083f2bc8aaa337b5e1c69c0c49059bed2fcb125d9b7ee8ddbbc6e22c58ba4e59"
+    },
+    {
+      "path": "reference/mermaid/C64.mmd",
+      "sha256_lf": "9a48361edffa7ae181a947227b3fbfaa77519d159e30ea9caf1889757f67fc59"
+    },
+    {
+      "path": "reference/mermaid/C65.mmd",
+      "sha256_lf": "7fbff07402fa7e91cec63c41c55f99cbeb4afee6d7a21e1b40375b69617cdcf8"
+    },
+    {
+      "path": "reference/mermaid/C66.mmd",
+      "sha256_lf": "cf7efc3cbb762baedbfa122d9a201ea9be010faeba98c938053110d3d81a6347"
+    },
+    {
+      "path": "reference/mermaid/C67.mmd",
+      "sha256_lf": "1377ab09795306bf7c379beda970929e8a222cd6e20c038bb59309d8148a1bed"
+    },
+    {
+      "path": "reference/mermaid/C68.mmd",
+      "sha256_lf": "e0f1363e765ecf1d282d078e27ca907024080875cfda41e0560b1fec98d598b8"
+    },
+    {
+      "path": "reference/mermaid/C69.mmd",
+      "sha256_lf": "501dbd85c7b5393728e3ad434c993d889216fec42ddbadb6d23357d938c8da0a"
+    },
+    {
+      "path": "reference/mermaid/C70.mmd",
+      "sha256_lf": "a0581b62ab0b6139beb7f395faba9d94d98ee3bba761910006f95347d67c1993"
+    },
+    {
+      "path": "reference/mermaid/C71.mmd",
+      "sha256_lf": "8b2a6b0c6dc8b6b4d92d685104fa07fba16d16552dd60121425bf5657825fbe6"
+    },
+    {
+      "path": "reference/mermaid/C72.mmd",
+      "sha256_lf": "e01ae5224529dfd78743459456a5cb374af84b32dd43b9bd245a59e24c2260d5"
+    },
+    {
+      "path": "reference/mermaid/D-C01.mmd",
+      "sha256_lf": "2fe8c11774255c495e365306f772cf23f01d70cc1885d4f6380151a9c62bd7ed"
+    },
+    {
+      "path": "reference/mermaid/D-C02.mmd",
+      "sha256_lf": "f0d110c87364d155cb3bab4647636224f37df7b1bc9855ddbbfea6f650306da4"
+    },
+    {
+      "path": "reference/mermaid/D-C03.mmd",
+      "sha256_lf": "29631c9500a4ba1d29360a3fdf789fd64dba0b55e78a4ae2d2a2faafb25e4a8a"
+    },
+    {
+      "path": "reference/mermaid/D-C04.mmd",
+      "sha256_lf": "3d8a9d185adf97150c251d8d9f7da3fa98b6a9a5bda8654ce040be7f21efbee2"
+    },
+    {
+      "path": "reference/mermaid/D-C05.mmd",
+      "sha256_lf": "5fab23a17f3dab222797cc23838c4a43f9c95f3cfdbda8f1cbc8d89332c25727"
+    },
+    {
+      "path": "reference/mermaid/D-C06.mmd",
+      "sha256_lf": "ba4cabb4801f8718b8ecf66d047b0b82f921d9dbf5207e6e02b1a91c6dfc9eca"
+    },
+    {
+      "path": "reference/mermaid/D-C07.mmd",
+      "sha256_lf": "124fc11acb56cfbfd3cd79359d49e0ce2a002226f7515d49939079d3adc45d49"
+    },
+    {
+      "path": "reference/mermaid/D-C08.mmd",
+      "sha256_lf": "fcef5ff0b5b97dff25bf706f459068c0b2592d4db53e740be026679b58481813"
+    },
+    {
+      "path": "reference/mermaid/D-C09.mmd",
+      "sha256_lf": "5d5e36e40b8c9419a457734751c01577fa9a4c795b767d208d792c6ab348fd7c"
+    },
+    {
+      "path": "reference/mermaid/D-E.mmd",
+      "sha256_lf": "4d9ee71dd815c4d3bdb871c5fc727b745012afc00a22f174383382e47634321d"
+    },
+    {
+      "path": "reference/mermaid/D-I.mmd",
+      "sha256_lf": "931e18a0736686a73a74371c6be2eb0b92fab25b112d605173f9f3c25315f96e"
+    },
+    {
+      "path": "reference/mermaid/D-L.mmd",
+      "sha256_lf": "8176d93ca60439e5017f0ea9279fe1160661d04c989bcf549b63230b4490dea8"
+    },
+    {
+      "path": "reference/mermaid/D-M01.mmd",
+      "sha256_lf": "0da53218d2aa26990775d466aa46d0ed1d775bf5ef3166f9d9db3342ae454b50"
+    },
+    {
+      "path": "reference/mermaid/D-M02.mmd",
+      "sha256_lf": "6c54a2ac00eba6548b9b87476da9b037a2b1af5ea3c7733ccc61481ab31f13f6"
+    },
+    {
+      "path": "reference/mermaid/D-M03.mmd",
+      "sha256_lf": "e58e2532db5324598931aa179ad49ea57db1c3e08f5f978780d31b9fc27703f8"
+    },
+    {
+      "path": "reference/mermaid/D-M04.mmd",
+      "sha256_lf": "fe2cccbd7a9118e7c4fa36b99cfbd6ad65698536c1ab924b778e0ad51710300d"
+    },
+    {
+      "path": "reference/mermaid/D-M05.mmd",
+      "sha256_lf": "90994640c7be8143e69e008352f3f3e8db9ccb33acccba1346dc64232819b1f3"
+    },
+    {
+      "path": "reference/mermaid/D-V.mmd",
+      "sha256_lf": "dbb7f7e5c4cb695f4f2fc97d04f92b193d0a79f304104497752b92b9c6526d3a"
+    },
+    {
+      "path": "reference/mermaid/D-X.mmd",
+      "sha256_lf": "0c5f311ede983e4f15c9fa298b001b0ce5edd20269fd08f128afcef9fe5d88f4"
+    },
+    {
+      "path": "reference/mermaid/E01.mmd",
+      "sha256_lf": "b70f5039d779ab65eb4234c7e918e7d10a56be0a4c4dab9d08063dc757e0db32"
+    },
+    {
+      "path": "reference/mermaid/E02.mmd",
+      "sha256_lf": "faa9d3f1eb807f570b6980a804d5eb31bbc5cbcb6650ebb133f96347c4e780b2"
+    },
+    {
+      "path": "reference/mermaid/E03.mmd",
+      "sha256_lf": "26658599199860b4ab2427fd53e29cbc3dd7a5f8d5216a5f9d53505c28cfa906"
+    },
+    {
+      "path": "reference/mermaid/E04.mmd",
+      "sha256_lf": "8f0ca83f13595d6dbc852088cbe333746c23b6305f70c3ffa62f263369c6ca15"
+    },
+    {
+      "path": "reference/mermaid/E05.mmd",
+      "sha256_lf": "ac3c49e6b22b2f8d8b17af1bfe39f91e29d5ed629a6e61423d2ad0dd8e0e2057"
+    },
+    {
+      "path": "reference/mermaid/E06.mmd",
+      "sha256_lf": "830e8b7f75f88bd6f1b411f815085496b1065ccad7c207b48e5bbb23a454c810"
+    },
+    {
+      "path": "reference/mermaid/E07.mmd",
+      "sha256_lf": "df5905b15d081b7ab20726323688b817513189cbe15564e8801b9155daefdf8d"
+    },
+    {
+      "path": "reference/mermaid/E08.mmd",
+      "sha256_lf": "20262dd3a8a796be24b407f4977be1e39b6d4f705eb1e6a5ccd7c4c66a6332b2"
+    },
+    {
+      "path": "reference/mermaid/E09.mmd",
+      "sha256_lf": "360bacf816e54045ae222af569855d192afff706e28c2fc44d29992b2193e9da"
+    },
+    {
+      "path": "reference/mermaid/E10.mmd",
+      "sha256_lf": "f99ef39cd39553005aed8567c6d7171a320f662c9e6347ce8170f0cf28c22290"
+    },
+    {
+      "path": "reference/mermaid/E11.mmd",
+      "sha256_lf": "5db0e9abd3ecacfbc05df75ffc6514c58412223cbaeb3db8041c57067d25a5a4"
+    },
+    {
+      "path": "reference/mermaid/E12.mmd",
+      "sha256_lf": "4b800bfd9437662ca465e534d276c3d8963ecf3ad03f261b1af98fdcc383b755"
+    },
+    {
+      "path": "reference/mermaid/E13.mmd",
+      "sha256_lf": "f8ce506574a3117ad0c6e05375ad5b0e425d28bb66b4c55c94bd2e50d53e375f"
+    },
+    {
+      "path": "reference/mermaid/E14.mmd",
+      "sha256_lf": "373b4281cfcadab60270ee8b31b19c5c830c2662a07a8b47568437a6af714fa0"
+    },
+    {
+      "path": "reference/mermaid/I01.mmd",
+      "sha256_lf": "29c789cc75f6ce62414d6e4c1accb2288890c05bfdccf9f5c0bbf68bce2cc3bf"
+    },
+    {
+      "path": "reference/mermaid/I02.mmd",
+      "sha256_lf": "abbdc412044471717f0dd792e1bd048f22dcc2f66e9a21ec2a74ac6cba6b891c"
+    },
+    {
+      "path": "reference/mermaid/I03.mmd",
+      "sha256_lf": "9874d2e2d3f0e18f7926d452135dbc2e7ada4844089137138c2e6193b8518ec4"
+    },
+    {
+      "path": "reference/mermaid/I04.mmd",
+      "sha256_lf": "8869c2e21f22e51d5a9bf72f126d6037b32f6d393c04b160af927b9032264fc5"
+    },
+    {
+      "path": "reference/mermaid/I05.mmd",
+      "sha256_lf": "0ec95866bbb8595b4c23a2f2cc10358eeabc9a53f194301ab3b45b38c4a0e6e3"
+    },
+    {
+      "path": "reference/mermaid/I06.mmd",
+      "sha256_lf": "472c99201ffa738c88d631ca7ae1591abb58540f79d16f2337972e9a1852f0d4"
+    },
+    {
+      "path": "reference/mermaid/I07.mmd",
+      "sha256_lf": "315f1a0ae1265586b61d7a5a811a5d8cb6d1a11e3c49684e8a04049ef4554409"
+    },
+    {
+      "path": "reference/mermaid/I08.mmd",
+      "sha256_lf": "c30b25804d1766d8b47daea3924c604376a3d75bff6478f0440bd293693d9ea8"
+    },
+    {
+      "path": "reference/mermaid/I09.mmd",
+      "sha256_lf": "9f57ab1ae03e4af4b2c9861357cc863d3bf6053007bd7d687ab327eafd670f8f"
+    },
+    {
+      "path": "reference/mermaid/I10.mmd",
+      "sha256_lf": "2ab8847a4ba12d47f11a21f6cf5cf9aff6e056d7c5a685984144652a7271ee4a"
+    },
+    {
+      "path": "reference/mermaid/I11.mmd",
+      "sha256_lf": "5feff022d31d82fb18701d7971712ed31ad045fcaa4eddc925323b7a896b50ef"
+    },
+    {
+      "path": "reference/mermaid/I12.mmd",
+      "sha256_lf": "8264d0bbb6dfa348e4319b4692191d97f838cd1e88fe8a93b6ae9fab0bb3a40f"
+    },
+    {
+      "path": "reference/mermaid/I13.mmd",
+      "sha256_lf": "856379aac9cf41a9e021704f2ff0b008edc19983815010635dbc8ef47e1dd609"
+    },
+    {
+      "path": "reference/mermaid/I14.mmd",
+      "sha256_lf": "08782980e18c61ddd6d47cc2d1fd6fee63816b0e2f7e4a74c23e13db7ddb36be"
+    },
+    {
+      "path": "reference/mermaid/I15.mmd",
+      "sha256_lf": "c1d25fc82ac4c311bcc1089c042d61d233745bebcd9ba67d22c46f7d11c66ab8"
+    },
+    {
+      "path": "reference/mermaid/I16.mmd",
+      "sha256_lf": "ea37fa92af76e59a68605b557453322c7f2b9b9bfb97e967834592726c89de3a"
+    },
+    {
+      "path": "reference/mermaid/I17.mmd",
+      "sha256_lf": "5a43caa8cae2fe87abba4d48324cfce65351f24d5980f9694e4d0eec8585666d"
+    },
+    {
+      "path": "reference/mermaid/I18.mmd",
+      "sha256_lf": "dd93c4d103a317c795e9e6e9f507ca6a2aa385b379f62e856248695d76325326"
+    },
+    {
+      "path": "reference/mermaid/I19.mmd",
+      "sha256_lf": "54373d40423b22fed7804c966ed9e8385467a8d62a2a379544bd3f23c732d3b2"
+    },
+    {
+      "path": "reference/mermaid/I20.mmd",
+      "sha256_lf": "11da9a584eb04468e8081cd0537a026b5b0f1568f9e16c3186faf3dd5e4230b1"
+    },
+    {
+      "path": "reference/mermaid/I21.mmd",
+      "sha256_lf": "ffb3e744b4ec8eee07e1248326a8e0e65e6f6daf895dc7cd01d4036d0c060fc1"
+    },
+    {
+      "path": "reference/mermaid/I22.mmd",
+      "sha256_lf": "9f2d529159d08d1d5da729bdced9c21c0865c297785076447d3f700dbb1b89cd"
+    },
+    {
+      "path": "reference/mermaid/I23.mmd",
+      "sha256_lf": "56a042d6b80a7aad87146fe02700b12a1e71a0b99f7e4c1ba4a0ac4fa2a69255"
+    },
+    {
+      "path": "reference/mermaid/I24.mmd",
+      "sha256_lf": "2499d49fad9f4611fe15baf79089a5aa74ff7cc64a20fce93d8359137a712fc3"
+    },
+    {
+      "path": "reference/mermaid/I25.mmd",
+      "sha256_lf": "4641966f4aa09baf05a2d9a414e7ddf6ee46797d48e035562f58ba1b363c948f"
+    },
+    {
+      "path": "reference/mermaid/I26.mmd",
+      "sha256_lf": "89c307ca9bda75534a86bb3d909bb8627c0a57b42623626581ae3e1a76ce462e"
+    },
+    {
+      "path": "reference/mermaid/I27.mmd",
+      "sha256_lf": "9b874a70959f59a012d52c837f50d78017acd7bff8407a1590bc94661eca811f"
+    },
+    {
+      "path": "reference/mermaid/I28.mmd",
+      "sha256_lf": "6ba115398488d54bf109209af4d7bab3b9dbb502e459aba47caa2e5c34f55a76"
+    },
+    {
+      "path": "reference/mermaid/I29.mmd",
+      "sha256_lf": "2ba01d07d196b5b28945c0086d492ddcf14e95b8dda57f7d1ab3d62f8ac0b73a"
+    },
+    {
+      "path": "reference/mermaid/I30.mmd",
+      "sha256_lf": "58238e260bcfca475ea70f7c27240b3d9acb451ab5c9915db3d202082a559b48"
+    },
+    {
+      "path": "reference/mermaid/I31.mmd",
+      "sha256_lf": "811f6628c49ada570d28b13c150ee717aaee6e30655263b2ce91c61028556dca"
+    },
+    {
+      "path": "reference/mermaid/I32.mmd",
+      "sha256_lf": "6a07b680e98f46155a57a056484add896d6fb6d8a851b0bcfaee5cabb7cabd23"
+    },
+    {
+      "path": "reference/mermaid/I33.mmd",
+      "sha256_lf": "ba0b9007c1af9cca29aeda5a94083df945d0c557f97034ca170514e623ccc0ef"
+    },
+    {
+      "path": "reference/mermaid/I34.mmd",
+      "sha256_lf": "5c8afce2f354711f4963f978dcbb8b1dca84aa379da523116b1ef2cf45f097d6"
+    },
+    {
+      "path": "reference/mermaid/I35.mmd",
+      "sha256_lf": "2256de6abfcb12e16e6e031fbd4a69b3d6b8f58eaedfe8282547a43a311644e4"
+    },
+    {
+      "path": "reference/mermaid/I36.mmd",
+      "sha256_lf": "9d748ee01e40f1d5e2968a46c4d1ee6d93e7c86050d9b2af8dc7d4a6ec824fb4"
+    },
+    {
+      "path": "reference/mermaid/L01.mmd",
+      "sha256_lf": "a67b942fa536b14344d124bdffc9547b1fa2b6ca94e765a8b8c82e4480b7dc6f"
+    },
+    {
+      "path": "reference/mermaid/L02.mmd",
+      "sha256_lf": "e639241002557811e3f242e571f532c00a331fd20832b6abe5331091e61f2fd2"
+    },
+    {
+      "path": "reference/mermaid/L03.mmd",
+      "sha256_lf": "abcd05f7e19682e3b6413d94ee21eda0c431b677f5cf9e2d600a0da2a857eb85"
+    },
+    {
+      "path": "reference/mermaid/L04.mmd",
+      "sha256_lf": "e77b579172f132632fc913bb22d61051ab11924ac9dfcef5f76ed68bd7eabd53"
+    },
+    {
+      "path": "reference/mermaid/L05.mmd",
+      "sha256_lf": "41c8744b8ec5101593c84b7b0259199b9a6f8cd731e8f03e741cdd25dc17a13b"
+    },
+    {
+      "path": "reference/mermaid/L06.mmd",
+      "sha256_lf": "325f5df3df9f62a4382a948731fdddcd54ceb08899f0a57e43e6d1fec2f300ce"
+    },
+    {
+      "path": "reference/mermaid/L07.mmd",
+      "sha256_lf": "85f63621ef5e9fd48792c048e7f7ec56434ca04e5c7d815eca9b87f84aa7cf4b"
+    },
+    {
+      "path": "reference/mermaid/L08.mmd",
+      "sha256_lf": "16460a664ac36469d34927eeac7e8d3352574231c04241848ae5779888f7ed0d"
+    },
+    {
+      "path": "reference/mermaid/M01.mmd",
+      "sha256_lf": "f2c8b8ac1338570e3f2e75c472bed12a5d3cd61de7de384c7efc753261614e96"
+    },
+    {
+      "path": "reference/mermaid/M02.mmd",
+      "sha256_lf": "e26189d726e54f5cbccc6bd66345f8b85eb8db7f4c433d0e48826ca005a93e33"
+    },
+    {
+      "path": "reference/mermaid/M03.mmd",
+      "sha256_lf": "e594fa94a79ba2907f0d3f1dce67b41876eec1723a6d8602a964964ede6188fa"
+    },
+    {
+      "path": "reference/mermaid/M04.mmd",
+      "sha256_lf": "d4c73d472ac997ecfccea3badf7eeeebe0e9884cad9f1fc3a0b6e3fc581554d4"
+    },
+    {
+      "path": "reference/mermaid/M05.mmd",
+      "sha256_lf": "ca1b9ba3cfc91f97fce8f9b04f19521d9d0b826de1e81a4332c6c60cbea53f4d"
+    },
+    {
+      "path": "reference/mermaid/M06.mmd",
+      "sha256_lf": "9d9005d3cac6146209d701d94def331abad52c3814a46a5563c0767c3bd9e943"
+    },
+    {
+      "path": "reference/mermaid/M07.mmd",
+      "sha256_lf": "bd3f0345b757982fb4ddfe430d5f41bcac2b6e0a90ffdc2b4966550a72375027"
+    },
+    {
+      "path": "reference/mermaid/M08.mmd",
+      "sha256_lf": "5de1e444ef67a8dc9e72a36b38ac5fd7968a1d757c5e3465650a89f190b41704"
+    },
+    {
+      "path": "reference/mermaid/M09.mmd",
+      "sha256_lf": "c17ee610635ebb274dbd587ca5f9ae4bc745904182d3f0a174da5c09c9ff6de8"
+    },
+    {
+      "path": "reference/mermaid/M10.mmd",
+      "sha256_lf": "0c958da314df582dffa943e90e36a760cc797a75a952a273e9f445d732bd20ba"
+    },
+    {
+      "path": "reference/mermaid/M11.mmd",
+      "sha256_lf": "0165d157ab807f237acddb44e7eb80caf3047b40c3088354c27dd5005a5319fd"
+    },
+    {
+      "path": "reference/mermaid/M12.mmd",
+      "sha256_lf": "31f4d6f69968903a9380b5364709d7e02288dfcfe929dd446a1cb8eae05f118d"
+    },
+    {
+      "path": "reference/mermaid/M13.mmd",
+      "sha256_lf": "674ad7533be15326c1245a8f0e1518e694e663bc198c479f914848f7ee746d24"
+    },
+    {
+      "path": "reference/mermaid/M14.mmd",
+      "sha256_lf": "b35830c3128adfc2d9345ba6d52c16a5025c81b268903e254d9a705fbe83dd72"
+    },
+    {
+      "path": "reference/mermaid/M15.mmd",
+      "sha256_lf": "fb07cd9edc5e57b905d5badaeafa8aa99fd3ff73e7250669d74685927adad008"
+    },
+    {
+      "path": "reference/mermaid/M16.mmd",
+      "sha256_lf": "f184472d59306320dbf21ddc3ea8d7328af16aa53cb46102566613250ab25a42"
+    },
+    {
+      "path": "reference/mermaid/M17.mmd",
+      "sha256_lf": "783858f8e097e1c232fe7220d887efa4ffe6041a5ecac23e303e79881433dca1"
+    },
+    {
+      "path": "reference/mermaid/M18.mmd",
+      "sha256_lf": "b293120486868a03117bdf79816beca166293662a05be88cc8fe477a774524f6"
+    },
+    {
+      "path": "reference/mermaid/M19.mmd",
+      "sha256_lf": "d6455707126b8e691e6e0a23630eb1fb36a11efd4da07a7841753fb7a75df604"
+    },
+    {
+      "path": "reference/mermaid/M20.mmd",
+      "sha256_lf": "c16b1f405a9b71f16734cebb1996084778722cfc6f08fd34f83f41e6a4522f1c"
+    },
+    {
+      "path": "reference/mermaid/M21.mmd",
+      "sha256_lf": "6f7ba97615a8de454aecfd91bc84acfa24b9ea3ffed70490f5f1db93244df64a"
+    },
+    {
+      "path": "reference/mermaid/M22.mmd",
+      "sha256_lf": "bbe2a3507c6d61bf527103e1cd6c1efd0edecbe5c264f78fd5f9892c85877332"
+    },
+    {
+      "path": "reference/mermaid/M23.mmd",
+      "sha256_lf": "7240df1f46a56ccc1ffe950354e603f265ceb01da0fd040aa01ec5fbce894bc5"
+    },
+    {
+      "path": "reference/mermaid/M24.mmd",
+      "sha256_lf": "5fb64beeede66e0d5915efee2437086a6d6a7b4b5039ab9e543fb484401ed2d3"
+    },
+    {
+      "path": "reference/mermaid/M25.mmd",
+      "sha256_lf": "dfe336de46e5c83d7faadb0cf3a979f7473b2e52481ae1b42bf562ab3c9a4873"
+    },
+    {
+      "path": "reference/mermaid/M26.mmd",
+      "sha256_lf": "0118e4aad0995cc1a8b1de92a4ff96154e6000ed62d067d89a0a81fddf82ea0e"
+    },
+    {
+      "path": "reference/mermaid/M27.mmd",
+      "sha256_lf": "db949526dba5b7671191b57969e7a382a1f5e0ef0edaf795d23f58ae4d681d02"
+    },
+    {
+      "path": "reference/mermaid/M28.mmd",
+      "sha256_lf": "4e2f300608e3890b9c5be9c099309002e2a77f9e6b434adfc3af82c44fa67daf"
+    },
+    {
+      "path": "reference/mermaid/M29.mmd",
+      "sha256_lf": "cade90f1d3fd9637ac51c583bb5065c132bf28d07ec155c720bdb2072c6d4f4e"
+    },
+    {
+      "path": "reference/mermaid/M30.mmd",
+      "sha256_lf": "5d2cd465eb75ea50373fd22a5b1443693279f67a6488684e3c755a0a663139bc"
+    },
+    {
+      "path": "reference/mermaid/M31.mmd",
+      "sha256_lf": "19b8aa1762eb136ce254c67acc9716df722365ab2b57dcef24d28bb8825d3f32"
+    },
+    {
+      "path": "reference/mermaid/M32.mmd",
+      "sha256_lf": "dd15ac7ddad7ac0f30a5a1f4449320a73287f268d099030f10f8e597943f1862"
+    },
+    {
+      "path": "reference/mermaid/M33.mmd",
+      "sha256_lf": "d5afa0cca8c768f760108399b6a0575aacc1a9f0518c6e7957965d12b98fc1d5"
+    },
+    {
+      "path": "reference/mermaid/M34.mmd",
+      "sha256_lf": "8312acb98794267b17e0d11ce8a5b38c1efe5fa63533f20d41aa8c43ecd94a98"
+    },
+    {
+      "path": "reference/mermaid/M35.mmd",
+      "sha256_lf": "310920349ed8c5c9a179514d84a6c23b195ac3a39519fd69326047fb2f209760"
+    },
+    {
+      "path": "reference/mermaid/M36.mmd",
+      "sha256_lf": "bc3eb76b6fe9210c5abff152cbba95a1c874ca90e3f7a101a8b1f7b7a14527c1"
+    },
+    {
+      "path": "reference/mermaid/V01.mmd",
+      "sha256_lf": "d4b71774d9bb4dafc91e9aee52e9660a46e4a444ffa601f8924e56820938833c"
+    },
+    {
+      "path": "reference/mermaid/V02.mmd",
+      "sha256_lf": "edcc7bea7217f72b1a0be850a2680bb095013e703b9c608446b967eb18f1d47d"
+    },
+    {
+      "path": "reference/mermaid/V03.mmd",
+      "sha256_lf": "a46e43d15efcdc3519ecae58be2da9e85830084ed29806cb8e7906083539a525"
+    },
+    {
+      "path": "reference/mermaid/V04.mmd",
+      "sha256_lf": "38c9027b9cc6bebad2e44e8073663d86c8b230e54e3d2b68d83b75263c0bd00d"
+    },
+    {
+      "path": "reference/mermaid/V05.mmd",
+      "sha256_lf": "2bc4549636d2d32fc89eaad57744e48da9c0f39b02639175eac55ee0ace65add"
+    },
+    {
+      "path": "reference/mermaid/V06.mmd",
+      "sha256_lf": "0c860f55e5a85eff232b3d7af4e70a114a92729b04c4451b27a612bc7b015656"
+    },
+    {
+      "path": "reference/mermaid/V07.mmd",
+      "sha256_lf": "980130570f66d73db519c5f5c620385cae86a066605e0716eb317711615cd7f0"
+    },
+    {
+      "path": "reference/mermaid/V08.mmd",
+      "sha256_lf": "7cdf22d09cbc96aebe6c1576a7d24a2a96f936e31a6a3be345dc76417ffe3663"
+    },
+    {
+      "path": "reference/mermaid/V09.mmd",
+      "sha256_lf": "1fabe0ffc2ba1a66c8e48a5f0441a723060221eb734a7aad8ac0c17773d27818"
+    },
+    {
+      "path": "reference/mermaid/V10.mmd",
+      "sha256_lf": "ba7e20ad9807b5b6794febb3859648119f255ac94f5456fd08c3ebb6eec6d17d"
+    },
+    {
+      "path": "reference/mermaid/V11.mmd",
+      "sha256_lf": "0ce1ac430e14a7f0be63b971f5430c5157386f68772d2df4afe41f08c1fb365d"
+    },
+    {
+      "path": "reference/mermaid/V12.mmd",
+      "sha256_lf": "02b2fdb260bb50d6e3969065da8dfceb64056169499806e11ed46784176e3c4a"
+    },
+    {
+      "path": "reference/mermaid/X01.mmd",
+      "sha256_lf": "21f4e82eb06b7c9502d252924ea139f7e6b027aa70d1fb589584fc2feef56ad5"
+    },
+    {
+      "path": "reference/mermaid/X02.mmd",
+      "sha256_lf": "a47a5f13380b25f8b963e9619b2fe67fe395aab231e13942343c686634ba6d06"
+    },
+    {
+      "path": "reference/mermaid/X03.mmd",
+      "sha256_lf": "0b333db96aeec1dfd5b824a314eb4aa2259f2dafd93e7eb1f206a9e1072150c9"
+    },
+    {
+      "path": "reference/mermaid/X04.mmd",
+      "sha256_lf": "5d887b79944bbbe97c3ac8f84f8af1d7515102d6d12d375e19c7287f7377e454"
+    },
+    {
+      "path": "reference/mermaid/X05.mmd",
+      "sha256_lf": "fdb521cfeef636d04ee1ee4f82bb31ab8928f2b611647c1a45c0f32eea612027"
+    },
+    {
+      "path": "reference/mermaid/X06.mmd",
+      "sha256_lf": "9c97accbbd7dd2b91c7822061969e9e6cc1c32709cb9f4d224b69d38ebc75be5"
+    },
+    {
+      "path": "reference/mermaid/X07.mmd",
+      "sha256_lf": "ece5e234259f37683e25ada4f297c1dd7c6bd1f31897fe9c35383f38b699bf9f"
+    },
+    {
+      "path": "reference/mermaid/X08.mmd",
+      "sha256_lf": "a6b335540af5407bc7950a89cdc903f12ba06f5b941af6132652ae3870009051"
+    },
+    {
+      "path": "reference/mermaid/X09.mmd",
+      "sha256_lf": "1873d1b4f4bbf756f6aba093e50a83bbe0f5d3ac0b301bcc109fc21a6e5f2fc8"
+    },
+    {
+      "path": "reference/mermaid/X10.mmd",
+      "sha256_lf": "01fb585d6333c4c9dd1e6e3e3e1de19afcce7de5462e0344d10779e398d21461"
+    },
+    {
+      "path": "reference/mermaid/X11.mmd",
+      "sha256_lf": "9bb7b7e89c66348cc60293ca291367e4a68fb711dd51ca477f497c07bb60713d"
+    },
+    {
+      "path": "reference/mermaid/X12.mmd",
+      "sha256_lf": "8b7c0a6d1488da0c8be041914791972e9bf46d7d15bd2885e3c60863cbe73e30"
+    },
+    {
+      "path": "reference/workflows/C01.json",
+      "sha256_lf": "4f5d78dcb0f72e0b155b5d021b8941380774650ffc5d2dd22b41d1643897a17d"
+    },
+    {
+      "path": "reference/workflows/C02.json",
+      "sha256_lf": "d0288f6c95877d3157d01b3b6961b52c2c2d5dc3fb7ea9ca912fc5a14c05762b"
+    },
+    {
+      "path": "reference/workflows/C03.json",
+      "sha256_lf": "b90d8f5e3102cadd97b93f0333b0f95db808dcde5fc61a302df22224aa0c57f8"
+    },
+    {
+      "path": "reference/workflows/C04.json",
+      "sha256_lf": "0950d86dced8238decd51b78c604cac23fb2680ebb9b0eb5bc0516fe8035e43f"
+    },
+    {
+      "path": "reference/workflows/C05.json",
+      "sha256_lf": "2c532f06eda675330669f6e6b43c3bd7cfa5eab8a0e863d84a533d610a4a94a4"
+    },
+    {
+      "path": "reference/workflows/C06.json",
+      "sha256_lf": "31e42b1f6b5ec27fe4d7c424a06346d35e8b2c0185f9c87d1c4c02a02bc97956"
+    },
+    {
+      "path": "reference/workflows/C07.json",
+      "sha256_lf": "565f51f57b1e2aaf3a38fa372b5c2fb626758589409f27754456f8ad209ea615"
+    },
+    {
+      "path": "reference/workflows/C08.json",
+      "sha256_lf": "0702645bd96cd846d49fd795213219bd1ad9d6e1de054610346b947651ec46d3"
+    },
+    {
+      "path": "reference/workflows/C09.json",
+      "sha256_lf": "8262099c722366413b2cbf127289c0fe074cafc93a5cc3d71f5f596f04eecf74"
+    },
+    {
+      "path": "reference/workflows/C10.json",
+      "sha256_lf": "40d48169ff9ceae380248cdf892f9a0a7b90d94004f14d721cbd1431fec0e592"
+    },
+    {
+      "path": "reference/workflows/C11.json",
+      "sha256_lf": "84a4572192f25e11509a8fe3ae1dd86ca8e01c54cbd827fd8153fe958fd87599"
+    },
+    {
+      "path": "reference/workflows/C12.json",
+      "sha256_lf": "3a20b5f46a30ff8a58444a40dde1b3dab543a08f840a5f193d90bf61c134dff5"
+    },
+    {
+      "path": "reference/workflows/C13.json",
+      "sha256_lf": "2f1fdf5c9bd253177120963d45781be06194e45a94795dd8e69aeae4795e7a36"
+    },
+    {
+      "path": "reference/workflows/C14.json",
+      "sha256_lf": "3dd99d456f875494b1eedc47b9fb687c5a742e7d0fbec07f98bc3cf3eaa9b304"
+    },
+    {
+      "path": "reference/workflows/C15.json",
+      "sha256_lf": "aba7dba5ef662bdb38ec1cb52fa2f62a9c932bfacfb797959ceb295e50599e17"
+    },
+    {
+      "path": "reference/workflows/C16.json",
+      "sha256_lf": "9859050a8cdc3d72597e6231c96b2dce9b18dd3fe47c91fe0c6c5b24ee8a3940"
+    },
+    {
+      "path": "reference/workflows/C17.json",
+      "sha256_lf": "335840363f589afebb04ae60c93389abc751d9756bd80b5ec1e7849be2a02caf"
+    },
+    {
+      "path": "reference/workflows/C18.json",
+      "sha256_lf": "6be66341694738c33cd7ac10049313d5b188e71d3fa45bd82e5bf659cbb58c57"
+    },
+    {
+      "path": "reference/workflows/C19.json",
+      "sha256_lf": "a481f27d3c05fda91c993b15bb474d8eab4dd5785c938dfb4e2986ebf1ede6f3"
+    },
+    {
+      "path": "reference/workflows/C20.json",
+      "sha256_lf": "eed780f497bc002e33255f3d8ff26a165cd300e436db9b1a088079bb14ae0033"
+    },
+    {
+      "path": "reference/workflows/C21.json",
+      "sha256_lf": "0283d41f37371931eda5d9c01ef63b4b85d47ffb2fd8c273e4085cd5f653598e"
+    },
+    {
+      "path": "reference/workflows/C22.json",
+      "sha256_lf": "797670acf88c67d097b1f6e927ec819361f73e40b68f64c2cc0db11b712eb750"
+    },
+    {
+      "path": "reference/workflows/C23.json",
+      "sha256_lf": "c39fa81ea75a8e1a0e01470217b0448ac2f2fb38bb9458e85ff01415f09a7098"
+    },
+    {
+      "path": "reference/workflows/C24.json",
+      "sha256_lf": "7977e4f71c793e323e635e0a45e1654774eaffcc9b851b24822e679cb12033b9"
+    },
+    {
+      "path": "reference/workflows/C25.json",
+      "sha256_lf": "42ff8051938a41bc8007732686c1e3b878be1ebd18ffd905601d8bbe1e1c7c78"
+    },
+    {
+      "path": "reference/workflows/C26.json",
+      "sha256_lf": "5e495b433690b7f1f4cb19e1314c4608062d438b39f6f96f48c12078fa4c4061"
+    },
+    {
+      "path": "reference/workflows/C27.json",
+      "sha256_lf": "36305e3752e918840592bdd988e77363ba206a86853e7643280b43a884a08f90"
+    },
+    {
+      "path": "reference/workflows/C28.json",
+      "sha256_lf": "c93130447fc2189cebd03fdab68d5757053958e04d3d4592b012857bbbe1b0ec"
+    },
+    {
+      "path": "reference/workflows/C29.json",
+      "sha256_lf": "d343e9636cb9e407cde771de91c9774244001f31b88c4d2188bdbe091ca9e894"
+    },
+    {
+      "path": "reference/workflows/C30.json",
+      "sha256_lf": "22a46c4456dd50d2a870ea52c4aca6dd55c7b680719b0755ddd697c23dc2e34e"
+    },
+    {
+      "path": "reference/workflows/C31.json",
+      "sha256_lf": "b8c771ac176044832223e4d6bd529dd1f4f607d98044f54d7ef54249af5046db"
+    },
+    {
+      "path": "reference/workflows/C32.json",
+      "sha256_lf": "728fc2b91c86ae4fc5ba48e6ffe42b7650d427a62d6f478aba95c8ca8e6aff85"
+    },
+    {
+      "path": "reference/workflows/C33.json",
+      "sha256_lf": "1a6fe1fc5262f99f30d8e26709015985e3c52ea99526e538561917d5f0e99d0c"
+    },
+    {
+      "path": "reference/workflows/C34.json",
+      "sha256_lf": "96c944bf688835deacfd8b41b39d83750dfaa306e42aaf7044cc18edb2284807"
+    },
+    {
+      "path": "reference/workflows/C35.json",
+      "sha256_lf": "b668d1208d2fbb014e231e4377eced0cd1d2313a7f2fbfcb11c87b6944361a8b"
+    },
+    {
+      "path": "reference/workflows/C36.json",
+      "sha256_lf": "a7a3cf233500f7d0947cae1dc70e10132509e020488644f2e0c2a8eb0fcfb3ca"
+    },
+    {
+      "path": "reference/workflows/C37.json",
+      "sha256_lf": "8f1f0903b1d995aa06aa6d8410b497f15bf10de3a3207c27e74cc70df92fb18d"
+    },
+    {
+      "path": "reference/workflows/C38.json",
+      "sha256_lf": "c69c53b34b833710b44c22d95dfddfa18ad5bda564b4a5e64ca0d55693fac0c0"
+    },
+    {
+      "path": "reference/workflows/C39.json",
+      "sha256_lf": "7b2f88cc058e534eac2c08cee0c7a2809e49a3442828f0aa6bb880c05dcb9c10"
+    },
+    {
+      "path": "reference/workflows/C40.json",
+      "sha256_lf": "3966816c0b4e4d33044d0d3808a1a628fd7333156ac95ddb1e52c8308ee8ecc3"
+    },
+    {
+      "path": "reference/workflows/C41.json",
+      "sha256_lf": "0a350cc92c064a738149a68ceb95414376e1302b536152554b34349bb7e9dd43"
+    },
+    {
+      "path": "reference/workflows/C42.json",
+      "sha256_lf": "9b013b997efa85793ac2ea9f2a8f7fd9e9aea53e726622042d8245fcc2953198"
+    },
+    {
+      "path": "reference/workflows/C43.json",
+      "sha256_lf": "ce604847502ea730cc60915be26cab23d6975eddccc2202447a8ac5d3f9df66f"
+    },
+    {
+      "path": "reference/workflows/C44.json",
+      "sha256_lf": "e54ff8e7ecfb51b1e9efc54df04c69f7a6df75e964dc12eb8fb8a1e8055821b5"
+    },
+    {
+      "path": "reference/workflows/C45.json",
+      "sha256_lf": "74cf8b7c7d122fa1c878e36f8890e18ce2fecc9a717df1c21ad777b54cd048d7"
+    },
+    {
+      "path": "reference/workflows/C46.json",
+      "sha256_lf": "ed8baf4abda0e735fe436c759a47b6b983c4500ba18e4e22ea89e141e1c91ae0"
+    },
+    {
+      "path": "reference/workflows/C47.json",
+      "sha256_lf": "a55e15fe7fb7a3151a831fd7cabaadaf529a3b2f2e2e2d364a04e047b32ff9ea"
+    },
+    {
+      "path": "reference/workflows/C48.json",
+      "sha256_lf": "4962dfadcd0a17fbfa4fdbf1ef9e96bd7c74d2aa5f3993ca9016ef28d8428b04"
+    },
+    {
+      "path": "reference/workflows/C49.json",
+      "sha256_lf": "a316771129e7d5c87430f7773088523997a450df8679fb4cf46bcd754b706cd6"
+    },
+    {
+      "path": "reference/workflows/C50.json",
+      "sha256_lf": "38ea0252e2e0caeeb8894d1df4bfccec2fbb176cf3fcc840e9e8953f30024e3e"
+    },
+    {
+      "path": "reference/workflows/C51.json",
+      "sha256_lf": "42ad76995b77b1165fa948980d83195f3586948fd6d119db19efc8963f2feb97"
+    },
+    {
+      "path": "reference/workflows/C52.json",
+      "sha256_lf": "d256e0be9c74719f6fb1875034e4a5c4b9694bb1b63766664024e4623fc3676d"
+    },
+    {
+      "path": "reference/workflows/C53.json",
+      "sha256_lf": "78abb5b452ab3d7ed75346206a5b37c981a84118235eda37bbc3a69de9a809e3"
+    },
+    {
+      "path": "reference/workflows/C54.json",
+      "sha256_lf": "b8a481cc6c462c898c646a8384e47f388e5f42af017322d29f34b988770f1b01"
+    },
+    {
+      "path": "reference/workflows/C55.json",
+      "sha256_lf": "ea016e04bfa276c641fde5346285098e8bab826a9f8a33eba3b83fa68c8105a5"
+    },
+    {
+      "path": "reference/workflows/C56.json",
+      "sha256_lf": "7cd9697e1bbed8654477326b7b6fa82473b19359f75e9b0be25320be2f2d8ddd"
+    },
+    {
+      "path": "reference/workflows/C57.json",
+      "sha256_lf": "839df216f08978abe2b416e63d83cf2263313479c361ba6c0425b32c3c7d6d0b"
+    },
+    {
+      "path": "reference/workflows/C58.json",
+      "sha256_lf": "11c923e26241e06b52fdfd6792a3e23011fca77f30291d16dc173b57d8c7efcd"
+    },
+    {
+      "path": "reference/workflows/C59.json",
+      "sha256_lf": "4220a3999bbd54e48c2e605bec1f1c63f7c3a31dee0c5db8ca824737bf260349"
+    },
+    {
+      "path": "reference/workflows/C60.json",
+      "sha256_lf": "3f9498ad99d9e6218a73c9f0b35a0e76ac56e9738e027e559040c3fc6a8c98e4"
+    },
+    {
+      "path": "reference/workflows/C61.json",
+      "sha256_lf": "75f0526540f39bc2090cabbfa3a41f0f2510c295844e32e0cd0578d6e088a729"
+    },
+    {
+      "path": "reference/workflows/C62.json",
+      "sha256_lf": "36329fce8cfd2d9d7772b528624659bb57e1f7c6512dc8e0204690ec9214c049"
+    },
+    {
+      "path": "reference/workflows/C63.json",
+      "sha256_lf": "2475f060ed69c27673f7592bebe2a3aa814753996b7273f50611d5ca61a97341"
+    },
+    {
+      "path": "reference/workflows/C64.json",
+      "sha256_lf": "7fd51f087312e4abca75e852cd8132901241f8da6a3ef132c9460b42ab4fc4a9"
+    },
+    {
+      "path": "reference/workflows/C65.json",
+      "sha256_lf": "05c918c592374bd8348766e0494afc9c10a6380088203d1c8cb909aee2fe39c2"
+    },
+    {
+      "path": "reference/workflows/C66.json",
+      "sha256_lf": "28451032e8337358b7c7ce15f35a27bf8af09eadc49f1e08da952008225fef65"
+    },
+    {
+      "path": "reference/workflows/C67.json",
+      "sha256_lf": "ac6c7aeb4f59b1e8a70526d069501e00a22c2e957253dc13a150b0521ff2142c"
+    },
+    {
+      "path": "reference/workflows/C68.json",
+      "sha256_lf": "4c5ab54dc5b6fe58fbc33ac05567a53d25a2d29d4c61c4159ef7385a2f5c4054"
+    },
+    {
+      "path": "reference/workflows/C69.json",
+      "sha256_lf": "8482e9bcfcedc89162896ace8b7e0632c3bb2c2aee93cdc42f31f82896f92925"
+    },
+    {
+      "path": "reference/workflows/C70.json",
+      "sha256_lf": "0228e9279bfc45175d2e75794e2a9ac341dbdc8e17c2f95d1e8d606a2a92ba5d"
+    },
+    {
+      "path": "reference/workflows/C71.json",
+      "sha256_lf": "f95866f1ec5e2efa510936fe088cdeed6edd134df8a696f9e7c02c6f7e98d054"
+    },
+    {
+      "path": "reference/workflows/C72.json",
+      "sha256_lf": "1c8843a5b63feed189119a472c0465f4f0f24fc627bfa5bd3a2b41f2293e10d4"
+    },
+    {
+      "path": "reference/workflows/E01.json",
+      "sha256_lf": "e382d0e5dd39d49f655d686cd81e83092c57dc17ebfaf6ee39362f69aa4a3335"
+    },
+    {
+      "path": "reference/workflows/E02.json",
+      "sha256_lf": "4bbb902119ad57a81accb42d11b75dce48839f40eb9fc7e52e0dbbaad60a5dd2"
+    },
+    {
+      "path": "reference/workflows/E03.json",
+      "sha256_lf": "3db0460a6343fb61aa0f07db2e2b6ee001a4e583360b9308e658e12ffbda8b92"
+    },
+    {
+      "path": "reference/workflows/E04.json",
+      "sha256_lf": "1caef0a3b6dcf3678877e89229fdeb549ac06bf68466390a53310255f11bf6e8"
+    },
+    {
+      "path": "reference/workflows/E05.json",
+      "sha256_lf": "dd257be535992f5957eb91ae49bcfdbeda77d376686244f2b2c00704b5410b97"
+    },
+    {
+      "path": "reference/workflows/E06.json",
+      "sha256_lf": "0eece84923e730d4cddadaf108385e5140166c8bd2e91d78a06ba934820aa602"
+    },
+    {
+      "path": "reference/workflows/E07.json",
+      "sha256_lf": "f3e5e7ddcd8471525153a314f72e91ac5092fcec2d31021ff7a4cd251cffe0b7"
+    },
+    {
+      "path": "reference/workflows/E08.json",
+      "sha256_lf": "487b89644417dd8e9062373298d0ac2e7305b4607a4059ea2aa9bf2cf350adf6"
+    },
+    {
+      "path": "reference/workflows/E09.json",
+      "sha256_lf": "8a881ee54bbfa42ac4fc4418c72704150477f6f1b84216189a1588a370a79c2f"
+    },
+    {
+      "path": "reference/workflows/E10.json",
+      "sha256_lf": "c026bd458bab4ca0eaba7e85f6c28424ba7e271d3c43a12a4e88c166142c325c"
+    },
+    {
+      "path": "reference/workflows/E11.json",
+      "sha256_lf": "8751befe102b9def2395adfffacf1fa1bf9bfeaa18461cc512066f97644428db"
+    },
+    {
+      "path": "reference/workflows/E12.json",
+      "sha256_lf": "6ec992f05a8976664f621bd286078ea641f23d973312864ae14db5f697f0907f"
+    },
+    {
+      "path": "reference/workflows/E13.json",
+      "sha256_lf": "a36ca2dd98f61504139a65b697daa1603209be8cf5b628195a8d2063dac83801"
+    },
+    {
+      "path": "reference/workflows/E14.json",
+      "sha256_lf": "44b8a82bd2a321567aa143b950c8a4a8a1a64b22618bfc2d411d55b8561c6ee7"
+    },
+    {
+      "path": "reference/workflows/I01.json",
+      "sha256_lf": "d000f4aca7728be6fd4e231fba294bd9e4ebc3883579e318f3b7cf67ebfd91e1"
+    },
+    {
+      "path": "reference/workflows/I02.json",
+      "sha256_lf": "4b6423fc9a3d187d869d0ad7e67b6b7aa2a7b70b3059c6923850c3827fcca930"
+    },
+    {
+      "path": "reference/workflows/I03.json",
+      "sha256_lf": "d0015411b01b42f031fabe32ae3dba13162dfe66a10a0d3a055ff2f9448cbcfd"
+    },
+    {
+      "path": "reference/workflows/I04.json",
+      "sha256_lf": "54ca3402c75124ebd23482aaee7eab8b2f741ec9ddd4febd169a943941e93b69"
+    },
+    {
+      "path": "reference/workflows/I05.json",
+      "sha256_lf": "bd51a74dfaca023d9f841096da9a9ec927a311ce40513a66e10c85d0b06453bb"
+    },
+    {
+      "path": "reference/workflows/I06.json",
+      "sha256_lf": "117ab7595ac247cdce8fcfe372af556af864674a1ed22c04bb1f5b66c058b40a"
+    },
+    {
+      "path": "reference/workflows/I07.json",
+      "sha256_lf": "456276f4b77c115cb87adebf2cb6e296ee8244f6086481b255298561b9293926"
+    },
+    {
+      "path": "reference/workflows/I08.json",
+      "sha256_lf": "29785f96b0c25f00bceeaaf8192995856bd89a747545097ba39683a0f68ddca9"
+    },
+    {
+      "path": "reference/workflows/I09.json",
+      "sha256_lf": "544a8d537a598cb2995b694f34fba3c32c871a22b14098e2324e1e91e7122edf"
+    },
+    {
+      "path": "reference/workflows/I10.json",
+      "sha256_lf": "cd2ff1b391fa8e95d3ed09bd3cc50aa598cac9a93dca66885d973ddcc6e79a9f"
+    },
+    {
+      "path": "reference/workflows/I11.json",
+      "sha256_lf": "5b90b85058fa11278ec1ae5d4b4b08ff4a994bb8c424611589207f2e9cba99c2"
+    },
+    {
+      "path": "reference/workflows/I12.json",
+      "sha256_lf": "58501e797b63ad3103e28623d89dae5ff2a8b04da3d078456183b709a0fe4c8d"
+    },
+    {
+      "path": "reference/workflows/I13.json",
+      "sha256_lf": "c6456aab90d604b33b0030203a7a38fbdba2b331cbabcb6af9231a6048afe93c"
+    },
+    {
+      "path": "reference/workflows/I14.json",
+      "sha256_lf": "536c71298a3b37bc07fb8aca7ecd92c1444d98b0904fb01d1b68887d0842cc6b"
+    },
+    {
+      "path": "reference/workflows/I15.json",
+      "sha256_lf": "4a9ae123484bd1e353c526ada4283d38814d530f3ddf3d18bd9aa3e1d4c40200"
+    },
+    {
+      "path": "reference/workflows/I16.json",
+      "sha256_lf": "1a6eccd3196e545754f186123eff35fc932faf01632d39524c1ceb5f49163721"
+    },
+    {
+      "path": "reference/workflows/I17.json",
+      "sha256_lf": "3f469fb7d00326e812142cb78497f132ff39315b7fd8dfec98e05dc247a271d8"
+    },
+    {
+      "path": "reference/workflows/I18.json",
+      "sha256_lf": "490b7663225049864c1d3592d575e9709e1492edd23da095ced209bb27bf7c49"
+    },
+    {
+      "path": "reference/workflows/I19.json",
+      "sha256_lf": "c79b43d4224fac0a32a0bf5f53e9158466c5c993a67ee113cdf7c52f5483ec52"
+    },
+    {
+      "path": "reference/workflows/I20.json",
+      "sha256_lf": "c7f7d1d9a5190ed05aa7e803737b22e0d8e144086be7a14e517d2f722b6764b8"
+    },
+    {
+      "path": "reference/workflows/I21.json",
+      "sha256_lf": "53b300dc14b534e1c2be3a2a76d03c9357da2038fb07dc68232872fbcf7c35d3"
+    },
+    {
+      "path": "reference/workflows/I22.json",
+      "sha256_lf": "a1e3ed664cc7943caa854f5950f6339b5a4eb1c430579a57dc86d056ee3d723a"
+    },
+    {
+      "path": "reference/workflows/I23.json",
+      "sha256_lf": "d25809b704643ed8671f1e96dd2b653dd7b66b05a074b568c13e335b1d2866c6"
+    },
+    {
+      "path": "reference/workflows/I24.json",
+      "sha256_lf": "8232968a4ad90a41257522d7f40e8b9ece6c11ef3adce2dab186df8410bfe817"
+    },
+    {
+      "path": "reference/workflows/I25.json",
+      "sha256_lf": "e94b1802a707fbe3952f2c366a75c78b3478b9b87e1d2c37b0d63a8f598a3fb0"
+    },
+    {
+      "path": "reference/workflows/I26.json",
+      "sha256_lf": "ba596481b1b732a5927e8be9b267b585bd18a9d358a8a32a42a9e06455741268"
+    },
+    {
+      "path": "reference/workflows/I27.json",
+      "sha256_lf": "3aaa2ef0bb4ab764622213f5e98bcaf372f25add12a2c351b613bdc05f1d68d4"
+    },
+    {
+      "path": "reference/workflows/I28.json",
+      "sha256_lf": "a9b8f3aad6400c9bae195fa506ff23f747d07064dc6d7f99fe3d5bbf14c190c4"
+    },
+    {
+      "path": "reference/workflows/I29.json",
+      "sha256_lf": "4cdda2d835825cdda997fe352cdbfeb9083ce3f909a807a575d3fa09ed280a30"
+    },
+    {
+      "path": "reference/workflows/I30.json",
+      "sha256_lf": "b5fdfde3cafe46459cd342d7a5abb1e6c0491659b145bb42a1a1a5b64034e5cc"
+    },
+    {
+      "path": "reference/workflows/I31.json",
+      "sha256_lf": "6671231d51158820885a3dfba021f0f890d1194ba1a4a4c79a0b788a76d7db78"
+    },
+    {
+      "path": "reference/workflows/I32.json",
+      "sha256_lf": "0e58b91afa55f51ce47751653df5944c7644ba313db3e904b8e59d1e0ca91237"
+    },
+    {
+      "path": "reference/workflows/I33.json",
+      "sha256_lf": "4ea253d6e42ae797ddec4bcce32d972f10d9402df08c684b87fdda1e8f32c55e"
+    },
+    {
+      "path": "reference/workflows/I34.json",
+      "sha256_lf": "4dcdc6ba3aa40e51f77be19a78b0aab203c2fbbda1ca6e766dbe012e969ef07b"
+    },
+    {
+      "path": "reference/workflows/I35.json",
+      "sha256_lf": "be17492221783216671d2016d35d3aee7f02a253349f66a6137fbe0fdec05c59"
+    },
+    {
+      "path": "reference/workflows/I36.json",
+      "sha256_lf": "2fbc83e6ddcad7384742b33489bc565cf2e7f557989a31f00fad46059cd3b29c"
+    },
+    {
+      "path": "reference/workflows/L01.json",
+      "sha256_lf": "d40a639b37cb48229b32d74450fa26fc40cae57d2afcb92731dc00045b70fbe4"
+    },
+    {
+      "path": "reference/workflows/L02.json",
+      "sha256_lf": "104b40c5debf66f3ce6f6e862caa33455386d12a7d9e0f7aecfb65c95e056113"
+    },
+    {
+      "path": "reference/workflows/L03.json",
+      "sha256_lf": "de971cef1889103d4f2cb95def69cb60c0c1a69ce76741400aa2b32d018b470a"
+    },
+    {
+      "path": "reference/workflows/L04.json",
+      "sha256_lf": "4b6ea6d9a79b8d78103e06711d0923128e06cd746a3ee850ed4957217a3147fd"
+    },
+    {
+      "path": "reference/workflows/L05.json",
+      "sha256_lf": "a35ea72d1c7f1ae74f2c2a683600850ada73abb0a23070cf1f3c110932ad9a57"
+    },
+    {
+      "path": "reference/workflows/L06.json",
+      "sha256_lf": "4e54466f5a620a94fea57c3ea12fb7b4cccd355699e5da1ef4580bfcfb1cf134"
+    },
+    {
+      "path": "reference/workflows/L07.json",
+      "sha256_lf": "923f0606aa8c1ee5fe5ce783f36839c4aa2dd64dd5569c337ff1f5894cca5f1f"
+    },
+    {
+      "path": "reference/workflows/L08.json",
+      "sha256_lf": "be58f9fa3b14c1c0fcad5ebb1a32208ef546644d439516066bece7ae7e67dca0"
+    },
+    {
+      "path": "reference/workflows/M01.json",
+      "sha256_lf": "3401c386c0c8c8a2c28333b14aabe86f9af5bf014dc7094edf585e5a8e98588a"
+    },
+    {
+      "path": "reference/workflows/M02.json",
+      "sha256_lf": "9e0ce8c9a69604b3c0dd25645622c1cbe1251514dd7b4d00c7051ff5703254c0"
+    },
+    {
+      "path": "reference/workflows/M03.json",
+      "sha256_lf": "803ff72023cde8b5c032dca64d3b3a5758ff7191d16f9823f2e99d28e1c11bbf"
+    },
+    {
+      "path": "reference/workflows/M04.json",
+      "sha256_lf": "cc1559a6fc8a181afa9ff9896827af580e0fee9c6af6721e3067a8fa79dc9fcb"
+    },
+    {
+      "path": "reference/workflows/M05.json",
+      "sha256_lf": "c5665d856964dbae438a70fcc9df35bcc9e115b7f9e8220d48fd4e86ec25edc4"
+    },
+    {
+      "path": "reference/workflows/M06.json",
+      "sha256_lf": "12064e1928b9e5240b00e526e9abc684c34033dbd5c4a155c2d5c826b4dff098"
+    },
+    {
+      "path": "reference/workflows/M07.json",
+      "sha256_lf": "1f282d04b3a5f008123d6eabc9031c58d0d99ff25c0293593f85a28db951669a"
+    },
+    {
+      "path": "reference/workflows/M08.json",
+      "sha256_lf": "cd3c91a8e3bb60b808b549c2a6d9a786bcec0f7886535e9f7487b8ef210de91b"
+    },
+    {
+      "path": "reference/workflows/M09.json",
+      "sha256_lf": "b532ac253ec83cb0822e933531e104b3c14e9b209fe0f0d6e7d16ed5b15c633c"
+    },
+    {
+      "path": "reference/workflows/M10.json",
+      "sha256_lf": "b5d47edc69267a2f2765fa5f5e8a121296bc99b1d6e001919d42277bdc3944ec"
+    },
+    {
+      "path": "reference/workflows/M11.json",
+      "sha256_lf": "b347da8dab7a64ac74902f9da6585758cd0b0f91ad32bd6b973e16e40e84f963"
+    },
+    {
+      "path": "reference/workflows/M12.json",
+      "sha256_lf": "e55590dc1b05f614e619e5b884d8b165686655234cdb8d2e8c7e3253d84c02e2"
+    },
+    {
+      "path": "reference/workflows/M13.json",
+      "sha256_lf": "ed43c08762524b9d45ff5373a9e6a0e0ab5d952b21381951c40902e97b865a75"
+    },
+    {
+      "path": "reference/workflows/M14.json",
+      "sha256_lf": "0f156719601ceec8081f17e88d59f81e37ee510bdb83c87ce8fc2b1d24458b47"
+    },
+    {
+      "path": "reference/workflows/M15.json",
+      "sha256_lf": "26a95dd11ebdd50ee150da677306faaf47ac9719a48b8f677da65d262c6a0d88"
+    },
+    {
+      "path": "reference/workflows/M16.json",
+      "sha256_lf": "3185d1487ef686f25f4e3ce4e8bcaf20f2795450733334a4b2fe89964db7165d"
+    },
+    {
+      "path": "reference/workflows/M17.json",
+      "sha256_lf": "3019b84982390c5d74bccc2a7cc0c255d6951f144ea5952a3c17fe5e6e8080c4"
+    },
+    {
+      "path": "reference/workflows/M18.json",
+      "sha256_lf": "bc627143795b81ce791bff8cae1e68242167bfe033476c14ccf633c65fd86d25"
+    },
+    {
+      "path": "reference/workflows/M19.json",
+      "sha256_lf": "79378bdf68eafef766be558788bba7c835fadd264d8d6faa7d43ec9db1e7dea2"
+    },
+    {
+      "path": "reference/workflows/M20.json",
+      "sha256_lf": "0345afe3c2258ca696b20b3bb55ed84f308948bdafc0cfc3f3331b27a99ad7bc"
+    },
+    {
+      "path": "reference/workflows/M21.json",
+      "sha256_lf": "d563555177ee4b9b1960168a5f3ab4f3e4cb4323918baa6fa0c61aadb2f3d3b8"
+    },
+    {
+      "path": "reference/workflows/M22.json",
+      "sha256_lf": "98d203ec202874d15e8fec6be12e8750775fa9525ef94ed19842ce70f81bb1be"
+    },
+    {
+      "path": "reference/workflows/M23.json",
+      "sha256_lf": "275e7110408feee26c9ee9963eeddac97ae358bfa19a379f9e22cb062ed09b1e"
+    },
+    {
+      "path": "reference/workflows/M24.json",
+      "sha256_lf": "b09d24e3943558719dd43433f00a4568c2e8d7821dd73ac3d111ff82e9fc465c"
+    },
+    {
+      "path": "reference/workflows/M25.json",
+      "sha256_lf": "5ba1b25bc4dd422378c7359c97df18fc3501e80c01605712c10ff72ab8f6fb8e"
+    },
+    {
+      "path": "reference/workflows/M26.json",
+      "sha256_lf": "0067d0ae8fb6200dd80424063249b354f3c9abe33d8c338cae245bf4e969415f"
+    },
+    {
+      "path": "reference/workflows/M27.json",
+      "sha256_lf": "4fd4d6046b555029ce0dbedd7d2cd6eaae78736a0d8add6f1ecda44224804317"
+    },
+    {
+      "path": "reference/workflows/M28.json",
+      "sha256_lf": "44984ce641e37ae6e8771e9753433a19cdb1cc4e9b34ad9e102f233ee3b0d3ad"
+    },
+    {
+      "path": "reference/workflows/M29.json",
+      "sha256_lf": "29ba8bc20e425ccecb4a8ccfdd348389c157f528f6c33170603c2553cf0af0da"
+    },
+    {
+      "path": "reference/workflows/M30.json",
+      "sha256_lf": "25faae8ed4bfcd8b6fcf4bc0f0220e457376ea707bed41c89d436278c62bcd41"
+    },
+    {
+      "path": "reference/workflows/M31.json",
+      "sha256_lf": "049284e625a03c68f4f42707b254d65b2737ad0b1efe2f0ac3058eed6f2a30d3"
+    },
+    {
+      "path": "reference/workflows/M32.json",
+      "sha256_lf": "8fcded26175ed8a572d7d9063ad5b24204f65577cdfcffb98ddb195964bbebde"
+    },
+    {
+      "path": "reference/workflows/M33.json",
+      "sha256_lf": "6e03e3cf5d18acbdc7b5bc0257695b3a0bf82614f197890c9ac51f1fda48d8d0"
+    },
+    {
+      "path": "reference/workflows/M34.json",
+      "sha256_lf": "3078ba4b12ac9142320e4e1ea64829e133856bae8cc351bb4869fc7e4c80cb29"
+    },
+    {
+      "path": "reference/workflows/M35.json",
+      "sha256_lf": "3dffe4a87955caeb26cd6799b43cb892bbacfcbdc0e1d66a08e4255dc05711ce"
+    },
+    {
+      "path": "reference/workflows/M36.json",
+      "sha256_lf": "02b7553b6e08890c74e7303a735d9d934ca0d0b31330c0a8d0b6198f96e2d407"
+    },
+    {
+      "path": "reference/workflows/V01.json",
+      "sha256_lf": "a0c09e52880bd725d2f90f6067110e43fb230a648c19d446adc86ef154cf489c"
+    },
+    {
+      "path": "reference/workflows/V02.json",
+      "sha256_lf": "62db3df16002ef5caea9792885e5b15162b629f01167a20e860aec53931f6a52"
+    },
+    {
+      "path": "reference/workflows/V03.json",
+      "sha256_lf": "aff19b057e9aec7799480262a48d77ba0f20af34fa16d36afeae8db6b87c5c90"
+    },
+    {
+      "path": "reference/workflows/V04.json",
+      "sha256_lf": "38446ab8eb3c9a2bede77133f2b2074de1d3ebd0cd61b6441aa487dbcff401a4"
+    },
+    {
+      "path": "reference/workflows/V05.json",
+      "sha256_lf": "c2f35a42cfddc27afd321923bbcf319e286b6b0f69eac3c55cdbace9bfc2cd51"
+    },
+    {
+      "path": "reference/workflows/V06.json",
+      "sha256_lf": "e82328501a1e6dab14383d2cdb25bacf13ef5ee97b7a8800f83b2825c4c3a4a1"
+    },
+    {
+      "path": "reference/workflows/V07.json",
+      "sha256_lf": "8dce9b37be78f3fec7f4cd4344f14e8c19a4a0a4bb6ccb71856abcfc56ce8450"
+    },
+    {
+      "path": "reference/workflows/V08.json",
+      "sha256_lf": "ba299797a44d500da1918d49b3f93d4bac5d0496dd5143e5bfa2eccb8441a2c9"
+    },
+    {
+      "path": "reference/workflows/V09.json",
+      "sha256_lf": "bdfd283cecf059c819efa976c791beab32054de42762507fbc18d67076ad2b0f"
+    },
+    {
+      "path": "reference/workflows/V10.json",
+      "sha256_lf": "0df5b081321c9a45c62445930dfba25f248146af9a6262cd624668f5b4295f76"
+    },
+    {
+      "path": "reference/workflows/V11.json",
+      "sha256_lf": "62405fdfd4fdd03645a9507c2578d427206d6aff12162b1687710067b633431d"
+    },
+    {
+      "path": "reference/workflows/V12.json",
+      "sha256_lf": "2a4d9f359c4832314c839828ad6f33c1fc7ef06b61b30896088ec8aabc5675f5"
+    },
+    {
+      "path": "reference/workflows/X01.json",
+      "sha256_lf": "20f0c5e817265c5a0ce279d8bf66f1b0a6ff18c601f5cda1ad3679ed3b7e8589"
+    },
+    {
+      "path": "reference/workflows/X02.json",
+      "sha256_lf": "997822d1175ed1186211ec486edaa0e212e462f0192912626ce3cf90db20be32"
+    },
+    {
+      "path": "reference/workflows/X03.json",
+      "sha256_lf": "c03c7992820ed8a51d38d511350ee44a50b46fec4d7bf9d4b16c88e22a6c9d85"
+    },
+    {
+      "path": "reference/workflows/X04.json",
+      "sha256_lf": "2e6a1ffea1ea1ae1bb925213955330d9e03b43694adac73aa1417ac74071d468"
+    },
+    {
+      "path": "reference/workflows/X05.json",
+      "sha256_lf": "707c6d8473b81ed9a8b4aff8c389061cb18001cdc16095c7120619bfcecac98b"
+    },
+    {
+      "path": "reference/workflows/X06.json",
+      "sha256_lf": "e803347d08a9e603ad3a82ea09a5dc1f1500b83cf961826b6cb9db6196141366"
+    },
+    {
+      "path": "reference/workflows/X07.json",
+      "sha256_lf": "2a6b46887e90175f61943aa1e8a696afb2deb1a22b7dca38c0532c69cd45377d"
+    },
+    {
+      "path": "reference/workflows/X08.json",
+      "sha256_lf": "2c52141f585e427b400ca22035d537500ea6ecc0aa1f5a32ad57e4cb791bd7bb"
+    },
+    {
+      "path": "reference/workflows/X09.json",
+      "sha256_lf": "87ccb4388de93fe322261cc6e3a4dc92dcbe61d9c17ef06ae9834f2a286a3f64"
+    },
+    {
+      "path": "reference/workflows/X10.json",
+      "sha256_lf": "885e59160185241f9dce635c5b7e937bcfa52e949e07116e02ea8ae4f4ad7b8f"
+    },
+    {
+      "path": "reference/workflows/X11.json",
+      "sha256_lf": "977cd4431bd9d76ead47777c2f7fdae402391474a294146739006ff118e3c1e8"
+    },
+    {
+      "path": "reference/workflows/X12.json",
+      "sha256_lf": "19a3f5e64e5a138de5868a88bd74db443a716acdd38b4703d1e6668183ec8796"
+    }
+  ]
+}

@@ -13,3 +13,49 @@ Run tests with `CURATION_SOURCE_ROOT` set to the intended read-only public check
 Validation caches each source file's bytes after its hash check, and resolves all citations from those same bytes and a per-call parsed-JSON cache. A later validation starts with empty caches and detects changed files. Direct source relations require nonempty typed evidence and a workflow ID from the190 pinned workflow JSON records; count-preserving substitutions cannot invent a workflow. Parent and audit identities must each equal the20 canonical manager IDs without duplicates. Conditional classification and deferred disposition cannot become approval.
 
 Audit routing uses only explicit raw `workflow_id`, `workflow_ids`, or legacy `workflows` fields. IDs must be canonical and unique; multiple fields must agree, and curated routing must match. Finding keys must be nonempty and unique. No identifier is inferred from prose. The portable manifest separates historical controller receipts from this candidate, which awaits independent controller validation.
+
+
+## Offline amendments (proposal only)
+
+`offline-amendments.json` supplies 13 bounded source-bound amendments and 15
+unanswered source choices, linked one-to-one to the unchanged 28 findings.
+Replacement proposals bind source path, JSON pointer, LF SHA256, exact old value,
+canonical JSON old-value hash, and proposed value. Association proposals are
+additions to this review payload; they never edit source fields or graph edges.
+Canonical JSON hashes use sorted keys, compact separators and UTF-8.
+
+`validate_amendments` checks the exact proposal contract and immutable source
+bindings. Its digest is an integrity allowlist, not approval. CLI artifact checks
+require all ten artifacts from the running package even with another source root.
+The five original relation families remain governed by `validate`.
+
+No proposal selects architecture, qualifies consumers, authorizes providers or
+applies a graph change. All source-owner selections and accepted receipts remain
+null. Root must separately review source interpretation, invalidate affected
+leases for any future dependency change, and admit independent hermetic Linux
+tests. Windows work here is compile/AST only; no runtime acceptance is claimed.
+
+The root-approved exception updates only the original artifact positive/CRLF
+method for the added amendment: the exact old nine paths union the new payload
+must equal all ten paths, with normalized SHA256 and size checked before and
+after CRLF conversion. All other 40 original test methods remain byte-identical.
+Historical semantic fixtures continue testing the original relation validator.
+
+M29's proposed gate retains the complete original permission, approval and
+destination-readiness predicate. E11 qualification evidence is additive;
+missing, stale or ambiguous evidence remains UNKNOWN/HOLD. A direct semantic
+check and regressions inspect the actual proposed value independently of the
+integrity digest. No source gate, graph edge or architecture is adopted.
+
+F16 DENY can mean unavailable or stale evidence; only established ineligibility
+may map to the proposed durable EXCLUDED path. Unknown evidence remains HOLD.
+F05 owners must still resolve the exact existing post.draft/post.update action,
+native revision expectation and readback/held artifact bindings. Media/PDF
+configuration, evidence freshness/generation and all 15 source choices remain
+unresolved with their owners. No provider capability is inferred.
+
+This repaired candidate still requires admitted normal/-O complete portable
+suites and distinct-source-root CLI positive/negative cases, a matching final
+integrated audit.py/test_audit.py receipt, fresh independent review and actual
+current GitHub Codex/CI/security/discussion gates before publication. Historical
+receipts do not validate these changed bytes or any business/runtime acceptance.

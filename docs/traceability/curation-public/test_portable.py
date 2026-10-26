@@ -321,12 +321,32 @@ class ArtifactIntegrityTests(unittest.TestCase):
   (root/'portable-manifest.json').write_text(json.dumps(manifest))
   return manifest
  def test_final_artifacts_positive_and_crlf(self):
+  import hashlib
+  old_nine={'docs/traceability/README.md'} | {
+   'docs/traceability/curation-public/'+name for name in (
+    'component-curation.json','README.md','review-dispositions.json',
+    'shared-contract-evidence.json','source-manifest.json','summary.json',
+    'test_portable.py','validate_portable.py')}
+  required=old_nine | {'docs/traceability/curation-public/offline-amendments.json'}
+  self.assertEqual(len(old_nine),9);self.assertEqual(len(required),10)
   with tempfile.TemporaryDirectory(dir=v.PACKAGE) as directory:
    root=Path(directory);manifest=self.artifact_fixture(root)
-   self.assertEqual(v.verify_artifacts(root,root)['artifacts'],9)
+   self.assertEqual(len(manifest['artifacts']),10)
+   self.assertEqual({entry['path'] for entry in manifest['artifacts']},required)
+   self.assertEqual(v.ARTIFACT_PATHS,required)
+   self.assertEqual(v.verify_artifacts(root,root)['artifacts'],10)
+   for entry in manifest['artifacts']:
+    data=(root/entry['path']).read_bytes().replace(b'\r\n',b'\n')
+    self.assertEqual(len(data),entry['bytes'])
+    self.assertEqual(hashlib.sha256(data).hexdigest(),entry['sha256'])
    for entry in manifest['artifacts']:
     path=root/entry['path'];path.write_bytes(path.read_bytes().replace(b'\r\n',b'\n').replace(b'\n',b'\r\n'))
    self.assertEqual(v.verify_artifacts(root,root)['status'],'ARTIFACT_INTEGRITY_VALID')
+   self.assertEqual(v.verify_artifacts(root,root)['artifacts'],10)
+   for entry in manifest['artifacts']:
+    data=(root/entry['path']).read_bytes().replace(b'\r\n',b'\n')
+    self.assertEqual(len(data),entry['bytes'])
+    self.assertEqual(hashlib.sha256(data).hexdigest(),entry['sha256'])
  def test_stale_hash_size_duplicate_omission_and_self_listing(self):
   for mutation in ('hash','size','duplicate','omitted','self','data','bool_size'):
    with self.subTest(mutation=mutation),tempfile.TemporaryDirectory(dir=v.PACKAGE) as directory:
@@ -447,6 +467,159 @@ class Review03RegressionTests(unittest.TestCase):
   for value in ('C:/private/document.json','/home/private/document.json','workstream_workflows/private/document.json'):
    with self.subTest(value=value),self.assertRaises(ValueError):v.guard_public_inventory({'history':[{'nested':value}]})
   v.guard_public_inventory({'path':'reference/workflows/C01.json','pointer':'/software','absent':[None,'']})
+
+
+
+class OfflineAmendmentTests(unittest.TestCase):
+ def source(self):
+  return Path(os.environ.get('CURATION_SOURCE_ROOT',str(v.PACKAGE.parents[2])))
+ def proposal(self):
+  return json.loads((v.PACKAGE/'offline-amendments.json').read_text())
+ def reject(self,mutate):
+  import copy
+  doc=copy.deepcopy(self.proposal());mutate(doc)
+  original=v.load
+  def fixture(root,name):
+   return doc if name=='offline-amendments.json' else original(root,name)
+  with patch.object(v,'load',side_effect=fixture),self.assertRaises((ValueError,KeyError,TypeError,IndexError)):
+   v.validate_amendments(self.source())
+ def test_exact_twenty_eight_and_source_bindings(self):
+  result=v.validate_amendments(self.source())
+  self.assertEqual(result['bounded_amendments'],13)
+  self.assertEqual(result['unanswered_choices'],15)
+  self.assertIs(result['adopted'],False)
+ def test_missing_duplicate_and_changed_key(self):
+  for mode in ('missing','duplicate','changed'):
+   def mutate(doc):
+    if mode=='missing':doc['rows'].pop()
+    elif mode=='duplicate':doc['rows'][-1]=doc['rows'][0]
+    else:doc['rows'][0]['finding_key']='O20-99:invented'
+   with self.subTest(mode=mode):self.reject(mutate)
+ def test_exact_source_hash_pointer_old_value_and_parent_context(self):
+  for key,value in (('sha256_lf','0'*64),('pointer','/gate'),('old_value','invented'),('old_value_sha256','0'*64),('path','reference/workflows/C01.json')):
+   with self.subTest(key=key):
+    self.reject(lambda d,k=key,val=value:d['rows'][1]['changes'][0].__setitem__(k,val))
+ def test_unknown_workflow_component_task(self):
+  for field,value in (('workflow_ids','Z99'),('component_ids','CP999'),('mapped_existing_task_keys','WF-Z99-BUILD')):
+   with self.subTest(field=field):self.reject(lambda d,f=field,val=value:d['rows'][0][f].append(val))
+ def test_domain_and_wordpress_ownership(self):
+  self.reject(lambda d:d['rows'][0]['citation_proposal'].__setitem__('C09','D-C01'))
+  self.reject(lambda d:d['rows'][1]['changes'][0].__setitem__('proposed_value','SerpBear / revision writer'))
+ def test_alias_is_exact_and_existing_edge_reused(self):
+  row=next(r for r in self.proposal()['rows'] if r['finding_key']=='O20-13:D01')
+  self.assertEqual(row['alias_proposal']['exact_source_token'],'NUT')
+  self.assertEqual(row['alias_proposal']['component_id'],'CP048')
+  self.assertFalse(row['alias_proposal']['new_edge'])
+  self.reject(lambda d:next(r for r in d['rows'] if r['finding_key']=='O20-13:D01')['alias_proposal'].__setitem__('matching','SUBSTRING'))
+ def test_procedure_consumers_and_m30_unresolved(self):
+  row=next(r for r in self.proposal()['rows'] if r['finding_key']=='O20-17:SA-01')
+  self.assertEqual(row['consumer_proposal']['component_id'],'CP054')
+  self.assertEqual(row['consumer_proposal']['consumers'],['M22','M28'])
+  self.assertIsNone(row['consumer_proposal']['M30']['selection'])
+  self.assertTrue(all(any(e['path'].endswith(w+'.json') and e['pointer']=='/source_procedure' and 'SearXNG' in e['old_value'] for e in row['source_evidence']) for w in ('M22','M28','M30')))
+  self.reject(lambda d:next(r for r in d['rows'] if r['finding_key']=='O20-17:SA-01')['consumer_proposal']['M30'].__setitem__('selection','SearXNG'))
+ def test_ordering_containment_generation_and_isolation(self):
+  for finding,field,value in (('O20-09:D01','unknown','READY'),('O20-09:D01','completion','BEFORE_CURRENT_PRODUCER'),('O20-09:D01','prior_generation','CURRENT_COMPLETION_AS_PRIOR'),('O20-12:S01','isolation','AFTER_APPLICATION_RESTORE')):
+   with self.subTest(finding=finding,field=field):
+    self.reject(lambda d,f=finding,k=field,val=value:next(r for r in d['rows'] if r['finding_key']==f)['boundaries'][0].__setitem__(k,val))
+  self.reject(lambda d:next(r for r in d['rows'] if r['finding_key']=='O20-09:D01')['containment'].__setitem__('E08','WAIT_FOR_CAUSE'))
+ def test_known_exclusion_is_not_unknown(self):
+  row=next(r for r in self.proposal()['rows'] if r['finding_key']=='O20-09:D03')
+  self.assertEqual(row['boundaries'][0]['known_ineligible'],'DURABLE_EXCLUDED')
+  self.assertEqual(row['boundaries'][0]['unknown'],'HOLD')
+  self.reject(lambda d:next(r for r in d['rows'] if r['finding_key']=='O20-09:D03')['boundaries'][0].__setitem__('unknown','EXCLUDED'))
+ def test_no_adoption_flags_forged_receipts_or_graph_application(self):
+  for field,value in (('qualified',True),('production_authorized',True),('status','ADOPTED'),('runtime_status','PASS'),('accepted_decision_receipt',{'root':'approved'}),('applied_graph_changes',[{'from':'E11','to':'M29'}])):
+   with self.subTest(field=field):self.reject(lambda d,k=field,val=value:d.__setitem__(k,val))
+ def test_fifteen_choices_remain_unanswered(self):
+  choices=[r for r in self.proposal()['rows'] if r['kind']=='UNANSWERED_CHOICE']
+  self.assertEqual(len(choices),15)
+  self.assertTrue(all(r['selection'] is None and len(r['alternatives'])>=2 for r in choices))
+  for choice in choices:
+   with self.subTest(key=choice['finding_key']):self.reject(lambda d,k=choice['finding_key']:next(r for r in d['rows'] if r['finding_key']==k).__setitem__('selection',0))
+ def test_recursive_private_inventory_in_proposal(self):
+  self.reject(lambda d:d['rows'][0].__setitem__('history',{'nested':['C:/private/inventory.json']}))
+ def test_new_artifact_ten_and_mutations(self):
+  for mode in ('positive','missing','stale','mutation'):
+   with self.subTest(mode=mode),tempfile.TemporaryDirectory(dir=v.PACKAGE) as directory:
+    root=Path(directory);manifest=ArtifactIntegrityTests().artifact_fixture(root)
+    entry=next(e for e in manifest['artifacts'] if e['path'].endswith('/offline-amendments.json'))
+    path=root/entry['path']
+    if mode=='positive':self.assertEqual(v.verify_artifacts(root,root)['artifacts'],10);continue
+    if mode=='missing':path.unlink()
+    elif mode=='stale':entry['sha256']='0'*64;(root/'portable-manifest.json').write_text(json.dumps(manifest))
+    else:path.write_bytes(path.read_bytes()+b' ')
+    with self.assertRaises((ValueError,OSError)):v.verify_artifacts(root,root)
+ def test_cli_new_artifact_with_distinct_source_root(self):
+  for mode in ('positive','missing','mutation'):
+   with self.subTest(mode=mode),tempfile.TemporaryDirectory(dir=v.PACKAGE) as directory:
+    helper=Review03RegressionTests();source,package=helper.cli_fixture(Path(directory))
+    self.assertNotEqual(source,package.parents[2])
+    path=package/'offline-amendments.json'
+    if mode=='missing':path.unlink()
+    elif mode=='mutation':path.write_bytes(path.read_bytes()+b' ')
+    result=helper.run_cli(source,package)
+    self.assertEqual(result.returncode,0 if mode=='positive' else 2,result.stdout+result.stderr)
+
+
+class OfflinePreservationTests(unittest.TestCase):
+ def test_all_413_pins_exact_and_original_acceptance_routes(self):
+  import hashlib,csv,io,collections
+  source=Path(os.environ.get('CURATION_SOURCE_ROOT',str(v.PACKAGE.parents[2])))
+  doc=json.loads((v.PACKAGE/'offline-amendments.json').read_text())
+  self.assertEqual(len(doc['public_source_pins']),413)
+  for pin in doc['public_source_pins']:
+   self.assertEqual(v.normalized_sha(source,pin['path']),pin['sha256_lf'])
+  matrix=list(csv.DictReader(io.StringIO(v.raw(source,'reference/acceptance/Original_Acceptance_Matrix.csv').decode('utf-8-sig'))))
+  trace=list(csv.DictReader(io.StringIO(v.raw(source,'backlog/acceptance_traceability.csv').decode('utf-8-sig'))))
+  self.assertEqual(len(matrix),576);self.assertEqual(len(trace),576)
+  self.assertEqual(len({r['test_id'] for r in matrix}),576)
+  self.assertEqual({r['test_id'] for r in matrix},{r['source_test_id'] for r in trace})
+  self.assertEqual(collections.Counter(r['status'] for r in matrix),{'NOT_RUN':564,'OPEN_SOURCE_BLOCKER':12})
+  self.assertEqual({r['initial_status'] for r in trace},{'NOT_RUN'})
+  issues=json.loads(v.raw(source,'backlog/issues.json'))['issues'];keys={r['key'] for r in issues}
+  self.assertEqual(len(keys),785)
+  for r in trace:
+   for field in ('implementation_issue','test_authoring_issue','verification_issue'):self.assertIn(r[field],keys)
+ def test_original_findings_bytes_bound_and_pending(self):
+  doc=json.loads((v.PACKAGE/'offline-amendments.json').read_text())
+  review=json.loads((v.PACKAGE/'review-dispositions.json').read_text())
+  self.assertEqual(len(review['audit_findings']),28)
+  for row in doc['rows']:
+   self.assertEqual(v.normalized_sha(v.PACKAGE,'review-dispositions.json'),row['source_disposition']['sha256_lf'])
+   finding=v.get_pointer(review,row['source_disposition']['pointer'])
+   self.assertEqual(finding['finding_key'],row['finding_key'])
+   self.assertEqual(finding['disposition'],'PENDING_ROOT_REVIEW_NO_SOURCE_OR_GRAPH_CHANGE')
+
+class M29GatePreservationTests(unittest.TestCase):
+ def change(self):
+  doc=json.loads((v.PACKAGE/'offline-amendments.json').read_text())
+  return next(row for row in doc['rows'] if row['finding_key']=='O20-17:SA-02')['changes'][0]
+ def test_actual_proposed_gate_retains_native_predicate_and_additive_e11(self):
+  change=self.change();proposed=change['proposed_value']
+  expected='Applicable permission, approval and destination readiness valid?'
+  self.assertEqual(change['old_value'],expected)
+  self.assertTrue(proposed.startswith(expected+' '))
+  self.assertIn('Additionally, qualification requires a current E11 control receipt;',proposed)
+  self.assertIn('this does not replace permission, approval or destination readiness.',proposed)
+  self.assertIn('Missing, stale or ambiguous authority, readiness or E11 evidence is UNKNOWN and remains HOLD pending reconciliation.',proposed)
+  self.assertIn('Ordinary isolated fixture tests remain permitted.',proposed)
+  self.assertIn('No hard build edge is established.',proposed)
+  v.validate_m29_gate(change)
+ def test_old_proposal_fails_semantic_check_without_digest(self):
+  change=self.change().copy()
+  change['proposed_value']='Qualification requires current E11 control receipt; ordinary isolated fixture tests remain permitted. No hard build edge is established.'
+  with self.assertRaisesRegex(ValueError,'M29 gate preservation'):v.validate_m29_gate(change)
+ def test_each_semantic_obligation_is_required_without_digest(self):
+  original=self.change()
+  for fragment in ('permission, ', 'approval and ', 'destination readiness valid?',
+   'Additionally, qualification requires a current E11 control receipt;',
+   'this does not replace permission, approval or destination readiness.',
+   'Missing, stale or ambiguous authority, readiness or E11 evidence is UNKNOWN and remains HOLD pending reconciliation.',
+   'Ordinary isolated fixture tests remain permitted.', 'No hard build edge is established.'):
+   with self.subTest(fragment=fragment):
+    change=original.copy();change['proposed_value']=change['proposed_value'].replace(fragment,'',1)
+    with self.assertRaisesRegex(ValueError,'M29 gate preservation'):v.validate_m29_gate(change)
 
 if __name__=='__main__':unittest.main(verbosity=2)
 
