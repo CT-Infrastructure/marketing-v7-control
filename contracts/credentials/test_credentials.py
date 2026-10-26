@@ -160,7 +160,8 @@ class RedactionTests(unittest.TestCase):
             for payload, suffix in cases:
                 with self.subTest(surface=surface, payload=payload):
                     safe = redact({"surface": surface, "message": payload})
-                    self.assertEqual(safe, {"surface": surface, "message": MARKER + suffix})
+                    self.assertEqual(safe, {"surface": surface, "message":
+                                          MARKER if '\\"' in payload else MARKER + suffix})
         # JSON serialization introduces escapes for both quote and backslash.
         for value in ('synthetic-"SYNTHETIC_TAIL', 'synthetic-\\"SYNTHETIC_TAIL'):
             payload = json.dumps({"password": value, "status": "ok"})
@@ -355,7 +356,7 @@ class RedactionTests(unittest.TestCase):
             value='SYNTHETIC_HEAD '+('\\'+quote)+' SYNTHETIC_TAIL'
             payload='before DB_PASSWORD='+quote+value+quote+'; status=ok'
             safe=redact(payload)
-            self.assertTrue(safe.endswith('; status=ok'))
+            self.assertEqual(safe, MARKER if quote == '"' else 'before DB_'+MARKER+'; status=ok')
             self.assertNotIn('SYNTHETIC_TAIL',safe)
         for embedded in ('"',"'"):
             token='SYNTHETIC_HEAD'+embedded+'SYNTHETIC_TAIL'
@@ -408,6 +409,76 @@ class RedactionTests(unittest.TestCase):
         payload=('-----BEGIN OPENSSH PRIVATE KEY-----\n'*1000)+'SYNTHETIC_PRIVATE_TAIL'
         self.assertLess(len(payload),65536)
         self.assertEqual(redact(payload),MARKER)
+
+    def assert_message_discarded(self, payload, sentinel):
+        self.assertEqual(redact(payload), MARKER)
+        self.assertNotIn(sentinel, redact(payload))
+        for surface in ('prompt', 'log', 'artifact'):
+            record = {'surface': surface, 'message': payload}
+            expected = {'surface': surface, 'message': MARKER}
+            self.assertEqual(redact(record), expected)
+            serialized = json.dumps(record)
+            if len(serialized) > 65536:
+                self.assertEqual(redact(serialized), MARKER)
+            else:
+                self.assertEqual(json.loads(redact(serialized)), expected)
+            self.assertNotIn(sentinel, json.dumps(redact(record)))
+
+    def test_uri_username_and_password_matrix(self):
+        for scheme in ('postgresql', 'postgres', 'mysql', 'smtp', 'sip', 'sips'):
+            for username in ('', 'synthetic'):
+                for password in ('SYNTHETIC_URI_VALUE', 'SYNTHETIC_URI_VALUE%40%3A%2F'):
+                    payload = f'before {scheme}://{username}:{password}@host.invalid/path after'
+                    with self.subTest(scheme=scheme, username=username, password=password):
+                        expected = 'before '+MARKER+'host.invalid/path after'
+                        self.assertEqual(redact(payload), expected)
+                        for surface in ('prompt', 'log', 'artifact'):
+                            record = {'surface': surface, 'message': payload}
+                            self.assertEqual(redact(record)['message'], expected)
+                            self.assertEqual(json.loads(redact(json.dumps(record)))['message'], expected)
+                        self.assertNotIn(password, redact(payload))
+            for authority in ('host.invalid', 'host.invalid:5432', 'synthetic@host.invalid'):
+                payload = f'before {scheme}://{authority}/public after'
+                self.assertEqual(redact(payload), payload)
+            # The supported credential pattern still requires a password.
+            payload = f'{scheme}://synthetic:@host.invalid/public'
+            self.assertEqual(redact(payload), payload)
+
+    def test_ambiguous_escaped_quote_assignment_prefixes_fail_closed(self):
+        sentinel = 'SYNTHETIC_PREFIX_VALUE'
+        for prefix in (r'prefix "broken\ ' , r'prefix "\q ', r'prefix \"broken '):
+            for key in ('password', r'\u0070assword', r'api_\u006bey'):
+                for opening in ('"', r'\"'):
+                    for value in (json.dumps(sentinel), json.dumps({'nested': sentinel}), json.dumps([sentinel])):
+                        payload = prefix + opening + key + '":' + value + ' SYNTHETIC_TRAILING_TAIL'
+                        with self.subTest(prefix=prefix, key=key, opening=opening, value=value):
+                            self.assert_message_discarded(payload, sentinel)
+        # Intentional conservative false positives, including public labels.
+        for separator in (':', '='):
+            self.assertEqual(redact(r'public \"quotation\" status'+separator+'ok'), MARKER)
+
+    def test_truncated_serialized_nested_messages_fail_closed(self):
+        sentinel = 'SYNTHETIC_TRUNCATED_VALUE'
+        message = json.dumps({'password': sentinel})
+        for wrappers in range(1, 4):
+            message = json.dumps({'message': message})
+            self.assertEqual(message[-1], '}')
+            variants = [message[:-1]]
+            for boundary in ('"', '}', '\\'):
+                index = message.rfind(boundary)
+                self.assertGreater(index, 0)
+                variants.append(message[:index])
+            for payload in variants:
+                with self.subTest(wrappers=wrappers, payload=payload):
+                    self.assert_message_discarded(payload, sentinel)
+
+    def test_malformed_json_near_size_boundary_is_discarded(self):
+        prefix = '{"message":"SYNTHETIC_BOUNDARY_VALUE'
+        for size in (65535, 65536, 65537):
+            payload = prefix + 'x' * (size - len(prefix))
+            self.assertEqual(len(payload), size)
+            self.assert_message_discarded(payload, 'SYNTHETIC_BOUNDARY_VALUE')
+
 if __name__ == "__main__":
     unittest.main()
 

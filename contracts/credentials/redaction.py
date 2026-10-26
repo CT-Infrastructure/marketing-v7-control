@@ -29,7 +29,7 @@ PATTERNS = [
     re.compile(r"\bsk-(?:proj-)?[A-Za-z0-9_-]{16,}"),
     re.compile(r"\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b"),
     re.compile(r"(?i)\b(?:Bearer|Basic)\s+[A-Za-z0-9+/_.~=:-]+"),
-    re.compile(r"(?i)(?:postgres(?:ql)?|mysql|smtp|sips?)://[^\s/@:]+:[^\s/@]+@"),
+    re.compile(r"(?i)(?:postgres(?:ql)?|mysql|smtp|sips?)://[^\s/@:]*:[^\s/@]+@"),
     # A quoted assignment either closes normally or consumes through end of
     # input, including a dangling escape. It must not fall back to one token.
     re.compile(r"(?i)(?<![A-Za-z0-9])(?:" + ASSIGNMENT_LABEL + r")(?![A-Za-z0-9])[\"']?\s*[=:]\s*"
@@ -99,10 +99,14 @@ def redact(value, *, depth=0):
             except RecursionError:
                 return MARKER
             except (ValueError, TypeError):
-                pass  # Keep the existing text path for non-JSON text.
+                return MARKER  # Malformed JSON boundaries cannot be trusted.
             else:
                 if type(parsed) in (dict, list):
                     return json.dumps(redact(parsed, depth=depth + 1), ensure_ascii=False)
+        # Escaped quotes make embedded assignment boundaries ambiguous. Prefer
+        # bounded whole-message redaction over speculative recovery parsing.
+        if '\\"' in value and (':' in value or '=' in value):
+            return MARKER
         # A scalar regex cannot delimit a nested object/array safely. Discard
         # the entire unparseable/embedded message rather than leak its tail.
         if COMPOSITE_ASSIGNMENT.search(value) or _has_sensitive_json_key(value):
