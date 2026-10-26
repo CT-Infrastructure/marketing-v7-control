@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# No capability fallback: unsupported namespace creation is a failing gate.
+mode=${1:-run}
+case "$mode" in
+  run)
+    test "$(python -c 'import platform; print(platform.python_version())')" = 3.12.3
+    command -v bwrap >/dev/null
+    root=$(mktemp -d "${RUNNER_TEMP:?}/f07-ci.XXXXXXXXXXXX")
+    printf 'F07_ROOT=%s\n' "$root" >> "${GITHUB_ENV:?}"
+    cleanup_runtime() {
+      python -B tests/harness/ci_evidence.py cleanup-runtime "$root"
+    }
+    trap cleanup_runtime EXIT
+    trap 'exit 143' TERM
+    trap 'exit 130' INT
+    mkdir "$root/runtime" "$root/upload"
+    python -m venv --copies "$root/deps"
+    "$root/deps/bin/python" -m pip --disable-pip-version-check install --no-cache-dir --no-index --require-hashes --only-binary=:all: -r tests/harness/requirements-ci.lock
+    # Direct reviewed wheel URLs remain usable with --no-index; no index resolution.
+    bwrap --unshare-all --die-with-parent --new-session --ro-bind / / --proc /proc --dev /dev \
+      --bind "$root/runtime" "$root/runtime" --bind "$root/upload" "$root/upload" \
+      --clearenv --setenv PATH /usr/bin:/bin --setenv TMPDIR "$root/runtime" \
+      --setenv PYTHONDONTWRITEBYTECODE 1 --setenv F07_NETWORK_NAMESPACE_EXPECTED 1 \
+      --chdir "$GITHUB_WORKSPACE" "$root/deps/bin/python" -B tests/harness/ci_evidence.py run \
+      "$root/upload" "$GITHUB_SHA" "$F07_CANDIDATE_SHA"
+    python -B tests/harness/ci_evidence.py check "$root/upload" "$GITHUB_SHA" "$F07_CANDIDATE_SHA"
+    ;;
+  metadata)
+    python -B tests/harness/ci_evidence.py metadata "${F07_ROOT:?}/upload" "$GITHUB_SHA" "$F07_CANDIDATE_SHA"
+    ;;
+  cleanup)
+    if [[ -n "${F07_ROOT:-}" ]]; then
+      python -B tests/harness/ci_evidence.py cleanup "$F07_ROOT"
+    fi
+    ;;
+  *) exit 2 ;;
+esac

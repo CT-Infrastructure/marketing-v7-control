@@ -21,3 +21,43 @@ jobs:
         run: python3 tools/validate_package.py
       - name: Test local tooling
         run: python3 -m unittest discover -s tests/package -v
+  f07-harness-qualified-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: read
+      actions: read
+    env:
+      F07_CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.12.3'
+      - name: Qualify isolated synthetic harness
+        run: bash .github/scripts/validate-f07-harness.sh run
+      - name: Upload bounded synthetic evidence
+        id: f07-upload
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7, node24
+        with:
+          name: f07-synthetic-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ env.F07_ROOT }}/upload/evidence.json
+            ${{ env.F07_ROOT }}/upload/manifest.json
+          retention-days: 7
+          archive: true
+          if-no-files-found: error
+          compression-level: 6
+          overwrite: false
+          include-hidden-files: false
+      - name: Verify actual same-run service metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+          F07_ARTIFACT_ID: ${{ steps.f07-upload.outputs.artifact-id }}
+          F07_ARTIFACT_DIGEST: ${{ steps.f07-upload.outputs.artifact-digest }}
+        run: bash .github/scripts/validate-f07-harness.sh metadata
+      - name: Dispose owned scratch while runner survives
+        if: always()
+        run: bash .github/scripts/validate-f07-harness.sh cleanup
