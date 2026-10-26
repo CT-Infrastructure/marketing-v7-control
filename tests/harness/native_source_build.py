@@ -142,6 +142,7 @@ def build_gate(lock, auth):
     if lock['patched_tree_sha256'] is None or lock['generated_output_model'] is None:
         hold('PATCHED_TREE_OUTPUT_MODEL_REQUIRED')
     hex64(lock['patched_tree_sha256'])
+    expected_source_identity(lock)
 
 
 def validate_platform(os_id, version, machine, system):
@@ -456,6 +457,103 @@ def tree_digest(files):
     return digest(canonical({relative(name):digest(value) for name,value in sorted(files.items())}))
 
 
+def typed_source_model(rows):
+    """All authenticated orig members, stripped once; no file alias expansion."""
+    validate_rows(rows,rows);prefix='bubblewrap-0.9.0/';members={};root_member=None
+    for row in rows:
+        if row['name']==prefix[:-1]:
+            check(root_member is None and row['type']=='directory');root_member=dict(row);continue
+        check(row['name'].startswith(prefix));name=relative(row['name'][len(prefix):])
+        check(name not in members);members[name]=dict(row,name=name)
+    check(bool(members))
+    resolved=validate_link_model(members)
+    # Source aliases are terminal FILE aliases only; no directory compatibility.
+    for name,destination in resolved.items():check(destination in members and members[destination]['type']=='file')
+    return dict(schema='f07-typed-source-model-v1',source_lock_sha256=SOURCE_LOCK_SHA256,
+                root_member=root_member,members=[members[name] for name in sorted(members)])
+
+
+def post_source_identity(original_model, regular_post_tree_sha256):
+    """Additive identity; tree_digest/patched_tree_sha256 stay FILE-ONLY."""
+    check(type(original_model) is dict and set(original_model)=={'schema','source_lock_sha256','root_member','members'})
+    check(original_model['schema']=='f07-typed-source-model-v1' and original_model['source_lock_sha256']==SOURCE_LOCK_SHA256)
+    check(type(original_model['members']) is list and len(original_model['members'])<=MAX_ENTRIES)
+    rows=[dict(row,name='bubblewrap-0.9.0/'+relative(row['name'])) for row in original_model['members']]
+    if original_model['root_member'] is not None:rows.insert(0,original_model['root_member'])
+    check(canonical(typed_source_model(rows))==canonical(original_model))
+    return digest(canonical(dict(schema='f07-post-source-identity-v1',source_lock_sha256=SOURCE_LOCK_SHA256,
+        original_source_model_sha256=digest(canonical(original_model)),regular_post_tree_sha256=hex64(regular_post_tree_sha256))))
+
+
+def expected_source_identity(lock):
+    # Expected facts come only from the separately hash-pinned ROOT lock model,
+    # never a build receipt, observed filesystem or generated inventory output.
+    origins=[item for item in lock['artifacts'] if item['kind']=='orig'];check(len(origins)==1)
+    if origins[0]['members'] is None or lock['patched_tree_sha256'] is None:hold('TYPED_SOURCE_MODEL_INVENTORY_REQUIRED')
+    model=typed_source_model(origins[0]['members'])
+    return model,post_source_identity(model,lock['patched_tree_sha256'])
+
+
+def source_identity_facts(rows, original, patched):
+    model=typed_source_model(rows);members={r['name']:r for r in model['members']}
+    regular={name for name,row in members.items() if row['type']=='file'}
+    check(set(original)==set(patched)==regular)
+    post=[]
+    for name,row in members.items():
+        item=dict(row)
+        if row['type']=='file':
+            check(len(original[name])==row['bytes'] and digest(original[name])==row['sha256'])
+            item.update(bytes=integer(len(patched[name]),MAX_FILE),sha256=digest(patched[name]))
+        post.append(item)
+    check(sum(row['bytes'] for row in post)<=MAX_TOTAL)
+    after=dict(model,members=post)
+    facts=dict(original_source_model=model,post_source_model=after,
+        original_source_model_sha256=digest(canonical(model)),post_source_model_sha256=digest(canonical(after)),
+        post_source_identity=post_source_identity(model,tree_digest(patched)))
+    check(len(canonical(facts))<=1048576)
+    return facts
+
+
+def validate_source_tree(root, lock):
+    """Complete lstat/readlink/no-follow binding before AND after build."""
+    root=own_root(root);original,expected=expected_source_identity(lock)
+    members={row['name']:row for row in original['members']};placement=dict(members)
+    for name in members:
+        parts=name.split('/')
+        for i in range(1,len(parts)):
+            parent='/'.join(parts[:i]);placement.setdefault(parent,dict(type='directory'))
+            check(len(placement)<=MAX_ENTRIES)
+    modified={name for patch in lock['patches'] for name in patch['modified_files']}
+    check(modified<={name for name,row in members.items() if row['type']=='file'})
+    pending=[root];seen=set();hashes={};post={name:dict(row) for name,row in members.items()};total=0
+    while pending:
+        directory=pending.pop()
+        with os.scandir(directory) as entries:
+            for entry in entries:
+                path=Path(entry.path);name=path.relative_to(root).as_posix();check(name in placement and name not in seen)
+                spec=placement[name];info=entry.stat(follow_symlinks=False);seen.add(name)
+                if spec['type']=='directory':check(stat.S_ISDIR(info.st_mode));pending.append(path)
+                elif spec['type']=='symlink':check(stat.S_ISLNK(info.st_mode) and os.readlink(path)==spec['link'])
+                else:
+                    check(stat.S_ISREG(info.st_mode) and info.st_nlink==1)
+                    value=read_file(path);total+=len(value);check(total<=MAX_TOTAL);hashes[name]=digest(value)
+                    if name not in modified:check(len(value)==spec['bytes'] and hashes[name]==spec['sha256'])
+                    post[name].update(bytes=len(value),sha256=hashes[name])
+                check(len(seen)<=MAX_ENTRIES and len(pending)<=MAX_ENTRIES)
+    check(seen==set(placement))
+    regular=digest(canonical(dict(sorted(hashes.items()))));check(regular==lock['patched_tree_sha256'])
+    after=dict(original,members=[post[name] for name in sorted(post)])
+    return dict(source_tree_sha256=regular,post_source_identity=expected,
+                original_source_model_sha256=digest(canonical(original)),post_source_model_sha256=digest(canonical(after)))
+
+
+def validate_source_result(result, lock):
+    model,expected=expected_source_identity(lock)
+    check(result['source_tree_sha256']==lock['patched_tree_sha256'] and result['post_source_identity']==expected)
+    check(result['original_source_model_sha256']==digest(canonical(model)))
+    hex64(result['post_source_model_sha256'])
+
+
 def elf_report(raw):
     check(type(raw) is bytes and 64<=len(raw)<=MAX_FILE and raw[:7]==b'\x7fELF\x02\x01\x01')
     e=struct.unpack_from('<16sHHIQQQIHHHHHH',raw);check(e[2]==62 and e[1]==3 and e[9]==56 and e[10]<=128)
@@ -583,7 +681,7 @@ def fetch_inputs(root, lock, deadline):
 
 
 def prepare_tree(root, lock, artifacts, deadline):
-    root=own_root(root);files=None;debian=None;sysrows={};sysdata={}
+    root=own_root(root);files=None;debian=None;sysrows={};sysdata={};source_rows=None
     for item in lock['artifacts']:
         check(time.monotonic()<deadline)
         raw=artifacts[item['name']];check(len(raw)==item['bytes'] and digest(raw)==item['sha256'])
@@ -603,7 +701,7 @@ def prepare_tree(root, lock, artifacts, deadline):
         if item['kind']=='orig':
             prefix='bubblewrap-0.9.0/'
             check(all(name.startswith(prefix) for name in data))
-            check(not any(row['type']=='symlink' for row in rows))
+            typed_source_model(rows);source_rows=rows
             files={name[len(prefix):]:value for name,value in data.items()}
         elif item['kind']=='debian':debian=data
         elif item['kind']=='wheel':
@@ -616,11 +714,13 @@ def prepare_tree(root, lock, artifacts, deadline):
                 sysrows[name]=row
                 if row['type']=='file':sysdata[name]=data[name]
     check(files is not None and debian is not None)
-    files,_=source_patch_facts(files,debian,lock['patches']);check(tree_digest(files)==lock['patched_tree_sha256'])
+    original=files;files,_=source_patch_facts(files,debian,lock['patches']);check(tree_digest(files)==lock['patched_tree_sha256'])
+    facts=source_identity_facts(source_rows,original,files);_,expected=expected_source_identity(lock)
+    check(facts['post_source_identity']==expected)
     target=root/'source';target.mkdir()
-    for name,value in files.items():
-        relative(name);path=target/name;path.parent.mkdir(parents=True,exist_ok=True)
-        with path.open('xb') as stream:check(stream.write(value)==len(value))
+    post_rows=facts['post_source_model']['members']
+    extract_checked(post_rows,files,target,post_rows)
+    bound=validate_source_tree(target,lock);check(bound['post_source_model_sha256']==facts['post_source_model_sha256'])
     sysroot=root/'sysroot';sysroot.mkdir()
     rows=list(sysrows.values());extract_checked(rows,sysdata,sysroot,rows,rewrites=lock['symlink_rewrites'])
     return tree_digest(files)
@@ -641,7 +741,7 @@ def build_unapproved(root, lock, auth, deadline=None):
     deadline=time.monotonic()+90 if deadline is None else deadline
     validate_fingerprints(auth['toolchain'],deadline)
     validate_private_tree(root,lock['generated_output_model'],complete=False)
-    check(tree_digest({p.relative_to(root/'source').as_posix():read_file(p) for p in (root/'source').rglob('*') if p.is_file()})==lock['patched_tree_sha256'])
+    source_binding=validate_source_tree(root/'source',lock)
     adapter=auth['build_adapter'];check(set(adapter)=={'path','bytes','sha256','protocol','network','filesystem'})
     check((adapter['protocol'],adapter['network'],adapter['filesystem'])==('f07-private-build-plan-v1','deny','private-build-v1'))
     validate_fingerprints([{k:adapter[k] for k in ('path','bytes','sha256')}])
@@ -653,6 +753,7 @@ def build_unapproved(root, lock, auth, deadline=None):
               environment=dict(PYTHONPATH='tools',PKG_CONFIG_LIBDIR='sysroot/usr/lib/x86_64-linux-gnu/pkgconfig',
                   PKG_CONFIG_SYSROOT_DIR='sysroot',LDFLAGS='-Lsysroot/usr/lib/x86_64-linux-gnu -Lsysroot/lib/x86_64-linux-gnu -Wl,-z,now'),
               generated_output_model=lock['generated_output_model'],runtime_closure=auth['runtime_closure'])
+    plan.update(source_binding)
     path=root/'build-plan.json'
     with path.open('xb') as stream:check(stream.write(canonical(plan))==len(canonical(plan)))
     from ci_evidence import capture_namespace_process
@@ -660,7 +761,7 @@ def build_unapproved(root, lock, auth, deadline=None):
     state=capture_namespace_process([adapter['path'],'--f07-build-plan',str(path)],timeout=min(90,remaining))
     check(state['reason'] is None and state['code']==0)
     validate_private_tree(root,lock['generated_output_model'],complete=False)
-    check(tree_digest({p.relative_to(root/'source').as_posix():read_file(p) for p in (root/'source').rglob('*') if p.is_file()})==lock['patched_tree_sha256'])
+    check(validate_source_tree(root/'source',lock)==source_binding)
     validate_fingerprints(auth['toolchain'],deadline)
     validate_private_tree(root,lock['generated_output_model'],complete=False)
     binarypath=root/'runtime/bin/bwrap'
@@ -673,6 +774,7 @@ def build_unapproved(root, lock, auth, deadline=None):
         builder_sha256=digest(read_file(Path(__file__))),toolchain_sha256=digest(canonical(auth['toolchain'])),
         recipe_sha256=digest(canonical(lock['recipe'])),binary=dict(bytes=len(binary),sha256=digest(binary)),
         elf=report,runtime_closure=runtime_closure(root,auth['runtime_closure']),vendor_tests='NOT_RUN',production='NOT_RUN')
+    result.update(source_binding);validate_source_result(result,lock)
     # Result is never copied into the authorization document or launched here.
     return result
 
@@ -715,6 +817,7 @@ def source_bootstrap(root, expected_authorization):
     if auth['status']!='ROOT_AUTHORIZED_EXACT_BUILD':
         print(raw.decode(),end='');hold('ROOT_EXACT_BUILD_RESULT_REQUIRED')
     binary=read_file(target/'runtime/bin/bwrap');closure=runtime_closure(target,auth['runtime_closure'])
+    validate_source_result(result,lock)
     authorized_runtime(result,auth,binary,closure)
     return result
 
@@ -733,6 +836,7 @@ def runtime_prefix(root, expected_authorization):
     result_raw=read_file(target/'build-result.json',65536)
     result=json.loads(result_raw,object_pairs_hook=unique);check(result_raw==canonical(result))
     binary=read_file(target/'runtime/bin/bwrap');closure=runtime_closure(target,auth['runtime_closure'])
+    validate_source_result(result,lock)
     authorized_runtime(result,auth,binary,closure)
     check(auth['loader']['path'].startswith(('/lib/','/lib64/','/usr/lib/')))
     return [auth['loader']['path'],'--inhibit-cache','--library-path',str(target/'runtime/lib'),str(target/'runtime/bin/bwrap')]
@@ -753,7 +857,7 @@ def deb_data_inventory(raw):
 
 
 def inventory_artifacts(root):
-    root=own_root(root);lock=source_lock();deadline=time.monotonic()+30;result=[];original=None;debian=None;source_identities=[];download_total=0
+    root=own_root(root);lock=source_lock();deadline=time.monotonic()+30;result=[];original=None;debian=None;source_identities=[];download_total=0;source_rows=None
     for item in lock['artifacts']:
         raw=read_file(root/item['name'],MAX_FILE,deadline)
         check(len(raw)==item['bytes'] and digest(raw)==item['sha256'])
@@ -763,7 +867,9 @@ def inventory_artifacts(root):
         elif item['kind']!='provenance':
             members,data=archive_rows(raw,item['kind'],deadline);row['members']=members
             if item['kind'] in ('orig','debian'):
-                validate_rows(members,members);check(all(m['type']!='symlink' for m in members))
+                validate_rows(members,members)
+                if item['kind']=='orig':typed_source_model(members);source_rows=members
+                else:check(all(m['type']!='symlink' for m in members))
                 validate_link_model({m['name']:m for m in members})
                 if item['members'] is not None:validate_rows(members,item['members'])
                 source_identities.append({k:row[k] for k in ('name','bytes','sha256','kind')})
@@ -775,7 +881,8 @@ def inventory_artifacts(root):
                 check(debian is None);debian=data
         result.append(row)
     check(original is not None and debian is not None and time.monotonic()<deadline)
-    _,facts=source_patch_facts(original,debian,lock['patches'])
+    patched,facts=source_patch_facts(original,debian,lock['patches'])
+    facts.update(source_identity_facts(source_rows,original,patched))
     check(time.monotonic()<deadline)
     report=dict(schema='f07-source-artifact-inventory-v1',variant=VARIANT,artifacts=result,
                 source_inputs=source_identities,source_patch_facts=facts,

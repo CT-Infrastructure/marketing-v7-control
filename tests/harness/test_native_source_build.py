@@ -494,4 +494,120 @@ class LocalMtimeMetadataTests(unittest.TestCase):
         with self.assertRaises(ValueError):s.archive_rows(self._archive()+bytes(10240),'tar')
 
 
+class TypedSourceLinkTests(unittest.TestCase):
+    def _fixture(self):
+        helper=SourceInterfaceRegressionTests();lock,blobs=helper._fixture()
+        rows,data=s.archive_rows(blobs['orig.tar'],'orig')
+        original={name.removeprefix('bubblewrap-0.9.0/'):value for name,value in data.items()}
+        original['COPYING']=b'public synthetic license\n'
+        rows.append(dict(name='bubblewrap-0.9.0/COPYING',type='file',bytes=len(original['COPYING']),sha256=s.digest(original['COPYING']),link=''))
+        rows.append(dict(name='bubblewrap-0.9.0/LICENSE',type='symlink',bytes=0,sha256=None,link='COPYING'))
+        out=io.BytesIO()
+        with tarfile.open(fileobj=out,mode='w',format=tarfile.USTAR_FORMAT) as archive:
+            for row in rows:
+                info=tarfile.TarInfo(row['name']);info.type=tarfile.SYMTYPE if row['type']=='symlink' else tarfile.REGTYPE
+                info.linkname=row['link'];info.size=row['bytes']
+                archive.addfile(info,io.BytesIO(original[row['name'].removeprefix('bubblewrap-0.9.0/')]) if info.isfile() else None)
+        blobs['orig.tar']=out.getvalue();lock['artifacts'][0].update(bytes=len(blobs['orig.tar']),sha256=s.digest(blobs['orig.tar']),members=rows)
+        _,debian=s.archive_rows(blobs['debian.tar'],'debian')
+        patched,_=s.source_patch_facts(original,debian,lock['patches'])
+        lock['artifacts'][1]['members']=s.archive_rows(blobs['debian.tar'],'debian')[0]
+        lock.update(patched_tree_sha256=s.tree_digest(patched),symlink_rewrites={})
+        lock['limits']['download_total']=sum(map(len,blobs.values()))
+        return lock,blobs,rows,original,patched
+
+    def test_inventory_retains_license_link_and_binds_both_identities(self):
+        lock,blobs,rows,original,patched=self._fixture()
+        report=SourceInterfaceRegressionTests()._inventory(lock,blobs);facts=report['source_patch_facts']
+        self.assertEqual(facts['post_tree_sha256'],s.tree_digest(patched))
+        self.assertEqual(facts['post_source_identity'],s.expected_source_identity(lock)[1])
+        links=[row for row in facts['post_source_model']['members'] if row['type']=='symlink']
+        self.assertEqual(links,[dict(name='LICENSE',type='symlink',bytes=0,sha256=None,link='COPYING')])
+        self.assertNotIn('LICENSE',patched);self.assertEqual(report['authorization'],'NOT_GRANTED')
+        self.assertEqual(report['build'],'NOT_RUN')
+
+    def test_data_only_preparation_preserves_actual_symlink_not_a_materialized_alias(self):
+        lock,blobs,rows,original,patched=self._fixture()
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp).resolve()
+            self.assertEqual(s.prepare_tree(root,lock,blobs,s.time.monotonic()+15),lock['patched_tree_sha256'])
+            self.assertTrue(stat.S_ISLNK((root/'source/LICENSE').lstat().st_mode))
+            self.assertEqual(s.os.readlink(root/'source/LICENSE'),'COPYING')
+            self.assertEqual((root/'source/COPYING').read_bytes(),original['COPYING'])
+            self.assertEqual(s.validate_source_tree(root/'source',lock)['post_source_identity'],s.expected_source_identity(lock)[1])
+
+    def test_file_only_digest_contract_is_unchanged_and_typed_identity_is_additive(self):
+        lock,blobs,rows,original,patched=self._fixture();facts=s.source_identity_facts(rows,original,patched)
+        self.assertEqual(s.tree_digest(patched),s.digest(s.canonical({name:s.digest(raw) for name,raw in sorted(patched.items())})))
+        self.assertNotEqual(facts['post_source_identity'],lock['patched_tree_sha256'])
+        changed=copy.deepcopy(rows);changed[-1]['link']='bubblewrap.c'
+        other=s.source_identity_facts(changed,original,patched)
+        self.assertNotEqual(facts['post_source_identity'],other['post_source_identity'])
+        self.assertEqual(s.tree_digest(patched),lock['patched_tree_sha256'])
+
+    def test_expected_identity_uses_pinned_members_and_post_digest_not_output_receipt(self):
+        lock,blobs,rows,original,patched=self._fixture();_,expected=s.expected_source_identity(lock)
+        changed=copy.deepcopy(lock);changed['patched_tree_sha256']='a'*64
+        self.assertNotEqual(s.expected_source_identity(changed)[1],expected)
+        changed=copy.deepcopy(lock);changed['artifacts'][0]['members']=None
+        with self.assertRaises(s.QualificationHold):s.expected_source_identity(changed)
+        model=s.typed_source_model(rows);model['source_lock_sha256']='b'*64
+        with self.assertRaises(ValueError):s.post_source_identity(model,lock['patched_tree_sha256'])
+
+    def test_source_terminal_file_link_model_rejects_directory_escape_cycles_and_dangling(self):
+        lock,blobs,rows,original,patched=self._fixture()
+        for target in ('missing','../COPYING','/COPYING','LICENSE','tests'):
+            bad=copy.deepcopy(rows);bad[-1]['link']=target
+            with self.subTest(target=target),self.assertRaises(ValueError):s.typed_source_model(bad)
+        bad=copy.deepcopy(rows);bad[-1]['link']='other';bad.append(dict(name='bubblewrap-0.9.0/other',type='symlink',bytes=0,sha256=None,link='LICENSE'))
+        with self.assertRaises(ValueError):s.typed_source_model(bad)
+
+    def test_source_model_rejects_special_duplicate_wrong_prefix_and_link_ancestor(self):
+        lock,blobs,rows,original,patched=self._fixture()
+        bad=copy.deepcopy(rows);bad[-1]['type']='fifo'
+        with self.assertRaises(ValueError):s.typed_source_model(bad)
+        with self.assertRaises(ValueError):s.typed_source_model(rows+[dict(rows[-1])])
+        bad=copy.deepcopy(rows);bad[-1]['name']='other/LICENSE'
+        with self.assertRaises(ValueError):s.typed_source_model(bad)
+        bad=copy.deepcopy(rows);bad.append(dict(name='bubblewrap-0.9.0/LICENSE/child',type='file',bytes=1,sha256=s.digest(b's'),link=''))
+        with self.assertRaises(ValueError):s.typed_source_model(bad)
+
+    def test_complete_source_binding_rejects_link_type_content_and_unknown_drift(self):
+        lock,blobs,rows,original,patched=self._fixture()
+        for change in ('link','materialized','content','patched-content','unknown','missing'):
+            with self.subTest(change=change),tempfile.TemporaryDirectory() as temp:
+                root=Path(temp).resolve();s.prepare_tree(root,lock,blobs,s.time.monotonic()+15);source=root/'source'
+                if change in ('link','materialized','missing'):
+                    (source/'LICENSE').unlink()
+                    if change=='link':(source/'LICENSE').symlink_to('bubblewrap.c')
+                    if change=='materialized':(source/'LICENSE').write_bytes(original['COPYING'])
+                elif change=='content':(source/'COPYING').write_bytes(b'changed')
+                elif change=='patched-content':(source/'bubblewrap.c').write_bytes(b'changed')
+                else:(source/'unknown').write_bytes(b'x')
+                with self.assertRaises(ValueError):s.validate_source_tree(source,lock)
+
+    def test_source_original_content_and_patches_must_target_regular_members(self):
+        lock,blobs,rows,original,patched=self._fixture();bad=dict(original,COPYING=b'changed')
+        with self.assertRaises(ValueError):s.source_identity_facts(rows,bad,patched)
+        raw=b'--- a/LICENSE\n+++ b/LICENSE\n@@ -1 +1 @@\n-old\n+new\n'
+        spec=dict(bytes=len(raw),sha256=s.digest(raw),modified_files=['LICENSE'])
+        with self.assertRaises(ValueError):s.exact_patch(original,raw,spec)
+
+    def test_build_result_combined_identity_must_match_root_derived_expectation(self):
+        lock,blobs,rows,original,patched=self._fixture();facts=s.source_identity_facts(rows,original,patched)
+        result={key:facts[key] for key in ('post_source_identity','original_source_model_sha256','post_source_model_sha256')}
+        result['source_tree_sha256']=lock['patched_tree_sha256'];s.validate_source_result(result,lock)
+        for field in ('post_source_identity','original_source_model_sha256','source_tree_sha256'):
+            bad=dict(result);bad[field]='a'*64
+            with self.subTest(field=field),self.assertRaises(ValueError):s.validate_source_result(bad,lock)
+
+    def test_typed_model_root_and_unchanged_link_metadata_are_digest_bound(self):
+        lock,blobs,rows,original,patched=self._fixture();root=dict(name='bubblewrap-0.9.0',type='directory',bytes=0,sha256=None,link='')
+        a=s.source_identity_facts(rows,original,patched);b=s.source_identity_facts([root]+rows,original,patched)
+        self.assertNotEqual(a['original_source_model_sha256'],b['original_source_model_sha256'])
+        self.assertNotEqual(a['post_source_identity'],b['post_source_identity'])
+        before={r['name']:r for r in b['original_source_model']['members']};after={r['name']:r for r in b['post_source_model']['members']}
+        self.assertEqual(before['LICENSE'],after['LICENSE']);self.assertEqual(b['post_source_model']['root_member'],root)
+
+
 if __name__=='__main__':unittest.main()
