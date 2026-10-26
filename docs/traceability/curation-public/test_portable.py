@@ -88,5 +88,44 @@ class PortableTests(unittest.TestCase):
     component=next(c for c in doc['components'] if c['source_classification']=='CONDITIONAL_NOT_INSTALLED');component[field]=value
     path.write_text(json.dumps(doc))
     with self.subTest(field=field),self.assertRaises(ValueError):v.validate(source,root)
+ def test_finding_routing_mutations_rejected(self):
+  source=Path(os.environ.get('CURATION_SOURCE_ROOT',str(v.PACKAGE.parents[2])))
+  mutations={
+   'lost_singular':lambda rows:rows[13].update(workflow_ids=[]),
+   'lost_plural':lambda rows:rows[0].update(workflow_ids=[]),
+   'fake_id':lambda rows:rows[13].update(workflow_ids=['FAKE01']),
+   'wrong_canonical':lambda rows:rows[13].update(workflow_ids=['I01']),
+   'duplicate_key':lambda rows:rows[1].update(finding_key=rows[0]['finding_key']),
+   'blank_key':lambda rows:rows[0].update(finding_key=' '),
+   'wrong_key_type':lambda rows:rows[0].update(finding_key=1),
+   'duplicate_ids':lambda rows:rows[13].update(workflow_ids=['I07','I07']),
+   'wrong_type':lambda rows:rows[13].update(workflow_ids='I07'),
+   'raw_duplicate':lambda rows:rows[0]['raw_finding_with_private_locations_redacted'].update(workflow_ids=['C02','C02']),
+   'raw_fake':lambda rows:rows[13]['raw_finding_with_private_locations_redacted'].update(workflow_id='FAKE01'),
+   'raw_wrong_type':lambda rows:rows[13]['raw_finding_with_private_locations_redacted'].update(workflow_id=['I07']),
+   'disagreement':lambda rows:rows[13]['raw_finding_with_private_locations_redacted'].update(workflow_ids=['I01']),
+   'lost_legacy_plural':lambda rows:rows[1].update(workflow_ids=[]),
+  }
+  for name,mutate in mutations.items():
+   with self.subTest(mutation=name),tempfile.TemporaryDirectory(dir=v.PACKAGE) as directory:
+    root=Path(directory);self.package_copy(root)
+    path=root/'review-dispositions.json';doc=json.loads(path.read_text())
+    mutate(doc['audit_findings']);path.write_text(json.dumps(doc))
+    with self.assertRaises(ValueError):v.validate(source,root)
+ def test_explicit_mapping_only_and_agreeing_aliases(self):
+  source=Path(os.environ.get('CURATION_SOURCE_ROOT',str(v.PACKAGE.parents[2])))
+  with tempfile.TemporaryDirectory(dir=v.PACKAGE) as directory:
+   root=Path(directory);self.package_copy(root)
+   path=root/'review-dispositions.json';doc=json.loads(path.read_text())
+   finding=doc['audit_findings'][13]
+   finding['raw_finding_with_private_locations_redacted']['workflow_ids']=['I07']
+   path.write_text(json.dumps(doc));v.validate(source,root)
+   del finding['raw_finding_with_private_locations_redacted']['workflow_id']
+   del finding['raw_finding_with_private_locations_redacted']['workflow_ids']
+   finding['workflow_ids']=[]
+   finding['raw_finding_with_private_locations_redacted']['description']='I07 mentioned in unrelated prose'
+   path.write_text(json.dumps(doc));v.validate(source,root)
+   finding['workflow_ids']=['I07'];path.write_text(json.dumps(doc))
+   with self.assertRaises(ValueError):v.validate(source,root)
 if __name__=='__main__':unittest.main(verbosity=2)
 

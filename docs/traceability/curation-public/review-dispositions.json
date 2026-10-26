@@ -462,7 +462,7 @@
         ],
         "classification": "inherited source allocation ambiguity; acknowledged by parent U05",
         "evidence": [
-          "reference/workflows/C10.json#/steps/1: add contextual internal links \u2014 SerpBear / bounded integration",
+          "reference/workflows/C10.json#/steps/1: add contextual internal links — SerpBear / bounded integration",
           "AGENTS.md: Authority and scope, SerpBear rankings; WordPress web publication",
           "opaque-parent-review-document",
           "opaque-parent-review-document: C10 / Ordered source behavior; U05"
@@ -489,7 +489,7 @@
         ],
         "classification": "inherited source allocation ambiguity; acknowledged by parent U05",
         "evidence": [
-          "reference/workflows/C15.json#/steps/1: build narrative \u2014 Kokoro ONNX / audio review",
+          "reference/workflows/C15.json#/steps/1: build narrative — Kokoro ONNX / audio review",
           "reference/workflows/C15.json#/source_software: Mautic, llama.cpp, OpenProject, WordPress",
           "opaque-parent-review-document",
           "opaque-parent-review-document: C15 / Ordered source behavior; U05"
@@ -516,7 +516,7 @@
         ],
         "classification": "inherited source allocation ambiguity; acknowledged by parent U05",
         "evidence": [
-          "reference/workflows/C16.json#/steps/1 and /steps/2: update facts; create new revision \u2014 SerpBear / bounded integration",
+          "reference/workflows/C16.json#/steps/1 and /steps/2: update facts; create new revision — SerpBear / bounded integration",
           "reference/workflows/C16.json#/source_software: SerpBear, Matomo, llama.cpp, WordPress",
           "AGENTS.md: Authority and scope, rankings versus web publication ownership",
           "opaque-parent-review-document: C16 / Ordered source behavior; U05"
@@ -543,7 +543,7 @@
         ],
         "classification": "inherited source allocation ambiguity; acknowledged by parent U05",
         "evidence": [
-          "reference/workflows/C17.json#/steps/0: Generate channel-specific hook, caption and CTA \u2014 FFmpeg / bounded media job",
+          "reference/workflows/C17.json#/steps/0: Generate channel-specific hook, caption and CTA — FFmpeg / bounded media job",
           "reference/workflows/C17.json#/source_software: llama.cpp, Activepieces, Postiz",
           "opaque-parent-review-document: C17 / Ordered source behavior; U05"
         ],
@@ -667,7 +667,7 @@
         "coverage_status": "FAIL",
         "evidence": [
           {
-            "quote": "render supported formats \u2014 FFmpeg / bounded media job",
+            "quote": "render supported formats — FFmpeg / bounded media job",
             "location": "reference/workflows/C58.json#/steps/3"
           },
           {
@@ -679,7 +679,7 @@
             "location": "reference/workflows/C58.json#/output"
           },
           {
-            "quote": "render supported formats \u2014 FFmpeg / bounded media job",
+            "quote": "render supported formats — FFmpeg / bounded media job",
             "location": "opaque-parent-review-document"
           },
           {
@@ -714,7 +714,7 @@
         "coverage_status": "FAIL",
         "evidence": [
           {
-            "quote": "export \u2014 llama.cpp / bounded integration",
+            "quote": "export — llama.cpp / bounded integration",
             "location": "reference/workflows/C59.json#/steps/2"
           },
           {
@@ -722,7 +722,7 @@
             "location": "reference/workflows/C59.json#/source_software"
           },
           {
-            "quote": "export \u2014 llama.cpp / bounded integration",
+            "quote": "export — llama.cpp / bounded integration",
             "location": "reference/workflows/C62.json#/steps/1"
           },
           {
@@ -730,11 +730,11 @@
             "location": "reference/workflows/C62.json#/source_software"
           },
           {
-            "quote": "export \u2014 llama.cpp / bounded integration",
+            "quote": "export — llama.cpp / bounded integration",
             "location": "opaque-parent-review-document"
           },
           {
-            "quote": "export \u2014 llama.cpp / bounded integration",
+            "quote": "export — llama.cpp / bounded integration",
             "location": "opaque-parent-review-document"
           },
           {
@@ -915,7 +915,9 @@
     {
       "finding_key": "O20-11:SOURCE-GATE-I07",
       "severity": "MEDIUM",
-      "workflow_ids": [],
+      "workflow_ids": [
+        "I07"
+      ],
       "raw_finding_with_private_locations_redacted": {
         "id": "SOURCE-GATE-I07",
         "severity": "MEDIUM",
@@ -945,7 +947,9 @@
     {
       "finding_key": "O20-11:SOURCE-GATE-I11",
       "severity": "MEDIUM",
-      "workflow_ids": [],
+      "workflow_ids": [
+        "I11"
+      ],
       "raw_finding_with_private_locations_redacted": {
         "id": "SOURCE-GATE-I11",
         "severity": "MEDIUM",
@@ -975,7 +979,9 @@
     {
       "finding_key": "O20-11:SOURCE-GATE-I12",
       "severity": "MEDIUM",
-      "workflow_ids": [],
+      "workflow_ids": [
+        "I12"
+      ],
       "raw_finding_with_private_locations_redacted": {
         "id": "SOURCE-GATE-I12",
         "severity": "MEDIUM",
@@ -1005,7 +1011,9 @@
     {
       "finding_key": "O20-11:SOURCE-GATE-I13",
       "severity": "MEDIUM",
-      "workflow_ids": [],
+      "workflow_ids": [
+        "I13"
+      ],
       "raw_finding_with_private_locations_redacted": {
         "id": "SOURCE-GATE-I13",
         "severity": "MEDIUM",
@@ -1035,7 +1043,9 @@
     {
       "finding_key": "O20-11:SOURCE-GATE-I14",
       "severity": "MEDIUM",
-      "workflow_ids": [],
+      "workflow_ids": [
+        "I14"
+      ],
       "raw_finding_with_private_locations_redacted": {
         "id": "SOURCE-GATE-I14",
         "severity": "MEDIUM",
@@ -1157,7 +1167,9 @@
     {
       "finding_key": "O20-14:A01",
       "severity": "HIGH",
-      "workflow_ids": [],
+      "workflow_ids": [
+        "I35"
+      ],
       "raw_finding_with_private_locations_redacted": {
         "id": "A01",
         "workflow_id": "I35",
@@ -1181,7 +1193,9 @@
     {
       "finding_key": "O20-14:A02",
       "severity": "HIGH",
-      "workflow_ids": [],
+      "workflow_ids": [
+        "I36"
+      ],
       "raw_finding_with_private_locations_redacted": {
         "id": "A02",
         "workflow_id": "I36",
@@ -1205,7 +1219,9 @@
     {
       "finding_key": "O20-14:A03",
       "severity": "MEDIUM",
-      "workflow_ids": [],
+      "workflow_ids": [
+        "L04"
+      ],
       "raw_finding_with_private_locations_redacted": {
         "id": "A03",
         "workflow_id": "L04",
@@ -1229,7 +1245,9 @@
     {
       "finding_key": "O20-14:A04",
       "severity": "HIGH",
-      "workflow_ids": [],
+      "workflow_ids": [
+        "L05"
+      ],
       "raw_finding_with_private_locations_redacted": {
         "id": "A04",
         "workflow_id": "L05",
@@ -1253,7 +1271,9 @@
     {
       "finding_key": "O20-14:A05",
       "severity": "HIGH",
-      "workflow_ids": [],
+      "workflow_ids": [
+        "L07"
+      ],
       "raw_finding_with_private_locations_redacted": {
         "id": "A05",
         "workflow_id": "L07",

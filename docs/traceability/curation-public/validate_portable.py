@@ -38,6 +38,21 @@ def get_pointer(value,pointer):
   value=value[int(key)] if isinstance(value,list) else value[key]
  return value
 
+def workflow_mapping(record,canonical):
+ need(type(record) is dict)
+ mappings=[]
+ for key in ('workflow_id','workflow_ids','workflows'):
+  if key not in record:continue
+  value=record[key]
+  if key=='workflow_id':
+   need(type(value) is str);value=[value]
+  need(type(value) is list and all(type(wid) is str and wid in canonical for wid in value))
+  need(len(value)==len(set(value)))
+  mappings.append(value)
+ if not mappings:return []
+ need(all(set(value)==set(mappings[0]) for value in mappings))
+ return mappings[0]
+
 def validate(source_root,package=PACKAGE):
  manifest=load(package,'source-manifest.json');need(type(manifest) is dict)
  sources=manifest['sources'];need(type(sources) is list)
@@ -107,7 +122,15 @@ def validate(source_root,package=PACKAGE):
   need(len(names)==len(set(names))==20 and set(names)==expected_parents)
  ids=[wid for parent in review['parents'] for wid in parent['workflow_ids']]
  need(all(type(wid) is str for wid in ids) and len(ids)==len(set(ids))==190 and set(ids)==canonical_workflows)
+ finding_keys=set()
  for finding in review['audit_findings']:
+  need(type(finding) is dict)
+  key=finding['finding_key'];need(type(key) is str and bool(key.strip()) and key not in finding_keys)
+  finding_keys.add(key)
+  curated=finding['workflow_ids']
+  need(type(curated) is list)
+  expected=workflow_mapping(finding['raw_finding_with_private_locations_redacted'],canonical_workflows)
+  need(set(workflow_mapping({'workflow_ids':curated},canonical_workflows))==set(expected))
   need(finding['disposition']=='PENDING_ROOT_REVIEW_NO_SOURCE_OR_GRAPH_CHANGE')
   need(re.fullmatch('[a-f0-9]{64}',finding['original_audit_document_sha256']) is not None)
  for name in ('component-curation.json','review-dispositions.json','source-manifest.json','shared-contract-evidence.json'):

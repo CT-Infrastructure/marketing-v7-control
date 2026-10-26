@@ -1,7 +1,5 @@
 {
   "schema_version": "1.0",
-  "status": "CONTROLLER_VALIDATED_SOURCE_EVIDENCE",
-  "source_revision": "97df42d5a00c5a7131eff76526777bba4fbdacff",
   "artifacts": [
     {
       "path": "docs/traceability/README.md",
@@ -15,13 +13,13 @@
     },
     {
       "path": "docs/traceability/curation-public/README.md",
-      "sha256": "4272a9275991f19d1c2eb27c15aacebcad8962276fc940ccec5e6506acc6eb95",
-      "bytes": 2842
+      "sha256": "24fa8edf917bdcfa61565c9e17bf5acbd606c7e36ba83e4dfb91604b02c33075",
+      "bytes": 3247
     },
     {
       "path": "docs/traceability/curation-public/review-dispositions.json",
-      "sha256": "ba4bf05bcb2df9a7a37447324cd1a434a25c97ec070824e3dadd4dba14dbfefc",
-      "bytes": 727764
+      "sha256": "8a773c8a2b620a279c67fd3541be2e91410b64d15653242304fb5f56b6e00a0e",
+      "bytes": 727944
     },
     {
       "path": "docs/traceability/curation-public/shared-contract-evidence.json",
@@ -40,41 +38,47 @@
     },
     {
       "path": "docs/traceability/curation-public/test_portable.py",
-      "sha256": "0937e1382083ba62c537129773caa7f1c5c9b63cbec32593a20ea9f5955ae43d",
-      "bytes": 6017
+      "sha256": "0ad7cf8806374b8660fc154b43dbdb1830b33f8f94807683541350edd16e741b",
+      "bytes": 8689
     },
     {
       "path": "docs/traceability/curation-public/validate_portable.py",
-      "sha256": "7654ff6e4982748f0075ad69f9810321f274f2ac32879fc9f552c94b9d05c2d0",
-      "bytes": 7325
+      "sha256": "f56822ba634ccc3a4980c2f2127330cfbabd687ed4c950fbf32d0e8ef3ec6bfa",
+      "bytes": 8280
     }
   ],
-  "root_validation_runs": [
-    {
-      "step": "validate",
-      "exit_code": 0,
-      "output_sha256": "cc8db75fe128c463dd365b7aa683eb4f733d22a225ee3bc9351d0b7f32279ff8"
-    },
-    {
-      "step": "normal",
-      "exit_code": 0,
-      "output_sha256": "6e0ccaaf49df51ef8c658a0cce588145ad365ea3afe1b3a1f63fda8154db5113"
-    },
-    {
-      "step": "optimized",
-      "exit_code": 0,
-      "output_sha256": "fe5ac821a4d3a8ee96a7489fbddb2f9b6586d90ed1c08e07872e9c0402348f57"
-    }
-  ],
-  "unit_tests_per_mode": 11,
-  "skipped_tests": 0,
-  "actual_linux_symlink_case_executed": true,
   "component_dispositions": 147,
   "workflow_ids": 190,
   "findings_pending": 28,
   "qualified": false,
   "runtime_cases_run": 0,
   "original_sources_changed": false,
-  "verified_at": "2026-10-25T23:43:07.749027+00:00",
-  "note": "Artifact hashes bind Git-staged blobs; original source citation hashes normalize CRLF to LF only."
+  "note": "Artifact hashes bind candidate bytes with CRLF normalized to LF (Git text blob semantics); source citation hashes also normalize CRLF to LF only. Historical controller receipts apply only to the prior artifact set, not this candidate.",
+  "historical_controller_validation": {
+    "status": "CONTROLLER_VALIDATED_SOURCE_EVIDENCE",
+    "source_revision": "97df42d5a00c5a7131eff76526777bba4fbdacff",
+    "root_validation_runs": [
+      {
+        "step": "validate",
+        "exit_code": 0,
+        "output_sha256": "cc8db75fe128c463dd365b7aa683eb4f733d22a225ee3bc9351d0b7f32279ff8"
+      },
+      {
+        "step": "normal",
+        "exit_code": 0,
+        "output_sha256": "6e0ccaaf49df51ef8c658a0cce588145ad365ea3afe1b3a1f63fda8154db5113"
+      },
+      {
+        "step": "optimized",
+        "exit_code": 0,
+        "output_sha256": "fe5ac821a4d3a8ee96a7489fbddb2f9b6586d90ed1c08e07872e9c0402348f57"
+      }
+    ],
+    "unit_tests_per_mode": 11,
+    "skipped_tests": 0,
+    "actual_linux_symlink_case_executed": true,
+    "verified_at": "2026-10-25T23:43:07.749027+00:00"
+  },
+  "status": "CANDIDATE_PENDING_CONTROLLER_VALIDATION",
+  "source_revision": "348491b91120d51163c8c0015eabfb232abf647b"
 }
