@@ -1,0 +1,154 @@
+{
+  "schema_version": "1.0",
+  "sequence": 1,
+  "observed_at": "2026-10-25T12:00:30Z",
+  "emergency_stop": false,
+  "dispatch_inputs": {
+    "provider": "codex-cli",
+    "provider_rpm": 100,
+    "provider_tpm": 10000,
+    "provider_concurrency": 4,
+    "total_spend_usd": 0,
+    "per_task_spend_usd": 0,
+    "task_timeout_seconds": 300,
+    "approved_headroom": {
+      "memory_mib": 512,
+      "cpu": 1,
+      "disk_gib": 1,
+      "gpu_vram_mib": 0
+    },
+    "agent_image_digest": "synthetic-image",
+    "credential_broker_ref": "synthetic-broker",
+    "g02_approval_ref": "synthetic-g02",
+    "capacity_approved": true,
+    "egress_qualified": true,
+    "disk_quota_qualified": true,
+    "cancellation_qualified": true,
+    "provider_limits_enforced": true,
+    "cross_repository_source_qualified": true,
+    "production_actions_allowed": false,
+    "billing_mode": "ChatGPT subscription",
+    "api_key_auth_allowed": false,
+    "extra_usage_purchase_allowed": false,
+    "review_provider": "GitHub Copilot",
+    "user_provider_instruction": "Codex implementation on subscription; Copilot reviews on GitHub",
+    "implementation_model": "GPT-6.1-Sol",
+    "implementation_reasoning_effort": "low",
+    "identity_qualified": true,
+    "adapter_qualified": true,
+    "subscription_entitlement_verified": true,
+    "worker_environment_qualified": true
+  },
+  "tasks": [
+    {
+      "result_ref": null,
+      "agent_ref": null,
+      "merge_wait_since": null,
+      "state": "READY",
+      "lease_until": null,
+      "queued_at": "2026-10-25T12:00:00Z",
+      "task_ref": "task:F17-SYNTHETIC-A",
+      "evidence_at": "2026-10-25T12:00:00Z",
+      "input_ref": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "base_ref": "git:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    {
+      "result_ref": null,
+      "agent_ref": "agent:synthetic-worker",
+      "merge_wait_since": null,
+      "state": "RUNNING",
+      "lease_until": "2026-10-25T12:10:00Z",
+      "queued_at": "2026-10-25T11:58:00Z",
+      "task_ref": "task:F17-SYNTHETIC-B",
+      "evidence_at": "2026-10-25T12:00:00Z",
+      "input_ref": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "base_ref": "git:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    {
+      "result_ref": "artifact:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "agent_ref": "agent:synthetic-reviewer",
+      "merge_wait_since": "2026-10-25T11:59:00Z",
+      "state": "REVIEW",
+      "lease_until": null,
+      "queued_at": "2026-10-25T11:55:00Z",
+      "task_ref": "task:F17-SYNTHETIC-C",
+      "evidence_at": "2026-10-25T11:59:00Z",
+      "input_ref": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "base_ref": "git:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    {
+      "result_ref": null,
+      "agent_ref": null,
+      "merge_wait_since": null,
+      "state": "BLOCKED",
+      "lease_until": null,
+      "queued_at": "2026-10-25T11:55:00Z",
+      "task_ref": "task:F17-SYNTHETIC-D",
+      "evidence_at": null,
+      "input_ref": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "base_ref": "git:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    {
+      "evidence_at": null,
+      "lease_until": null,
+      "state": "ACCEPTED",
+      "queued_at": "2026-10-24T11:30:00Z",
+      "base_ref": "git:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "task_ref": "task:F17-SYNTHETIC-E",
+      "agent_ref": "agent:synthetic-completed",
+      "merge_wait_since": null,
+      "input_ref": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+      "result_ref": "artifact:9999999999999999999999999999999999999999999999999999999999999999"
+    }
+  ],
+  "resources": {
+    "memory_mib": {
+      "capacity": 4096,
+      "allocated": 512
+    },
+    "gpu_vram_mib": {
+      "capacity": 0,
+      "allocated": 0
+    },
+    "slots": {
+      "capacity": 4,
+      "allocated": 1
+    },
+    "integration": {
+      "capacity": 1,
+      "allocated": 0
+    },
+    "disk_gib": {
+      "capacity": 20,
+      "allocated": 1
+    },
+    "gpu": {
+      "capacity": 0,
+      "allocated": 0
+    },
+    "cpu": {
+      "capacity": 4,
+      "allocated": 1
+    }
+  },
+  "accounting": {
+    "subscription_task_limit": 10,
+    "subscription_tasks_reserved": 1,
+    "api_reserved_usd": "0.00",
+    "subscription_tasks_used": 2,
+    "api_spent_usd": "0.00",
+    "requested_subscription_tasks": 1
+  },
+  "model_usage": {
+    "review": {
+      "output_tokens": null,
+      "calls": null,
+      "input_tokens": null
+    },
+    "implementation": {
+      "output_tokens": 50,
+      "calls": 2,
+      "input_tokens": 100
+    }
+  }
+}
