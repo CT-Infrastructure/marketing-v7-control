@@ -135,5 +135,42 @@ class RecoveryTests(unittest.TestCase):
         unknown=copy.deepcopy(t['synthetic-readback']);unknown['outcome']='UNKNOWN'
         t['synthetic-unknown']=unknown
         with self.assertRaises(ValueError):evaluate_recovery(r,e,t)
+
+    def test_hold_proof_completion_boundary_and_nonmutation(self):
+        from datetime import datetime, timedelta
+        for seconds in (-1, 0, 1):
+            with self.subTest(offset_seconds=seconds):
+                r,e,t=recovery_fixture()
+                completed=datetime.fromisoformat(r['restored_at'].replace('Z','+00:00'))
+                t[r['hold_ref']]['issued_at']=(completed+timedelta(seconds=seconds)).isoformat().replace('+00:00','Z')
+                before=copy.deepcopy((r,e,t))
+                if seconds < 0:
+                    with self.assertRaisesRegex(ValueError, '^HOLD proof predates completion$'):
+                        evaluate_recovery(r,e,t)
+                else:
+                    self.assertEqual(evaluate_recovery(r,e,t), {
+                        'release_eligible_for_human_review':True, 'state':'HOLD',
+                        'production_authorized':False, 'automatic_retry_allowed':False})
+                self.assertEqual((r,e,t),before)
+
+    def test_hold_specific_invalid_receipts_preserve_validation(self):
+        for case in ('missing','malformed','wrong_kind','wrong_restore','wrong_identity',
+                     'self_actor','self_verifier','future','expired'):
+            with self.subTest(case=case):
+                r,e,t=recovery_fixture()
+                proof=t[r['hold_ref']]
+                if case=='missing': del t[r['hold_ref']]
+                elif case=='malformed': del proof['artifact_sha256']
+                elif case=='wrong_kind': proof['kind']='restore_execution'
+                elif case=='wrong_restore': proof['subject']='synthetic-other-restore'
+                elif case=='wrong_identity': proof['identity']['environment_sha256']='1'*64
+                elif case=='self_actor': proof['actor_ref']=e['author_ref']
+                elif case=='self_verifier': proof['verified_by']=e['author_ref']
+                elif case=='future': proof['issued_at']='2026-10-25T12:00:01Z'
+                elif case=='expired': proof['expires_at']=e['now']
+                before=copy.deepcopy((r,e,t))
+                with self.assertRaises(ValueError): evaluate_recovery(r,e,t)
+                self.assertEqual((r,e,t),before)
+
 if __name__=='__main__':unittest.main(verbosity=2)
 
