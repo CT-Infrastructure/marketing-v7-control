@@ -610,4 +610,99 @@ class TypedSourceLinkTests(unittest.TestCase):
         self.assertEqual(before['LICENSE'],after['LICENSE']);self.assertEqual(b['post_source_model']['root_member'],root)
 
 
+class DebianMetadataLinkTests(unittest.TestCase):
+    def _fixture(self):
+        lock,blobs,_,_,_=TypedSourceLinkTests()._fixture();rows,data=s.archive_rows(blobs['debian.tar'],'debian')
+        target='debian/tests/upstream';payload=b'synthetic metadata only'.ljust(42,b'.');data[target]=payload
+        rows.append(dict(name=target,type='file',bytes=42,sha256=s.digest(payload),link=''))
+        rows.append(dict(name='debian/tests/upstream-usrmerge',type='symlink',bytes=0,sha256=None,link='upstream'))
+        out=io.BytesIO()
+        with tarfile.open(fileobj=out,mode='w',format=tarfile.USTAR_FORMAT) as archive:
+            for row in rows:
+                info=tarfile.TarInfo(row['name']);info.type=tarfile.SYMTYPE if row['type']=='symlink' else tarfile.REGTYPE
+                info.size=row['bytes'];info.linkname=row['link'];archive.addfile(info,io.BytesIO(data[row['name']]) if info.isfile() else None)
+        blobs['debian.tar']=out.getvalue();item=next(a for a in lock['artifacts'] if a['kind']=='debian')
+        item.update(bytes=len(blobs['debian.tar']),sha256=s.digest(blobs['debian.tar']),members=rows)
+        lock['limits']['download_total']=sum(map(len,blobs.values()))
+        return lock,blobs,rows,data
+
+    def test_inventory_preserves_actual_debian_alias_shape_and_closed_input_digest(self):
+        lock,blobs,rows,data=self._fixture();report=SourceInterfaceRegressionTests()._inventory(lock,blobs)
+        item=next(a for a in report['artifacts'] if a['kind']=='debian');model=item['input_model']
+        self.assertEqual(model['schema'],'f07-debian-input-model-v1');self.assertEqual(model['source_lock_sha256'],s.SOURCE_LOCK_SHA256)
+        self.assertEqual([r for r in model['members'] if r['type']=='symlink'],[dict(name='debian/tests/upstream-usrmerge',type='symlink',bytes=0,sha256=None,link='upstream')])
+        self.assertEqual(item['input_model_sha256'],s.expected_debian_input_identity(lock))
+        self.assertEqual(item['input_model_sha256'],s.digest(s.canonical(model)))
+        self.assertEqual(report['authorization'],'NOT_GRANTED');self.assertEqual(report['build'],'NOT_RUN')
+
+    def test_data_only_prepare_validates_metadata_without_staging_packaging_scripts_or_alias(self):
+        lock,blobs,rows,data=self._fixture()
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp).resolve();self.assertEqual(s.prepare_tree(root,lock,blobs,s.time.monotonic()+15),lock['patched_tree_sha256'])
+            self.assertFalse((root/'debian').exists());self.assertFalse((root/'source/debian').exists())
+            self.assertTrue((root/'source/LICENSE').is_symlink())
+        model=s.debian_input_model(rows,lock['patches'],data)
+        self.assertEqual(len(model['members']),len(rows))
+
+    def test_debian_alias_dangling_escape_cycle_absolute_and_directory_target_reject(self):
+        lock,blobs,rows,data=self._fixture()
+        for target in ('missing','../../outside','/debian/tests/upstream','upstream-usrmerge','../patches'):
+            bad=copy.deepcopy(rows);bad[-1]['link']=target
+            with self.subTest(target=target),self.assertRaises(ValueError):s.debian_input_model(bad,lock['patches'],data)
+        bad=copy.deepcopy(rows);bad[-1]['link']='other';bad.append(dict(name='debian/tests/other',type='symlink',bytes=0,sha256=None,link='upstream-usrmerge'))
+        with self.assertRaises(ValueError):s.debian_input_model(bad,lock['patches'],data)
+
+    def test_debian_alias_member_ancestor_special_duplicate_and_wrong_prefix_reject(self):
+        lock,blobs,rows,data=self._fixture()
+        bad=copy.deepcopy(rows);bad.append(dict(name='debian/tests/upstream-usrmerge/child',type='file',bytes=1,sha256=s.digest(b's'),link=''))
+        with self.assertRaises(ValueError):s.debian_input_model(bad,lock['patches'])
+        for kind in ('fifo','hardlink','character'):
+            bad=copy.deepcopy(rows);bad[-1]['type']=kind
+            with self.subTest(kind=kind),self.assertRaises(ValueError):s.debian_input_model(bad,lock['patches'])
+        with self.assertRaises(ValueError):s.debian_input_model(rows+[dict(rows[-1])],lock['patches'])
+        bad=copy.deepcopy(rows);bad[-1]['name']='elsewhere/upstream-usrmerge'
+        with self.assertRaises(ValueError):s.debian_input_model(bad,lock['patches'])
+
+    def test_selected_series_and_both_patches_must_be_regular_even_for_safe_identical_alias(self):
+        lock,blobs,rows,data=self._fixture()
+        for name in ['debian/patches/series']+[p['member'] for p in lock['patches']]:
+            with self.subTest(name=name):
+                bad=copy.deepcopy(rows);target=name+'.copy';original=next(r for r in bad if r['name']==name)
+                bad.append(dict(original,name=target));original.update(type='symlink',bytes=0,sha256=None,link=target.rsplit('/',1)[1])
+                copied=dict(data);copied[target]=copied.pop(name)
+                # The alias resolves to a regular byte-identical target, yet the
+                # required member itself must never be supplied by dereference.
+                self.assertEqual(s.validate_link_model({r['name']:r for r in bad})[name],target)
+                with self.assertRaises(ValueError):s.debian_input_model(bad,lock['patches'],copied)
+
+    def test_changed_safe_target_is_bound_by_pinned_member_model_and_input_identity(self):
+        lock,blobs,rows,data=self._fixture();expected=s.expected_debian_input_identity(lock)
+        bad=copy.deepcopy(rows);bad[-1]['link']='../patches/first.patch'
+        changed=s.digest(s.canonical(s.debian_input_model(bad,lock['patches'],data)))
+        self.assertNotEqual(changed,expected)
+        with self.assertRaises(ValueError):s.validate_rows(bad,rows)
+        with self.assertRaises(ValueError):s.validate_input_model_result(dict(debian_input_model_sha256=changed),lock)
+
+    def test_regular_input_hash_series_order_patch_bytes_and_model_nulls_reject(self):
+        lock,blobs,rows,data=self._fixture()
+        bad=dict(data);bad['debian/tests/upstream']=b'x'*42
+        with self.assertRaises(ValueError):s.debian_input_model(rows,lock['patches'],bad)
+        bad=copy.deepcopy(rows);next(r for r in bad if r['name']=='debian/patches/series')['sha256']='a'*64
+        with self.assertRaises(ValueError):s.debian_input_model(bad,lock['patches'])
+        with self.assertRaises(ValueError):s.debian_input_model(rows,list(reversed(lock['patches'])))
+        bad=copy.deepcopy(rows);next(r for r in bad if r['name']==lock['patches'][0]['member'])['bytes']+=1
+        with self.assertRaises(ValueError):s.debian_input_model(bad,lock['patches'])
+        missing=copy.deepcopy(lock);next(a for a in missing['artifacts'] if a['kind']=='debian')['members']=None
+        with self.assertRaises(s.QualificationHold):s.expected_debian_input_identity(missing)
+
+    def test_input_identity_result_binding_does_not_reinterpret_source_post_identity(self):
+        lock,blobs,rows,data=self._fixture();source_before=s.expected_source_identity(lock)[1]
+        expected=s.expected_debian_input_identity(lock);s.validate_input_model_result(dict(debian_input_model_sha256=expected),lock)
+        changed=copy.deepcopy(lock);debian=next(a for a in changed['artifacts'] if a['kind']=='debian')
+        next(r for r in debian['members'] if r['name']=='debian/tests/upstream')['sha256']='b'*64
+        self.assertNotEqual(s.expected_debian_input_identity(changed),expected)
+        self.assertEqual(s.expected_source_identity(changed)[1],source_before)
+        with self.assertRaises(ValueError):s.validate_input_model_result(dict(debian_input_model_sha256='c'*64),lock)
+
+
 if __name__=='__main__':unittest.main()

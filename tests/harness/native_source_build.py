@@ -143,6 +143,7 @@ def build_gate(lock, auth):
         hold('PATCHED_TREE_OUTPUT_MODEL_REQUIRED')
     hex64(lock['patched_tree_sha256'])
     expected_source_identity(lock)
+    expected_debian_input_identity(lock)
 
 
 def validate_platform(os_id, version, machine, system):
@@ -457,6 +458,43 @@ def tree_digest(files):
     return digest(canonical({relative(name):digest(value) for name,value in sorted(files.items())}))
 
 
+def debian_input_model(rows, specs, data=None):
+    """Authenticated metadata only; packaging aliases are never staged/run."""
+    validate_rows(rows,rows);members={row['name']:dict(row) for row in rows}
+    check(len(members)==len(rows) and bool(members))
+    check(all(name=='debian' or name.startswith('debian/') for name in members))
+    resolved=validate_link_model(members)
+    for destination in resolved.values():check(destination in members and members[destination]['type']=='file')
+    check(len(specs)==2)
+    series='debian/patches/series';entries=[spec['series_entry'] for spec in specs]
+    check(len(set(entries))==2)
+    expected=('\n'.join(entries)+'\n').encode('utf-8')
+    required={series:dict(bytes=len(expected),sha256=digest(expected))}
+    for spec in specs:
+        check(spec['member']=='debian/patches/'+relative(spec['series_entry']))
+        required[relative(spec['member'])]=dict(bytes=integer(spec['bytes'],MAX_FILE),sha256=hex64(spec['sha256']))
+    check(len(required)==3)
+    for name,identity in required.items():
+        check(name in members and members[name]['type']=='file')
+        check(members[name]['bytes']==identity['bytes'] and members[name]['sha256']==identity['sha256'])
+    if data is not None:
+        check(type(data) is dict and set(data)=={name for name,row in members.items() if row['type']=='file'})
+        for name,raw in data.items():
+            check(type(raw) is bytes and len(raw)==members[name]['bytes'] and digest(raw)==members[name]['sha256'])
+    return dict(schema='f07-debian-input-model-v1',source_lock_sha256=SOURCE_LOCK_SHA256,
+                members=[members[name] for name in sorted(members)])
+
+
+def expected_debian_input_identity(lock):
+    items=[item for item in lock['artifacts'] if item['kind']=='debian'];check(len(items)==1)
+    if items[0]['members'] is None:hold('DEBIAN_INPUT_MODEL_INVENTORY_REQUIRED')
+    return digest(canonical(debian_input_model(items[0]['members'],lock['patches'])))
+
+
+def validate_input_model_result(result, lock):
+    check(result['debian_input_model_sha256']==expected_debian_input_identity(lock))
+
+
 def typed_source_model(rows):
     """All authenticated orig members, stripped once; no file alias expansion."""
     validate_rows(rows,rows);prefix='bubblewrap-0.9.0/';members={};root_member=None
@@ -703,7 +741,8 @@ def prepare_tree(root, lock, artifacts, deadline):
             check(all(name.startswith(prefix) for name in data))
             typed_source_model(rows);source_rows=rows
             files={name[len(prefix):]:value for name,value in data.items()}
-        elif item['kind']=='debian':debian=data
+        elif item['kind']=='debian':
+            debian_input_model(rows,lock['patches'],data);debian=data
         elif item['kind']=='wheel':
             target=root/'tools';target.mkdir();extract_checked(rows,data,target,item['members'])
         else:
@@ -742,6 +781,7 @@ def build_unapproved(root, lock, auth, deadline=None):
     validate_fingerprints(auth['toolchain'],deadline)
     validate_private_tree(root,lock['generated_output_model'],complete=False)
     source_binding=validate_source_tree(root/'source',lock)
+    debian_identity=expected_debian_input_identity(lock)
     adapter=auth['build_adapter'];check(set(adapter)=={'path','bytes','sha256','protocol','network','filesystem'})
     check((adapter['protocol'],adapter['network'],adapter['filesystem'])==('f07-private-build-plan-v1','deny','private-build-v1'))
     validate_fingerprints([{k:adapter[k] for k in ('path','bytes','sha256')}])
@@ -753,7 +793,7 @@ def build_unapproved(root, lock, auth, deadline=None):
               environment=dict(PYTHONPATH='tools',PKG_CONFIG_LIBDIR='sysroot/usr/lib/x86_64-linux-gnu/pkgconfig',
                   PKG_CONFIG_SYSROOT_DIR='sysroot',LDFLAGS='-Lsysroot/usr/lib/x86_64-linux-gnu -Lsysroot/lib/x86_64-linux-gnu -Wl,-z,now'),
               generated_output_model=lock['generated_output_model'],runtime_closure=auth['runtime_closure'])
-    plan.update(source_binding)
+    plan.update(source_binding);plan['debian_input_model_sha256']=debian_identity
     path=root/'build-plan.json'
     with path.open('xb') as stream:check(stream.write(canonical(plan))==len(canonical(plan)))
     from ci_evidence import capture_namespace_process
@@ -774,7 +814,8 @@ def build_unapproved(root, lock, auth, deadline=None):
         builder_sha256=digest(read_file(Path(__file__))),toolchain_sha256=digest(canonical(auth['toolchain'])),
         recipe_sha256=digest(canonical(lock['recipe'])),binary=dict(bytes=len(binary),sha256=digest(binary)),
         elf=report,runtime_closure=runtime_closure(root,auth['runtime_closure']),vendor_tests='NOT_RUN',production='NOT_RUN')
-    result.update(source_binding);validate_source_result(result,lock)
+    result.update(source_binding);result['debian_input_model_sha256']=debian_identity
+    validate_source_result(result,lock);validate_input_model_result(result,lock)
     # Result is never copied into the authorization document or launched here.
     return result
 
@@ -817,7 +858,7 @@ def source_bootstrap(root, expected_authorization):
     if auth['status']!='ROOT_AUTHORIZED_EXACT_BUILD':
         print(raw.decode(),end='');hold('ROOT_EXACT_BUILD_RESULT_REQUIRED')
     binary=read_file(target/'runtime/bin/bwrap');closure=runtime_closure(target,auth['runtime_closure'])
-    validate_source_result(result,lock)
+    validate_source_result(result,lock);validate_input_model_result(result,lock)
     authorized_runtime(result,auth,binary,closure)
     return result
 
@@ -836,7 +877,7 @@ def runtime_prefix(root, expected_authorization):
     result_raw=read_file(target/'build-result.json',65536)
     result=json.loads(result_raw,object_pairs_hook=unique);check(result_raw==canonical(result))
     binary=read_file(target/'runtime/bin/bwrap');closure=runtime_closure(target,auth['runtime_closure'])
-    validate_source_result(result,lock)
+    validate_source_result(result,lock);validate_input_model_result(result,lock)
     authorized_runtime(result,auth,binary,closure)
     check(auth['loader']['path'].startswith(('/lib/','/lib64/','/usr/lib/')))
     return [auth['loader']['path'],'--inhibit-cache','--library-path',str(target/'runtime/lib'),str(target/'runtime/bin/bwrap')]
@@ -869,7 +910,9 @@ def inventory_artifacts(root):
             if item['kind'] in ('orig','debian'):
                 validate_rows(members,members)
                 if item['kind']=='orig':typed_source_model(members);source_rows=members
-                else:check(all(m['type']!='symlink' for m in members))
+                else:
+                    row['input_model']=debian_input_model(members,lock['patches'],data)
+                    row['input_model_sha256']=digest(canonical(row['input_model']))
                 validate_link_model({m['name']:m for m in members})
                 if item['members'] is not None:validate_rows(members,item['members'])
                 source_identities.append({k:row[k] for k in ('name','bytes','sha256','kind')})
