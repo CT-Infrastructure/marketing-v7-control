@@ -11,9 +11,115 @@ import unittest
 
 from test_local import LocalController, task, policy, result, proof, BASE, HEAD, MANIFEST
 
-SOURCE_REVISION = '5761f6e4b1d1986c3f8cd55e3279921336f3cc92'
 HERE = Path(__file__).resolve()
 ROOT = HERE.parents[2]
+SOURCE_PATHS = ('tests/controller/test_process_restart.py',
+                'tests/controller/test_process_revision.py', 'tests/controller/test_local.py',
+                'orchestration/controller/local.py', 'tools/scheduler.py',
+                'docs/orchestration/capacity/check_dispatch_inputs.py')
+
+
+def revision(value):
+    if type(value) is not str or re.fullmatch(r'[0-9a-f]{40}', value) is None or value == '0' * 40:
+        raise ValueError('Expected a nonzero lowercase 40-hex source revision')
+    return value
+
+
+def source_hashes(root):
+    hashes = {}
+    for name in SOURCE_PATHS:
+        path = root / name
+        if any(p.is_symlink() or getattr(p, 'is_junction', lambda: False)()
+               for p in (path, *path.parents)):
+            raise ValueError('Linked source path forbidden')
+        if not path.is_file() or not path.resolve(strict=True).is_relative_to(root):
+            raise ValueError('Source path is not a contained regular file')
+        hashes[name] = hashlib.sha256(path.read_bytes()).hexdigest()
+    return hashes
+
+
+def unique_object(pairs):
+    obj = {}
+    for key, value in pairs:
+        if key in obj:
+            raise ValueError('Duplicate provenance field')
+        obj[key] = value
+    return obj
+
+
+def source_binding(root=ROOT, *, expected=None, manifest=None):
+    """Check executor inputs, never authenticate them.
+
+    The trusted executor supplies F11_PROCESS_EXPECTED_REVISION and, for exports,
+    F11_PROCESS_SOURCE_MANIFEST (an absolute JSON file with source_revision and
+    source_hashes for exactly SOURCE_PATHS). It must independently obtain these
+    from its frozen revision and mount source read-only. An export declaration
+    binds bytes but is NOT independent Git proof or a durability authorization.
+
+    A candidate file digest is not a commit revision. In a checkout, the new
+    regression file must already exist with these bytes at HEAD: an untracked
+    or modified candidate fails the blob comparison. For an export, the executor
+    must obtain revision AND hashes from the same frozen committed tree, not
+    attach an ancestor revision to unpublished candidate bytes. This function
+    cannot independently prove that external declaration; the evidence mode
+    says so. After committing a candidate, rerun using its actual new HEAD and
+    regenerated manifest before treating evidence as committed-revision proof.
+    """
+    root = Path(root)
+    if not root.is_absolute() or root != root.resolve(strict=True):
+        raise ValueError('Source root must be absolute and resolved')
+    if expected is not None:
+        revision(expected)
+    hashes = source_hashes(root)
+    declared = None
+    if manifest is not None:
+        if type(manifest) is not str or not manifest or not Path(manifest).is_absolute():
+            raise ValueError('Manifest must be an explicit absolute executor path')
+        declared = json.loads(Path(manifest).read_text(encoding='utf-8'), object_pairs_hook=unique_object)
+        if type(declared) is not dict or set(declared) != {'source_revision', 'source_hashes'}:
+            raise ValueError('Malformed source manifest')
+        revision(declared['source_revision'])
+        covered = declared['source_hashes']
+        if (type(covered) is not dict or set(covered) != set(SOURCE_PATHS)
+                or any(type(v) is not str or re.fullmatch(r'[0-9a-f]{64}', v) is None
+                       for v in covered.values()) or covered != hashes):
+            raise ValueError('Source manifest coverage or bytes mismatch')
+        if expected is None or declared['source_revision'] != expected:
+            raise ValueError('Manifest needs matching executor expected revision')
+    if (root / '.git').exists():
+        # Ignore ambient cwd and Git routing/configuration environment. Linked
+        # worktree .git files remain supported by git -C at this exact root.
+        env = {k: v for k, v in os.environ.items() if not k.upper().startswith('GIT_')}
+        env.update(GIT_CONFIG_NOSYSTEM='1', GIT_CONFIG_GLOBAL=os.devnull,
+                   GIT_OPTIONAL_LOCKS='0', GIT_NO_REPLACE_OBJECTS='1')
+        def git(*args):
+            return subprocess.run(['git', '--no-replace-objects', '-C', str(root), *args],
+                                  env=env, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+                                  stderr=subprocess.PIPE, check=True, timeout=15).stdout
+        if Path(os.fsdecode(git('rev-parse', '--show-toplevel')).strip()).resolve() != root:
+            raise ValueError('Git checkout root mismatch')
+        actual = revision(git('rev-parse', '--verify', 'HEAD^{commit}').decode('ascii').strip())
+        if expected is not None and expected != actual:
+            raise ValueError('Executor revision differs from checkout HEAD')
+        for name, digest in hashes.items():
+            if hashlib.sha256(git('show', actual + ':' + name)).hexdigest() != digest:
+                raise ValueError('Relevant checkout source differs from HEAD')
+        if git('rev-parse', '--verify', 'HEAD^{commit}').decode('ascii').strip() != actual:
+            raise ValueError('Checkout advanced during provenance check')
+        mode = 'checkout-git-head-and-blobs'
+    else:
+        if expected is None or declared is None:
+            raise ValueError('Export requires executor revision and exact source manifest')
+        actual = expected
+        mode = 'executor-declared-export-with-verified-bytes'
+    if source_hashes(root) != hashes:
+        raise ValueError('Source changed during provenance check')
+    return dict(source_revision=actual, source_hashes=hashes, source_provenance=mode)
+
+
+def executor_binding():
+    return source_binding(expected=os.environ.get('F11_PROCESS_EXPECTED_REVISION'),
+                          manifest=os.environ.get('F11_PROCESS_SOURCE_MANIFEST'))
 
 
 def require(condition, message):
@@ -142,13 +248,12 @@ class ProcessRestartTests(unittest.TestCase):
 
     def test_restart_reservations_in_distinct_processes(self):
         scratch, durability, filesystem = storage_root()
+        binding = executor_binding()
         # Retain evidence and synthetic DBs for independent review; no cleanup of supplied scratch.
         directory = Path(tempfile.mkdtemp(prefix='f11-process-', dir=scratch))
-        evidence = dict(source_revision=SOURCE_REVISION, durability=durability, filesystem=filesystem,
+        evidence = dict(**binding, durability=durability, filesystem=filesystem,
                         power_loss='NOT_RUN', multi_host='NOT_RUN', cases=[])
-        evidence['source_hashes'] = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
-            for p in (HERE, HERE.with_name('test_local.py'), ROOT/'orchestration/controller/local.py',
-                      ROOT/'tools/scheduler.py')}
+        evidence['source_binding_complete'] = False
         try:
             for exit_mode in ('clean', 'abrupt'):
                 for mode in ('path', 'lock', 'capacity', 'cost'):
@@ -157,6 +262,7 @@ class ProcessRestartTests(unittest.TestCase):
                         case_dir.mkdir()
                         case = dict(exit_mode=exit_mode, reservation=mode)
                         evidence['cases'].append(case)
+                        self.assertEqual(executor_binding(), binding)
                         case['writer'] = self.run_child('writer', case_dir, mode, exit_mode)
                         self.assertEqual(case['writer']['exit_code'], 23 if exit_mode == 'abrupt' else 0)
                         case['verifier'] = self.run_child('verifier', case_dir, mode, exit_mode)
@@ -166,12 +272,15 @@ class ProcessRestartTests(unittest.TestCase):
                         self.assertEqual(json.loads((case_dir/'before.json').read_text())['pid'], case['writer']['pid'])
                         self.assertNotEqual(case['writer']['pid'], case['verifier']['pid'])
                         case['comparison'] = checked
+                        self.assertEqual(executor_binding(), binding)
+            evidence['source_binding_complete'] = True
         finally:
             write_json(directory/'process-evidence.json', evidence)
 
 
 if __name__ == '__main__':
     if len(sys.argv) == 5 and sys.argv[1] in ('writer', 'verifier'):
+        executor_binding()
         child(sys.argv[1], Path(sys.argv[2]), sys.argv[3], sys.argv[4])
     else:
         unittest.main()
