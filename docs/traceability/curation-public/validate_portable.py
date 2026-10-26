@@ -38,6 +38,28 @@ def get_pointer(value,pointer):
   value=value[int(key)] if isinstance(value,list) else value[key]
  return value
 
+ARTIFACT_PATHS=frozenset(('docs/traceability/README.md',)+tuple(
+ 'docs/traceability/curation-public/'+name for name in (
+ 'component-curation.json','README.md','review-dispositions.json',
+ 'shared-contract-evidence.json','source-manifest.json','summary.json',
+ 'test_portable.py','validate_portable.py')))
+
+def verify_artifacts(root,package=PACKAGE):
+ """Separate artifact gate; semantic fixtures do not bypass or mask this gate."""
+ entries=load(package,'portable-manifest.json')['artifacts']
+ need(type(entries) is list and len(entries)==len(ARTIFACT_PATHS))
+ seen=set()
+ for entry in entries:
+  need(type(entry) is dict and set(entry)=={'path','sha256','bytes'})
+  path=entry['path'];need(type(path) is str and path in ARTIFACT_PATHS and path not in seen)
+  seen.add(path)
+  need(type(entry['bytes']) is int and entry['bytes']>=0)
+  need(type(entry['sha256']) is str and re.fullmatch('[a-f0-9]{64}',entry['sha256']))
+  data=raw(root,path).replace(b'\r\n',b'\n')
+  need(len(data)==entry['bytes'] and hashlib.sha256(data).hexdigest()==entry['sha256'])
+ need(seen==ARTIFACT_PATHS)
+ return {'status':'ARTIFACT_INTEGRITY_VALID','artifacts':len(seen)}
+
 def workflow_mapping(record,canonical):
  need(type(record) is dict)
  mappings=[]
@@ -52,6 +74,22 @@ def workflow_mapping(record,canonical):
  if not mappings:return []
  need(all(set(value)==set(mappings[0]) for value in mappings))
  return mappings[0]
+
+def guard_public_inventory(value):
+ """Recursively reject private locations, including embedded historical proposals."""
+ if type(value) is dict:
+  for key,item in value.items():
+   guard_public_inventory(key);guard_public_inventory(item)
+  if any(key in value for key in ('source_contract_path','original_parent_path','audit_path')):
+   for key in ('source_contract_path','original_parent_path','audit_path'):
+    if key not in value:continue
+    item=value[key]
+    need(item is None or item=='' or (type(item) is str and re.fullmatch(
+     r'urn:document:O20-[0-9]{2}:(?:source-contract|parent|audit):sha256:[a-f0-9]{64}#/technical_amendments/0/prior_proposal/parent_plans/[0-9]+/(?:source_contract_path|original_parent_path|audit_path)',item) is not None))
+ elif type(value) is list:
+  for item in value:guard_public_inventory(item)
+ elif type(value) is str:
+  need(not re.search(r'[A-Za-z]:[\\/]|\.control|/(?:Users|home)/|(?:workstream_workflows|repository-orchestrators|repo_control)(?:[/\\]|$)',value,re.I))
 
 def validate(source_root,package=PACKAGE):
  manifest=load(package,'source-manifest.json');need(type(manifest) is dict)
@@ -133,6 +171,30 @@ def validate(source_root,package=PACKAGE):
   need(all(type(value) is str for value in values))
   identity=(native_path,f'/adapters/{index}',*values)
   need(identity not in expected_roles[cid]);expected_roles[cid].add(identity)
+ # Bind complete placement and parent sets to their containing source records.
+ placement_path='policies/container/native-exceptions.json'
+ expected_placements={cid:set() for cid in component_names}
+ placements=source_value(placement_path)['placements'];need(type(placements) is list)
+ for index,placement in enumerate(placements):
+  need(type(placement) is dict and type(placement['components']) is list)
+  need(all(type(name) is str for name in placement['components']))
+  need(len(placement['components'])==len(set(placement['components'])))
+  need(type(placement['placement']) is str and type(placement['owner']) is str)
+  need(type(placement['deployment_authorized']) is bool)
+  for name in placement['components']:
+   if name in by_name:
+    expected_placements[by_name[name]].add((placement_path,f'/placements/{index}',
+     placement['placement'],placement['owner'],placement['deployment_authorized']))
+ registry_path='reference/components/component_registry.json'
+ expected_native_parents={cid:set() for cid in component_names}
+ for index,child in enumerate(registry):
+  # Missing or explicit null means no association; every non-null value is strict.
+  parent_name=child.get('native_parent')
+  if parent_name is None:continue
+  need(type(parent_name) is str and parent_name in by_name)
+  workflows=sorted(expected_consumers[child['component_id']])
+  expected_native_parents[by_name[parent_name]].add((registry_path,
+   f'/components/{index}/native_parent',child['component_id'],tuple(sorted(workflows))))
  for row in rows:
   source=citation(row['registry_evidence']);need(source['component_id']==row['component_id'] and source['name']==row['canonical_name'])
   need(row['qualified'] is False and row['production_authorized'] is False and row['runtime_status']=='NOT_RUN')
@@ -145,6 +207,8 @@ def validate(source_root,package=PACKAGE):
   for relation in relations:
    actual_parts=[]
    need(type(relation) is dict and relation['workflow_id'] in canonical_workflows)
+   need(relation['basis']=='EXACT_CANONICAL_SOFTWARE_TOKEN' and relation['runtime_state']=='NOT_RUN')
+   need(relation['consumer_confirmation']=='SOURCE_NAMED_ONLY_NOT_RUNTIME_CONFIRMED')
    need(type(relation.get('evidence')) is list and bool(relation['evidence']))
    for part in relation['evidence']:
     need(type(part) is dict)
@@ -159,6 +223,7 @@ def validate(source_root,package=PACKAGE):
   actual_edges=[]
   for edge in edges:
    need(type(edge) is dict and citation(edge['evidence'])==row['component_id'])
+   need(edge['basis']=='EXACT_EXISTING_PACKAGE_PREREQUISITE' and edge['not_automatically_a_direct_consumer'] is True)
    evidence=edge['evidence'];pointer=evidence['pointer']
    need(evidence['path']=='backlog/issues.json' and type(pointer) is str)
    match=re.fullmatch(r'/issues/(0|[1-9][0-9]*)/depends_on/(0|[1-9][0-9]*)',pointer);need(match is not None)
@@ -171,7 +236,7 @@ def validate(source_root,package=PACKAGE):
   roles=row['authoritative_native_roles'];need(type(roles) is list)
   actual_roles=[]
   for role in roles:
-   need(type(role) is dict)
+   need(type(role) is dict and role['runtime_state']=='NOT_RUN')
    native=citation(role['evidence']);need(native['component']==row['component_id'])
    need(role['evidence']['path']=='contracts/adapters/catalog.v1.json')
    need(role['native_owner']==native['native_owner'])
@@ -182,8 +247,34 @@ def validate(source_root,package=PACKAGE):
    actual_roles.append((role['evidence']['path'],role['evidence']['pointer'],*values))
   need(len(actual_roles)==len(set(actual_roles)))
   need(set(actual_roles)==expected_roles[row['component_id']])
-  for placement in row['native_placement_evidence']:need(row['canonical_name'] in citation(placement['evidence'])['components'])
-  for parent in row['explicit_native_parent_support']:need(citation(parent['evidence'])==row['canonical_name'])
+  placements=row['native_placement_evidence'];need(type(placements) is list)
+  actual_placements=[]
+  for placement in placements:
+   need(type(placement) is dict)
+   evidence=placement['evidence'];native=citation(evidence)
+   need(type(native) is dict and row['canonical_name'] in native['components'])
+   need(type(placement['placement']) is str and type(placement['owner_role']) is str)
+   need(type(placement['deployment_authorized']) is bool)
+   need(placement['placement']==native['placement'] and placement['owner_role']==native['owner'])
+   need(placement['deployment_authorized'] is native['deployment_authorized'])
+   actual_placements.append((evidence['path'],evidence['pointer'],placement['placement'],
+    placement['owner_role'],placement['deployment_authorized']))
+  need(len(actual_placements)==len(set(actual_placements)))
+  need(set(actual_placements)==expected_placements[row['component_id']])
+  parents=row['explicit_native_parent_support'];need(type(parents) is list)
+  actual_parents=[]
+  for parent in parents:
+   need(type(parent) is dict and parent['basis']=='EXPLICIT_NATIVE_PARENT_NOT_DIRECT_CONSUMER')
+   evidence=parent['evidence'];need(citation(evidence)==row['canonical_name'])
+   need(evidence['path']==registry_path and type(evidence['pointer']) is str)
+   match=re.fullmatch(r'/components/(0|[1-9][0-9]*)/native_parent',evidence['pointer']);need(match is not None)
+   child=registry[int(match[1])]
+   need(type(parent['child_component_id']) is str and parent['child_component_id']==child['component_id'])
+   workflows=workflow_mapping({'workflow_ids':parent['workflow_ids']},canonical_workflows)
+   need(set(workflows)==set(expected_consumers[child['component_id']]))
+   actual_parents.append((evidence['path'],evidence['pointer'],parent['child_component_id'],tuple(sorted(workflows))))
+  need(len(actual_parents)==len(set(actual_parents)))
+  need(set(actual_parents)==expected_native_parents[row['component_id']])
  shared=load(package,'shared-contract-evidence.json')
  for entry in shared['constraints']:citation(entry['evidence'])
  review=load(package,'review-dispositions.json');need(review['qualified'] is False)
@@ -206,14 +297,17 @@ def validate(source_root,package=PACKAGE):
   need(set(workflow_mapping({'workflow_ids':curated},canonical_workflows))==set(expected))
   need(finding['disposition']=='PENDING_ROOT_REVIEW_NO_SOURCE_OR_GRAPH_CHANGE')
   need(re.fullmatch('[a-f0-9]{64}',finding['original_audit_document_sha256']) is not None)
- for name in ('component-curation.json','review-dispositions.json','source-manifest.json','shared-contract-evidence.json'):
-  text=raw(package,name).decode('utf-8-sig')
-  need(not re.search(r'[A-Za-z]:[\\/]|\.control|/Users/|/home/',text))
+ for name in ('component-curation.json','review-dispositions.json','source-manifest.json','shared-contract-evidence.json','summary.json','portable-manifest.json'):
+  # Semantic fixture packages may omit the two artifact-only documents.
+  if name in ('summary.json','portable-manifest.json') and not (Path(package)/name).exists():continue
+  guard_public_inventory(load(package,name))
  return {'status':'SOURCE_EVIDENCE_VALID','components':147,'workflows':190,'pending_findings':28,'qualified':False,'runtime_status':'NOT_RUN'}
 
 def main():
  parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--source-root',type=Path,default=PACKAGE.parents[2]);args=parser.parse_args()
- try:print(json.dumps(validate(args.source_root)));return 0
+ try:
+  verify_artifacts(PACKAGE.parents[2],PACKAGE)
+  print(json.dumps(validate(args.source_root)));return 0
  except (OSError,ValueError,TypeError,KeyError,IndexError,RecursionError):
   print(json.dumps({'status':'INVALID_SOURCE_EVIDENCE','qualified':False}));return 2
 if __name__=='__main__':raise SystemExit(main())

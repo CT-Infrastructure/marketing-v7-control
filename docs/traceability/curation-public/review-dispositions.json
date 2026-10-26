@@ -462,7 +462,7 @@
         ],
         "classification": "inherited source allocation ambiguity; acknowledged by parent U05",
         "evidence": [
-          "reference/workflows/C10.json#/steps/1: add contextual internal links — SerpBear / bounded integration",
+          "reference/workflows/C10.json#/steps/1: add contextual internal links \u2014 SerpBear / bounded integration",
           "AGENTS.md: Authority and scope, SerpBear rankings; WordPress web publication",
           "opaque-parent-review-document",
           "opaque-parent-review-document: C10 / Ordered source behavior; U05"
@@ -489,7 +489,7 @@
         ],
         "classification": "inherited source allocation ambiguity; acknowledged by parent U05",
         "evidence": [
-          "reference/workflows/C15.json#/steps/1: build narrative — Kokoro ONNX / audio review",
+          "reference/workflows/C15.json#/steps/1: build narrative \u2014 Kokoro ONNX / audio review",
           "reference/workflows/C15.json#/source_software: Mautic, llama.cpp, OpenProject, WordPress",
           "opaque-parent-review-document",
           "opaque-parent-review-document: C15 / Ordered source behavior; U05"
@@ -516,7 +516,7 @@
         ],
         "classification": "inherited source allocation ambiguity; acknowledged by parent U05",
         "evidence": [
-          "reference/workflows/C16.json#/steps/1 and /steps/2: update facts; create new revision — SerpBear / bounded integration",
+          "reference/workflows/C16.json#/steps/1 and /steps/2: update facts; create new revision \u2014 SerpBear / bounded integration",
           "reference/workflows/C16.json#/source_software: SerpBear, Matomo, llama.cpp, WordPress",
           "AGENTS.md: Authority and scope, rankings versus web publication ownership",
           "opaque-parent-review-document: C16 / Ordered source behavior; U05"
@@ -543,7 +543,7 @@
         ],
         "classification": "inherited source allocation ambiguity; acknowledged by parent U05",
         "evidence": [
-          "reference/workflows/C17.json#/steps/0: Generate channel-specific hook, caption and CTA — FFmpeg / bounded media job",
+          "reference/workflows/C17.json#/steps/0: Generate channel-specific hook, caption and CTA \u2014 FFmpeg / bounded media job",
           "reference/workflows/C17.json#/source_software: llama.cpp, Activepieces, Postiz",
           "opaque-parent-review-document: C17 / Ordered source behavior; U05"
         ],
@@ -667,7 +667,7 @@
         "coverage_status": "FAIL",
         "evidence": [
           {
-            "quote": "render supported formats — FFmpeg / bounded media job",
+            "quote": "render supported formats \u2014 FFmpeg / bounded media job",
             "location": "reference/workflows/C58.json#/steps/3"
           },
           {
@@ -679,7 +679,7 @@
             "location": "reference/workflows/C58.json#/output"
           },
           {
-            "quote": "render supported formats — FFmpeg / bounded media job",
+            "quote": "render supported formats \u2014 FFmpeg / bounded media job",
             "location": "opaque-parent-review-document"
           },
           {
@@ -714,7 +714,7 @@
         "coverage_status": "FAIL",
         "evidence": [
           {
-            "quote": "export — llama.cpp / bounded integration",
+            "quote": "export \u2014 llama.cpp / bounded integration",
             "location": "reference/workflows/C59.json#/steps/2"
           },
           {
@@ -722,7 +722,7 @@
             "location": "reference/workflows/C59.json#/source_software"
           },
           {
-            "quote": "export — llama.cpp / bounded integration",
+            "quote": "export \u2014 llama.cpp / bounded integration",
             "location": "reference/workflows/C62.json#/steps/1"
           },
           {
@@ -730,11 +730,11 @@
             "location": "reference/workflows/C62.json#/source_software"
           },
           {
-            "quote": "export — llama.cpp / bounded integration",
+            "quote": "export \u2014 llama.cpp / bounded integration",
             "location": "opaque-parent-review-document"
           },
           {
-            "quote": "export — llama.cpp / bounded integration",
+            "quote": "export \u2014 llama.cpp / bounded integration",
             "location": "opaque-parent-review-document"
           },
           {
@@ -12432,9 +12432,9 @@
         "parent_plans": [
           {
             "parent": "O20-01",
-            "source_contract_path": "orchestrator-wave5/audit-children/jobs/o20-01-source-audit/workspace/opaque-parent-review-document",
+            "source_contract_path": "urn:document:O20-01:source-contract:sha256:a9da95cd795179c52d9d486b790747e8ba6a544c4b428b91366299b614238d49#/technical_amendments/0/prior_proposal/parent_plans/0/source_contract_path",
             "source_contract_sha256": "a9da95cd795179c52d9d486b790747e8ba6a544c4b428b91366299b614238d49",
-            "original_parent_path": "orchestrator-wave5/source-coverage/o20-01/workspace/plans/source-contracts.json",
+            "original_parent_path": "urn:document:O20-01:parent:sha256:a9da95cd795179c52d9d486b790747e8ba6a544c4b428b91366299b614238d49#/technical_amendments/0/prior_proposal/parent_plans/0/original_parent_path",
             "parent_and_frozen_byte_identical": true,
             "workflow_field": "workflows",
             "workflows": [
@@ -12649,14 +12649,14 @@
               }
             ],
             "audit_available": true,
-            "audit_path": "orchestrator-wave5/audit-children/jobs/o20-01-source-audit/workspace/audits/audit.json",
+            "audit_path": "urn:document:O20-01:audit:sha256:81e7b6d407818c29c9f50b6449dd04355a2ba66a69cd9c81206eca99bf05c73d#/technical_amendments/0/prior_proposal/parent_plans/0/audit_path",
             "audit_sha256": "81e7b6d407818c29c9f50b6449dd04355a2ba66a69cd9c81206eca99bf05c73d"
           },
           {
             "parent": "O20-02",
-            "source_contract_path": "orchestrator-wave5/audit-children/jobs/o20-02-source-audit/workspace/opaque-parent-review-document",
+            "source_contract_path": "urn:document:O20-02:source-contract:sha256:270f20fc4ce48a292a27600c8c7d2fe7c073ab08ca000ababe3c26e28342d9b0#/technical_amendments/0/prior_proposal/parent_plans/1/source_contract_path",
             "source_contract_sha256": "270f20fc4ce48a292a27600c8c7d2fe7c073ab08ca000ababe3c26e28342d9b0",
-            "original_parent_path": "orchestrator-wave5/source-coverage/o20-02/workspace/plans/source-contracts.json",
+            "original_parent_path": "urn:document:O20-02:parent:sha256:270f20fc4ce48a292a27600c8c7d2fe7c073ab08ca000ababe3c26e28342d9b0#/technical_amendments/0/prior_proposal/parent_plans/1/original_parent_path",
             "parent_and_frozen_byte_identical": true,
             "workflow_field": "workflows",
             "workflows": [
@@ -12735,14 +12735,14 @@
             ],
             "aggregate_inventory_domain_citations": [],
             "audit_available": true,
-            "audit_path": "orchestrator-wave5/audit-children/jobs/o20-02-source-audit/workspace/audits/audit.json",
+            "audit_path": "urn:document:O20-02:audit:sha256:0e8ec02cabe830cde9d98424944a771c5529c38bd2c402adfa162812bae896b2#/technical_amendments/0/prior_proposal/parent_plans/1/audit_path",
             "audit_sha256": "0e8ec02cabe830cde9d98424944a771c5529c38bd2c402adfa162812bae896b2"
           },
           {
             "parent": "O20-03",
-            "source_contract_path": "orchestrator-wave5/audit-children/jobs/o20-03-source-audit/workspace/opaque-parent-review-document",
+            "source_contract_path": "urn:document:O20-03:source-contract:sha256:d34c5ac8c530ed2e09ac5d2c0320d809347aad3a37d9ee1ac4749d4ecc1c2586#/technical_amendments/0/prior_proposal/parent_plans/2/source_contract_path",
             "source_contract_sha256": "d34c5ac8c530ed2e09ac5d2c0320d809347aad3a37d9ee1ac4749d4ecc1c2586",
-            "original_parent_path": "orchestrator-wave5/source-coverage/o20-03/workspace/plans/source-contracts.json",
+            "original_parent_path": "urn:document:O20-03:parent:sha256:d34c5ac8c530ed2e09ac5d2c0320d809347aad3a37d9ee1ac4749d4ecc1c2586#/technical_amendments/0/prior_proposal/parent_plans/2/original_parent_path",
             "parent_and_frozen_byte_identical": true,
             "workflow_field": "workflows",
             "workflows": [
@@ -12821,14 +12821,14 @@
             ],
             "aggregate_inventory_domain_citations": [],
             "audit_available": true,
-            "audit_path": "orchestrator-wave5/audit-children/jobs/o20-03-source-audit/workspace/audits/audit.json",
+            "audit_path": "urn:document:O20-03:audit:sha256:904e88b239d2f94204d12f1a7975f7187bcc224a77777ebf7c01a55324eb04d0#/technical_amendments/0/prior_proposal/parent_plans/2/audit_path",
             "audit_sha256": "904e88b239d2f94204d12f1a7975f7187bcc224a77777ebf7c01a55324eb04d0"
           },
           {
             "parent": "O20-04",
-            "source_contract_path": "orchestrator-wave5/audit-children/jobs/o20-04-source-audit/workspace/opaque-parent-review-document",
+            "source_contract_path": "urn:document:O20-04:source-contract:sha256:68f86064b82c5ff71600902f22fb15702792331f20302d4a0d9ebb309cc4c970#/technical_amendments/0/prior_proposal/parent_plans/3/source_contract_path",
             "source_contract_sha256": "68f86064b82c5ff71600902f22fb15702792331f20302d4a0d9ebb309cc4c970",
-            "original_parent_path": "orchestrator-wave5/source-coverage/o20-04/workspace/plans/source-contracts.json",
+            "original_parent_path": "urn:document:O20-04:parent:sha256:68f86064b82c5ff71600902f22fb15702792331f20302d4a0d9ebb309cc4c970#/technical_amendments/0/prior_proposal/parent_plans/3/original_parent_path",
             "parent_and_frozen_byte_identical": true,
             "workflow_field": "workflows",
             "workflows": [
@@ -12907,14 +12907,14 @@
             ],
             "aggregate_inventory_domain_citations": [],
             "audit_available": true,
-            "audit_path": "orchestrator-wave5/audit-children/jobs/o20-04-source-audit/workspace/audits/audit.json",
+            "audit_path": "urn:document:O20-04:audit:sha256:c4e6d14032143031493b4fa8058db4c9950badc7876546f4fd8ee6901e697d25#/technical_amendments/0/prior_proposal/parent_plans/3/audit_path",
             "audit_sha256": "c4e6d14032143031493b4fa8058db4c9950badc7876546f4fd8ee6901e697d25"
           },
           {
             "parent": "O20-05",
-            "source_contract_path": "orchestrator-wave5/audit-children/jobs/o20-05-source-audit/workspace/opaque-parent-review-document",
+            "source_contract_path": "urn:document:O20-05:source-contract:sha256:dbc9f648c034bd7b1851821a72cd4efcb806e27af3861a36ccb558569f213abf#/technical_amendments/0/prior_proposal/parent_plans/4/source_contract_path",
             "source_contract_sha256": "dbc9f648c034bd7b1851821a72cd4efcb806e27af3861a36ccb558569f213abf",
-            "original_parent_path": "orchestrator-wave5/source-coverage/o20-05/workspace/plans/source-contracts.json",
+            "original_parent_path": "urn:document:O20-05:parent:sha256:dbc9f648c034bd7b1851821a72cd4efcb806e27af3861a36ccb558569f213abf#/technical_amendments/0/prior_proposal/parent_plans/4/original_parent_path",
             "parent_and_frozen_byte_identical": true,
             "workflow_field": "workflows",
             "workflows": [
@@ -12993,14 +12993,14 @@
             ],
             "aggregate_inventory_domain_citations": [],
             "audit_available": true,
-            "audit_path": "orchestrator-wave5/audit-children/jobs/o20-05-source-audit/workspace/audits/audit.json",
+            "audit_path": "urn:document:O20-05:audit:sha256:caf9cf856ea5ad1b032ba9cc9b4278447753501cf0d2127038cd6b74349d24a2#/technical_amendments/0/prior_proposal/parent_plans/4/audit_path",
             "audit_sha256": "caf9cf856ea5ad1b032ba9cc9b4278447753501cf0d2127038cd6b74349d24a2"
           },
           {
             "parent": "O20-06",
-            "source_contract_path": "orchestrator-wave5/audit-children/jobs/o20-06-source-audit/workspace/opaque-parent-review-document",
+            "source_contract_path": "urn:document:O20-06:source-contract:sha256:66ea3b76833694e33f701747d3ac5a135e5fbf8885c578f84201ce76db676372#/technical_amendments/0/prior_proposal/parent_plans/5/source_contract_path",
             "source_contract_sha256": "66ea3b76833694e33f701747d3ac5a135e5fbf8885c578f84201ce76db676372",
-            "original_parent_path": "orchestrator-wave5/source-coverage/o20-06/workspace/plans/source-contracts.json",
+            "original_parent_path": "urn:document:O20-06:parent:sha256:66ea3b76833694e33f701747d3ac5a135e5fbf8885c578f84201ce76db676372#/technical_amendments/0/prior_proposal/parent_plans/5/original_parent_path",
             "parent_and_frozen_byte_identical": true,
             "workflow_field": "workflows",
             "workflows": [
@@ -13079,14 +13079,14 @@
             ],
             "aggregate_inventory_domain_citations": [],
             "audit_available": true,
-            "audit_path": "orchestrator-wave5/audit-children/jobs/o20-06-source-audit/workspace/audits/audit.json",
+            "audit_path": "urn:document:O20-06:audit:sha256:089134e700f6d34a7f9107825b4260be69e503826e523d71323e78dabf16b3b8#/technical_amendments/0/prior_proposal/parent_plans/5/audit_path",
             "audit_sha256": "089134e700f6d34a7f9107825b4260be69e503826e523d71323e78dabf16b3b8"
           },
           {
             "parent": "O20-07",
-            "source_contract_path": "orchestrator-wave5/audit-children/jobs/o20-07-source-audit/workspace/opaque-parent-review-document",
+            "source_contract_path": "urn:document:O20-07:source-contract:sha256:dbb63f8ab6b4292461f806ca959f3e05bab7870f00c1dbc3c40ba25b060a23e3#/technical_amendments/0/prior_proposal/parent_plans/6/source_contract_path",
             "source_contract_sha256": "dbb63f8ab6b4292461f806ca959f3e05bab7870f00c1dbc3c40ba25b060a23e3",
-            "original_parent_path": "orchestrator-wave5/source-coverage/o20-07/workspace/plans/source-contracts.json",
+            "original_parent_path": "urn:document:O20-07:parent:sha256:dbb63f8ab6b4292461f806ca959f3e05bab7870f00c1dbc3c40ba25b060a23e3#/technical_amendments/0/prior_proposal/parent_plans/6/original_parent_path",
             "parent_and_frozen_byte_identical": true,
             "workflow_field": "workflows",
             "workflows": [
@@ -13165,14 +13165,14 @@
             ],
             "aggregate_inventory_domain_citations": [],
             "audit_available": true,
-            "audit_path": "orchestrator-wave5/audit-children/jobs/o20-07-source-audit/workspace/audits/audit.json",
+            "audit_path": "urn:document:O20-07:audit:sha256:a604b752e8e5b81c03db7731660191c229073e6bd9f9d11eb88e7623edea12df#/technical_amendments/0/prior_proposal/parent_plans/6/audit_path",
             "audit_sha256": "a604b752e8e5b81c03db7731660191c229073e6bd9f9d11eb88e7623edea12df"
           },
           {
             "parent": "O20-08",
-            "source_contract_path": "orchestrator-wave5/audit-children/jobs/o20-08-source-audit/workspace/opaque-parent-review-document",
+            "source_contract_path": "urn:document:O20-08:source-contract:sha256:1f9300859035de6748eaae3464790b82b1a29e38a12d205260395596efae7185#/technical_amendments/0/prior_proposal/parent_plans/7/source_contract_path",
             "source_contract_sha256": "1f9300859035de6748eaae3464790b82b1a29e38a12d205260395596efae7185",
-            "original_parent_path": "orchestrator-wave5/source-coverage/o20-08/workspace/plans/source-contracts.json",
+            "original_parent_path": "urn:document:O20-08:parent:sha256:1f9300859035de6748eaae3464790b82b1a29e38a12d205260395596efae7185#/technical_amendments/0/prior_proposal/parent_plans/7/original_parent_path",
             "parent_and_frozen_byte_identical": true,
             "workflow_field": "workflows",
             "workflows": [
@@ -13251,14 +13251,14 @@
             ],
             "aggregate_inventory_domain_citations": [],
             "audit_available": true,
-            "audit_path": "orchestrator-wave5/audit-children/jobs/o20-08-source-audit/workspace/audits/audit.json",
+            "audit_path": "urn:document:O20-08:audit:sha256:4ad58968f69a579c1ad9e88ceba3d03e3b64b4c8bef374c377734f399566acc5#/technical_amendments/0/prior_proposal/parent_plans/7/audit_path",
             "audit_sha256": "4ad58968f69a579c1ad9e88ceba3d03e3b64b4c8bef374c377734f399566acc5"
           },
           {
             "parent": "O20-09",
-            "source_contract_path": "orchestrator-wave5/audit-children/jobs/o20-09-source-audit/workspace/opaque-parent-review-document",
+            "source_contract_path": "urn:document:O20-09:source-contract:sha256:ed92d56960ec8a7eb9cb1cd65e5cfcb89de9321d07c40436180d378f80f6c33a#/technical_amendments/0/prior_proposal/parent_plans/8/source_contract_path",
             "source_contract_sha256": "ed92d56960ec8a7eb9cb1cd65e5cfcb89de9321d07c40436180d378f80f6c33a",
-            "original_parent_path": "orchestrator-wave5/source-coverage/o20-09/workspace/plans/source-contracts.json",
+            "original_parent_path": "urn:document:O20-09:parent:sha256:ed92d56960ec8a7eb9cb1cd65e5cfcb89de9321d07c40436180d378f80f6c33a#/technical_amendments/0/prior_proposal/parent_plans/8/original_parent_path",
             "parent_and_frozen_byte_identical": true,
             "workflow_field": "workflows",
             "workflows": [
@@ -13337,14 +13337,14 @@
             ],
             "aggregate_inventory_domain_citations": [],
             "audit_available": true,
-            "audit_path": "orchestrator-wave5/audit-children/jobs/o20-09-source-audit/workspace/audits/audit.json",
+            "audit_path": "urn:document:O20-09:audit:sha256:7de2d553362f33e1923b1371ac9713c91ad0400f77eb127315f0a958a5fb90b3#/technical_amendments/0/prior_proposal/parent_plans/8/audit_path",
             "audit_sha256": "7de2d553362f33e1923b1371ac9713c91ad0400f77eb127315f0a958a5fb90b3"
           },
           {
             "parent": "O20-10",
-            "source_contract_path": "orchestrator-wave5/audit-children/jobs/o20-10-source-audit/workspace/opaque-parent-review-document",
+            "source_contract_path": "urn:document:O20-10:source-contract:sha256:9ec678bfbdf918ad40a71e37206474f4fc3641c1cee3b6dbe6434f04a6925584#/technical_amendments/0/prior_proposal/parent_plans/9/source_contract_path",
             "source_contract_sha256": "9ec678bfbdf918ad40a71e37206474f4fc3641c1cee3b6dbe6434f04a6925584",
-            "original_parent_path": "orchestrator-wave5/source-coverage/o20-10/workspace/plans/source-contracts.json",
+            "original_parent_path": "urn:document:O20-10:parent:sha256:9ec678bfbdf918ad40a71e37206474f4fc3641c1cee3b6dbe6434f04a6925584#/technical_amendments/0/prior_proposal/parent_plans/9/original_parent_path",
             "parent_and_frozen_byte_identical": true,
             "workflow_field": "workflows",
             "workflows": [
@@ -13423,14 +13423,14 @@
             ],
             "aggregate_inventory_domain_citations": [],
             "audit_available": true,
-            "audit_path": "orchestrator-wave5/audit-children/jobs/o20-10-source-audit/workspace/audits/audit.json",
+            "audit_path": "urn:document:O20-10:audit:sha256:a595d2e6803066a528fc7f687e487c1aa709dcf48f54fa8774d78ef9a5bf0399#/technical_amendments/0/prior_proposal/parent_plans/9/audit_path",
             "audit_sha256": "a595d2e6803066a528fc7f687e487c1aa709dcf48f54fa8774d78ef9a5bf0399"
           },
           {
             "parent": "O20-11",
-            "source_contract_path": "orchestrator-wave5/audit-children/jobs/o20-11-source-audit/workspace/opaque-parent-review-document",
+            "source_contract_path": "urn:document:O20-11:source-contract:sha256:11b1af2e3042a5d96c7e56cd785ad81e5f07bb6a8e425870b5d4d721604dbebd#/technical_amendments/0/prior_proposal/parent_plans/10/source_contract_path",
             "source_contract_sha256": "11b1af2e3042a5d96c7e56cd785ad81e5f07bb6a8e425870b5d4d721604dbebd",
-            "original_parent_path": "orchestrator-wave5/source-coverage/o20-11/workspace/plans/source-contracts.json",
+            "original_parent_path": "urn:document:O20-11:parent:sha256:11b1af2e3042a5d96c7e56cd785ad81e5f07bb6a8e425870b5d4d721604dbebd#/technical_amendments/0/prior_proposal/parent_plans/10/original_parent_path",
             "parent_and_frozen_byte_identical": true,
             "workflow_field": "workflows",
             "workflows": [
@@ -13517,14 +13517,14 @@
             ],
             "aggregate_inventory_domain_citations": [],
             "audit_available": true,
-            "audit_path": "orchestrator-wave5/audit-children/jobs/o20-11-source-audit/workspace/audits/audit.json",
+            "audit_path": "urn:document:O20-11:audit:sha256:1d7b88e7c165f1fde6963248539f1bee9dda6afee421a5bf37eddf6ee1d0a11f#/technical_amendments/0/prior_proposal/parent_plans/10/audit_path",
             "audit_sha256": "1d7b88e7c165f1fde6963248539f1bee9dda6afee421a5bf37eddf6ee1d0a11f"
           },
           {
             "parent": "O20-12",
-            "source_contract_path": "orchestrator-wave5/audit-children/jobs/o20-12-source-audit/workspace/opaque-parent-review-document",
+            "source_contract_path": "urn:document:O20-12:source-contract:sha256:a731d5292d4048fdde37b43035fb6ae8d202c749343e9367361ec86c26d135ca#/technical_amendments/0/prior_proposal/parent_plans/11/source_contract_path",
             "source_contract_sha256": "a731d5292d4048fdde37b43035fb6ae8d202c749343e9367361ec86c26d135ca",
-            "original_parent_path": "orchestrator-wave5/source-coverage/o20-12/workspace/plans/source-contracts.json",
+            "original_parent_path": "urn:document:O20-12:parent:sha256:a731d5292d4048fdde37b43035fb6ae8d202c749343e9367361ec86c26d135ca#/technical_amendments/0/prior_proposal/parent_plans/11/original_parent_path",
             "parent_and_frozen_byte_identical": true,
             "workflow_field": "workflows",
             "workflows": [
@@ -13611,14 +13611,14 @@
             ],
             "aggregate_inventory_domain_citations": [],
             "audit_available": true,
-            "audit_path": "orchestrator-wave5/audit-children/jobs/o20-12-source-audit/workspace/audits/audit.json",
+            "audit_path": "urn:document:O20-12:audit:sha256:f2f4e81506b6c7813223c2b4eabed5c85b025bd5a99d9b9a1dce3a1c262a9184#/technical_amendments/0/prior_proposal/parent_plans/11/audit_path",
             "audit_sha256": "f2f4e81506b6c7813223c2b4eabed5c85b025bd5a99d9b9a1dce3a1c262a9184"
           },
           {
             "parent": "O20-13",
-            "source_contract_path": "orchestrator-wave5/audit-children/jobs/o20-13-source-audit/workspace/opaque-parent-review-document",
+            "source_contract_path": "urn:document:O20-13:source-contract:sha256:965458bb30da275f7693ddb30d6ac7592b25bb086298e017e8259fd680e3b114#/technical_amendments/0/prior_proposal/parent_plans/12/source_contract_path",
             "source_contract_sha256": "965458bb30da275f7693ddb30d6ac7592b25bb086298e017e8259fd680e3b114",
-            "original_parent_path": "orchestrator-wave5/source-coverage/o20-13/workspace/plans/source-contracts.json",
+            "original_parent_path": "urn:document:O20-13:parent:sha256:965458bb30da275f7693ddb30d6ac7592b25bb086298e017e8259fd680e3b114#/technical_amendments/0/prior_proposal/parent_plans/12/original_parent_path",
             "parent_and_frozen_byte_identical": true,
             "workflow_field": "workflows",
             "workflows": [
@@ -13705,14 +13705,14 @@
             ],
             "aggregate_inventory_domain_citations": [],
             "audit_available": true,
-            "audit_path": "orchestrator-wave5/audit-children/jobs/o20-13-source-audit/workspace/audits/audit.json",
+            "audit_path": "urn:document:O20-13:audit:sha256:d2706d367fc5259c27c3c9a9932ea78fad4cd18cb92f7ad822fdf023fd5b946b#/technical_amendments/0/prior_proposal/parent_plans/12/audit_path",
             "audit_sha256": "d2706d367fc5259c27c3c9a9932ea78fad4cd18cb92f7ad822fdf023fd5b946b"
           },
           {
             "parent": "O20-14",
-            "source_contract_path": "orchestrator-wave5/audit-children/jobs/o20-14-source-audit/workspace/opaque-parent-review-document",
+            "source_contract_path": "urn:document:O20-14:source-contract:sha256:0f9b053d232f80c5d982dbb95d1a1b8f84d563e2af9cd3ac7e43e365069ceedf#/technical_amendments/0/prior_proposal/parent_plans/13/source_contract_path",
             "source_contract_sha256": "0f9b053d232f80c5d982dbb95d1a1b8f84d563e2af9cd3ac7e43e365069ceedf",
-            "original_parent_path": "orchestrator-wave5/source-coverage/o20-14/workspace/plans/source-contracts.json",
+            "original_parent_path": "urn:document:O20-14:parent:sha256:0f9b053d232f80c5d982dbb95d1a1b8f84d563e2af9cd3ac7e43e365069ceedf#/technical_amendments/0/prior_proposal/parent_plans/13/original_parent_path",
             "parent_and_frozen_byte_identical": true,
             "workflow_field": "workflows",
             "workflows": [
@@ -13799,14 +13799,14 @@
             ],
             "aggregate_inventory_domain_citations": [],
             "audit_available": true,
-            "audit_path": "orchestrator-wave5/audit-children/jobs/o20-14-source-audit/workspace/audits/audit.json",
+            "audit_path": "urn:document:O20-14:audit:sha256:06d31feaa6a4ee6e64365807e046b3777f7900d413ce8eefbb2276a6185c55ef#/technical_amendments/0/prior_proposal/parent_plans/13/audit_path",
             "audit_sha256": "06d31feaa6a4ee6e64365807e046b3777f7900d413ce8eefbb2276a6185c55ef"
           },
           {
             "parent": "O20-15",
-            "source_contract_path": "orchestrator-wave5/audit-children/jobs/o20-15-source-audit/workspace/opaque-parent-review-document",
+            "source_contract_path": "urn:document:O20-15:source-contract:sha256:78753c0566831905e5e56e6b946c687048a795a46ae54871b1df73670b98e67a#/technical_amendments/0/prior_proposal/parent_plans/14/source_contract_path",
             "source_contract_sha256": "78753c0566831905e5e56e6b946c687048a795a46ae54871b1df73670b98e67a",
-            "original_parent_path": "orchestrator-wave5/source-coverage/o20-15/workspace/plans/source-contracts.json",
+            "original_parent_path": "urn:document:O20-15:parent:sha256:78753c0566831905e5e56e6b946c687048a795a46ae54871b1df73670b98e67a#/technical_amendments/0/prior_proposal/parent_plans/14/original_parent_path",
             "parent_and_frozen_byte_identical": true,
             "workflow_field": "workflows",
             "workflows": [
@@ -14334,14 +14334,14 @@
               }
             ],
             "audit_available": true,
-            "audit_path": "orchestrator-wave5/audit-children/jobs/o20-15-source-audit/workspace/audits/audit.json",
+            "audit_path": "urn:document:O20-15:audit:sha256:f76752079e9032fbb8c511842899548720d820bf91e314f075b1016fb8308c36#/technical_amendments/0/prior_proposal/parent_plans/14/audit_path",
             "audit_sha256": "f76752079e9032fbb8c511842899548720d820bf91e314f075b1016fb8308c36"
           },
           {
             "parent": "O20-16",
-            "source_contract_path": "orchestrator-wave5/audit-children/jobs/o20-16-source-audit/workspace/opaque-parent-review-document",
+            "source_contract_path": "urn:document:O20-16:source-contract:sha256:0e7ccd1c26b2b6bcb9683aa7025035fc5c088da0aa0e55514cc22e30431295e3#/technical_amendments/0/prior_proposal/parent_plans/15/source_contract_path",
             "source_contract_sha256": "0e7ccd1c26b2b6bcb9683aa7025035fc5c088da0aa0e55514cc22e30431295e3",
-            "original_parent_path": "orchestrator-wave5/source-coverage/o20-16/workspace/plans/source-contracts.json",
+            "original_parent_path": "urn:document:O20-16:parent:sha256:0e7ccd1c26b2b6bcb9683aa7025035fc5c088da0aa0e55514cc22e30431295e3#/technical_amendments/0/prior_proposal/parent_plans/15/original_parent_path",
             "parent_and_frozen_byte_identical": true,
             "workflow_field": "workflows",
             "workflows": [
@@ -14433,9 +14433,9 @@
           },
           {
             "parent": "O20-17",
-            "source_contract_path": "orchestrator-wave5/audit-children/jobs/o20-17-source-audit/workspace/opaque-parent-review-document",
+            "source_contract_path": "urn:document:O20-17:source-contract:sha256:b7edcedec6f2843ac441fb03cbc991d2ae200679cfe0d40bd3fb4326c2e48735#/technical_amendments/0/prior_proposal/parent_plans/16/source_contract_path",
             "source_contract_sha256": "b7edcedec6f2843ac441fb03cbc991d2ae200679cfe0d40bd3fb4326c2e48735",
-            "original_parent_path": "orchestrator-wave5/source-coverage/o20-17/workspace/plans/source-contracts.json",
+            "original_parent_path": "urn:document:O20-17:parent:sha256:b7edcedec6f2843ac441fb03cbc991d2ae200679cfe0d40bd3fb4326c2e48735#/technical_amendments/0/prior_proposal/parent_plans/16/original_parent_path",
             "parent_and_frozen_byte_identical": true,
             "workflow_field": "workflows",
             "workflows": [
@@ -14527,9 +14527,9 @@
           },
           {
             "parent": "O20-18",
-            "source_contract_path": "orchestrator-wave5/audit-children/jobs/o20-18-source-audit/workspace/opaque-parent-review-document",
+            "source_contract_path": "urn:document:O20-18:source-contract:sha256:00e0eee04fb2eacbb4f21832202c242b95d6173bedd60b542621a011b5840f4c#/technical_amendments/0/prior_proposal/parent_plans/17/source_contract_path",
             "source_contract_sha256": "00e0eee04fb2eacbb4f21832202c242b95d6173bedd60b542621a011b5840f4c",
-            "original_parent_path": "orchestrator-wave5/source-coverage/o20-18/workspace/plans/source-contracts.json",
+            "original_parent_path": "urn:document:O20-18:parent:sha256:00e0eee04fb2eacbb4f21832202c242b95d6173bedd60b542621a011b5840f4c#/technical_amendments/0/prior_proposal/parent_plans/17/original_parent_path",
             "parent_and_frozen_byte_identical": true,
             "workflow_field": "contracts",
             "workflows": [
@@ -14621,9 +14621,9 @@
           },
           {
             "parent": "O20-19",
-            "source_contract_path": "orchestrator-wave5/audit-children/jobs/o20-19-source-audit/workspace/opaque-parent-review-document",
+            "source_contract_path": "urn:document:O20-19:source-contract:sha256:0590e3beb9ea6e77a0f60bbba54bc91f782ec1e114df5246b7add0340c2d4b6c#/technical_amendments/0/prior_proposal/parent_plans/18/source_contract_path",
             "source_contract_sha256": "0590e3beb9ea6e77a0f60bbba54bc91f782ec1e114df5246b7add0340c2d4b6c",
-            "original_parent_path": "orchestrator-wave5/source-coverage/o20-19/workspace/plans/source-contracts.json",
+            "original_parent_path": "urn:document:O20-19:parent:sha256:0590e3beb9ea6e77a0f60bbba54bc91f782ec1e114df5246b7add0340c2d4b6c#/technical_amendments/0/prior_proposal/parent_plans/18/original_parent_path",
             "parent_and_frozen_byte_identical": true,
             "workflow_field": "workflows",
             "workflows": [
@@ -14715,9 +14715,9 @@
           },
           {
             "parent": "O20-20",
-            "source_contract_path": "orchestrator-wave5/audit-children/jobs/o20-20-source-audit/workspace/opaque-parent-review-document",
+            "source_contract_path": "urn:document:O20-20:source-contract:sha256:4a5074f42ef1826f8b4f9c1bdb9962d19506c258273462515d45614e6c58f27b#/technical_amendments/0/prior_proposal/parent_plans/19/source_contract_path",
             "source_contract_sha256": "4a5074f42ef1826f8b4f9c1bdb9962d19506c258273462515d45614e6c58f27b",
-            "original_parent_path": "orchestrator-wave5/source-coverage/o20-20/workspace/plans/source-contracts.json",
+            "original_parent_path": "urn:document:O20-20:parent:sha256:4a5074f42ef1826f8b4f9c1bdb9962d19506c258273462515d45614e6c58f27b#/technical_amendments/0/prior_proposal/parent_plans/19/original_parent_path",
             "parent_and_frozen_byte_identical": true,
             "workflow_field": "workflows",
             "workflows": [

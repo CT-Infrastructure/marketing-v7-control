@@ -18,8 +18,8 @@
     },
     {
       "path": "docs/traceability/curation-public/review-dispositions.json",
-      "sha256": "8a773c8a2b620a279c67fd3541be2e91410b64d15653242304fb5f56b6e00a0e",
-      "bytes": 727944
+      "sha256": "9214eda8c60ee08a892abcbc3100766f4d939770827a9d8b65715ef5042c7c75",
+      "bytes": 732699
     },
     {
       "path": "docs/traceability/curation-public/shared-contract-evidence.json",
@@ -38,13 +38,13 @@
     },
     {
       "path": "docs/traceability/curation-public/test_portable.py",
-      "sha256": "0ad7cf8806374b8660fc154b43dbdb1830b33f8f94807683541350edd16e741b",
-      "bytes": 8689
+      "sha256": "bbd3c4f00836b28238e3847b3bfe50cea53df2e88513d1d746ccbb92f40226f7",
+      "bytes": 29637
     },
     {
       "path": "docs/traceability/curation-public/validate_portable.py",
-      "sha256": "f56822ba634ccc3a4980c2f2127330cfbabd687ed4c950fbf32d0e8ef3ec6bfa",
-      "bytes": 8280
+      "sha256": "872050c921557ee0f61b3827b5f82aa5874ae721da5d5b4b1262682c0cbbcbbc",
+      "bytes": 18546
     }
   ],
   "component_dispositions": 147,
