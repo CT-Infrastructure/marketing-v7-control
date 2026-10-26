@@ -1,5 +1,6 @@
 """Authored F17 offline tests. No controller DB, models or external services."""
 import copy
+from datetime import timedelta
 import contextlib
 import io
 from decimal import Decimal, localcontext
@@ -20,6 +21,93 @@ def snapshot():
     return json.loads((Path(__file__).parent/'fixtures/synthetic-snapshot.json').read_text(encoding='utf-8-sig'))
 
 class TelemetryTests(unittest.TestCase):
+
+    def assert_consumers(self, report, instant, expected):
+        metrics={line.split()[0]:float(line.split()[1]) for line in t.prometheus(report).splitlines() if line and not line.startswith('#')}
+        now=t.time(instant).timestamp();expiry=metrics['agent_export_valid_until_timestamp_seconds']
+        metric_current=(metrics['agent_export_available']==1 and
+                        (now<expiry or (now==expiry and metrics['agent_export_valid_until_inclusive']==1)))
+        self.assertEqual(t.report_is_current(report,instant),expected)
+        self.assertEqual(metric_current,expected)
+
+    def fresh_data(self, now=NOW):
+        data=snapshot();data['observed_at']=now
+        for task in data['tasks']:
+            if task['state'] in t.CRITICAL_EVIDENCE_STATES:task['evidence_at']=now
+            if task['state']=='RUNNING':task['lease_until']='2026-10-25T12:10:00Z'
+        return data
+
+    def test_default_fixture_is_current_at_inclusive_expiry(self):
+        report=t.render(snapshot(),NOW)
+        self.assertTrue(report['admission_signal'])
+        self.assertEqual(report['valid_until'],NOW)
+        self.assertIs(report['valid_until_inclusive'],True)
+        self.assert_consumers(report,NOW,True)
+        self.assert_consumers(report,'2026-10-25T12:01:00.000001Z',False)
+
+    def test_snapshot_and_critical_evidence_fractional_boundaries(self):
+        for origin in ('2026-10-25T12:01:00Z','2026-10-25T12:01:00.123456Z'):
+            for state in ('snapshot','READY','RUNNING','REVIEW'):
+                with self.subTest(origin=origin,state=state):
+                    boundary=(t.time(origin)+timedelta(seconds=120)).isoformat().replace('+00:00','Z')
+                    after=(t.time(boundary)+timedelta(microseconds=1)).isoformat().replace('+00:00','Z')
+                    data=self.fresh_data(boundary)
+                    if state=='snapshot':data['observed_at']=origin
+                    for task in data['tasks']:
+                        if state=='snapshot' and task['state'] in t.CRITICAL_EVIDENCE_STATES:task['evidence_at']=origin
+                        elif task['state']==state:task['evidence_at']=origin
+                    report=t.render(data,boundary)
+                    self.assertTrue(report['admission_signal'])
+                    self.assertIs(report['valid_until_inclusive'],True)
+                    self.assert_consumers(report,boundary,True)
+                    self.assert_consumers(report,after,False)
+                    stale=t.render(data,after)
+                    self.assertFalse(stale['admission_signal'])
+                    self.assert_consumers(stale,after,False)
+
+    def test_lease_expiry_ties_and_multiple_leases(self):
+        boundary='2026-10-25T12:02:00Z'
+        before='2026-10-25T12:01:59.999999Z'
+        for tie in (False,True):
+            with self.subTest(tie=tie):
+                data=self.fresh_data()
+                if tie:
+                    for task in data['tasks']:
+                        if task['state']=='REVIEW':task['evidence_at']='2026-10-25T12:00:00Z'
+                running=next(task for task in data['tasks'] if task['state']=='RUNNING')
+                running['lease_until']=boundary
+                later=copy.deepcopy(running);later['task_ref']='task:LATER';later['lease_until']='2026-10-25T12:09:00Z'
+                data['tasks'].append(later)
+                report=t.render(data,NOW)
+                self.assertEqual(t.time(report['valid_until']),t.time(boundary))
+                self.assertIs(report['valid_until_inclusive'],False)
+                self.assert_consumers(report,before,True)
+                self.assert_consumers(report,boundary,False)
+                expired=t.render(data,boundary)
+                self.assertIn('reconciliation_required',expired['admission_hold_reasons'])
+                self.assertFalse(expired['admission_signal'])
+
+    def test_no_running_and_later_lease_preserve_freshness_boundary(self):
+        for no_running in (False,True):
+            data=self.fresh_data()
+            if no_running:data['tasks']=[task for task in data['tasks'] if task['state']!='RUNNING']
+            for task in data['tasks']:
+                if task['state']=='ACCEPTED':
+                    task['evidence_at']='2020-01-01T00:00:00Z';task['lease_until']='2020-01-01T00:00:00Z'
+            report=t.render(data,NOW)
+            self.assertEqual(t.time(report['valid_until']),t.time('2026-10-25T12:03:00Z'))
+            self.assertIs(report['valid_until_inclusive'],True)
+            self.assert_consumers(report,report['valid_until'],True)
+
+    def test_boundary_metadata_fails_closed_at_equality(self):
+        report=t.render(snapshot(),NOW)
+        for value in (None,False,1,'true',[],{}):
+            malformed=copy.deepcopy(report);malformed['valid_until_inclusive']=value
+            self.assertFalse(t.report_is_current(malformed,NOW))
+        del report['valid_until_inclusive']
+        self.assertFalse(t.report_is_current(report,NOW))
+        self.assertIs(t.unavailable_report(NOW)['valid_until_inclusive'],False)
+
     def test_counts_ages_leases_and_safe_bindings(self):
         report=t.render(snapshot(),NOW)
         self.assertEqual(report['counts']['READY'],1)
@@ -303,7 +391,9 @@ class TelemetryTests(unittest.TestCase):
         report=t.render(data,NOW)
         self.assertTrue(t.report_is_current(report,NOW))
         self.assertFalse(t.report_is_current(report,'2026-10-25T12:04:00Z'))
-        self.assertFalse(t.report_is_current(report,report['valid_until']))
+        self.assertTrue(t.report_is_current(report,report['valid_until']))
+        self.assertFalse(t.report_is_current(report,'2026-10-25T12:00:59.999999Z'))
+        self.assertFalse(t.report_is_current(t.unavailable_report(NOW),NOW))
         metrics=t.prometheus(report)
         self.assertIn('agent_export_timestamp_seconds ',metrics)
         self.assertIn('agent_export_valid_until_timestamp_seconds ',metrics)

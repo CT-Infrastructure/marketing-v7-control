@@ -203,14 +203,16 @@ def unavailable_report(now):
     except (ValueError,TypeError,OverflowError):
         stamp=None
     return {'schema_version':'1.0','status':'INVALID_SNAPSHOT','export_available':False,
-            'rendered_at':stamp,'valid_until':stamp,'admission_signal':False,'dispatch_authorized':False}
+            'rendered_at':stamp,'valid_until':stamp,'valid_until_inclusive':False,'admission_signal':False,'dispatch_authorized':False}
 
 
 def report_is_current(report,now):
     """Consumers must check this at read time; admission remains advisory only."""
     try:
-        return (type(report) is dict and report.get('export_available') is True
-                and time(report['rendered_at'])<=time(now)<time(report['valid_until']))
+        if type(report) is not dict or report.get('export_available') is not True:return False
+        current=time(now);deadline=time(report['valid_until'])
+        return (time(report['rendered_at'])<=current and
+                (current<deadline or (current==deadline and report.get('valid_until_inclusive') is True)))
     except (ValueError,TypeError,KeyError,OverflowError):
         return False
 
@@ -284,13 +286,18 @@ def render(snapshot,now,previous=None):
     sub=[accounting[k] for k in ('subscription_task_limit','subscription_tasks_used','subscription_tasks_reserved')]
     if any(value is None for value in sub):reasons.append('subscription_quota_unset')
     elif sub[1]+sub[2]>=sub[0] or sub[1]+sub[2]+accounting['requested_subscription_tasks']>sub[0]:reasons.append('subscription_budget_exhausted')
-    deadlines=[current+timedelta(seconds=FRESHNESS_SECONDS),observed+timedelta(seconds=FRESHNESS_SECONDS)]
+    freshness_deadlines=[current+timedelta(seconds=FRESHNESS_SECONDS),observed+timedelta(seconds=FRESHNESS_SECONDS)]
+    lease_deadlines=[]
     for task in snapshot['tasks']:
         if task['state'] in CRITICAL_EVIDENCE_STATES and task['evidence_at'] is not None:
-            deadlines.append(time(task['evidence_at'])+timedelta(seconds=FRESHNESS_SECONDS))
-        if task['state']=='RUNNING':deadlines.append(time(task['lease_until']))
-    valid_until=min(deadlines).isoformat().replace('+00:00','Z')
+            freshness_deadlines.append(time(task['evidence_at'])+timedelta(seconds=FRESHNESS_SECONDS))
+        if task['state']=='RUNNING':lease_deadlines.append(time(task['lease_until']))
+    freshness_deadline=min(freshness_deadlines)
+    # A lease tying an inclusive freshness boundary must still expire strictly.
+    inclusive=all(freshness_deadline<deadline for deadline in lease_deadlines)
+    valid_until=min([freshness_deadline]+lease_deadlines).isoformat().replace('+00:00','Z')
     report={'schema_version':'1.0','status':'AVAILABLE','export_available':True,'valid_until':valid_until,
+            'valid_until_inclusive':inclusive,
             'observed_at':snapshot['observed_at'],'rendered_at':now,'cursor':cursor,
             'counts':counts,'snapshot_age_seconds':(current-observed).total_seconds(),'active_leases':active_leases,'expired_running_leases':expired_running,
             'queue_oldest_age_seconds':max(queue_ages,default=0),'merge_wait_oldest_seconds':max(merge_ages,default=0),
@@ -305,13 +312,14 @@ def render(snapshot,now,previous=None):
 def prometheus(report):
     # No task refs, agent refs, model names, paths or arbitrary input strings become labels.
     if report.get('export_available') is False:
-        return '# F17 unavailable export; no dispatch authority\nagent_export_available 0\nagent_admission_signal 0\nagent_dispatch_authorized 0\n'
+        return '# F17 unavailable export; no dispatch authority\nagent_export_available 0\nagent_export_valid_until_inclusive 0\nagent_admission_signal 0\nagent_dispatch_authorized 0\n'
     lines=['# F17 bounded snapshot gauges; no dispatch authority']
     def gauge(name,value,labels=''):
         if value is None:return
         require(type(value) in (int,float,Decimal) and math.isfinite(value) and 0<=value<=10**12)
         lines.append(name+labels+' '+str(value) if isinstance(value,Decimal) else name+labels+' '+str(value))
     gauge('agent_export_available',1)
+    gauge('agent_export_valid_until_inclusive',int(report.get('valid_until_inclusive') is True))
     gauge('agent_export_timestamp_seconds',time(report['rendered_at']).timestamp())
     gauge('agent_export_valid_until_timestamp_seconds',time(report['valid_until']).timestamp())
     gauge('agent_snapshot_observed_timestamp_seconds',time(report['observed_at']).timestamp())
