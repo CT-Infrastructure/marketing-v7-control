@@ -18,7 +18,10 @@ case "$mode" in
     python -m venv --copies "$root/deps"
     "$root/deps/bin/python" -m pip --disable-pip-version-check install --no-cache-dir --no-index --require-hashes --only-binary=:all: -r tests/harness/requirements-ci.lock
     # Direct reviewed wheel URLs remain usable with --no-index; no index resolution.
-    bwrap --unshare-all --die-with-parent --new-session --ro-bind / / --proc /proc --dev /dev \
+    bwrap --unshare-all --die-with-parent --new-session \
+      --ro-bind /usr /usr --ro-bind /lib /lib --ro-bind /lib64 /lib64 --symlink usr/bin /bin \
+      --ro-bind /opt /opt --ro-bind /etc/ld.so.cache /etc/ld.so.cache --proc /proc --dev /dev \
+      --ro-bind "$GITHUB_WORKSPACE" "$GITHUB_WORKSPACE" --ro-bind "$root/deps" "$root/deps" \
       --bind "$root/runtime" "$root/runtime" --bind "$root/upload" "$root/upload" \
       --clearenv --setenv PATH /usr/bin:/bin --setenv TMPDIR "$root/runtime" \
       --setenv PYTHONDONTWRITEBYTECODE 1 --setenv F07_NETWORK_NAMESPACE_EXPECTED 1 \
