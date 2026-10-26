@@ -242,16 +242,64 @@ def safe_link(name,target):
     check(bool(parts));return '/'.join(parts)
 
 
+def validate_link_model(model):
+    # Resolve authenticated model data only, never host paths. Implicit parents
+    # are directories; explicit files/links cannot be member ancestors.
+    check(type(model) is dict and len(model)<=MAX_ENTRIES)
+    nodes={};total=0
+    for name,spec in model.items():
+        relative(name);check(type(spec) is dict and spec['type'] in ('file','directory','symlink'))
+        nodes[name]=spec
+        if spec['type']=='file':
+            total+=integer(spec['bytes'],MAX_FILE);hex64(spec['sha256'])
+        else:
+            check(integer(spec.get('bytes',0),MAX_FILE)==0 and spec.get('sha256') is None)
+        if spec['type']=='symlink':
+            target=spec['link']
+            check(type(target) is str and 0<len(target)<=240 and not target.startswith('/'))
+            check(re.fullmatch('[A-Za-z0-9_+.,@%=/ -]+',target) is not None)
+            check(all(p not in ('','.') for p in target.split('/')))
+        check(total<=MAX_TOTAL)
+    for name in model:
+        parts=name.split('/')
+        for i in range(1,len(parts)):
+            parent='/'.join(parts[:i])
+            if parent in nodes:check(nodes[parent]['type']=='directory')
+            else:
+                nodes[parent]=dict(type='directory');check(len(nodes)<=MAX_ENTRIES)
+    check(len(nodes)<=MAX_ENTRIES)
+    resolved={}
+    for name,spec in model.items():
+        if spec['type']!='symlink':continue
+        parts=name.split('/')[:-1];todo=spec['link'].split('/');hops=0;steps=0
+        while todo:
+            steps+=1;check(steps<=MAX_ENTRIES*4)
+            part=todo.pop(0)
+            if part=='..':check(bool(parts));parts.pop();continue
+            current='/'.join(parts+[part]);check(current in nodes)
+            node=nodes[current]
+            if node['type']=='symlink':
+                hops+=1;check(hops<=40)
+                todo=node['link'].split('/')+todo
+            else:
+                parts.append(part)
+                if todo:check(node['type']=='directory')
+        destination='/'.join(parts);check(destination in nodes)
+        resolved[name]=destination
+    return resolved
+
+
 def extract_checked(rows, data, root, expected, selected=None, rewrites=None):
     validate_rows(rows,expected);root=own_root(root);check(not list(root.iterdir()))
     rewrites={} if rewrites is None else rewrites
     chosen={r['name'] for r in rows} if selected is None else set(selected)
     check(chosen <= {r['name'] for r in rows})
-    # Validate link targets and all content before any write.
+    model={r['name']:dict(r,link=rewrites.get(r['name'],r['link'])) for r in rows if r['name'] in chosen}
+    check(set(rewrites)<=chosen and all(model[n]['type']=='symlink' for n in rewrites))
+    validate_link_model(model)
+    # Validate the whole link graph and all content before any write.
     for row in rows:
         if row['type']=='file': check(digest(data[row['name']])==row['sha256'] and len(data[row['name']])==row['bytes'])
-        if row['type']=='symlink' and row['name'] in chosen:
-            check(safe_link(row['name'],rewrites.get(row['name'],row['link'])) in chosen)
     for row in rows:
         if row['name'] not in chosen or row['type']=='symlink': continue
         path=root/row['name'];path.parent.mkdir(parents=True,exist_ok=True)
@@ -297,6 +345,43 @@ def patched_files(files, patches, specs):
     result=dict(files)
     for raw,spec in zip(patches,specs): result=exact_patch(result,raw,spec)
     return result
+
+
+def source_patch_facts(original, debian, specs):
+    check(type(original) is dict and type(debian) is dict and len(specs)==2)
+    check(0<len(original)<=MAX_ENTRIES and len(debian)<=MAX_ENTRIES)
+    for files in (original,debian):
+        total=0
+        for name,raw in files.items():
+            relative(name);check(type(raw) is bytes);integer(len(raw),MAX_FILE)
+            total+=len(raw);check(total<=MAX_TOTAL)
+    check('debian/patches/series' in debian)
+    entries=[p['series_entry'] for p in specs]
+    check(len(set(entries))==2)
+    for entry,spec in zip(entries,specs):
+        relative(entry);check(spec['member']=='debian/patches/'+entry)
+    # No comments/options/whitespace/order changes or additional patch.
+    series=debian['debian/patches/series']
+    check(series==('\n'.join(entries)+'\n').encode('utf-8'))
+    patches=[];identities=[]
+    for spec in specs:
+        check(spec['member'] in debian)
+        raw=debian[spec['member']]
+        check(len(raw)==integer(spec['bytes'],MAX_FILE) and digest(raw)==hex64(spec['sha256']))
+        patches.append(raw)
+        identities.append(dict(member=spec['member'],series_entry=spec['series_entry'],bytes=len(raw),sha256=digest(raw),
+                               modified_files=list(spec['modified_files'])))
+    patched=patched_files(original,patches,specs)
+    check(len(patched)==len(original) and sum(len(v) for v in patched.values())<=MAX_TOTAL)
+    for value in patched.values():integer(len(value),MAX_FILE)
+    modified=sorted({name for spec in specs for name in spec['modified_files']})
+    facts=dict(schema='f07-source-patch-facts-v1',patches=identities,series_sha256=digest(series),
+               pre_tree_sha256=tree_digest(original),post_tree_sha256=tree_digest(patched),file_count=len(patched),
+               modified_files={name:dict(pre_bytes=len(original[name]),pre_sha256=digest(original[name]),
+                   post_bytes=len(patched[name]),post_sha256=digest(patched[name])) for name in modified},
+               application='EXACT_ORDER_ONCE_NO_FUZZ_OFFSET_REVERSE',authorization='NOT_GRANTED',build='NOT_RUN',native_execution='NOT_RUN')
+    check(len(canonical(facts))<=65536)
+    return patched,facts
 
 
 def tree_digest(files):
@@ -385,7 +470,7 @@ def authorized_runtime(result, auth, binary, closure):
 
 
 def validate_private_tree(root, model, complete=False):
-    root=own_root(root);check(type(model) is dict and len(model)<=MAX_ENTRIES)
+    root=own_root(root);validate_link_model(model)
     seen=set();total=0;pending=[root]
     while pending:
         base=pending.pop()
@@ -394,7 +479,7 @@ def validate_private_tree(root, model, complete=False):
                 path=Path(entry.path);name=path.relative_to(root).as_posix();check(name in model)
                 spec=model[name];info=entry.stat(follow_symlinks=False)
                 if stat.S_ISDIR(info.st_mode):check(spec['type']=='directory');pending.append(path)
-                elif stat.S_ISLNK(info.st_mode):check(spec['type']=='symlink' and os.readlink(path)==spec['link'] and safe_link(name,spec['link']) in model)
+                elif stat.S_ISLNK(info.st_mode):check(spec['type']=='symlink' and os.readlink(path)==spec['link'])
                 else:
                     check(spec['type']=='file' and stat.S_ISREG(info.st_mode) and info.st_nlink==1)
                     maximum=integer(spec['bytes'],MAX_FILE);check(info.st_size==maximum if complete else 0<=info.st_size<=maximum)
@@ -463,10 +548,7 @@ def prepare_tree(root, lock, artifacts, deadline):
                 sysrows[name]=row
                 if row['type']=='file':sysdata[name]=data[name]
     check(files is not None and debian is not None)
-    series=debian['debian/patches/series'].decode().splitlines()
-    check(series==[p['series_entry'] for p in lock['patches']])
-    patches=[debian[p['member']] for p in lock['patches']]
-    files=patched_files(files,patches,lock['patches']);check(tree_digest(files)==lock['patched_tree_sha256'])
+    files,_=source_patch_facts(files,debian,lock['patches']);check(tree_digest(files)==lock['patched_tree_sha256'])
     target=root/'source';target.mkdir()
     for name,value in files.items():
         relative(name);path=target/name;path.parent.mkdir(parents=True,exist_ok=True)
@@ -603,21 +685,35 @@ def deb_data_inventory(raw):
 
 
 def inventory_artifacts(root):
-    root=own_root(root);lock=source_lock();deadline=time.monotonic()+30;result=[];original=None;debian=None
+    root=own_root(root);lock=source_lock();deadline=time.monotonic()+30;result=[];original=None;debian=None;source_identities=[];download_total=0
     for item in lock['artifacts']:
         raw=read_file(root/item['name'],MAX_FILE,deadline)
         check(len(raw)==item['bytes'] and digest(raw)==item['sha256'])
+        download_total+=len(raw);check(download_total<=lock['limits']['download_total'])
         row=dict(name=item['name'],bytes=len(raw),sha256=digest(raw),kind=item['kind'])
         if item['kind']=='deb':row['inventory']=deb_data_inventory(raw)
         elif item['kind']!='provenance':
             members,data=archive_rows(raw,item['kind'],deadline);row['members']=members
+            if item['kind'] in ('orig','debian'):
+                validate_rows(members,members);check(all(m['type']!='symlink' for m in members))
+                validate_link_model({m['name']:m for m in members})
+                if item['members'] is not None:validate_rows(members,item['members'])
+                source_identities.append({k:row[k] for k in ('name','bytes','sha256','kind')})
             if item['kind']=='orig':
+                check(original is None)
                 prefix='bubblewrap-0.9.0/';check(all(name.startswith(prefix) for name in data))
                 original={name[len(prefix):]:value for name,value in data.items()}
-            if item['kind']=='debian':debian=data
+            if item['kind']=='debian':
+                check(debian is None);debian=data
         result.append(row)
-    return dict(schema='f07-source-artifact-inventory-v1',variant=VARIANT,artifacts=result,
-                third_party_code_execution='NOT_RUN',build='NOT_RUN',authorization='NOT_GRANTED')
+    check(original is not None and debian is not None and time.monotonic()<deadline)
+    _,facts=source_patch_facts(original,debian,lock['patches'])
+    check(time.monotonic()<deadline)
+    report=dict(schema='f07-source-artifact-inventory-v1',variant=VARIANT,artifacts=result,
+                source_inputs=source_identities,source_patch_facts=facts,
+                third_party_code_execution='NOT_RUN',build='NOT_RUN',native_execution='NOT_RUN',authorization='NOT_GRANTED')
+    check(len(canonical(report))<=1048576)
+    return report
 
 def main():
     if sys.argv[1:]==['inventory']:

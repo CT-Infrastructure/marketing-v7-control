@@ -231,4 +231,159 @@ class SourceContractTests(unittest.TestCase):
             changed=dict(result,source_lock_sha256='a'*64)
             with self.assertRaises(ValueError):s.authorized_runtime(changed,auth,binary,auth['runtime_closure'])
 
+class SourceInterfaceRegressionTests(unittest.TestCase):
+    def _tar(self,files):
+        out=io.BytesIO()
+        with tarfile.open(fileobj=out,mode='w',format=tarfile.USTAR_FORMAT) as archive:
+            for name,raw in files.items():
+                info=tarfile.TarInfo(name);info.size=len(raw);archive.addfile(info,io.BytesIO(raw))
+        return out.getvalue()
+
+    def _fixture(self,series=None,preimage=b'old\n',patch_mutation=False,missing=False,reverse=False):
+        specs=[];patches=[]
+        for name,old,new in (('first.patch','old','middle'),('second.patch','middle','final')):
+            raw=('--- a/bubblewrap.c\n+++ b/bubblewrap.c\n@@ -1 +1 @@\n-'+old+'\n+'+new+'\n').encode()
+            specs.append(dict(series_entry=name,member='debian/patches/'+name,bytes=len(raw),sha256=s.digest(raw),modified_files=['bubblewrap.c']))
+            patches.append(raw)
+        original={'bubblewrap-0.9.0/bubblewrap.c':preimage,'bubblewrap-0.9.0/tests/retained.sh':b'not executed\n'}
+        debian={'debian/patches/series':b'first.patch\nsecond.patch\n' if series is None else series,
+                specs[0]['member']:patches[0],specs[1]['member']:patches[1]}
+        if patch_mutation:debian[specs[0]['member']]=patches[0].replace(b'+middle',b'+MIDDLE')
+        if missing:del debian[specs[1]['member']]
+        if reverse:specs.reverse()
+        blobs={'orig.tar':self._tar(original),'debian.tar':self._tar(debian)}
+        artifacts=[dict(name=name,kind=kind,bytes=len(blobs[name]),sha256=s.digest(blobs[name]),members=None)
+                   for name,kind in (('orig.tar','orig'),('debian.tar','debian'))]
+        return dict(artifacts=artifacts,patches=specs,limits=dict(download_total=sum(map(len,blobs.values())))),blobs
+
+    def _inventory(self,lock,blobs):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp).resolve()
+            for name,raw in blobs.items():(root/name).write_bytes(raw)
+            before={p.name:p.read_bytes() for p in root.iterdir()}
+            # Only the trust anchor is replaced by an explicit synthetic fixture.
+            # Real no-follow reads, archive parser, series/hash checks and exact
+            # applicator run; no source code from the archive is imported.
+            with patch.object(s,'source_lock',return_value=lock), \
+                 patch.object(s,'fetch_inputs',side_effect=AssertionError('no network')) as fetch, \
+                 patch.object(c,'capture_namespace_process',side_effect=AssertionError('no native process')) as process:
+                report=s.inventory_artifacts(root)
+                fetch.assert_not_called();process.assert_not_called()
+            self.assertEqual({p.name:p.read_bytes() for p in root.iterdir()},before)
+            return report
+
+    def test_authenticated_inventory_emits_exact_once_pre_post_facts_without_execution(self):
+        lock,blobs=self._fixture();report=self._inventory(lock,blobs);facts=report['source_patch_facts']
+        original={'bubblewrap.c':b'old\n','tests/retained.sh':b'not executed\n'}
+        patched=dict(original,**{'bubblewrap.c':b'final\n'})
+        self.assertEqual(facts['pre_tree_sha256'],s.tree_digest(original))
+        self.assertEqual(facts['post_tree_sha256'],s.tree_digest(patched))
+        self.assertEqual(facts['modified_files'],{'bubblewrap.c':dict(pre_bytes=4,pre_sha256=s.digest(b'old\n'),post_bytes=6,post_sha256=s.digest(b'final\n'))})
+        self.assertEqual([x['sha256'] for x in facts['patches']],[x['sha256'] for x in lock['patches']])
+        self.assertEqual(facts['series_sha256'],s.digest(b'first.patch\nsecond.patch\n'))
+        self.assertEqual(facts['file_count'],2);self.assertEqual(len(report['source_inputs']),2)
+        for key in ('build','native_execution','third_party_code_execution'):self.assertEqual(report[key],'NOT_RUN')
+        self.assertEqual(report['authorization'],'NOT_GRANTED');self.assertLessEqual(len(s.canonical(report)),1048576)
+
+    def test_authenticated_inventory_rejects_wrong_series_order_options_and_extra_patch(self):
+        for series in (b'second.patch\nfirst.patch\n',b'first.patch -p0\nsecond.patch\n',
+                       b'first.patch\nsecond.patch\nthird.patch\n',b'# comment\nfirst.patch\nsecond.patch\n',b'first.patch\r\nsecond.patch\r\n'):
+            with self.subTest(series=series),self.assertRaises(ValueError):self._inventory(*self._fixture(series=series))
+
+    def test_authenticated_inventory_rejects_patch_member_mutation_missing_and_wrong_order(self):
+        for kwargs in (dict(patch_mutation=True),dict(missing=True),dict(reverse=True)):
+            with self.subTest(kwargs=kwargs),self.assertRaises(ValueError):self._inventory(*self._fixture(**kwargs))
+
+    def test_authenticated_inventory_rejects_fuzz_offset_reverse_and_reapplication(self):
+        for preimage in (b'prefix\nold\n',b'OLD\n',b'middle\n',b'final\n'):
+            with self.subTest(preimage=preimage),self.assertRaises(ValueError):self._inventory(*self._fixture(preimage=preimage))
+
+    def test_authenticated_inventory_rejects_wrong_raw_artifact_hash_and_missing_source(self):
+        lock,blobs=self._fixture();blobs['orig.tar']=blobs['orig.tar']+b'x'
+        with self.assertRaises(ValueError):self._inventory(lock,blobs)
+        lock,blobs=self._fixture();lock['artifacts']=lock['artifacts'][1:]
+        with self.assertRaises(ValueError):self._inventory(lock,blobs)
+
+    def test_authenticated_inventory_rejects_wrong_pinned_members_and_source_symlink(self):
+        lock,blobs=self._fixture();lock['artifacts'][0]['members']=[]
+        with self.assertRaises(ValueError):self._inventory(lock,blobs)
+        lock,blobs=self._fixture();out=io.BytesIO()
+        with tarfile.open(fileobj=out,mode='w',format=tarfile.USTAR_FORMAT) as archive:
+            info=tarfile.TarInfo('bubblewrap-0.9.0/bubblewrap.c');info.type=tarfile.SYMTYPE;info.linkname='elsewhere';archive.addfile(info)
+        blobs['orig.tar']=out.getvalue();lock['artifacts'][0].update(bytes=len(blobs['orig.tar']),sha256=s.digest(blobs['orig.tar']))
+        with self.assertRaises(ValueError):self._inventory(lock,blobs)
+
+    def _graph(self,links=None):
+        model={'a':dict(type='directory'),'z':dict(type='directory'),
+               'outside':dict(type='file',bytes=1,sha256=s.digest(b's'))}
+        for name,target in (links or {'a/b':'../z','x':'a/b/../../outside'}).items():model[name]=dict(type='symlink',link=target)
+        return model
+
+    def _rows(self,model):
+        return [dict(name=name,type=spec['type'],bytes=spec.get('bytes',0),sha256=spec.get('sha256'),link=spec.get('link','')) for name,spec in model.items()]
+
+    def test_exact_reviewed_chained_escape_rejects_before_any_extraction_write(self):
+        rows=self._rows(self._graph())
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp).resolve()
+            with self.assertRaises(ValueError):s.extract_checked(rows,{'outside':b's'},root,rows)
+            self.assertEqual(list(root.iterdir()),[])
+
+    def test_exact_reviewed_chained_escape_private_tree_rejects_without_host_reads(self):
+        model=self._graph()
+        with tempfile.TemporaryDirectory() as temp:
+            parent=Path(temp).resolve();root=parent/'owned';root.mkdir();(parent/'outside').write_bytes(b'preserve')
+            (root/'a').mkdir();(root/'z').mkdir();(root/'outside').write_bytes(b's')
+            (root/'a/b').symlink_to('../z');(root/'x').symlink_to('a/b/../../outside')
+            for complete in (False,True):
+                with self.assertRaises(ValueError):s.validate_private_tree(root,model,complete=complete)
+            self.assertEqual((parent/'outside').read_bytes(),b'preserve')
+
+    def test_link_cycles_dangling_absolute_and_non_directory_traversals_reject(self):
+        cases=({'x':'x'},{'x':'y','y':'x'},{'x':'missing'},{'x':'/outside'},
+               {'x':'../outside'},{'x':'outside/../outside'},{'x':'a/missing/../outside'},
+               {'x':'a/'+'x'*241},{'x':'a//z'},{'x':'a/./z'})
+        for links in cases:
+            with self.subTest(links=links),self.assertRaises(ValueError):s.validate_link_model(self._graph(links))
+
+    def test_symlink_or_regular_member_ancestor_rejects_before_writes(self):
+        for kind in ('symlink','file'):
+            model=self._graph({'x':'z'})
+            model['x']=dict(type='symlink',link='z') if kind=='symlink' else dict(type='file',bytes=1,sha256=s.digest(b's'))
+            model['x/child']=dict(type='file',bytes=1,sha256=s.digest(b's'));rows=self._rows(model)
+            with tempfile.TemporaryDirectory() as temp:
+                root=Path(temp).resolve()
+                with self.assertRaises(ValueError):s.extract_checked(rows,{'outside':b's','x':b's','x/child':b's'},root,rows)
+                self.assertEqual(list(root.iterdir()),[])
+
+    def test_valid_internal_chain_resolves_and_complete_tree_is_accepted(self):
+        model=self._graph({'a/b':'../z','x':'a/b/../outside','y':'x'})
+        self.assertEqual(s.validate_link_model(model),{'a/b':'z','x':'outside','y':'outside'})
+        rows=self._rows(model)
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp).resolve();s.extract_checked(rows,{'outside':b's'},root,rows)
+            s.validate_private_tree(root,model,complete=True)
+            self.assertEqual((root/'y').read_bytes(),b's')
+
+    def test_three_reviewed_development_rewrites_remain_internal(self):
+        rewrites=s.source_lock()['symlink_rewrites'];rows=[];data={}
+        for name,target in rewrites.items():
+            destination='lib/x86_64-linux-gnu/'+target.rsplit('/',1)[1]
+            rows.append(dict(name=destination,type='file',bytes=1,sha256=s.digest(b's'),link=''));data[destination]=b's'
+            rows.append(dict(name=name,type='symlink',bytes=0,sha256=None,link='/'+destination))
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp).resolve();s.extract_checked(rows,data,root,rows,rewrites=rewrites)
+            for name in rewrites:self.assertEqual((root/name).read_bytes(),b's')
+
+    def test_graph_count_size_hop_and_special_type_bounds_reject(self):
+        bad=self._graph({'x':'outside'});bad['outside']['bytes']=s.MAX_FILE+1
+        with self.assertRaises(ValueError):s.validate_link_model(bad)
+        bad=self._graph({'x':'outside'});bad['outside']['type']='fifo'
+        with self.assertRaises(ValueError):s.validate_link_model(bad)
+        bad={str(i):dict(type='directory') for i in range(s.MAX_ENTRIES+1)}
+        with self.assertRaises(ValueError):s.validate_link_model(bad)
+        bad=self._graph({**{'l'+str(i):'l'+str(i+1) for i in range(41)},'l41':'outside'})
+        with self.assertRaises(ValueError):s.validate_link_model(bad)
+
+
 if __name__=='__main__':unittest.main()
