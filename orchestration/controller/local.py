@@ -165,18 +165,22 @@ def stable_ledger_copy(path):
     raise ValueError('Ledger is changing; retry preflight with a stable snapshot')
 
 
-def validate_ledger_markers(db, expected_mode):
+def validate_ledger_markers(db, expected_mode, expected_graph_hash, expected_policy_hash):
     table = db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='metadata'").fetchone()
     require(table is not None, 'Unmarked ledger requires reviewed migration')
     mode = db.execute("SELECT value FROM metadata WHERE key='f11_mode'").fetchone()
     version = db.execute("SELECT value FROM metadata WHERE key='f11_schema_version'").fetchone()
     require(mode is not None and mode[0] == expected_mode, 'Unmarked or incompatible ledger mode requires reviewed migration')
     require(version is not None and version[0] == F11_SCHEMA_VERSION, 'Unmarked or incompatible ledger version requires reviewed migration')
+    for key, expected in (('graph_hash', expected_graph_hash), ('policy_hash', expected_policy_hash)):
+        stored = db.execute('SELECT value FROM metadata WHERE key=?', (key,)).fetchone()
+        require(stored is not None and stored[0] == expected,
+                'Missing or incompatible ' + key + ' requires reviewed migration')
     columns = {row[1] for row in db.execute('PRAGMA table_info(f11_attempts)')}
     require('launch_ref' in columns, 'Missing durable launch schema requires reviewed migration')
 
 
-def preflight_existing_ledger(database, fixture_only):
+def preflight_existing_ledger(database, fixture_only, expected_graph_hash, expected_policy_hash):
     """Inspect a WAL-aware private snapshot; never open the source with SQLite."""
     path = Path(database)
     require(not path.is_symlink() and not getattr(path, 'is_junction', lambda: False)(), 'Linked ledger is forbidden')
@@ -191,7 +195,7 @@ def preflight_existing_ledger(database, fixture_only):
                 if content is not None:
                     Path(str(snapshot) + suffix).write_bytes(content)
             with contextlib.closing(sqlite3.connect(snapshot)) as db:
-                validate_ledger_markers(db, expected_mode)
+                validate_ledger_markers(db, expected_mode, expected_graph_hash, expected_policy_hash)
     except sqlite3.DatabaseError:
         raise ValueError('Unreadable or incompatible ledger requires reviewed migration') from None
 
@@ -199,7 +203,6 @@ class LocalController(_REFERENCE.Scheduler):
     """Reuse the bundled ledger, graph, claim ordering and atomic reservations."""
     def __init__(self, database, tasks, policy, clock=time.time, *, fixture_only=False, dispatch_inputs=None, measurements=None, trusted_admission_ref=None):
         require(type(fixture_only) is bool, 'Fixture mode must be Boolean')
-        preflight_existing_ledger(database, fixture_only)
         self.fixture_only = fixture_only
         self.dispatch_inputs = copy.deepcopy(dispatch_inputs)
         self.measurements = copy.deepcopy(measurements)
@@ -223,6 +226,9 @@ class LocalController(_REFERENCE.Scheduler):
             for key in ('manual', 'enabled_by_default'):
                 if key in task:
                     require(type(task[key]) is bool, 'Invalid task flag')
+        _REFERENCE.validate_graph(tasks)
+        _REFERENCE.validate_policy(policy)
+        preflight_existing_ledger(database, fixture_only, canonical_hash(tasks), canonical_hash(policy))
         super().__init__(database, tasks, policy, clock=clock)
         self._configuration = canonical_hash([self.tasks, self.policy, self.fixture_only, self.dispatch_inputs, self.measurements, self.trusted_admission_ref])
         with self._connection() as db:

@@ -332,7 +332,7 @@ class ControllerTests(unittest.TestCase):
         return {p.name: (p.read_bytes(), p.stat().st_mode) for p in self.path.parent.iterdir() if p.is_file() and not (ignore_shm and p.name.endswith('-shm'))}
 
     def detached_wal(self, marked):
-        source = self.path.parent / 'wal-source.sqlite3'
+        source = self.path.parent / (self.path.stem+'-wal-source.sqlite3')
         if marked:
             LocalController(source,self.tasks,self.pol,clock=lambda:self.now[0],fixture_only=True)
         else:
@@ -347,6 +347,55 @@ class ControllerTests(unittest.TestCase):
         Path(str(self.path)+'-wal').write_bytes(Path(str(source)+'-wal').read_bytes())
         self.addCleanup(db.close)
         return db
+
+    def test_configuration_mismatch_preserves_detached_wal_before_superclass(self):
+        for changed in ('tasks', 'policy'):
+            for existing_shm in (False, True):
+                with self.subTest(changed=changed, existing_shm=existing_shm):
+                    self.path=Path(self.tmp.name)/(changed+str(existing_shm)+'.sqlite3')
+                    self.tasks=[task('A')]; self.pol=policy()
+                    self.detached_wal(True)
+                    if existing_shm:
+                        Path(str(self.path)+'-shm').write_bytes(b'synthetic-arbitrary-index')
+                    if changed=='tasks':
+                        self.tasks[0]['priority']='P2'
+                    else:
+                        self.pol['lease_seconds']+=1
+                    before=self.directory_bytes()
+                    with patch.object(_REFERENCE.Scheduler, '__init__') as initialize:
+                        with self.assertRaisesRegex(ValueError, 'graph_hash|policy_hash'):
+                            self.make()
+                        initialize.assert_not_called()
+                    self.assertEqual(before,self.directory_bytes())
+                    self.assertEqual(Path(str(self.path)+'-shm').exists(),existing_shm)
+
+    def test_missing_configuration_metadata_rejected_before_superclass(self):
+        for key in ('graph_hash', 'policy_hash'):
+            with self.subTest(key=key):
+                self.path=Path(self.tmp.name)/(key+'.sqlite3')
+                self.make()
+                with contextlib.closing(sqlite3.connect(self.path)) as db:
+                    db.execute('DELETE FROM metadata WHERE key=?',(key,)); db.commit()
+                before=self.directory_bytes()
+                with patch.object(_REFERENCE.Scheduler, '__init__') as initialize:
+                    with self.assertRaisesRegex(ValueError,key):self.make()
+                    initialize.assert_not_called()
+                self.assertEqual(before,self.directory_bytes())
+
+    def test_configuration_hash_mismatch_committed_only_in_wal(self):
+        for key in ('graph_hash', 'policy_hash'):
+            with self.subTest(key=key):
+                self.path=Path(self.tmp.name)/(key+'.sqlite3')
+                db=self.detached_wal(True)
+                db.execute('UPDATE metadata SET value=? WHERE key=?',('0'*64,key));db.commit()
+                source=self.path.parent/(self.path.stem+'-wal-source.sqlite3')
+                Path(str(self.path)+'-wal').write_bytes(Path(str(source)+'-wal').read_bytes())
+                before=self.directory_bytes()
+                with patch.object(_REFERENCE.Scheduler, '__init__') as initialize:
+                    with self.assertRaisesRegex(ValueError,key):self.make()
+                    initialize.assert_not_called()
+                self.assertEqual(before,self.directory_bytes())
+                self.assertFalse(Path(str(self.path)+'-shm').exists())
 
     def test_rejected_wal_without_shm_preserves_all_directory_bytes(self):
         self.detached_wal(False)
@@ -370,7 +419,7 @@ class ControllerTests(unittest.TestCase):
         db.execute('PRAGMA wal_checkpoint(TRUNCATE)')
         db.execute("UPDATE metadata SET value='offline-fixture' WHERE key='f11_mode'");db.commit()
         before=self.directory_bytes()
-        preflight_existing_ledger(self.path,True)
+        preflight_existing_ledger(self.path,True,canonical_hash(self.tasks),canonical_hash(self.pol))
         self.assertEqual(before,self.directory_bytes())
 
     def test_incompatible_marker_committed_in_wal_is_not_ignored(self):
@@ -378,7 +427,7 @@ class ControllerTests(unittest.TestCase):
         db=sqlite3.connect(self.path);self.addCleanup(db.close)
         db.execute("UPDATE metadata SET value='wrong' WHERE key='f11_mode'");db.commit()
         before=self.directory_bytes()
-        with self.assertRaises(ValueError):preflight_existing_ledger(self.path,True)
+        with self.assertRaises(ValueError):preflight_existing_ledger(self.path,True,canonical_hash(self.tasks),canonical_hash(self.pol))
         self.assertEqual(before,self.directory_bytes())
 
     def test_uncommitted_marker_does_not_override_committed_snapshot(self):
@@ -386,7 +435,7 @@ class ControllerTests(unittest.TestCase):
         db=sqlite3.connect(self.path);self.addCleanup(db.close)
         db.execute("UPDATE metadata SET value='wrong' WHERE key='f11_mode'")
         before=self.directory_bytes(ignore_shm=True)
-        preflight_existing_ledger(self.path,True)
+        preflight_existing_ledger(self.path,True,canonical_hash(self.tasks),canonical_hash(self.pol))
         self.assertEqual(before,self.directory_bytes(ignore_shm=True))
 
     def test_tiny_snapshot_read_requests_are_bounded_by_observed_size(self):
