@@ -499,6 +499,221 @@ def native_bootstrap(root):
     python_library_path(sys.base_prefix, sysconfig.get_config_var('LIBDIR'))
     diagnostic(PHASE, 'PASS')
 
+# Output text is untrusted data. Only these two whole literals are root-approved
+# SYNTHETIC TEXT classes, not observed policy errors or syscall errno evidence.
+PERMISSION_TEXT = (
+    b'bwrap: Creating new namespace failed: Operation not permitted\n',
+    b'bwrap: Creating new namespace failed: Permission denied\n',
+)
+STDERR_PREFIX = 65536
+STREAM_LIMIT = 1048576
+DIAGNOSTIC_MAX = 4096
+
+
+def classify_namespace_stderr(prefix, complete, truncated):
+    require(type(prefix) is bytes and len(prefix) <= STDERR_PREFIX)
+    require(type(complete) is bool and type(truncated) is bool)
+    if not complete or truncated:
+        return 'UNKNOWN', None
+    if not prefix:
+        return 'EMPTY', None
+    if prefix in PERMISSION_TEXT:
+        return 'NAMESPACE_PERMISSION_ERROR_TEXT', None
+    # The entire canonical helper sequence may report a phase; no substring,
+    # ANSI stripping, free-text field or claimed successful isolation is trusted.
+    for name in sorted(PHASES):
+        rows = [dict(scope='f07-ci-bootstrap', phase=name, status=value) for value in ('START', 'FAIL')]
+        if prefix == b''.join(encoded(row) for row in rows):
+            return 'INNER_HELPER_FAILURE_REPORTED', name
+    return 'UNKNOWN', None
+
+
+def validate_namespace_diagnostic(doc):
+    fields = {'schema','status','reason','phase','inner_phase_reported','process_exit_code','process_signal',
+              'errno','known_error_class','stderr_bytes_observed','stderr_prefix_bytes','stderr_prefix_sha256',
+              'stderr_complete','stderr_truncated','stderr_limit_reached','stdout_limit_reached',
+              'drain_incomplete','deadline_reached','child_reaped','tested_git_sha','pr_candidate_sha',
+              'run_id','run_attempt'}
+    require(type(doc) is dict and set(doc) == fields)
+    require(doc['schema'] == 'f07-namespace-diagnostic-v1' and doc['status'] == 'FAIL')
+    require(doc['phase'] == 'NAMESPACE_WRAPPER')
+    require(doc['reason'] in {'CHILD_NONZERO','CHILD_SIGNAL','SPAWN_OS_ERROR','STREAM_IO_ERROR',
+                              'DEADLINE','STREAM_LIMIT','DRAIN_INCOMPLETE','CHILD_REAP_INCOMPLETE'})
+    require(doc['known_error_class'] in {'UNKNOWN','EMPTY','NAMESPACE_PERMISSION_ERROR_TEXT','INNER_HELPER_FAILURE_REPORTED'})
+    require(doc['inner_phase_reported'] is None or doc['inner_phase_reported'] in PHASES)
+    require((doc['inner_phase_reported'] is not None) == (doc['known_error_class'] == 'INNER_HELPER_FAILURE_REPORTED'))
+    for key in ('stderr_complete','stderr_truncated','stderr_limit_reached','stdout_limit_reached',
+                'drain_incomplete','deadline_reached','child_reaped'):
+        require(type(doc[key]) is bool)
+    number(doc['stderr_bytes_observed'], 0, STREAM_LIMIT)
+    number(doc['stderr_prefix_bytes'], 0, STDERR_PREFIX)
+    require(doc['stderr_prefix_bytes'] <= doc['stderr_bytes_observed'])
+    require(doc['stderr_truncated'] == (doc['stderr_bytes_observed'] > doc['stderr_prefix_bytes']))
+    require(not doc['stderr_limit_reached'] or doc['stderr_bytes_observed'] == STREAM_LIMIT)
+    require(not doc['stderr_complete'] or not (doc['drain_incomplete'] or doc['stderr_limit_reached']))
+    require(doc['known_error_class'] in ('UNKNOWN','EMPTY') or
+            (doc['stderr_complete'] and not doc['stderr_truncated']))
+    require(doc['known_error_class'] != 'EMPTY' or (doc['stderr_complete'] and doc['stderr_bytes_observed'] == 0))
+    hex_value(doc['stderr_prefix_sha256'],64)
+    if doc['stderr_prefix_bytes'] == 0: require(doc['stderr_prefix_sha256'] == hashlib.sha256(b'').hexdigest())
+    for key, maximum in (('process_exit_code',255),('process_signal',64),('errno',4095)):
+        if doc[key] is not None:
+            number(doc[key], 0 if key == 'process_exit_code' else 1, maximum)
+    require(doc['process_exit_code'] is None or doc['process_signal'] is None)
+    if doc['reason'] == 'CHILD_NONZERO': require(doc['process_exit_code'] is not None and doc['process_exit_code'] > 0)
+    if doc['reason'] == 'CHILD_SIGNAL': require(doc['process_signal'] is not None)
+    if doc['reason'] == 'SPAWN_OS_ERROR':
+        require(doc['process_exit_code'] is None and doc['process_signal'] is None and not doc['child_reaped'])
+    if doc['errno'] is not None: require(doc['reason'] in ('SPAWN_OS_ERROR','STREAM_IO_ERROR'))
+    if doc['reason'] == 'DEADLINE': require(doc['deadline_reached'])
+    if doc['reason'] == 'STREAM_LIMIT': require(doc['stderr_limit_reached'] or doc['stdout_limit_reached'])
+    if doc['reason'] == 'DRAIN_INCOMPLETE': require(doc['drain_incomplete'])
+    if doc['reason'] == 'CHILD_REAP_INCOMPLETE': require(not doc['child_reaped'])
+    hex_value(doc['tested_git_sha'],40);hex_value(doc['pr_candidate_sha'],40)
+    number(doc['run_id']);number(doc['run_attempt'])
+    require(len(encoded(doc)) <= DIAGNOSTIC_MAX)
+    return doc
+
+
+def read_namespace_pipe(descriptor):
+    return os.read(descriptor,4096)
+
+
+def capture_namespace_process(argv, timeout=600):
+    """Fixed caller only. Nonblocking dual pipes; no full-output buffering/file."""
+    import math
+    import selectors
+    import time
+    require(type(timeout) in (int,float) and math.isfinite(timeout) and 0.1 <= timeout <= 600)
+    started = time.monotonic()
+    reserve = min(0.5, timeout/4)
+    deadline = started + timeout - reserve
+    state = dict(reason=None, code=None, errno=None, stderr=b'', stderr_count=0, stdout_count=0,
+                 stderr_eof=False, stderr_limit=False, stdout_limit=False, drain=False, deadline=False, reaped=False)
+    process = None
+    selector = selectors.DefaultSelector()
+    streams = []
+    try:
+        try:
+            process = subprocess.Popen(argv, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+                                       stderr=subprocess.PIPE, close_fds=True)
+        except OSError as exc:
+            state.update(reason='SPAWN_OS_ERROR', errno=exc.errno if type(exc.errno) is int and 1 <= exc.errno <= 4095 else None)
+            return state
+        for name, stream in (('stdout',process.stdout),('stderr',process.stderr)):
+            streams.append(stream)
+            os.set_blocking(stream.fileno(),False)
+            selector.register(stream,selectors.EVENT_READ,name)
+        exited_at = None
+        while selector.get_map() or process.poll() is None:
+            now = time.monotonic()
+            code = process.poll()
+            if code is not None and exited_at is None: exited_at = now
+            if now >= deadline:
+                state.update(reason='DEADLINE',deadline=True)
+                break
+            if exited_at is not None and now-exited_at >= 1:
+                state.update(reason='DRAIN_INCOMPLETE',drain=True)
+                break
+            wait = min(0.05,deadline-now)
+            if exited_at is not None: wait = min(wait,max(0,1-(now-exited_at)))
+            try:
+                ready = selector.select(wait) if selector.get_map() else []
+            except InterruptedError:
+                continue
+            if not selector.get_map() and code is None: time.sleep(wait)
+            for key,_ in ready:
+                try:
+                    chunk = read_namespace_pipe(key.fileobj.fileno())
+                except (BlockingIOError,InterruptedError):
+                    continue
+                except OSError as exc:
+                    state.update(reason='STREAM_IO_ERROR',errno=exc.errno if type(exc.errno) is int and 1 <= exc.errno <= 4095 else None)
+                    break
+                if not chunk:
+                    if key.data == 'stderr': state['stderr_eof'] = True
+                    selector.unregister(key.fileobj)
+                    continue
+                count = key.data+'_count'
+                state[count] = min(STREAM_LIMIT,state[count]+len(chunk))
+                if key.data == 'stderr':
+                    state['stderr'] += chunk[:max(0,STDERR_PREFIX-len(state['stderr']))]
+                if state[count] >= STREAM_LIMIT:
+                    state[key.data+'_limit'] = True
+                    state['reason'] = 'STREAM_LIMIT'
+                    break
+            if state['reason'] is not None: break
+    except OSError as exc:
+        state.update(reason='STREAM_IO_ERROR',errno=exc.errno if type(exc.errno) is int and 1 <= exc.errno <= 4095 else None)
+    finally:
+        selector.close()
+        for stream in streams: stream.close()
+        if process is not None:
+            # Only this exact owned Popen child; no discovery, PID/name/group kill.
+            if process.poll() is None:
+                try: process.terminate()
+                except ProcessLookupError: pass
+                except OSError: state['reason'] = 'CHILD_REAP_INCOMPLETE'
+                try: process.wait(timeout=reserve/2)
+                except subprocess.TimeoutExpired:
+                    try: process.kill()
+                    except ProcessLookupError: pass
+                    except OSError: state['reason'] = 'CHILD_REAP_INCOMPLETE'
+                    try: process.wait(timeout=reserve/2)
+                    except (subprocess.TimeoutExpired,OSError): state['reason'] = 'CHILD_REAP_INCOMPLETE'
+                except OSError: state['reason'] = 'CHILD_REAP_INCOMPLETE'
+            code = process.poll()
+            state.update(code=code,reaped=code is not None)
+    if state['reason'] is None and state['code'] != 0:
+        state['reason'] = 'CHILD_SIGNAL' if state['code'] < 0 else 'CHILD_NONZERO'
+    return state
+
+
+def namespace_failure_receipt(state, tested, candidate, run_id, run_attempt):
+    complete = state['stderr_eof'] and not state['stderr_limit'] and not state['drain']
+    truncated = state['stderr_count'] > len(state['stderr'])
+    error_class, reported = classify_namespace_stderr(state['stderr'],complete,truncated)
+    code = state['code']
+    doc = dict(schema='f07-namespace-diagnostic-v1',status='FAIL',reason=state['reason'],phase='NAMESPACE_WRAPPER',
+        inner_phase_reported=reported,process_exit_code=code if type(code) is int and 0 <= code <= 255 else None,
+        process_signal=-code if type(code) is int and -64 <= code < 0 else None,errno=state['errno'],
+        known_error_class=error_class,stderr_bytes_observed=state['stderr_count'],stderr_prefix_bytes=len(state['stderr']),
+        stderr_prefix_sha256=hashlib.sha256(state['stderr']).hexdigest(),stderr_complete=complete,
+        stderr_truncated=truncated,stderr_limit_reached=state['stderr_limit'],stdout_limit_reached=state['stdout_limit'],
+        drain_incomplete=state['drain'],deadline_reached=state['deadline'],child_reaped=state['reaped'],
+        tested_git_sha=tested,pr_candidate_sha=candidate,run_id=run_id,run_attempt=run_attempt)
+    return validate_namespace_diagnostic(doc)
+
+
+def namespace_supervise(root, tested, candidate, run_id, run_attempt):
+    import sysconfig
+    root = canonical_root(root)
+    parent = canonical_root(os.environ['RUNNER_TEMP'])
+    require(root.parent == parent and re.fullmatch(r'f07-ci\.[A-Za-z0-9]{12}',root.name) is not None)
+    hex_value(tested,40);hex_value(candidate,40)
+    require(all(re.fullmatch('[1-9][0-9]{0,18}',v) is not None for v in (run_id,run_attempt)))
+    number(int(run_id));number(int(run_attempt))
+    lock = native_lock();validate_native_tree(root/'native',lock)
+    library = python_library_path(sys.base_prefix,sysconfig.get_config_var('LIBDIR'))
+    # Same isolation/mount/environment argv as baseline427; no caller-supplied command.
+    argv = [str(root/'native/payload/usr/bin/bwrap'),'--unshare-all','--die-with-parent','--new-session',
+        '--ro-bind','/usr','/usr','--ro-bind','/lib','/lib','--ro-bind','/lib64','/lib64','--symlink','usr/bin','/bin',
+        '--ro-bind','/opt','/opt','--ro-bind','/etc/ld.so.cache','/etc/ld.so.cache','--proc','/proc','--dev','/dev',
+        '--ro-bind',str(ROOT),str(ROOT),'--ro-bind',str(root/'deps'),str(root/'deps'),
+        '--bind',str(root/'runtime'),str(root/'runtime'),'--bind',str(root/'upload'),str(root/'upload'),
+        '--clearenv','--setenv','PATH','/usr/bin:/bin','--setenv','TMPDIR',str(root/'runtime'),
+        '--setenv','PYTHONDONTWRITEBYTECODE','1','--setenv','F07_NETWORK_NAMESPACE_EXPECTED','1',
+        '--setenv','LD_LIBRARY_PATH',library,'--chdir',str(ROOT),str(root/'deps/bin/python'),'-B',
+        'tests/harness/ci_evidence.py','run',str(root/'upload'),tested,candidate]
+    state = capture_namespace_process(argv)
+    if state['reason'] is not None:
+        try:
+            print(encoded(namespace_failure_receipt(state,tested,candidate,int(run_id),int(run_attempt))).decode(),end='')
+        except Exception:
+            print('{"schema":"f07-namespace-diagnostic-v1","status":"FAIL","reason":"DIAGNOSTIC_INVALID"}')
+        raise SystemExit(1)
+    diagnostic('namespace','PASS')
+
 def main():
     action, *args = sys.argv[1:]
     if action == 'suite':
@@ -511,6 +726,9 @@ def main():
         import sysconfig
         phase('python-library')
         print(python_library_path(sys.base_prefix, sysconfig.get_config_var('LIBDIR')))
+    elif action == 'namespace-supervise':
+        phase('namespace')
+        namespace_supervise(*args)
     elif action == 'namespace-result':
         phase('namespace')
         validate_namespace_exit(int(args[0]))

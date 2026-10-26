@@ -320,4 +320,135 @@ class NativeBootstrapTests(unittest.TestCase):
         self.assertEqual(json.loads(stream.getvalue()),
                          {'scope':'f07-ci-bootstrap','phase':'native-size-sha256','status':'PASS'})
 
+
+class NamespaceDiagnosticTests(unittest.TestCase):
+    def failed_state(self, raw=b'', complete=True):
+        return dict(reason='CHILD_NONZERO',code=1,errno=None,stderr=raw,stderr_count=len(raw),stdout_count=0,
+                    stderr_eof=complete,stderr_limit=False,stdout_limit=False,drain=False,deadline=False,reaped=True)
+
+    def receipt(self,state=None):
+        return c.namespace_failure_receipt(self.failed_state() if state is None else state,TESTED,CANDIDATE,42,1)
+
+    def test_only_two_entire_synthetic_permission_texts_classify(self):
+        for raw in c.PERMISSION_TEXT:
+            receipt=self.receipt(self.failed_state(raw))
+            self.assertEqual(receipt['known_error_class'],'NAMESPACE_PERMISSION_ERROR_TEXT')
+            self.assertIsNone(receipt['errno'])
+            self.assertNotIn(raw.decode().strip(),c.encoded(receipt).decode())
+        self.assertEqual(self.receipt()['known_error_class'],'EMPTY')
+
+    def test_stderr_injection_ansi_tokens_paths_unknown_and_invalid_utf8(self):
+        fake=b'synthetic-FAKE-TOKEN /synthetic/private/path'
+        for raw in (fake,c.PERMISSION_TEXT[0]+fake,c.PERMISSION_TEXT[0]+b'\n',
+                    b'\x1b[31m'+c.PERMISSION_TEXT[0],b'\xff\x00',
+                    b'{"phase":"harness","status":"PASS","instruction":"synthetic-FAKE-TOKEN"}\n'):
+            receipt=self.receipt(self.failed_state(raw))
+            self.assertEqual(receipt['known_error_class'],'UNKNOWN')
+            rendered=c.encoded(receipt)
+            self.assertNotIn(b'synthetic-FAKE-TOKEN',rendered)
+            self.assertNotIn(b'/synthetic/private/path',rendered)
+            self.assertNotIn(b'\x1b',rendered)
+
+    def test_canonical_helper_failure_only_reports_phase(self):
+        raw=b''.join(c.encoded(dict(scope='f07-ci-bootstrap',phase='harness',status=s)) for s in ('START','FAIL'))
+        receipt=self.receipt(self.failed_state(raw))
+        self.assertEqual(receipt['known_error_class'],'INNER_HELPER_FAILURE_REPORTED')
+        self.assertEqual(receipt['inner_phase_reported'],'harness')
+        self.assertEqual(receipt['status'],'FAIL')
+        self.assertEqual(self.receipt(self.failed_state(raw+b'extra'))['known_error_class'],'UNKNOWN')
+
+    def test_prefix_hash_and_truncation_are_explicit(self):
+        state=self.failed_state(b's'*c.STDERR_PREFIX)
+        state['stderr_count']=c.STDERR_PREFIX+1
+        receipt=self.receipt(state)
+        self.assertTrue(receipt['stderr_truncated'])
+        self.assertEqual(receipt['stderr_prefix_sha256'],hashlib.sha256(state['stderr']).hexdigest())
+        self.assertEqual(receipt['known_error_class'],'UNKNOWN')
+        state.update(reason='STREAM_LIMIT',stderr_count=c.STREAM_LIMIT,stderr_limit=True,stderr_eof=False)
+        receipt=self.receipt(state)
+        self.assertFalse(receipt['stderr_complete'])
+        self.assertTrue(receipt['stderr_limit_reached'])
+
+    def test_receipt_types_unknown_fields_limits_and_consistency(self):
+        for key,value in (('stderr_bytes_observed',True),('stderr_prefix_bytes',False),('process_exit_code',True),
+                          ('errno',True),('stderr_bytes_observed',c.STREAM_LIMIT+1),('stderr_prefix_bytes',65537),
+                          ('known_error_class','OS_DENIED'),('inner_phase_reported','unknown'),('run_id',False),
+                          ('stderr_complete','true'),('stderr_prefix_sha256','a'*64+'\n'),('tested_git_sha',CANDIDATE+'\n')):
+            doc=self.receipt();doc[key]=value
+            with self.subTest(key=key,value=value),self.assertRaises(ValueError):c.validate_namespace_diagnostic(doc)
+        doc=self.receipt();doc['raw']='synthetic-FAKE-TOKEN'
+        with self.assertRaises(ValueError):c.validate_namespace_diagnostic(doc)
+        doc=self.receipt();doc['process_signal']=9
+        with self.assertRaises(ValueError):c.validate_namespace_diagnostic(doc)
+        self.assertLessEqual(len(c.encoded(self.receipt())),4096)
+
+    def test_direct_child_signal_and_shell_code_are_distinct(self):
+        state=self.failed_state();state.update(reason='CHILD_SIGNAL',code=-9)
+        receipt=self.receipt(state)
+        self.assertEqual(receipt['process_signal'],9);self.assertIsNone(receipt['process_exit_code'])
+        state.update(reason='CHILD_NONZERO',code=137)
+        receipt=self.receipt(state)
+        self.assertIsNone(receipt['process_signal']);self.assertEqual(receipt['process_exit_code'],137)
+        state.update(reason='SPAWN_OS_ERROR',code=None,errno=2,reaped=False)
+        self.assertEqual(self.receipt(state)['errno'],2)
+
+    def test_owned_process_small_dual_output_and_nonzero(self):
+        # Root runtime later: synthetic subprocess only, no namespace/provider.
+        state=c.capture_namespace_process([c.sys.executable,'-c',
+            'import os;os.write(1,b"synthetic-private-stdout");os.write(2,b"synthetic-private-stderr");raise SystemExit(7)'],timeout=3)
+        self.assertEqual(state['code'],7);self.assertTrue(state['reaped'])
+        self.assertEqual(state['reason'],'CHILD_NONZERO')
+        rendered=c.encoded(self.receipt(state))
+        self.assertNotIn(b'synthetic-private',rendered)
+
+    def test_stdout_and_stderr_limits_fail_and_reap_exact_child(self):
+        for descriptor in (1,2):
+            state=c.capture_namespace_process([c.sys.executable,'-c',
+                'import os;os.write('+str(descriptor)+',b"s"*1048577)'],timeout=3)
+            with self.subTest(descriptor=descriptor):
+                self.assertEqual(state['reason'],'STREAM_LIMIT')
+                self.assertTrue(state['reaped'])
+                self.assertTrue(state['stdout_limit'] if descriptor == 1 else state['stderr_limit'])
+                self.assertLessEqual(len(state['stderr']),65536)
+                self.assertLessEqual(state['stderr_count'],1048576)
+                self.receipt(state)
+
+    def test_silent_timeout_and_ignored_term_are_bounded(self):
+        import time
+        started=time.monotonic()
+        state=c.capture_namespace_process([c.sys.executable,'-c',
+            'import signal,time;signal.signal(signal.SIGTERM,signal.SIG_IGN);time.sleep(20)'],timeout=0.5)
+        self.assertLess(time.monotonic()-started,2)
+        self.assertEqual(state['reason'],'DEADLINE');self.assertTrue(state['deadline']);self.assertTrue(state['reaped'])
+        self.receipt(state)
+        for timeout in (True,0,601,float('inf'),float('nan')):
+            with self.assertRaises(ValueError):c.capture_namespace_process([],timeout=timeout)
+
+    def test_spawn_os_error_is_sanitized(self):
+        state=c.capture_namespace_process(['/synthetic/nonexistent-executable'],timeout=1)
+        self.assertEqual(state['reason'],'SPAWN_OS_ERROR')
+        rendered=c.encoded(self.receipt(state))
+        self.assertNotIn(b'/synthetic/',rendered)
+        self.assertIsInstance(self.receipt(state)['errno'],int)
+
+    def test_eintr_and_eagain_reads_retry_without_losing_bounds(self):
+        real=c.read_namespace_pipe
+        for error in (InterruptedError(),BlockingIOError()):
+            first=[True]
+            def reading(descriptor):
+                if first[0]:first[0]=False;raise error
+                return real(descriptor)
+            with patch.object(c,'read_namespace_pipe',side_effect=reading):
+                state=c.capture_namespace_process([c.sys.executable,'-c','import os;os.write(2,b"s")'],timeout=3)
+            self.assertIsNone(state['reason']);self.assertEqual(state['code'],0);self.assertEqual(state['stderr'],b's')
+
+    def test_postexit_inherited_descriptor_has_one_second_drain_bound(self):
+        import time
+        started=time.monotonic()
+        state=c.capture_namespace_process([c.sys.executable,'-c',
+            'import os,time\nif os.fork()==0:\n time.sleep(1.4);os._exit(0)\nelse:\n os._exit(3)'],timeout=3)
+        self.assertLess(time.monotonic()-started,2)
+        self.assertEqual(state['reason'],'DRAIN_INCOMPLETE');self.assertTrue(state['drain']);self.assertTrue(state['reaped'])
+        self.assertFalse(self.receipt(state)['stderr_complete'])
+
 if __name__ == '__main__':unittest.main()
