@@ -127,5 +127,108 @@ class PortableTests(unittest.TestCase):
    path.write_text(json.dumps(doc));v.validate(source,root)
    finding['workflow_ids']=['I07'];path.write_text(json.dumps(doc))
    with self.assertRaises(ValueError):v.validate(source,root)
+class RelationRepairTests(unittest.TestCase):
+ package_copy=PortableTests.package_copy
+ def reject_mutation(self,mutate):
+  source=Path(os.environ.get('CURATION_SOURCE_ROOT',str(v.PACKAGE.parents[2])))
+  with tempfile.TemporaryDirectory(dir=v.PACKAGE) as directory:
+   root=Path(directory);self.package_copy(root)
+   path=root/'component-curation.json';doc=json.loads(path.read_text())
+   mutate(doc['components']);path.write_text(json.dumps(doc))
+   with self.assertRaises(ValueError):v.validate(source,root)
+ def test_relation_deletions_and_duplicates(self):
+  for field in ('direct_source_named_consumers','engineering_prerequisite_edges'):
+   for mutation in ('all','one','duplicate'):
+    def mutate(rows,field=field,mutation=mutation):
+     if mutation=='all':
+      for row in rows:row[field]=[]
+     else:
+      entries=next(row[field] for row in rows if row[field])
+      if mutation=='one':entries.pop()
+      else:entries.append(entries[0])
+    with self.subTest(field=field,mutation=mutation):self.reject_mutation(mutate)
+ def test_consumer_citation_deletion_and_duplicate(self):
+  for mutation in ('one','duplicate'):
+   def mutate(rows):
+    parts=next(r['evidence'] for c in rows for r in c['direct_source_named_consumers'] if len(r['evidence'])>1)
+    if mutation=='one':parts.pop()
+    else:parts.append(parts[0])
+   with self.subTest(mutation=mutation):self.reject_mutation(mutate)
+ def test_swapped_workflow_labels(self):
+  for field in ('direct_source_named_consumers','engineering_prerequisite_edges'):
+   def mutate(rows):
+    entries=next(c[field] for c in rows if len(c[field])>1)
+    entries[0]['workflow_id'],entries[1]['workflow_id']=entries[1]['workflow_id'],entries[0]['workflow_id']
+   with self.subTest(field=field):self.reject_mutation(mutate)
+ def test_prerequisite_parent_identity_retaining_citation(self):
+  for mutation in ('both','workflow','package','position'):
+   def mutate(rows):
+    edge=rows[0]['engineering_prerequisite_edges'][0]
+    self.assertEqual((edge['workflow_id'],edge['package_key']),('I05','WF-I05-VERIFY'))
+    self.assertEqual(edge['evidence']['pointer'],'/issues/207/depends_on/3')
+    if mutation in ('both','workflow'):edge['workflow_id']='I01'
+    if mutation in ('both','package'):edge['package_key']='WF-I01-VERIFY'
+    if mutation=='position':edge['evidence']['pointer']='/issues/207/depends_on/4'
+   with self.subTest(mutation=mutation):self.reject_mutation(mutate)
+ def test_native_contract_field_substitutions(self):
+  for field,value in (('api_boundary','Direct writes to Mautic database tables'),('native_owner','Independent custom campaign owner'),('native_dependencies_text','Operational PostgreSQL only')):
+   def mutate(rows):
+    row=next(c for c in rows if c['component_id']=='CP058')
+    row['authoritative_native_roles'][0][field]=value
+   with self.subTest(field=field):self.reject_mutation(mutate)
+
+class NativeRoleCompletenessTests(unittest.TestCase):
+ package_copy=PortableTests.package_copy
+ reject_mutation=RelationRepairTests.reject_mutation
+ def test_native_role_deletion_one_and_all(self):
+  for mutation in ('one','all'):
+   def mutate(rows):
+    if mutation=='all':
+     for row in rows:row['authoritative_native_roles']=[]
+    else:next(c['authoritative_native_roles'] for c in rows if c['authoritative_native_roles']).pop()
+   with self.subTest(mutation=mutation):self.reject_mutation(mutate)
+ def test_native_role_duplicates(self):
+  def mutate(rows):
+   entries=next(c['authoritative_native_roles'] for c in rows if c['authoritative_native_roles'])
+   entries.append(entries[0].copy())
+  self.reject_mutation(mutate)
+ def test_native_role_extra_on_unrelated_component(self):
+  def mutate(rows):
+   role=next(r for c in rows for r in c['authoritative_native_roles'])
+   next(c for c in rows if not c['authoritative_native_roles'])['authoritative_native_roles'].append(role.copy())
+  self.reject_mutation(mutate)
+ def test_native_role_wrong_fields_and_identity(self):
+  for field in ('native_owner','api_boundary','native_dependencies_text','pointer','path'):
+   def mutate(rows):
+    role=next(r for c in rows for r in c['authoritative_native_roles'])
+    if field=='pointer':role['evidence']['pointer']='/adapters/06'
+    elif field=='path':role['evidence']['path']='reference/components/component_registry.json'
+    else:role[field]='invented native contract value'
+   with self.subTest(field=field):self.reject_mutation(mutate)
+ def test_combined_provider_exclusion_control(self):
+  source=Path(os.environ.get('CURATION_SOURCE_ROOT',str(v.PACKAGE.parents[2])))
+  catalog=json.loads((source/'contracts/adapters/catalog.v1.json').read_text())
+  with tempfile.TemporaryDirectory(dir=v.PACKAGE) as directory:
+   root=Path(directory);self.package_copy(root)
+   doc=json.loads((root/'component-curation.json').read_text())
+   by_id={row['component_id']:row for row in doc['components']}
+   combined=next(a for a in catalog['adapters'] if a['adapter']=='providers')
+   self.assertEqual(combined['component'],'CP141/CP144/CP147')
+   self.assertNotIn(combined['component'],by_id)
+   for cid in ('CP141','CP144','CP147'):self.assertEqual(by_id[cid]['authoritative_native_roles'],[])
+   self.assertEqual(sum(len(row['authoritative_native_roles']) for row in by_id.values()),8)
+   self.assertEqual(v.validate(source,root)['runtime_status'],'NOT_RUN')
+ def test_combined_provider_role_injection_rejected(self):
+  source=Path(os.environ.get('CURATION_SOURCE_ROOT',str(v.PACKAGE.parents[2])))
+  catalog=json.loads((source/'contracts/adapters/catalog.v1.json').read_text())
+  index,native=next((i,a) for i,a in enumerate(catalog['adapters']) if a['adapter']=='providers')
+  pin=json.loads((v.PACKAGE/'source-manifest.json').read_text())
+  digest=next(s['sha256_lf'] for s in pin['sources'] if s['path']=='contracts/adapters/catalog.v1.json')
+  for cid in ('CP141','CP144','CP147'):
+   def mutate(rows):
+    row=next(c for c in rows if c['component_id']==cid)
+    row['authoritative_native_roles'].append({'native_owner':native['native_owner'],'api_boundary':native['api_boundary'],'native_dependencies_text':native['native_dependencies'],'evidence':{'path':'contracts/adapters/catalog.v1.json','pointer':f'/adapters/{index}','sha256_lf':digest},'runtime_state':'NOT_RUN'})
+   with self.subTest(component=cid):self.reject_mutation(mutate)
+
 if __name__=='__main__':unittest.main(verbosity=2)
 

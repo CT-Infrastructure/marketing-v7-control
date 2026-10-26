@@ -90,6 +90,49 @@ def validate(source_root,package=PACKAGE):
  need(doc['qualified'] is False and doc['runtime_status']=='NOT_RUN')
  need(type(rows) is list and len(rows)==147)
  need({r['component_id'] for r in rows}=={f'CP{i:03d}' for i in range(1,148)})
+ # Derive relations only from the bytes already verified against source pins.
+ registry=source_value('reference/components/component_registry.json')['components']
+ component_names={item['component_id']:item['name'] for item in registry}
+ need(len(component_names)==len(registry)==147)
+ names=set(component_names.values());need(len(names)==147)
+ expected_consumers={cid:{} for cid in component_names}
+ by_name={name:cid for cid,name in component_names.items()}
+ for path in pins:
+  if not (path.startswith('reference/workflows/') and path.endswith('.json')):continue
+  workflow=source_value(path);wid=workflow['id'];fields=[]
+  if 'source_software' in workflow:fields.append(('/source_software',workflow['source_software']))
+  fields.extend((f'/software/{i}',value) for i,value in enumerate(workflow['software']))
+  fields.extend((f'/steps/{i}/software',step['software']) for i,step in enumerate(workflow['steps']))
+  for pointer,value in fields:
+   need(type(value) is str)
+   tokens={s.strip() for s in re.split(r',|;| / | \+ ',value) if s.strip()}
+   for name in tokens & names:
+    expected_consumers[by_name[name]].setdefault(wid,set()).add((path,pointer))
+ expected_edges={cid:set() for cid in component_names}
+ issues=source_value('backlog/issues.json')['issues'];need(type(issues) is list)
+ issue_keys=set()
+ for i,issue in enumerate(issues):
+  key=issue['key'];need(type(key) is str and key not in issue_keys);issue_keys.add(key)
+  wid=issue.get('workflow_id')
+  if wid is None:continue
+  need(wid in canonical_workflows)
+  dependencies=issue['depends_on'];need(type(dependencies) is list)
+  need(len(dependencies)==len(set(dependencies)))
+  for position,dependency in enumerate(dependencies):
+   if dependency in component_names:
+    expected_edges[dependency].add((wid,key,'backlog/issues.json',f'/issues/{i}/depends_on/{position}'))
+ # Exact registry membership excludes combined provider component strings.
+ native_path='contracts/adapters/catalog.v1.json'
+ adapters=source_value(native_path)['adapters'];need(type(adapters) is list)
+ expected_roles={cid:set() for cid in component_names}
+ for index,native in enumerate(adapters):
+  need(type(native) is dict and type(native['component']) is str)
+  cid=native['component']
+  if cid not in component_names:continue
+  values=tuple(native[field] for field in ('native_owner','api_boundary','native_dependencies'))
+  need(all(type(value) is str for value in values))
+  identity=(native_path,f'/adapters/{index}',*values)
+  need(identity not in expected_roles[cid]);expected_roles[cid].add(identity)
  for row in rows:
   source=citation(row['registry_evidence']);need(source['component_id']==row['component_id'] and source['name']==row['canonical_name'])
   need(row['qualified'] is False and row['production_authorized'] is False and row['runtime_status']=='NOT_RUN')
@@ -98,7 +141,9 @@ def validate(source_root,package=PACKAGE):
   if source['source_classification']=='CONDITIONAL_NOT_INSTALLED':
    need(row['disposition']=='CONDITIONAL_DEFERRED_NO_INSTALL_AUTHORITY')
   relations=row['direct_source_named_consumers'];need(type(relations) is list and len(relations)==len({r['workflow_id'] for r in relations}))
+  need({r['workflow_id'] for r in relations}==set(expected_consumers[row['component_id']]))
   for relation in relations:
+   actual_parts=[]
    need(type(relation) is dict and relation['workflow_id'] in canonical_workflows)
    need(type(relation.get('evidence')) is list and bool(relation['evidence']))
    for part in relation['evidence']:
@@ -107,8 +152,36 @@ def validate(source_root,package=PACKAGE):
     tokens=[s.strip() for s in re.split(r',|;| / | \+ ',value) if s.strip()]
     need(part['canonical_token']==row['canonical_name'] and row['canonical_name'] in tokens)
     need(PurePosixPath(part['evidence']['path']).stem==relation['workflow_id'])
-  for edge in row['engineering_prerequisite_edges']:need(citation(edge['evidence'])==row['component_id'])
-  for role in row['authoritative_native_roles']:need(citation(role['evidence'])['component']==row['component_id'])
+    actual_parts.append((part['evidence']['path'],part['evidence']['pointer']))
+   need(len(actual_parts)==len(set(actual_parts)))
+   need(set(actual_parts)==expected_consumers[row['component_id']][relation['workflow_id']])
+  edges=row['engineering_prerequisite_edges'];need(type(edges) is list)
+  actual_edges=[]
+  for edge in edges:
+   need(type(edge) is dict and citation(edge['evidence'])==row['component_id'])
+   evidence=edge['evidence'];pointer=evidence['pointer']
+   need(evidence['path']=='backlog/issues.json' and type(pointer) is str)
+   match=re.fullmatch(r'/issues/(0|[1-9][0-9]*)/depends_on/(0|[1-9][0-9]*)',pointer);need(match is not None)
+   parent=issues[int(match[1])];position=int(match[2])
+   need(parent['key']==edge['package_key'] and parent['workflow_id']==edge['workflow_id'])
+   need(parent['depends_on'][position]==row['component_id'])
+   actual_edges.append((edge['workflow_id'],edge['package_key'],evidence['path'],pointer))
+  need(len(actual_edges)==len(set(actual_edges)))
+  need(set(actual_edges)==expected_edges[row['component_id']])
+  roles=row['authoritative_native_roles'];need(type(roles) is list)
+  actual_roles=[]
+  for role in roles:
+   need(type(role) is dict)
+   native=citation(role['evidence']);need(native['component']==row['component_id'])
+   need(role['evidence']['path']=='contracts/adapters/catalog.v1.json')
+   need(role['native_owner']==native['native_owner'])
+   need(role['api_boundary']==native['api_boundary'])
+   need(role['native_dependencies_text']==native['native_dependencies'])
+   values=tuple(role[field] for field in ('native_owner','api_boundary','native_dependencies_text'))
+   need(all(type(value) is str for value in values))
+   actual_roles.append((role['evidence']['path'],role['evidence']['pointer'],*values))
+  need(len(actual_roles)==len(set(actual_roles)))
+  need(set(actual_roles)==expected_roles[row['component_id']])
   for placement in row['native_placement_evidence']:need(row['canonical_name'] in citation(placement['evidence'])['components'])
   for parent in row['explicit_native_parent_support']:need(citation(parent['evidence'])==row['canonical_name'])
  shared=load(package,'shared-contract-evidence.json')
