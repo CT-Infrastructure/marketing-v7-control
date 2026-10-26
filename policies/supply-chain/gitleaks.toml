@@ -1,0 +1,3 @@
+# Use bundled default rules; scoped scans must not inherit a host config.
+[extend]
+useDefault = true

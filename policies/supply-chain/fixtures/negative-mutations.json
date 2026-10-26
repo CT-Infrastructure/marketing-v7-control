@@ -1,0 +1,68 @@
+[
+  {
+    "id": "floating-oci",
+    "path": [
+      "release"
+    ],
+    "value": "latest"
+  },
+  {
+    "id": "digest-newline",
+    "path": [
+      "digest",
+      "value"
+    ],
+    "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n"
+  },
+  {
+    "id": "unpinned-digest",
+    "path": [
+      "digest"
+    ],
+    "value": {
+      "algorithm": "UNSET",
+      "value": "UNSET"
+    }
+  },
+  {
+    "id": "unknown-license",
+    "path": [
+      "license",
+      "expression"
+    ],
+    "value": "UNSET"
+  },
+  {
+    "id": "unknown-provenance",
+    "path": [
+      "provenance",
+      "status"
+    ],
+    "value": "UNSET"
+  },
+  {
+    "id": "stale-scan",
+    "path": [
+      "scans",
+      0,
+      "scanned_at"
+    ],
+    "value": "2026-10-20T12:00:00Z"
+  },
+  {
+    "id": "missing-sbom",
+    "path": [
+      "sbom",
+      "status"
+    ],
+    "value": "NOT_RUN"
+  },
+  {
+    "id": "unknown-rights",
+    "path": [
+      "model_rights",
+      "state"
+    ],
+    "value": "UNSET"
+  }
+]
