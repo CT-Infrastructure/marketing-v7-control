@@ -1,0 +1,636 @@
+"""Explicit Jammy source variant. Inventory is not build or runtime authority."""
+from __future__ import annotations
+import hashlib
+import io
+import json
+import os
+from pathlib import Path, PurePosixPath
+import re
+import stat
+import struct
+import sys
+import tarfile
+import time
+import urllib.request
+import zipfile
+
+ROOT = Path(__file__).resolve().parents[2]
+VARIANT = 'ubuntu-0.9.0-1ubuntu0.3-jammy-source-v1'
+SOURCE_LOCK_SHA256 = '6c8be8dc661d54be89d22c72db9b81d187489ea1dde451d6934f7d39746abe83'
+MAX_ENTRIES, MAX_FILE, MAX_TOTAL = 8192, 8388608, 134217728
+TOOL_CANDIDATES = ('/usr/bin/gcc-11','/usr/bin/as','/usr/bin/ld.bfd','/usr/bin/ninja',
+                   '/usr/bin/pkg-config','/usr/bin/python3','/usr/bin/dpkg-deb',
+                   '/lib/x86_64-linux-gnu/libc.so.6','/lib64/ld-linux-x86-64.so.2',
+                   '/usr/include/stdio.h','/usr/include/linux/version.h',
+                   '/usr/lib/x86_64-linux-gnu/crt1.o','/usr/lib/x86_64-linux-gnu/crti.o',
+                   '/usr/lib/x86_64-linux-gnu/crtn.o','/usr/lib/x86_64-linux-gnu/libc.so')
+
+
+class QualificationHold(ValueError):
+    pass
+
+
+def check(value):
+    if not value: raise ValueError('invalid source-build contract')
+
+
+def hold(reason):
+    raise QualificationHold(reason)
+
+
+def canonical(doc):
+    return (json.dumps(doc,sort_keys=True,separators=(',',':'),allow_nan=False)+'\n').encode('ascii')
+
+
+def digest(raw): return hashlib.sha256(raw).hexdigest()
+
+
+def hex64(value):
+    check(type(value) is str and re.fullmatch('[0-9a-f]{64}',value) is not None)
+    return value
+
+
+def integer(value, maximum, minimum=0):
+    check(type(value) is int and minimum <= value <= maximum)
+    return value
+
+
+def unique(pairs):
+    doc={}
+    for key,value in pairs:
+        check(key not in doc);doc[key]=value
+    return doc
+
+
+def relative(name):
+    check(type(name) is str and 0 < len(name) <= 240 and '\\' not in name and ':' not in name)
+    check(not name.startswith('/') and all(p not in ('','.','..') for p in name.split('/')))
+    check(re.fullmatch('[A-Za-z0-9_+.,@%=/ -]+',name) is not None)
+    return name
+
+
+def own_root(root):
+    root=Path(root)
+    check(root.is_absolute() and root != Path(root.anchor) and root.is_dir() and root.resolve()==root)
+    for part in (root,*root.parents): check(not part.is_symlink())
+    return root
+
+
+def read_file(path, maximum=MAX_FILE, deadline=None):
+    path=Path(path);info=path.lstat()
+    check(stat.S_ISREG(info.st_mode) and info.st_nlink==1 and not path.is_symlink() and info.st_size<=maximum)
+    descriptor=os.open(path,os.O_RDONLY|getattr(os,'O_NOFOLLOW',0)|getattr(os,'O_NONBLOCK',0))
+    chunks=[];size=0
+    with os.fdopen(descriptor,'rb') as stream:
+        opened=os.fstat(stream.fileno())
+        check((opened.st_dev,opened.st_ino,opened.st_size)==(info.st_dev,info.st_ino,info.st_size))
+        while True:
+            if deadline is not None: check(time.monotonic()<deadline)
+            chunk=stream.read(min(65536,maximum-size+1))
+            if not chunk: break
+            size+=len(chunk);check(size<=maximum);chunks.append(chunk)
+    check(size==info.st_size)
+    return b''.join(chunks)
+
+
+def read_json(path, expected, maximum=1048576):
+    raw=read_file(path,maximum);check(digest(raw)==hex64(expected))
+    doc=json.loads(raw,object_pairs_hook=unique);check(raw==canonical(doc));return doc
+
+
+def source_lock():
+    lock=read_json(ROOT/'tests/harness/native-source-ci.lock.json',SOURCE_LOCK_SHA256)
+    check(lock['schema']=='f07-native-source-inputs-v1' and lock['variant']==VARIANT)
+    check(lock['distribution_version']=='0.9.0-1ubuntu0.3')
+    check(lock['limits']['entries']==MAX_ENTRIES and lock['limits']['file_bytes']==MAX_FILE and lock['limits']['aggregate_bytes']==MAX_TOTAL)
+    check(len(lock['patches'])==2 and len(lock['artifacts'])==16)
+    names=set();total=0
+    for item in lock['artifacts']:
+        check('/' not in relative(item['name']) and item['name'] not in names);names.add(item['name'])
+        integer(item['bytes'],MAX_FILE,1);hex64(item['sha256']);total+=item['bytes']
+        check(item['url'].startswith(('https://archive.ubuntu.com/ubuntu/pool/','https://files.pythonhosted.org/packages/')))
+        check(item['url'].split('/')[-1]==item['name'])
+    check(total<=lock['limits']['download_total'])
+    return lock
+
+
+def authorization(expected):
+    doc=read_json(ROOT/'tests/harness/native-build-authorization.lock.json',expected)
+    check(set(doc)=={'schema','variant','status','build_admitted','source_lock_sha256','toolchain','build_adapter',
+                     'result_sha256','binary','elf','runtime_closure','loader','builder_sha256','root_authorization_receipt'})
+    check(doc['schema']=='f07-native-build-authorization-v1' and doc['variant']==VARIANT)
+    check(doc['source_lock_sha256']==SOURCE_LOCK_SHA256 and type(doc['build_admitted']) is bool)
+    check(doc['status'] in ('HOLD_UNAPPROVED','ROOT_AUTHORIZED_EXACT_BUILD'))
+    if doc['status']=='HOLD_UNAPPROVED': check(doc['binary'] is None and doc['result_sha256'] is None)
+    else:
+        check(doc['build_admitted'] and all(doc[k] is not None for k in ('toolchain','build_adapter','result_sha256','binary','elf','runtime_closure','loader','builder_sha256','root_authorization_receipt')))
+        hex64(doc['result_sha256']);hex64(doc['builder_sha256'])
+    return doc
+
+
+def build_gate(lock, auth):
+    if not auth['build_admitted']: hold('BUILD_INVENTORY_REQUIRED')
+    if auth['toolchain'] is None or auth['build_adapter'] is None: hold('TOOLCHAIN_ADAPTER_INVENTORY_REQUIRED')
+    if any(a['members'] is None for a in lock['artifacts'] if a['kind']!='provenance'):
+        hold('ARCHIVE_MEMBER_INVENTORY_REQUIRED')
+    if any(a.get('decoded_tar') is None for a in lock['artifacts'] if a['kind']=='deb'):
+        hold('DEB_DATA_DECODER_INVENTORY_REQUIRED')
+    if auth['runtime_closure'] is None or lock.get('runtime_map') is None: hold('PRIVATE_RUNTIME_CLOSURE_INVENTORY_REQUIRED')
+    if lock['patched_tree_sha256'] is None or lock['generated_output_model'] is None:
+        hold('PATCHED_TREE_OUTPUT_MODEL_REQUIRED')
+    hex64(lock['patched_tree_sha256'])
+
+
+def validate_platform(os_id, version, machine, system):
+    check((os_id,version,machine,system)==('ubuntu','22.04','x86_64','Linux'))
+
+
+def inventory():
+    # Fixed public tool candidates only. No PATH lookup, executable invocation,
+    # environment dump, source import, configure, network or namespace operation.
+    import platform
+    release=platform.freedesktop_os_release()
+    results=[];deadline=time.monotonic()+30
+    for name in TOOL_CANDIDATES:
+        try:
+            path=Path(name).resolve();check(path.is_relative_to('/usr') or path.is_relative_to('/lib'))
+            raw=read_file(path,67108864,deadline)
+            results.append(dict(candidate=name,available=True,bytes=len(raw),sha256=digest(raw)))
+        except (OSError,ValueError): results.append(dict(candidate=name,available=False,bytes=None,sha256=None))
+    return dict(schema='f07-source-readonly-inventory-v1',variant=VARIANT,
+        os_id=release.get('ID') if release.get('ID') in ('ubuntu','debian') else 'OTHER',
+        os_version=release.get('VERSION_ID') if release.get('VERSION_ID') in ('22.04','24.04') else 'OTHER',
+        architecture='x86_64' if platform.machine()=='x86_64' else 'OTHER',tools=results,
+        build_adapter='NOT_INVENTORIED',compiler_closure='NOT_INVENTORIED',
+        source_member_hashes='NOT_INVENTORIED',native_execution='NOT_RUN')
+
+
+def normalized_member(name):
+    check(type(name) is str and len(name)<=242)
+    while name.startswith('./'): name=name[2:]
+    return relative(name.rstrip('/'))
+
+
+def archive_rows(raw, kind, deadline=None):
+    # Data only, bounded in decoded bytes/count. .deb decoded sidecars require
+    # separate root-pinned parent linkage; no dpkg/control/maintainer execution.
+    check(type(raw) is bytes and len(raw)<=MAX_FILE)
+    deadline=time.monotonic()+15 if deadline is None else deadline
+    rows=[];data={};total=0
+    if kind=='wheel':
+        end=raw.rfind(b'PK\x05\x06',max(0,len(raw)-65557))
+        check(end>=0 and end+22<=len(raw))
+        disk,cdisk,local_count,count,cdsize,cdoff,comment=struct.unpack_from('<HHHHIIH',raw,end+4)
+        check(disk==cdisk==0 and local_count==count and count<=MAX_ENTRIES and count!=65535)
+        check(end+22+comment==len(raw) and cdoff+cdsize==end)
+        cursor=cdoff;seen=0
+        while cursor<end:
+            check(cursor+46<=end and raw[cursor:cursor+4]==b'PK\x01\x02')
+            name_size,extra_size,comment_size=struct.unpack_from('<HHH',raw,cursor+28)
+            cursor+=46+name_size+extra_size+comment_size;seen+=1
+            check(cursor<=end and seen<=MAX_ENTRIES)
+        check(seen==count)
+        with zipfile.ZipFile(io.BytesIO(raw)) as archive:
+            for info in archive.infolist():
+                check(time.monotonic()<deadline)
+                name=normalized_member(info.filename)
+                mode=stat.S_IFMT(info.external_attr>>16)
+                check(not info.flag_bits&1 and mode in (0,stat.S_IFREG,stat.S_IFDIR))
+                size=integer(info.file_size,MAX_FILE);total+=size;check(total<=MAX_TOTAL)
+                value=b'' if info.is_dir() else archive.read(info)
+                rows.append(dict(name=name,type='directory' if info.is_dir() else 'file',bytes=size,sha256=None if info.is_dir() else digest(value),link=''))
+                if not info.is_dir(): data[name]=value
+                check(len(rows)<=MAX_ENTRIES)
+    else:
+        with tarfile.open(fileobj=io.BytesIO(raw),mode='r:*') as archive:
+            for info in archive:
+                check(time.monotonic()<deadline)
+                if info.name in ('.','./'): continue
+                name=normalized_member(info.name);size=integer(info.size,MAX_FILE)
+                check(not info.pax_headers and info.type in (tarfile.REGTYPE,tarfile.DIRTYPE,tarfile.SYMTYPE))
+                total+=size;check(total<=MAX_TOTAL)
+                value=b''
+                if info.isfile():
+                    stream=archive.extractfile(info);check(stream is not None)
+                    with stream: value=stream.read(size+1)
+                    check(len(value)==size);data[name]=value
+                rows.append(dict(name=name,type='file' if info.isfile() else 'directory' if info.isdir() else 'symlink',
+                                 bytes=size,sha256=digest(value) if info.isfile() else None,link=info.linkname))
+                check(len(rows)<=MAX_ENTRIES)
+    check(len({r['name'] for r in rows})==len(rows))
+    return rows,data
+
+
+def validate_rows(rows, expected):
+    check(type(rows) is list and type(expected) is list and len(rows)<=MAX_ENTRIES)
+    check(canonical(rows)==canonical(expected))
+    for row in rows:
+        relative(row['name']);integer(row['bytes'],MAX_FILE)
+        check(set(row)=={'name','type','bytes','sha256','link'} and row['type'] in ('file','directory','symlink'))
+        if row['type']=='file': hex64(row['sha256']);check(row['link']=='')
+        if row['type']=='directory': check(row['bytes']==0 and row['sha256'] is None and row['link']=='')
+        if row['type']=='symlink': check(row['bytes']==0 and row['sha256'] is None)
+    check(sum(r['bytes'] for r in rows)<=MAX_TOTAL)
+
+
+def safe_link(name,target):
+    relative(name);check(type(target) is str and not target.startswith('/') and '\\' not in target and ':' not in target)
+    parts=list(PurePosixPath(name).parent.parts)
+    for part in target.split('/'):
+        if part=='..': check(bool(parts));parts.pop()
+        else: check(part not in ('','.'));parts.append(part)
+    check(bool(parts));return '/'.join(parts)
+
+
+def extract_checked(rows, data, root, expected, selected=None, rewrites=None):
+    validate_rows(rows,expected);root=own_root(root);check(not list(root.iterdir()))
+    rewrites={} if rewrites is None else rewrites
+    chosen={r['name'] for r in rows} if selected is None else set(selected)
+    check(chosen <= {r['name'] for r in rows})
+    # Validate link targets and all content before any write.
+    for row in rows:
+        if row['type']=='file': check(digest(data[row['name']])==row['sha256'] and len(data[row['name']])==row['bytes'])
+        if row['type']=='symlink' and row['name'] in chosen:
+            check(safe_link(row['name'],rewrites.get(row['name'],row['link'])) in chosen)
+    for row in rows:
+        if row['name'] not in chosen or row['type']=='symlink': continue
+        path=root/row['name'];path.parent.mkdir(parents=True,exist_ok=True)
+        if row['type']=='directory': path.mkdir(exist_ok=True)
+        else:
+            with path.open('xb') as stream: check(stream.write(data[row['name']])==row['bytes'])
+            path.chmod(0o644)
+    for row in rows:
+        if row['name'] in chosen and row['type']=='symlink':
+            path=root/row['name'];path.parent.mkdir(parents=True,exist_ok=True)
+            path.symlink_to(rewrites.get(row['name'],row['link']))
+
+
+def exact_patch(files, raw, spec):
+    check(type(raw) is bytes and len(raw)==spec['bytes'] and digest(raw)==spec['sha256'] and b'\r' not in raw)
+    lines=raw.decode('utf-8').splitlines(keepends=True);result=dict(files);changed=[];index=0
+    while index<len(lines):
+        if not lines[index].startswith('--- a/'):
+            index+=1;continue
+        name=lines[index][6:].rstrip('\n');relative(name)
+        check(name in spec['modified_files'] and name not in changed and name in files)
+        check(index+1<len(lines) and lines[index+1]=='+++ b/'+name+'\n');index+=2
+        old=files[name].decode('utf-8').splitlines(keepends=True);out=[];cursor=0;hunks=0
+        while index<len(lines) and lines[index].startswith('@@ '):
+            match=re.fullmatch(r'@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@[^\n]*\n',lines[index]);check(match is not None)
+            start,oldcount,newstart,newcount=int(match[1])-1,int(match[2] or 1),int(match[3])-1,int(match[4] or 1)
+            check(cursor<=start<=len(old));out+=old[cursor:start];check(len(out)==newstart)
+            cursor=start;removed=added=0;index+=1
+            while index<len(lines) and lines[index][:1] in (' ','+','-') and not lines[index].startswith('--- a/'):
+                marker,value=lines[index][0],lines[index][1:]
+                if marker in (' ','-'):
+                    check(cursor<len(old) and old[cursor]==value);cursor+=1;removed+=1
+                if marker in (' ','+'): out.append(value);added+=1
+                index+=1
+            check((removed,added)==(oldcount,newcount));hunks+=1
+        check(hunks>0);out+=old[cursor:];result[name]=''.join(out).encode('utf-8');changed.append(name)
+    check(set(changed)==set(spec['modified_files']))
+    return result
+
+
+def patched_files(files, patches, specs):
+    check(len(patches)==len(specs)==2)
+    result=dict(files)
+    for raw,spec in zip(patches,specs): result=exact_patch(result,raw,spec)
+    return result
+
+
+def tree_digest(files):
+    return digest(canonical({relative(name):digest(value) for name,value in sorted(files.items())}))
+
+
+def elf_report(raw):
+    check(type(raw) is bytes and 64<=len(raw)<=MAX_FILE and raw[:7]==b'\x7fELF\x02\x01\x01')
+    e=struct.unpack_from('<16sHHIQQQIHHHHHH',raw);check(e[2]==62 and e[1]==3 and e[9]==56 and e[10]<=128)
+    ph=[]
+    for index in range(e[10]):
+        offset=e[5]+index*56;check(offset+56<=len(raw));p=struct.unpack_from('<IIQQQQQQ',raw,offset)
+        check(p[2]+p[5]<=len(raw));ph.append(p)
+    def mapped(address,size):
+        for p in ph:
+            if p[0]==1 and p[3]<=address and address+size<=p[3]+p[5]:return p[2]+address-p[3]
+        raise ValueError('invalid ELF mapping')
+    dynamic={};needed=[];interpreter=None
+    for p in ph:
+        if p[0]==3:
+            check(0<p[5]<=256);value=raw[p[2]:p[2]+p[5]];check(value.endswith(b'\0'));interpreter=value[:-1].decode('ascii')
+        if p[0]==2:
+            check(p[5]%16==0 and p[5]<=65536)
+            for offset in range(p[2],p[2]+p[5],16):
+                tag,value=struct.unpack_from('<qQ',raw,offset)
+                if tag==0: break
+                if tag==1:needed.append(value)
+                else: check(tag not in dynamic);dynamic[tag]=value
+    check(5 in dynamic and 10 in dynamic and dynamic[10]<=1048576)
+    strings=mapped(dynamic[5],dynamic[10]);end=strings+dynamic[10]
+    def string(index):
+        check(0<=index<dynamic[10]);stop=raw.find(b'\0',strings+index,end);check(stop!=-1)
+        return raw[strings+index:stop].decode('ascii')
+    versions=[]
+    if 0x6ffffffe in dynamic:
+        address=dynamic[0x6ffffffe];count=dynamic.get(0x6fffffff,0);check(count<=128)
+        for _ in range(count):
+            off=mapped(address,16);version,cnt,_,aux,nxt=struct.unpack_from('<HHIII',raw,off);check(version==1 and cnt<=128)
+            a=address+aux
+            for __ in range(cnt):
+                off=mapped(a,16);_,_,_,name,n=struct.unpack_from('<IHHII',raw,off);text=string(name)
+                if text.startswith('GLIBC_'):check(re.fullmatch(r'GLIBC_\d+(?:\.\d+){1,2}',text) is not None);versions.append(text)
+                a+=n
+            address+=nxt
+    report=dict(machine='AMD64',elf_type='ET_DYN',interpreter=interpreter,
+        pie=bool(dynamic.get(0x6ffffffb,0)&0x8000000),bind_now=bool(24 in dynamic or dynamic.get(30,0)&8 or dynamic.get(0x6ffffffb,0)&1),
+        relro=any(p[0]==0x6474e552 for p in ph),nonexec_stack=any(p[0]==0x6474e551 and not p[1]&1 for p in ph),
+        needed=[string(n) for n in needed],rpath=string(dynamic[15]) if 15 in dynamic else None,
+        runpath=string(dynamic[29]) if 29 in dynamic else None,glibc_versions=sorted(set(versions)))
+    check(report['interpreter'] in ('/lib64/ld-linux-x86-64.so.2','/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2'))
+    check(report['rpath'] in (None,'','/../lib') and report['runpath'] in (None,'','/../lib'))
+    check(all(re.fullmatch('[A-Za-z0-9_.+-]{1,80}',n) is not None for n in report['needed']))
+    check(report['pie'] and report['bind_now'] and report['relro'] and report['nonexec_stack'])
+    check('libselinux.so.1' in report['needed'] and 'libcap.so.2' in report['needed'])
+    check(all(tuple(map(int,v[6:].split('.'))) <= (2,35) for v in versions))
+    return report
+
+
+def validate_fingerprints(entries, deadline=None):
+    deadline=time.monotonic()+30 if deadline is None else min(deadline,time.monotonic()+30)
+    check(type(entries) is list and 0<len(entries)<=256)
+    check(len({item['path'] for item in entries})==len(entries))
+    for item in entries:
+        check(set(item)=={'path','bytes','sha256'} and type(item['path']) is str and Path(item['path']).is_absolute())
+        raw=read_file(Path(item['path']).resolve(),67108864,deadline)
+        check(len(raw)==item['bytes'] and digest(raw)==hex64(item['sha256']))
+
+
+def authorized_runtime(result, auth, binary, closure):
+    # A build-generated result cannot approve itself: caller supplies the separately
+    # hash-pinned root authorization document, never an output-derived expectation.
+    if auth['status']!='ROOT_AUTHORIZED_EXACT_BUILD': hold('ROOT_EXACT_BUILD_RESULT_REQUIRED')
+    check(auth['build_admitted'] is True and auth['root_authorization_receipt'] is not None)
+    check(digest(canonical(result))==hex64(auth['result_sha256']))
+    check(result['schema']=='f07-unapproved-native-build-v1' and result['variant']==VARIANT)
+    check(result['source_lock_sha256']==SOURCE_LOCK_SHA256 and result['builder_sha256']==auth['builder_sha256'])
+    check(digest(read_file(Path(__file__)))==auth['builder_sha256'])
+    check(result['toolchain_sha256']==digest(canonical(auth['toolchain'])))
+    validate_fingerprints(auth['toolchain'])
+    check(result['binary']==auth['binary'] and result['elf']==auth['elf'] and result['runtime_closure']==auth['runtime_closure'])
+    check(len(binary)==auth['binary']['bytes'] and digest(binary)==hex64(auth['binary']['sha256']))
+    check(elf_report(binary)==auth['elf'])
+    check(closure==auth['runtime_closure'])
+    check(auth['loader'] is not None);validate_fingerprints([auth['loader']])
+    return auth['binary']
+
+
+def validate_private_tree(root, model, complete=False):
+    root=own_root(root);check(type(model) is dict and len(model)<=MAX_ENTRIES)
+    seen=set();total=0;pending=[root]
+    while pending:
+        base=pending.pop()
+        with os.scandir(base) as entries:
+            for entry in entries:
+                path=Path(entry.path);name=path.relative_to(root).as_posix();check(name in model)
+                spec=model[name];info=entry.stat(follow_symlinks=False)
+                if stat.S_ISDIR(info.st_mode):check(spec['type']=='directory');pending.append(path)
+                elif stat.S_ISLNK(info.st_mode):check(spec['type']=='symlink' and os.readlink(path)==spec['link'] and safe_link(name,spec['link']) in model)
+                else:
+                    check(spec['type']=='file' and stat.S_ISREG(info.st_mode) and info.st_nlink==1)
+                    maximum=integer(spec['bytes'],MAX_FILE);check(info.st_size==maximum if complete else 0<=info.st_size<=maximum)
+                    total+=info.st_size;check(total<=MAX_TOTAL)
+                    if complete:check(digest(read_file(path))==hex64(spec['sha256']))
+                seen.add(name);check(len(seen)<=MAX_ENTRIES and len(pending)<=MAX_ENTRIES)
+    if complete:check(seen==set(model))
+
+
+def fetch_inputs(root, lock, deadline):
+    class NoRedirect(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self,*args):raise ValueError('redirect rejected')
+    root=own_root(root);opener=urllib.request.build_opener(urllib.request.ProxyHandler({}),NoRedirect())
+    data={};total=0
+    for item in lock['artifacts']:
+        check(time.monotonic()<deadline)
+        with opener.open(urllib.request.Request(item['url']),timeout=min(20,max(0.1,deadline-time.monotonic()))) as response:
+            check(response.status==200)
+            chunks=[];size=0
+            while size<=item['bytes']:
+                remaining=deadline-time.monotonic();check(remaining>0)
+                if response.fp is None:break
+                response.fp.raw._sock.settimeout(min(20,remaining))
+                chunk=response.read1(min(4096,item['bytes']-size+1))
+                if not chunk:break
+                chunks.append(chunk);size+=len(chunk)
+            raw=b''.join(chunks)
+        check(len(raw)==item['bytes'] and digest(raw)==item['sha256']);total+=len(raw)
+        check(total<=lock['limits']['download_total'] and time.monotonic()<deadline)
+        with (root/item['name']).open('xb') as stream:check(stream.write(raw)==len(raw))
+        data[item['name']]=raw
+    return data
+
+
+def prepare_tree(root, lock, artifacts, deadline):
+    root=own_root(root);files=None;debian=None;sysrows={};sysdata={}
+    for item in lock['artifacts']:
+        check(time.monotonic()<deadline)
+        raw=artifacts[item['name']];check(len(raw)==item['bytes'] and digest(raw)==item['sha256'])
+        if item['kind']=='provenance':continue
+        if item['kind']=='deb':
+            # A root-authenticated decoded sidecar is required when stdlib cannot
+            # decode the package compression. Its parent digest is part of lock.
+            sidecar=item.get('decoded_tar')
+            if sidecar is None:hold('DEB_DATA_SIDECAR_INVENTORY_REQUIRED')
+            check(sidecar['parent_sha256']==item['sha256'])
+            check('/' not in relative(sidecar['name']));integer(sidecar['bytes'],MAX_FILE,1);hex64(sidecar['sha256'])
+            decoded=read_file(root/'downloads'/sidecar['name'])
+            check(len(decoded)==sidecar['bytes'] and digest(decoded)==sidecar['sha256'])
+            rows,data=archive_rows(decoded,'tar',deadline)
+        else:rows,data=archive_rows(raw,item['kind'],deadline)
+        validate_rows(rows,item['members'])
+        if item['kind']=='orig':
+            prefix='bubblewrap-0.9.0/'
+            check(all(name.startswith(prefix) for name in data))
+            check(not any(row['type']=='symlink' for row in rows))
+            files={name[len(prefix):]:value for name,value in data.items()}
+        elif item['kind']=='debian':debian=data
+        elif item['kind']=='wheel':
+            target=root/'tools';target.mkdir();extract_checked(rows,data,target,item['members'])
+        else:
+            for row in rows:
+                if row['name'] not in item['extract_paths']:continue
+                name=row['name']
+                if name in sysrows:check(canonical(sysrows[name])==canonical(row))
+                sysrows[name]=row
+                if row['type']=='file':sysdata[name]=data[name]
+    check(files is not None and debian is not None)
+    series=debian['debian/patches/series'].decode().splitlines()
+    check(series==[p['series_entry'] for p in lock['patches']])
+    patches=[debian[p['member']] for p in lock['patches']]
+    files=patched_files(files,patches,lock['patches']);check(tree_digest(files)==lock['patched_tree_sha256'])
+    target=root/'source';target.mkdir()
+    for name,value in files.items():
+        relative(name);path=target/name;path.parent.mkdir(parents=True,exist_ok=True)
+        with path.open('xb') as stream:check(stream.write(value)==len(value))
+    sysroot=root/'sysroot';sysroot.mkdir()
+    rows=list(sysrows.values());extract_checked(rows,sysdata,sysroot,rows,rewrites=lock['symlink_rewrites'])
+    return tree_digest(files)
+
+
+def runtime_closure(root, expected):
+    check(type(expected) is list and 0<len(expected)<=128)
+    result=[]
+    for item in expected:
+        name=relative(item['path']);raw=read_file(root/name)
+        check(len(raw)==item['bytes'] and digest(raw)==hex64(item['sha256']))
+        result.append(dict(path=name,bytes=len(raw),sha256=digest(raw)))
+    check(len({x['path'] for x in result})==len(result));return result
+
+def build_unapproved(root, lock, auth, deadline=None):
+    # No code/configure/process executes while unknown facts remain null.
+    build_gate(lock,auth);root=own_root(root)
+    deadline=time.monotonic()+90 if deadline is None else deadline
+    validate_fingerprints(auth['toolchain'],deadline)
+    validate_private_tree(root,lock['generated_output_model'],complete=False)
+    check(tree_digest({p.relative_to(root/'source').as_posix():read_file(p) for p in (root/'source').rglob('*') if p.is_file()})==lock['patched_tree_sha256'])
+    adapter=auth['build_adapter'];check(set(adapter)=={'path','bytes','sha256','protocol','network','filesystem'})
+    check((adapter['protocol'],adapter['network'],adapter['filesystem'])==('f07-private-build-plan-v1','deny','private-build-v1'))
+    validate_fingerprints([{k:adapter[k] for k in ('path','bytes','sha256')}])
+    # Root-admitted adapter executes this closed plan in its independently qualified
+    # filesystem/network boundary. No guessed unshare/bwrap/container fallback.
+    plan=dict(schema='f07-private-build-plan-v1',stage='build',variant=VARIANT,source_lock_sha256=SOURCE_LOCK_SHA256,
+              source_tree_sha256=lock['patched_tree_sha256'],recipe=lock['recipe'],toolchain=auth['toolchain'],
+              sysroot='sysroot',source='source',build='build',runtime='runtime',tests='NOT_RUN',install=False,
+              environment=dict(PYTHONPATH='tools',PKG_CONFIG_LIBDIR='sysroot/usr/lib/x86_64-linux-gnu/pkgconfig',
+                  PKG_CONFIG_SYSROOT_DIR='sysroot',LDFLAGS='-Lsysroot/usr/lib/x86_64-linux-gnu -Lsysroot/lib/x86_64-linux-gnu -Wl,-z,now'),
+              generated_output_model=lock['generated_output_model'],runtime_closure=auth['runtime_closure'])
+    path=root/'build-plan.json'
+    with path.open('xb') as stream:check(stream.write(canonical(plan))==len(canonical(plan)))
+    from ci_evidence import capture_namespace_process
+    remaining=deadline-time.monotonic();check(remaining>=0.1)
+    state=capture_namespace_process([adapter['path'],'--f07-build-plan',str(path)],timeout=min(90,remaining))
+    check(state['reason'] is None and state['code']==0)
+    validate_private_tree(root,lock['generated_output_model'],complete=False)
+    check(tree_digest({p.relative_to(root/'source').as_posix():read_file(p) for p in (root/'source').rglob('*') if p.is_file()})==lock['patched_tree_sha256'])
+    validate_fingerprints(auth['toolchain'],deadline)
+    validate_private_tree(root,lock['generated_output_model'],complete=False)
+    binarypath=root/'runtime/bin/bwrap'
+    check(not binarypath.lstat().st_mode&0o6000)
+    if hasattr(os,'listxattr'):check('security.capability' not in os.listxattr(binarypath))
+    binary=read_file(binarypath);report=elf_report(binary)
+    config=read_file(root/'build/config.h');check(b'#define HAVE_SELINUX 1' in config.splitlines())
+    result=dict(schema='f07-unapproved-native-build-v1',variant=VARIANT,status='UNAPPROVED',
+        source_lock_sha256=SOURCE_LOCK_SHA256,source_tree_sha256=lock['patched_tree_sha256'],
+        builder_sha256=digest(read_file(Path(__file__))),toolchain_sha256=digest(canonical(auth['toolchain'])),
+        recipe_sha256=digest(canonical(lock['recipe'])),binary=dict(bytes=len(binary),sha256=digest(binary)),
+        elf=report,runtime_closure=runtime_closure(root,auth['runtime_closure']),vendor_tests='NOT_RUN',production='NOT_RUN')
+    # Result is never copied into the authorization document or launched here.
+    return result
+
+
+def source_bootstrap(root, expected_authorization):
+    import platform
+    release=platform.freedesktop_os_release()
+    validate_platform(release.get('ID'),release.get('VERSION_ID'),platform.machine(),platform.system())
+    lock=source_lock();auth=authorization(expected_authorization);build_gate(lock,auth)
+    root=own_root(root)
+    with (root/'runtime/source-clock.json').open('xb') as clock:
+        stamp=time.monotonic();raw=canonical(dict(schema='f07-source-clock-v1',start=stamp,deadline=stamp+540))
+        check(clock.write(raw)==len(raw))
+    target=root/'sourcebuild';check(not target.exists());target.mkdir(mode=0o700)
+    deadline=time.monotonic()+90
+    downloads=target/'downloads';downloads.mkdir()
+    inputs=fetch_inputs(downloads,lock,deadline)
+    adapter=auth['build_adapter'];validate_fingerprints([{k:adapter[k] for k in ('path','bytes','sha256')}])
+    check((adapter['protocol'],adapter['network'],adapter['filesystem'])==('f07-private-build-plan-v1','deny','private-build-v1'))
+    decode_plan=dict(schema='f07-private-build-plan-v1',stage='decode-data-only',artifacts=lock['artifacts'],install=False)
+    planpath=target/'decode-plan.json'
+    with planpath.open('xb') as stream:check(stream.write(canonical(decode_plan))==len(canonical(decode_plan)))
+    from ci_evidence import capture_namespace_process
+    remaining=deadline-time.monotonic();check(remaining>=0.1)
+    decoded=capture_namespace_process([adapter['path'],'--f07-build-plan',str(planpath)],timeout=min(90,remaining))
+    check(decoded['reason'] is None and decoded['code']==0)
+    prepare_tree(target,lock,inputs,deadline);check(time.monotonic()<deadline)
+    for item in auth['runtime_closure']:
+        name=relative(item['path']);check(name.startswith('runtime/lib/'))
+        source=relative(lock['runtime_map'][name]);check(source.startswith('sysroot/'))
+        raw=read_file(target/source);check(len(raw)==item['bytes'] and digest(raw)==item['sha256'])
+        path=target/name;path.parent.mkdir(parents=True,exist_ok=True)
+        with path.open('xb') as stream:check(stream.write(raw)==len(raw))
+    # A qualified adapter must supply any root-pinned decoded sidecars before
+    # staging; their absence is a repairable inventory gate, never a fallback.
+    result=build_unapproved(target,lock,auth,deadline)
+    check(time.monotonic()<deadline)
+    raw=canonical(result);check(len(raw)<=65536)
+    with (target/'build-result.json').open('xb') as stream:check(stream.write(raw)==len(raw))
+    if auth['status']!='ROOT_AUTHORIZED_EXACT_BUILD':
+        print(raw.decode(),end='');hold('ROOT_EXACT_BUILD_RESULT_REQUIRED')
+    binary=read_file(target/'runtime/bin/bwrap');closure=runtime_closure(target,auth['runtime_closure'])
+    authorized_runtime(result,auth,binary,closure)
+    return result
+
+
+def runtime_budget(root):
+    raw=read_file(own_root(root)/'runtime/source-clock.json',1024)
+    doc=json.loads(raw,object_pairs_hook=unique);check(raw==canonical(doc) and set(doc)=={'schema','start','deadline'})
+    check(doc['schema']=='f07-source-clock-v1' and type(doc['start']) is float and type(doc['deadline']) is float)
+    check(abs(doc['deadline']-doc['start']-540)<0.000001 and doc['start']<=time.monotonic()<doc['deadline'])
+    remaining=doc['deadline']-time.monotonic();check(remaining>=0.1);return min(600,remaining)
+
+
+def runtime_prefix(root, expected_authorization):
+    target=own_root(root)/'sourcebuild';lock=source_lock();auth=authorization(expected_authorization)
+    build_gate(lock,auth);validate_private_tree(target,lock['generated_output_model'],complete=False)
+    result_raw=read_file(target/'build-result.json',65536)
+    result=json.loads(result_raw,object_pairs_hook=unique);check(result_raw==canonical(result))
+    binary=read_file(target/'runtime/bin/bwrap');closure=runtime_closure(target,auth['runtime_closure'])
+    authorized_runtime(result,auth,binary,closure)
+    check(auth['loader']['path'].startswith(('/lib/','/lib64/','/usr/lib/')))
+    return [auth['loader']['path'],'--inhibit-cache','--library-path',str(target/'runtime/lib'),str(target/'runtime/bin/bwrap')]
+
+def deb_data_inventory(raw):
+    check(type(raw) is bytes and len(raw)<=MAX_FILE and raw[:8]==b'!<arch>\n')
+    offset=8;entries=[];data=[]
+    while offset<len(raw):
+        check(offset+60<=len(raw));header=raw[offset:offset+60];check(header[58:]==b'`\n')
+        name=header[:16].decode('ascii').strip().rstrip('/');relative(name)
+        text=header[48:58].decode('ascii').strip();check(re.fullmatch('[0-9]{1,10}',text) is not None)
+        size=integer(int(text),MAX_FILE);start=offset+60;check(start+size<=len(raw))
+        entries.append(dict(name=name,bytes=size,sha256=digest(raw[start:start+size])))
+        if name.startswith('data.tar.'):data.append(name)
+        offset=start+size+(size%2);check(len(entries)<=8)
+    check(offset==len(raw) and len(data)==1 and any(x['name']=='debian-binary' for x in entries))
+    return dict(ar_members=entries,data_member=data[0],decoded_members=None,disposition='ROOT_PINNED_DATA_DECODER_REQUIRED')
+
+
+def inventory_artifacts(root):
+    root=own_root(root);lock=source_lock();deadline=time.monotonic()+30;result=[];original=None;debian=None
+    for item in lock['artifacts']:
+        raw=read_file(root/item['name'],MAX_FILE,deadline)
+        check(len(raw)==item['bytes'] and digest(raw)==item['sha256'])
+        row=dict(name=item['name'],bytes=len(raw),sha256=digest(raw),kind=item['kind'])
+        if item['kind']=='deb':row['inventory']=deb_data_inventory(raw)
+        elif item['kind']!='provenance':
+            members,data=archive_rows(raw,item['kind'],deadline);row['members']=members
+            if item['kind']=='orig':
+                prefix='bubblewrap-0.9.0/';check(all(name.startswith(prefix) for name in data))
+                original={name[len(prefix):]:value for name,value in data.items()}
+            if item['kind']=='debian':debian=data
+        result.append(row)
+    return dict(schema='f07-source-artifact-inventory-v1',variant=VARIANT,artifacts=result,
+                third_party_code_execution='NOT_RUN',build='NOT_RUN',authorization='NOT_GRANTED')
+
+def main():
+    if sys.argv[1:]==['inventory']:
+        raw=canonical(inventory());check(len(raw)<=65536)
+    elif len(sys.argv)==3 and sys.argv[1]=='inventory-artifacts':
+        raw=canonical(inventory_artifacts(sys.argv[2]));check(len(raw)<=1048576)
+    else:raise ValueError('unsupported readonly command')
+    print(raw.decode(),end='')
+
+
+if __name__=='__main__':
+    try: main()
+    except QualificationHold as exc:
+        print(canonical(dict(schema='f07-source-status-v1',status='HOLD',reason=str(exc))).decode(),end='');sys.exit(2)
+    except Exception:
+        print('{"schema":"f07-source-status-v1","status":"FAIL","reason":"CONTRACT_INVALID"}');sys.exit(1)

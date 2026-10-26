@@ -13,11 +13,13 @@ case "$mode" in
     trap 'exit 143' TERM
     trap 'exit 130' INT
     mkdir "$root/runtime" "$root/upload"
-    python -B tests/harness/ci_evidence.py native-bootstrap "$root"
+    test "${F07_NATIVE_VARIANT:?}" = ubuntu-0.9.0-1ubuntu0.3-jammy-source-v1
+    python -B tests/harness/ci_evidence.py source-inventory
+    python -B tests/harness/ci_evidence.py source-bootstrap "$root"
     python -m venv --copies "$root/deps"
     "$root/deps/bin/python" -m pip --disable-pip-version-check install --no-cache-dir --no-index --require-hashes --only-binary=:all: -r tests/harness/requirements-ci.lock
     # Direct reviewed wheel URLs remain usable with --no-index; no index resolution.
-    python -B tests/harness/ci_evidence.py namespace-supervise "$root" "$GITHUB_SHA" "$F07_CANDIDATE_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT"
+    python -B tests/harness/ci_evidence.py namespace-supervise "$root" "$GITHUB_SHA" "$F07_CANDIDATE_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$F07_NATIVE_VARIANT"
     python -B tests/harness/ci_evidence.py check "$root/upload" "$GITHUB_SHA" "$F07_CANDIDATE_SHA"
     ;;
   metadata)

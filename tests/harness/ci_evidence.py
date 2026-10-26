@@ -25,6 +25,8 @@ SOURCE = (
     'tests/harness/ci_evidence.py', 'tests/harness/test_ci_evidence.py',
     'tests/harness/requirements-ci.lock', 'tests/harness/README.md',
     'tests/harness/native-ci.lock.json',
+    'tests/harness/native_source_build.py','tests/harness/test_native_source_build.py',
+    'tests/harness/native-source-ci.lock.json','tests/harness/native-build-authorization.lock.json',
     'tests/harness/test_synthetic.py', 'tests/harness/test_probe_network.py',
     'tests/harness/test_export_retention.py', 'tests/harness/synthetic.py',
     'tests/harness/probe_network.py', 'tests/harness/export_retention.py',
@@ -279,10 +281,14 @@ def cleanup(root, runtime_only=False):
     root = canonical_root(root)
     parent = canonical_root(os.environ['RUNNER_TEMP'])
     require(root.parent == parent and re.fullmatch(r'f07-ci\.[A-Za-z0-9]{12}', root.name) is not None)
-    allowed = {'runtime'} if runtime_only else {'runtime', 'upload', 'deps', 'native'}
-    require(set(p.name for p in root.iterdir()) <= {'runtime', 'upload', 'deps', 'native'})
+    allowed = {'runtime'} if runtime_only else {'runtime', 'upload', 'deps', 'native', 'sourcebuild'}
+    require(set(p.name for p in root.iterdir()) <= {'runtime', 'upload', 'deps', 'native', 'sourcebuild'})
     if (root/'native').exists():
         validate_native_tree(root/'native', native_lock(), complete=False)
+    if (root/'sourcebuild').exists():
+        import native_source_build as source_build
+        model=source_build.source_lock()['generated_output_model']
+        source_build.validate_private_tree(root/'sourcebuild',model,complete=False)
     # Validate the entire bounded private tree before deleting anything. No links followed.
     paths = []
     for name in allowed:
@@ -293,6 +299,8 @@ def cleanup(root, runtime_only=False):
             for entry in [Path(base), *(Path(base)/n for n in dirs+files)]:
                 info = entry.lstat()
                 if entry.is_symlink():
+                    if entry.is_relative_to(root/'sourcebuild'):
+                        continue  # Exact source model/link targets validated above.
                     require(entry == root/'deps/lib64' and os.readlink(entry) == 'lib')
                     continue
                 require(stat.S_ISDIR(info.st_mode) or (stat.S_ISREG(info.st_mode) and info.st_nlink == 1))
@@ -686,7 +694,9 @@ def namespace_failure_receipt(state, tested, candidate, run_id, run_attempt):
     return validate_namespace_diagnostic(doc)
 
 
-def namespace_supervise(root, tested, candidate, run_id, run_attempt):
+SOURCE_BUILD_AUTHORIZATION_SHA256 = '85de32f8eba0691dc66168e4bcb49af9125c691ea9fc545a780fba74c845dba9'
+
+def namespace_supervise(root, tested, candidate, run_id, run_attempt, native_variant='legacy-noble-v1'):
     import sysconfig
     root = canonical_root(root)
     parent = canonical_root(os.environ['RUNNER_TEMP'])
@@ -694,10 +704,18 @@ def namespace_supervise(root, tested, candidate, run_id, run_attempt):
     hex_value(tested,40);hex_value(candidate,40)
     require(all(re.fullmatch('[1-9][0-9]{0,18}',v) is not None for v in (run_id,run_attempt)))
     number(int(run_id));number(int(run_attempt))
-    lock = native_lock();validate_native_tree(root/'native',lock)
+    if native_variant=='legacy-noble-v1':
+        lock = native_lock();validate_native_tree(root/'native',lock)
+        prefix=[str(root/'native/payload/usr/bin/bwrap')];timeout=600
+    elif native_variant=='ubuntu-0.9.0-1ubuntu0.3-jammy-source-v1':
+        import native_source_build as source_build
+        prefix=source_build.runtime_prefix(root,SOURCE_BUILD_AUTHORIZATION_SHA256)
+        timeout=source_build.runtime_budget(root)
+    else:
+        raise ValueError('unsupported explicit native variant')
     library = python_library_path(sys.base_prefix,sysconfig.get_config_var('LIBDIR'))
     # Same isolation/mount/environment argv as baseline427; no caller-supplied command.
-    argv = [str(root/'native/payload/usr/bin/bwrap'),'--unshare-all','--die-with-parent','--new-session',
+    argv = [*prefix,'--unshare-all','--die-with-parent','--new-session',
         '--ro-bind','/usr','/usr','--ro-bind','/lib','/lib','--ro-bind','/lib64','/lib64','--symlink','usr/bin','/bin',
         '--ro-bind','/opt','/opt','--ro-bind','/etc/ld.so.cache','/etc/ld.so.cache','--proc','/proc','--dev','/dev',
         '--ro-bind',str(ROOT),str(ROOT),'--ro-bind',str(root/'deps'),str(root/'deps'),
@@ -706,7 +724,7 @@ def namespace_supervise(root, tested, candidate, run_id, run_attempt):
         '--setenv','PYTHONDONTWRITEBYTECODE','1','--setenv','F07_NETWORK_NAMESPACE_EXPECTED','1',
         '--setenv','LD_LIBRARY_PATH',library,'--chdir',str(ROOT),str(root/'deps/bin/python'),'-B',
         'tests/harness/ci_evidence.py','run',str(root/'upload'),tested,candidate]
-    state = capture_namespace_process(argv)
+    state = capture_namespace_process(argv,timeout=timeout)
     if state['reason'] is not None:
         try:
             print(encoded(namespace_failure_receipt(state,tested,candidate,int(run_id),int(run_attempt))).decode(),end='')
@@ -719,8 +737,18 @@ def main():
     action, *args = sys.argv[1:]
     if action == 'suite':
         require(args in (['original'], ['helper']))
-        print(encoded(suite(list(ORIGINAL) if args[0] == 'original' else ['test_ci_evidence'],
+        print(encoded(suite(list(ORIGINAL) if args[0] == 'original' else ['test_ci_evidence','test_native_source_build'],
                             54 if args[0] == 'original' else None)).decode(), end='')
+    elif action == 'source-inventory':
+        import native_source_build as source_build
+        print(source_build.canonical(source_build.inventory()).decode(),end='')
+    elif action == 'source-bootstrap':
+        import native_source_build as source_build
+        try:
+            source_build.source_bootstrap(*args,SOURCE_BUILD_AUTHORIZATION_SHA256)
+        except source_build.QualificationHold as exc:
+            print(source_build.canonical(dict(schema='f07-source-status-v1',status='HOLD',reason=str(exc))).decode(),end='')
+            raise SystemExit(2)
     elif action == 'native-bootstrap':
         native_bootstrap(*args)
     elif action == 'python-library':
