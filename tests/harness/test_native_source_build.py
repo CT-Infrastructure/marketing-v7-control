@@ -26,12 +26,18 @@ class SourceContractTests(unittest.TestCase):
 
     def test_hold_never_reaches_fetch_build_or_native_execution(self):
         lock=s.source_lock();auth=s.authorization(c.SOURCE_BUILD_AUTHORIZATION_SHA256)
-        with patch.object(s,'fetch_inputs',side_effect=AssertionError('no download')), \
-             patch.object(s,'build_unapproved',side_effect=AssertionError('no build')), \
-             patch.object(c,'capture_namespace_process',side_effect=AssertionError('no process')):
-            with self.assertRaises(s.QualificationHold):s.build_gate(lock,auth)
+        with patch.object(s,'fetch_inputs',side_effect=AssertionError('no download')) as fetch, \
+             patch.object(s,'validate_fingerprints',side_effect=AssertionError('no build preparation')) as prepare, \
+             patch.object(c,'capture_namespace_process',side_effect=AssertionError('no process')) as process:
+            with self.assertRaisesRegex(s.QualificationHold,'^BUILD_INVENTORY_REQUIRED$'):
+                s.build_gate(lock,auth)
             with tempfile.TemporaryDirectory() as temp:
-                with self.assertRaises(s.QualificationHold):s.build_unapproved(Path(temp).resolve(),lock,auth)
+                root=Path(temp).resolve()
+                self.assertEqual(s.own_root(root),root)
+                with self.assertRaisesRegex(s.QualificationHold,'^BUILD_INVENTORY_REQUIRED$'):
+                    s.build_unapproved(root,lock,auth)
+                self.assertEqual(list(root.iterdir()),[])
+            fetch.assert_not_called();prepare.assert_not_called();process.assert_not_called()
         with self.assertRaises(s.QualificationHold):s.authorized_runtime({},auth,b'',[])
 
     def test_explicit_jammy_mode_keeps_legacy_platform_contract(self):
