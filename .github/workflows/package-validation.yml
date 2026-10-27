@@ -62,3 +62,34 @@ jobs:
       - name: Dispose owned scratch while runner survives
         if: always()
         run: bash .github/scripts/validate-f07-harness.sh cleanup
+  f07-builder-public-inventory:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      F07_TASK: F07
+      F07_CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Inventory fixed public builder files without invoking tools
+        run: python3 -I -B tests/harness/native_builder_inventory.py inventory "${{ runner.temp }}/f07-builder-inventory-${{ github.run_id }}-${{ github.run_attempt }}"
+      - name: Upload bounded public inventory only
+        id: f07-builder-upload
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: f07-builder-inventory-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/f07-builder-inventory-${{ github.run_id }}-${{ github.run_attempt }}/inventory.json
+            ${{ runner.temp }}/f07-builder-inventory-${{ github.run_id }}-${{ github.run_attempt }}/manifest.json
+          retention-days: 7
+          archive: true
+          if-no-files-found: error
+          compression-level: 6
+          overwrite: false
+          include-hidden-files: false
+      - name: Dispose only this inventory root while runner survives
+        if: always()
+        run: python3 -I -B tests/harness/native_builder_inventory.py cleanup "${{ runner.temp }}/f07-builder-inventory-${{ github.run_id }}-${{ github.run_attempt }}"
