@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-python3 -I -B - "$@" <<'PY'
+python3 -I -S -B - "$@" <<'PY'
 import hashlib,json,os,re,stat,sys,time,subprocess,selectors
 from pathlib import Path
 EXPECTED_SIZE=2235
@@ -22,6 +22,23 @@ def read_fixed(p,cap):
         need(ident(os.fstat(stream.fileno()))==ident(before));raw=stream.read(cap+1)
         need(ident(os.fstat(stream.fileno()))==ident(before))
     need(len(raw)==before.st_size and ident(p.lstat())==ident(before));return raw,before
+
+def parse_release(raw):
+    # Parse data only: no shell expansion, evaluation, comments or extra keys.
+    need(type(raw) is bytes and len(raw)<=8192)
+    allowed=('ID','VERSION_ID','VERSION_CODENAME','BUILD_ID','PRETTY_NAME');fields={}
+    for line in raw.decode('ascii').splitlines():
+        if not line or line.startswith('#'):continue
+        key,sep,value=line.partition('=');need(sep and re.fullmatch('[A-Z_][A-Z0-9_]*',key))
+        if key not in allowed:continue
+        need(key not in fields and len(value)<=258)
+        if value.startswith(('"',"'")):
+            need(len(value)>=2 and value[-1]==value[0]);value=value[1:-1]
+        need(len(value)<=256 and all(32<=ord(char)<=126 for char in value))
+        need('\\' not in value and '"' not in value and "'" not in value)
+        fields[key]=value
+    need(fields.get('ID')=='ubuntu' and fields.get('VERSION_ID')=='22.04')
+    return {'status':'OBSERVED_PUBLIC_OS_FIELDS','fields':fields}
 
 def package_query(arguments,kind):
     # Fixed executable/argv, no PATH search or shell. Kill/reap only this child.
@@ -90,12 +107,12 @@ def main():
         wrapper.update(status='OBSERVED_PUBLIC_FILE_ONLY',bytes=len(raw),sha256=digest,matches_expected=(len(raw)==EXPECTED_SIZE and digest==EXPECTED_SHA))
     except FileNotFoundError:wrapper['status']='MISSING'
     except Exception:pass
-    release={'status':'UNAVAILABLE','raw_ascii':None}
+    release={'status':'UNAVAILABLE','fields':{}}
     try:
         path=Path('/etc/os-release');directory(path.parent);before=path.lstat()
         if stat.S_ISLNK(before.st_mode):
             link=os.readlink(path);need(link in ('../usr/lib/os-release','/usr/lib/os-release'));need(ident(path.lstat())==ident(before));path=Path('/usr/lib/os-release')
-        raw,_=read_fixed(path,8192);release={'status':'OBSERVED_PUBLIC_OS_BYTES','raw_ascii':raw.decode('ascii')}
+        raw,_=read_fixed(path,8192);release=parse_release(raw)
     except Exception:pass
     doc={'schema':'f07-fixed-public-wrapper-diagnostic-v1','disposition':'DIAGNOSTIC_ONLY_NOT_ACCEPTANCE','repository':'CT-Infrastructure/marketing-v7-control','job':'f07-wrapper-diagnostic','tested_git_sha':tested,'pr_candidate_sha':candidate,'run_id':run,'run_attempt':attempt,'source_sha256':sources,'runner':{'os':'Linux','arch':'X64','image_os':'ubuntu22','image_version':image},'wrapper_path':str(WRAPPER),'expected':{'bytes':EXPECTED_SIZE,'sha256':EXPECTED_SHA},'observed':wrapper,'os_release':release,'package_versions':package_query(['-W','-f=${binary:Package}\t${Version}\n','pkg-config','pkgconf'],'version'),'package_owner':package_query(['-S',str(WRAPPER)],'owner'),'native_execution':'NOT_RUN','adoption':'NOT_AUTHORIZED','retention_days_configured':7,'elapsed_seven_day_deletion':'NOT_RUN','service_artifact_metadata':'ROOT_SAME_RUN_READBACK_REQUIRED'}
     need(sources=={name:hashlib.sha256(read_fixed(checkout/name,65536)[0]).hexdigest() for name in SOURCES})
