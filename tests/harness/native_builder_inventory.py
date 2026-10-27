@@ -72,7 +72,16 @@ WRAPPER_REQUEST='/usr/bin/x86_64-linux-gnu-pkg-config'
 PUBLIC_WRAPPER='/usr/share/pkg-config-crosswrapper'
 WRAPPER_BYTES=2235
 WRAPPER_SHA256='4d37004a6a285b0676073345752c42f8af20cc8ea7537772b8ea4249b9fc1001'
+PKGCONF_WRAPPER_BYTES=1920
+PKGCONF_WRAPPER_SHA256='a08e50a023bff40762602ab68e94d7c5d1751bfdc49d95ce05cfc0e9b9806eff'
 WRAPPER_CLASSES=frozenset(('KNOWN_PUBLIC_WRAPPER','UNKNOWN'))
+
+
+def wrapper_pairs():
+    # Two independently signed-archive-authenticated public payloads only.
+    # Preserve the original constants and their local synthetic unit-fixture
+    # contract; no runtime metadata or host digest can extend this table.
+    return ((WRAPPER_BYTES,WRAPPER_SHA256),(PKGCONF_WRAPPER_BYTES,PKGCONF_WRAPPER_SHA256))
 
 
 class WrapperTargetHold(PredicateHold):
@@ -243,7 +252,7 @@ class FixedFiles:
         if resolved is None:return dict(path=name,status='NOT_FOUND',resolved=None,bytes=None,sha256=None,mode=None,links=links)
         if resolved not in self.cache:
             info=self.observe(resolved)
-            if resolved==PUBLIC_WRAPPER:predicate(info.st_size==WRAPPER_BYTES,'WRAPPER_EXACT_FILE_SIZE')
+            if resolved==PUBLIC_WRAPPER:predicate(any(info.st_size==size for size,_ in wrapper_pairs()),'WRAPPER_EXACT_FILE_SIZE')
             predicate(info.st_size<=MAX_FILE and self.total+info.st_size<=MAX_BYTES,'FILE_AND_AGGREGATE_SIZE')
             descriptor=os.open(self.physical(resolved),os.O_RDONLY|getattr(os,'O_NOFOLLOW',0)|getattr(os,'O_NONBLOCK',0))
             digest=hashlib.sha256();size=0
@@ -259,7 +268,7 @@ class FixedFiles:
             self.cache[resolved]=dict(path=resolved,type='file',mode=stat.S_IMODE(info.st_mode),bytes=size,sha256=digest.hexdigest())
             self.public[resolved]=self.cache[resolved]
         fact=self.cache[resolved]
-        if resolved==PUBLIC_WRAPPER:predicate(fact['bytes']==WRAPPER_BYTES and fact['sha256']==WRAPPER_SHA256,'WRAPPER_OBSERVED_SIZE_CONTENT_PIN')
+        if resolved==PUBLIC_WRAPPER:predicate((fact['bytes'],fact['sha256']) in wrapper_pairs(),'WRAPPER_OBSERVED_SIZE_CONTENT_PIN')
         return dict(path=name,status='OBSERVED',resolved=resolved,bytes=fact['bytes'],sha256=fact['sha256'],mode=fact['mode'],links=links)
 
     def verify(self):
@@ -335,7 +344,7 @@ def validate_inventory(doc):
     wrapper=next(row for row in doc['files'] if row['path']==PUBLIC_WRAPPER)
     if wrapper['status']=='OBSERVED':
         predicate(wrapper['resolved']==PUBLIC_WRAPPER and wrapper['links']==[],'WRAPPER_CONSUMER_DIRECT_IDENTITY_NO_LINKS')
-        predicate(wrapper['bytes']==WRAPPER_BYTES and wrapper['sha256']==WRAPPER_SHA256,'WRAPPER_CONSUMER_SIZE_CONTENT_PIN')
+        predicate((wrapper['bytes'],wrapper['sha256']) in wrapper_pairs(),'WRAPPER_CONSUMER_SIZE_CONTENT_PIN')
         predicate(PUBLIC_WRAPPER in nodes and nodes[PUBLIC_WRAPPER]['type']=='file','WRAPPER_CONSUMER_REGULAR_NODE')
     need(sum(row['bytes'] for row in nodes.values() if row['type']=='file')<=MAX_BYTES)
     for fact in doc['files']:

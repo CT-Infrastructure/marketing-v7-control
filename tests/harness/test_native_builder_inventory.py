@@ -499,4 +499,41 @@ class PublicBuilderInventoryTests(unittest.TestCase):
         self.assertNotIn('predicate',json.loads(n.diagnostic(error)))
 
 
+    def test_exact_two_production_wrapper_pairs_are_closed_and_original_constants_retained(self):
+        self.assertEqual(n.WRAPPER_BYTES,2235);self.assertEqual(n.WRAPPER_SHA256,'4d37004a6a285b0676073345752c42f8af20cc8ea7537772b8ea4249b9fc1001')
+        self.assertEqual(n.wrapper_pairs(),((2235,'4d37004a6a285b0676073345752c42f8af20cc8ea7537772b8ea4249b9fc1001'),(1920,'a08e50a023bff40762602ab68e94d7c5d1751bfdc49d95ce05cfc0e9b9806eff')))
+        self.assertNotIn(n.PUBLIC_WRAPPER+'.real',n.FILES);self.assertNotIn(n.PUBLIC_WRAPPER+'.real',n.NODES)
+
+    def test_second_profile_unit_fixture_positive_alias_and_consumer_without_execution(self):
+        # Synthetic data plus ONLY local second-profile expected pin patch;
+        # never authenticated public payload or native execution proof.
+        raw=b'harmless synthetic second wrapper profile\n';path=self.public/n.PUBLIC_WRAPPER.lstrip('/');self.put(path,raw)
+        (self.public/n.WRAPPER_REQUEST.lstrip('/')).symlink_to(n.PUBLIC_WRAPPER)
+        with patch.object(n,'PKGCONF_WRAPPER_BYTES',len(raw)),patch.object(n,'PKGCONF_WRAPPER_SHA256',n.sha(raw)),patch.object(subprocess,'run',side_effect=AssertionError('no native execution')):
+            fact=self.files().file(n.WRAPPER_REQUEST);doc=self.document();n.validate_inventory(doc)
+            self.assertEqual(fact['sha256'],n.sha(raw));self.assertEqual(fact['resolved'],n.PUBLIC_WRAPPER)
+        self.assertEqual(doc['disposition'],'HOLD_INVENTORY_ONLY_NOT_AUTHORITY')
+        with self.assertRaises(n.InventoryHold):n.validate_inventory(doc)
+
+    def test_profile_length_hash_cross_product_never_authorizes_a_wrapper(self):
+        a=b'first harmless data';b=b'second harmless data longer';path=self.public/n.PUBLIC_WRAPPER.lstrip('/')
+        with patch.object(n,'WRAPPER_BYTES',len(a)),patch.object(n,'WRAPPER_SHA256',n.sha(a)),patch.object(n,'PKGCONF_WRAPPER_BYTES',len(b)),patch.object(n,'PKGCONF_WRAPPER_SHA256',n.sha(b)):
+            for raw in (a,b):
+                self.put(path,raw);self.assertEqual(self.files().file(n.PUBLIC_WRAPPER)['sha256'],n.sha(raw))
+            for size,digest in ((len(a),n.sha(b)),(len(b),n.sha(a))):
+                self.assertNotIn((size,digest),n.wrapper_pairs())
+            doc=self.document();fact=next(row for row in doc['files'] if row['path']==n.PUBLIC_WRAPPER);node=next(row for row in doc['closure_nodes'] if row['path']==n.PUBLIC_WRAPPER)
+            fact['bytes']=node['bytes']=len(a);fact['sha256']=node['sha256']=n.sha(b)
+            with self.assertRaises(n.InventoryHold):n.validate_inventory(doc)
+
+    def test_both_real_profile_sizes_with_wrong_public_bytes_still_hold(self):
+        path=self.public/n.PUBLIC_WRAPPER.lstrip('/')
+        for size in (1920,2235,1919,1921,2234,2236):
+            self.put(path,b'x'*size)
+            with self.subTest(size=size),self.assertRaises(n.DiagnosticHold) as caught:n.boundary('public_file',self.files().file,n.PUBLIC_WRAPPER,path_id=n.PUBLIC_WRAPPER)
+            expected='WRAPPER_OBSERVED_SIZE_CONTENT_PIN' if size in (1920,2235) else 'WRAPPER_EXACT_FILE_SIZE'
+            self.assertEqual(json.loads(n.diagnostic(caught.exception))['predicate'],expected)
+        self.assertFalse(self.root().exists())
+
+
 if __name__=='__main__':unittest.main()
