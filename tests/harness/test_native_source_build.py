@@ -922,4 +922,64 @@ class LoaderEffectiveRelroTests(unittest.TestCase):
         self.assertEqual(str(caught.exception),'TARGET_LOADER_PAGE_POLICY_NOT_QUALIFIED')
 
 
+
+
+class DynamicLoadBindingTests(unittest.TestCase):
+    def fixture(self):return bytearray(SourceContractTests().elf())
+
+    def header(self,raw,index=2,**changes):
+        return EffectiveElfHardeningTests().header(raw,index,**changes)
+
+    def test_exact_decoy_offset_and_loaded_no_now_vector_rejects(self):
+        raw=self.fixture();raw[4096:4240]=raw[768:912]
+        struct.pack_into('<qQ',raw,4096+4*16,0x6ffffffb,0x08000000)
+        self.assertEqual(struct.unpack_from('<qQ',raw,768+4*16),(0x6ffffffb,0x08000001))
+        self.assertEqual(struct.unpack_from('<qQ',raw,4096+4*16),(0x6ffffffb,0x08000000))
+        raw=self.header(raw,vaddr=0x401000)
+        with self.assertRaises(ValueError):s.elf_report(raw)
+
+    def test_coherent_vector_at_original_and_last_initialized_byte_accepts(self):
+        report=s.elf_report(bytes(self.fixture()));self.assertTrue(report['bind_now']);self.assertTrue(report['relro'])
+        raw=self.fixture();end=len(raw);start=end-144;raw[start:end]=raw[768:912]
+        report=s.elf_report(self.header(raw,offset=start,vaddr=0x400000+start))
+        self.assertTrue(report['bind_now']);self.assertEqual(report['needed'],['libcap.so.2','libselinux.so.1'])
+
+    def test_wrong_offset_address_unmapped_partial_and_overflow_ranges_reject(self):
+        for changes in ({'offset':784},{'vaddr':0x400310},{'vaddr':0x500300},{'filesz':0,'memsz':0},
+            {'filesz':128,'memsz':144},{'filesz':160,'memsz':144},{'filesz':145,'memsz':145},
+            {'vaddr':2**64-8},{'offset':2**64-16},{'offset':8192-128,'vaddr':0x401f80},
+            {'offset':769,'vaddr':0x400301},{'align':3}):
+            with self.subTest(changes=changes),self.assertRaises(ValueError):s.elf_report(self.header(self.fixture(),**changes))
+        raw=self.fixture();self.header(raw,0,filesz=4096,memsz=8192)
+        raw[4080:4224]=raw[768:912]
+        with self.assertRaises(ValueError):s.elf_report(self.header(raw,offset=4080,vaddr=0x400ff0))
+
+    def test_missing_duplicate_and_overlapping_vector_declarations_reject(self):
+        with self.assertRaises(ValueError):s.elf_report(self.header(self.fixture(),type=0))
+        for address,offset in ((0x400300,768),(0x400310,784),(0x401000,4096)):
+            raw=self.fixture();struct.pack_into('<H',raw,56,6)
+            raw[64+5*56:64+6*56]=raw[64+2*56:64+3*56]
+            self.header(raw,5,offset=offset,vaddr=address)
+            with self.subTest(address=address),self.assertRaises(ValueError):s.elf_report(bytes(raw))
+
+    def test_terminator_padding_duplicate_tags_and_needed_entries_fail_closed(self):
+        for kind in ('absent','nonzero_null','active_after_null','padding_value','duplicate_tag','duplicate_needed'):
+            raw=self.fixture()
+            if kind=='absent':
+                struct.pack_into('<qQ',raw,768+7*16,21,0);struct.pack_into('<qQ',raw,768+8*16,22,0)
+            elif kind=='nonzero_null':struct.pack_into('<qQ',raw,768+7*16,0,1)
+            elif kind=='active_after_null':struct.pack_into('<qQ',raw,768+8*16,24,0)
+            elif kind=='padding_value':struct.pack_into('<qQ',raw,768+8*16,0,1)
+            elif kind=='duplicate_tag':struct.pack_into('<qQ',raw,768+6*16,0x6ffffffb,0x08000001)
+            else:raw[768+16:768+32]=raw[768:768+16]
+            with self.subTest(kind=kind),self.assertRaises(ValueError):s.elf_report(bytes(raw))
+
+    def test_vector_must_fit_one_unique_initialized_load_not_adjacent_union(self):
+        raw=self.fixture();struct.pack_into('<H',raw,56,6)
+        self.header(raw,0,filesz=4096,memsz=4096)
+        self.header(raw,5,type=1,flags=6,offset=4096,vaddr=0x401000,filesz=4096,memsz=4096,align=4096)
+        raw[4080:4224]=raw[768:912]
+        with self.assertRaises(ValueError):s.elf_report(self.header(raw,offset=4080,vaddr=0x400ff0))
+
+
 if __name__=='__main__':unittest.main()

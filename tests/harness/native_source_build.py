@@ -650,17 +650,29 @@ def elf_report(raw):
         check(0<size and address+size<2**64)
         matches=[p for p in loads if p[3]<=address and address+size<=p[3]+p[5]]
         check(len(matches)==1);p=matches[0];return p[2]+address-p[3]
-    dynamic={};needed=[];interpreter=None
+    vectors=[p for p in ph if p[0]==2];check(len(vectors)==1)
+    vector=vectors[0]
+    # This supported vector is wholly initialized, not a file-prefix followed
+    # by implicit memory zeros. Bind the entire range to the unique LOAD image,
+    # rather than trusting a decoy vector selected only by p_offset.
+    check(0<vector[5]==vector[6]<=65536 and vector[5]%16==0)
+    check(vector[3]+vector[6]<2**64 and vector[2]%8==vector[3]%8==0)
+    check(vector[7] in (0,1) or (vector[7]&(vector[7]-1)==0 and vector[2]%vector[7]==vector[3]%vector[7]))
+    vector_offset=mapped(vector[3],vector[6]);check(vector_offset==vector[2])
+    dynamic={};needed=[];interpreter=None;terminated=False
+    for offset in range(vector_offset,vector_offset+vector[5],16):
+        tag,value=struct.unpack_from('<qQ',raw,offset)
+        if terminated:
+            check(tag==value==0);continue
+        if tag==0:
+            check(value==0);terminated=True;continue
+        if tag==1:
+            check(value not in needed);needed.append(value)
+        else:check(tag not in dynamic);dynamic[tag]=value
+    check(terminated)
     for p in ph:
         if p[0]==3:
             check(0<p[5]<=256);value=raw[p[2]:p[2]+p[5]];check(value.endswith(b'\0'));interpreter=value[:-1].decode('ascii')
-        if p[0]==2:
-            check(p[5]%16==0 and p[5]<=65536)
-            for offset in range(p[2],p[2]+p[5],16):
-                tag,value=struct.unpack_from('<qQ',raw,offset)
-                if tag==0: break
-                if tag==1:needed.append(value)
-                else: check(tag not in dynamic);dynamic[tag]=value
     check(5 in dynamic and 10 in dynamic and dynamic[10]<=1048576)
     strings=mapped(dynamic[5],dynamic[10]);end=strings+dynamic[10]
     def string(index):
