@@ -64,6 +64,29 @@ def predicate(value,code):
     if not value:raise PredicateHold(code)
 
 
+# Authenticated Jammy pkg-config0.29.2-1ubuntu3 payload69da4190... supplies
+# wrapper2235 bytes SHA2564d37004a6a285b0676073345752c42f8af20cc8ea7537772b8ea4249b9fc1001.
+# Its hook conditionally creates this target; this is not hosted-file proof.
+WRAPPER_REQUEST='/usr/bin/x86_64-linux-gnu-pkg-config'
+PUBLIC_WRAPPER='/usr/share/pkg-config-crosswrapper'
+WRAPPER_CLASSES=frozenset(('KNOWN_PUBLIC_WRAPPER','UNKNOWN'))
+
+
+class WrapperTargetHold(PredicateHold):
+    def __init__(self,classification):
+        super().__init__('SYMLINK_TARGET_ALLOWLIST');self.classification=classification
+
+
+def wrapper_target_diagnostic(error):
+    # Separate record preserves the existing exact legacy diagnostic contract.
+    if type(error) is not DiagnosticHold:return ''
+    if (error.phase,error.reason,error.path_id)!=('public_file','GUARD_REJECTED',WRAPPER_REQUEST):return ''
+    classification=getattr(error,'wrapper_classification',None)
+    if type(classification) is not str or classification not in WRAPPER_CLASSES:return ''
+    raw=canonical(dict(schema='f07-public-wrapper-classification-v1',status='HOLD',path_id=WRAPPER_REQUEST,target_class=classification))
+    need(len(raw)<=512);return raw.decode('ascii')
+
+
 class DiagnosticHold(InventoryHold):
     def __init__(self,phase,reason,path_id):
         super().__init__('INVENTORY_BOUNDARY_HOLD')
@@ -80,8 +103,10 @@ def boundary(phase,operation,*args,path_id=None):
         reason={InventoryHold:'GUARD_REJECTED',FileNotFoundError:'MISSING',PermissionError:'PERMISSION',
             OSError:'OS_ERROR',UnicodeDecodeError:'DECODE_ERROR'}.get(type(error),'UNKNOWN')
         converted=DiagnosticHold(phase,reason,path_id)
-        if type(error) is PredicateHold and type(error.code) is str and error.code in PREDICATES:
+        if type(error) in (PredicateHold,WrapperTargetHold) and type(error.code) is str and error.code in PREDICATES:
             converted.reason='GUARD_REJECTED';converted.predicate=error.code
+            if type(error) is WrapperTargetHold and type(error.classification) is str and error.classification in WRAPPER_CLASSES:
+                converted.wrapper_classification=error.classification
         raise converted from None
 
 
@@ -191,6 +216,11 @@ class FixedFiles:
                 if absolute:rawparts=rawparts[1:]
                 predicate(all(p not in ('','.') for p in rawparts),'SYMLINK_COMPONENT_GRAMMAR')
                 lexical=os.path.normpath(target if absolute else os.path.join('/'+('/'.join(parts)),target))
+                if lexical not in NODES and name==WRAPPER_REQUEST and current==WRAPPER_REQUEST:
+                    # Re-observe only the link itself before classifying; never
+                    # stat/open/follow the rejected target, even the known one.
+                    predicate(identity(self.observe(current))==identity(info),'OBSERVED_IDENTITY_STABLE')
+                    raise WrapperTargetHold('KNOWN_PUBLIC_WRAPPER' if lexical==PUBLIC_WRAPPER else 'UNKNOWN')
                 predicate(lexical in NODES,'SYMLINK_TARGET_ALLOWLIST')
                 links.append(dict(path=current,target=lexical,raw_target_sha256=sha(os.fsencode(target))))
                 self.public[current]=dict(path=current,type='symlink',mode=stat.S_IMODE(info.st_mode),target=lexical,raw_target_sha256=sha(os.fsencode(target)))
@@ -369,5 +399,6 @@ if __name__=='__main__':
     try:main()
     except Exception as error:
         sys.stderr.write(diagnostic(error))
+        sys.stderr.write(wrapper_target_diagnostic(error))
         print('{"schema":"f07-public-builder-status-v1","status":"HOLD","reason":"INVENTORY_BOUNDARY_HOLD"}')
         sys.exit(1)

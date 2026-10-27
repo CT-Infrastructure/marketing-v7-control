@@ -315,4 +315,59 @@ class PublicBuilderInventoryTests(unittest.TestCase):
         doc=json.loads(n.diagnostic(caught.exception));self.assertEqual(doc['predicate'],'REQUEST_ALLOWLIST');self.assertEqual(doc['phase'],'public_file')
 
 
+    def test_known_public_wrapper_enum_denies_without_opening_target(self):
+        name=n.WRAPPER_REQUEST;link=self.public/name.lstrip('/');link.symlink_to(n.PUBLIC_WRAPPER)
+        with patch.object(n.os,'open',side_effect=AssertionError('no target read')),self.assertRaises(n.DiagnosticHold) as caught:
+            n.boundary('public_file',self.files().file,name,path_id=name)
+        legacy=json.loads(n.diagnostic(caught.exception));self.assertEqual(legacy['predicate'],'SYMLINK_TARGET_ALLOWLIST')
+        self.assertNotIn('target_class',legacy)
+        detail=json.loads(n.wrapper_target_diagnostic(caught.exception))
+        self.assertEqual(detail,dict(schema='f07-public-wrapper-classification-v1',status='HOLD',path_id=name,target_class='KNOWN_PUBLIC_WRAPPER'))
+        self.assertNotIn(n.PUBLIC_WRAPPER,n.NODES);self.assertNotIn(n.PUBLIC_WRAPPER,n.FILES);self.assertFalse(self.root().exists())
+
+    def test_normalized_relative_wrapper_uses_existing_grammar_without_follow(self):
+        name=n.WRAPPER_REQUEST;link=self.public/name.lstrip('/');link.symlink_to('../share/pkg-config-crosswrapper')
+        with self.assertRaises(n.DiagnosticHold) as caught:n.boundary('public_file',self.files().file,name,path_id=name)
+        self.assertEqual(json.loads(n.wrapper_target_diagnostic(caught.exception))['target_class'],'KNOWN_PUBLIC_WRAPPER')
+        self.assertEqual(json.loads(n.diagnostic(caught.exception))['predicate'],'SYMLINK_TARGET_ALLOWLIST')
+
+    def test_unknown_targets_export_only_unknown_enum_not_hash_length_or_paths(self):
+        name=n.WRAPPER_REQUEST;link=self.public/name.lstrip('/')
+        for target in ('/home/private/SECRET','/usr/share/other-wrapper','../../../private/SECRET'):
+            link.symlink_to(target)
+            with self.subTest(target=target),patch.object(n.os,'open',side_effect=AssertionError('no target read')),self.assertRaises(n.DiagnosticHold) as caught:
+                n.boundary('public_file',self.files().file,name,path_id=name)
+            raw=n.wrapper_target_diagnostic(caught.exception);doc=json.loads(raw)
+            self.assertEqual(doc,dict(schema='f07-public-wrapper-classification-v1',status='HOLD',path_id=name,target_class='UNKNOWN'))
+            self.assertNotIn('SECRET',raw);self.assertNotIn('sha256',raw);self.assertNotIn('bytes',raw);self.assertLessEqual(len(raw.encode('ascii')),512)
+            link.unlink()
+
+    def test_other_requested_path_and_malformed_targets_do_not_classify(self):
+        link=self.public/'usr/bin/gcc';link.symlink_to(n.PUBLIC_WRAPPER)
+        with self.assertRaises(n.DiagnosticHold) as caught:n.boundary('public_file',self.files().file,'/usr/bin/gcc',path_id='/usr/bin/gcc')
+        self.assertEqual(n.wrapper_target_diagnostic(caught.exception),'');link.unlink()
+        link=self.public/n.WRAPPER_REQUEST.lstrip('/')
+        for target in ('./../share/pkg-config-crosswrapper','TOKEN\nPRIVATE','/a'+'x'*240):
+            link.symlink_to(target)
+            with self.subTest(target=target),self.assertRaises(n.DiagnosticHold) as caught:n.boundary('public_file',self.files().file,n.WRAPPER_REQUEST,path_id=n.WRAPPER_REQUEST)
+            self.assertEqual(n.wrapper_target_diagnostic(caught.exception),'');link.unlink()
+
+    def test_changed_link_identity_never_claims_known_public_wrapper(self):
+        link=self.public/n.WRAPPER_REQUEST.lstrip('/');link.symlink_to(n.PUBLIC_WRAPPER)
+        original=n.os.readlink
+        def changed(path):
+            target=original(path);link.unlink();link.symlink_to('/home/private/SECRET');return target
+        with patch.object(n.os,'readlink',side_effect=changed),self.assertRaises(n.DiagnosticHold) as caught:
+            n.boundary('public_file',self.files().file,n.WRAPPER_REQUEST,path_id=n.WRAPPER_REQUEST)
+        self.assertEqual(json.loads(n.diagnostic(caught.exception))['predicate'],'OBSERVED_IDENTITY_STABLE')
+        self.assertEqual(n.wrapper_target_diagnostic(caught.exception),'')
+
+    def test_wrapper_detail_rejects_forged_class_and_wrong_boundary(self):
+        class Forged(n.DiagnosticHold):pass
+        for kind,phase,path,classification in ((Forged,'public_file',n.WRAPPER_REQUEST,'KNOWN_PUBLIC_WRAPPER'),(n.DiagnosticHold,'publish',n.WRAPPER_REQUEST,'KNOWN_PUBLIC_WRAPPER'),(n.DiagnosticHold,'public_file','/usr/bin/gcc','KNOWN_PUBLIC_WRAPPER'),(n.DiagnosticHold,'public_file',n.WRAPPER_REQUEST,True),(n.DiagnosticHold,'public_file',n.WRAPPER_REQUEST,'PRIVATE'*10000)):
+            error=kind(phase,'GUARD_REJECTED',path);error.wrapper_classification=classification
+            self.assertEqual(n.wrapper_target_diagnostic(error),'')
+        self.assertEqual(n.wrapper_target_diagnostic(ValueError('PRIVATE')),'')
+
+
 if __name__=='__main__':unittest.main()
