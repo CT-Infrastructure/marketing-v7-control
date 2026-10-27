@@ -744,4 +744,79 @@ class TarZeroTailBoundaryTests(unittest.TestCase):
         with self.assertRaises(ValueError):s.archive_rows(old,'tar')
 
 
+class ElfSearchPathAndPhaseBudgetTests(unittest.TestCase):
+    def _elf(self,paths):
+        raw=bytearray(SourceContractTests().elf());strings=b'\0libcap.so.2\0libselinux.so.1\0GLIBC_2.35\0'
+        tags=[]
+        for tag,value in paths:
+            tags.append((tag,len(strings)));strings+=value.encode('ascii')+b'\0'
+        self.assertLessEqual(len(strings),256)
+        raw[1100:1100+len(strings)]=strings
+        struct.pack_into('<qQ',raw,768+3*16,10,len(strings))
+        for i,pair in enumerate(tags+[(0,0)]):struct.pack_into('<qQ',raw,768+(7+i)*16,*pair)
+        size=(8+len(tags))*16
+        struct.pack_into('<QQ',raw,64+2*56+32,size,size)
+        return bytes(raw)
+
+    def test_absolute_parent_host_library_path_rejects_in_both_elf_tags(self):
+        for tag in (15,29):
+            with self.subTest(tag=tag),self.assertRaises(ValueError):s.elf_report(self._elf([(tag,'/../lib')]))
+
+    def test_embedded_absolute_relative_empty_and_expanded_path_variants_reject(self):
+        values=('/lib','/usr/lib','//lib','/tmp/../lib','../lib','./lib','lib','.',
+                '$ORIGIN/../lib','${ORIGIN}/../lib','$LIB','',':','lib::other','/lib:/tmp',' $ORIGIN/lib')
+        for tag in (15,29):
+            for value in values:
+                with self.subTest(tag=tag,value=value),self.assertRaises(ValueError):s.elf_report(self._elf([(tag,value)]))
+        with self.assertRaises(ValueError):s.elf_report(self._elf([(15,'/../lib'),(29,'')]))
+
+    def test_absent_search_tags_keep_private_loader_and_elf_hardening_contract(self):
+        report=s.elf_report(self._elf([]))
+        self.assertIsNone(report['rpath']);self.assertIsNone(report['runpath'])
+        self.assertTrue(report['pie']);self.assertTrue(report['bind_now']);self.assertTrue(report['relro']);self.assertTrue(report['nonexec_stack'])
+        self.assertIn('libselinux.so.1',report['needed']);self.assertIn('libcap.so.2',report['needed'])
+        for raw in (SourceContractTests().elf('GLIBC_2.38'),SourceContractTests().elf(now=False),SourceContractTests().elf(stack=False)):
+            with self.assertRaises(ValueError):s.elf_report(raw)
+
+    def _budget(self,now=1010.0,doc=None,limits=None,raw=None):
+        if doc is None:doc=dict(schema='f07-source-clock-v1',start=1000.0,deadline=1540.0)
+        if limits is None:limits=s.source_lock()['limits']
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp).resolve();(root/'runtime').mkdir()
+            (root/'runtime/source-clock.json').write_bytes(s.canonical(doc) if raw is None else raw)
+            with patch.object(s.time,'monotonic',return_value=now),patch.object(s,'source_lock',return_value=dict(limits=limits)):
+                return s.runtime_budget(root)
+
+    def test_fast_bootstrap_runtime_budget_is_capped_at_pinned_450_seconds(self):
+        self.assertEqual(self._budget(now=1010.0),450)
+        self.assertEqual(self._budget(now=1000.0),450)
+        self.assertEqual(self._budget(now=1090.0),450)
+
+    def test_runtime_budget_tracks_remaining_aggregate_and_minimum_boundary(self):
+        self.assertEqual(self._budget(now=1090.125),449.875)
+        self.assertEqual(self._budget(now=1539.875),0.125)
+        for now in (1539.95,1540.0,1541.0,999.0):
+            with self.subTest(now=now),self.assertRaises(ValueError):self._budget(now=now)
+
+    def test_runtime_budget_rejects_clock_types_duration_and_noncanonical_input(self):
+        for field,value in (('start',1000),('start',True),('deadline',1540),('deadline',False),('deadline',1541.0),('schema','other')):
+            doc=dict(schema='f07-source-clock-v1',start=1000.0,deadline=1540.0);doc[field]=value
+            with self.subTest(field=field,value=value),self.assertRaises(ValueError):self._budget(doc=doc)
+        with self.assertRaises(ValueError):self._budget(doc=dict(schema='f07-source-clock-v1',start=1000.0,deadline=1540.0,extra=1))
+        with self.assertRaises(ValueError):self._budget(raw=b'{"schema":"f07-source-clock-v1","start":1000.0,"deadline":1540.0}')
+        with self.assertRaises(ValueError):self._budget(raw=b'{"schema":"f07-source-clock-v1","start":NaN,"deadline":1540.0}\n')
+
+    def test_runtime_budget_uses_exact_typed_pinned_caps_and_preserves_allocation(self):
+        real=s.source_lock()['limits']
+        for value in (True,450.0,0,449,451,600,601,'450'):
+            limits=dict(real,harness_seconds=value)
+            with self.subTest(value=value),self.assertRaises(ValueError):self._budget(limits=limits)
+        for name in ('execution_seconds','operation_seconds','job_seconds','reserve_seconds'):
+            limits=dict(real);limits[name]+=1
+            with self.subTest(name=name),self.assertRaises(ValueError):self._budget(limits=limits)
+        budget=self._budget(now=1010.0)
+        self.assertLessEqual(budget,450);self.assertLessEqual(budget,1540.0-1010.0);self.assertLessEqual(budget,600)
+        self.assertEqual(real['execution_seconds']+real['reserve_seconds'],real['job_seconds'])
+
+
 if __name__=='__main__':unittest.main()

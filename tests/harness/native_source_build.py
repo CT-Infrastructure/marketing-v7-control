@@ -636,7 +636,9 @@ def elf_report(raw):
         needed=[string(n) for n in needed],rpath=string(dynamic[15]) if 15 in dynamic else None,
         runpath=string(dynamic[29]) if 29 in dynamic else None,glibc_versions=sorted(set(versions)))
     check(report['interpreter'] in ('/lib64/ld-linux-x86-64.so.2','/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2'))
-    check(report['rpath'] in (None,'','/../lib') and report['runpath'] in (None,'','/../lib'))
+    # Only the separately qualified explicit private loader path is supported.
+    # Embedded tags, including empty/current-directory or expanded forms, deny.
+    check(report['rpath'] is None and report['runpath'] is None)
     check(all(re.fullmatch('[A-Za-z0-9_.+-]{1,80}',n) is not None for n in report['needed']))
     check(report['pie'] and report['bind_now'] and report['relro'] and report['nonexec_stack'])
     check('libselinux.so.1' in report['needed'] and 'libcap.so.2' in report['needed'])
@@ -867,8 +869,13 @@ def runtime_budget(root):
     raw=read_file(own_root(root)/'runtime/source-clock.json',1024)
     doc=json.loads(raw,object_pairs_hook=unique);check(raw==canonical(doc) and set(doc)=={'schema','start','deadline'})
     check(doc['schema']=='f07-source-clock-v1' and type(doc['start']) is float and type(doc['deadline']) is float)
-    check(abs(doc['deadline']-doc['start']-540)<0.000001 and doc['start']<=time.monotonic()<doc['deadline'])
-    remaining=doc['deadline']-time.monotonic();check(remaining>=0.1);return min(600,remaining)
+    limits=source_lock()['limits'];cap=integer(limits['harness_seconds'],600,1);check(cap==450)
+    for name,value in (('execution_seconds',540),('operation_seconds',90),('job_seconds',720),('reserve_seconds',180)):
+        check(integer(limits[name],720,1)==value)
+    now=time.monotonic()
+    check(abs(doc['deadline']-doc['start']-540)<0.000001 and doc['start']<=now<doc['deadline'])
+    remaining=doc['deadline']-now;check(remaining>=0.1)
+    return min(600,cap,remaining)
 
 
 def runtime_prefix(root, expected_authorization):
