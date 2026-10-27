@@ -213,4 +213,55 @@ class PublicBuilderInventoryTests(unittest.TestCase):
         self.assertEqual(json.loads(output.getvalue()),dict(schema='f07-public-builder-status-v1',status='HOLD',reason='INVENTORY_BOUNDARY_HOLD'))
 
 
+    def test_diagnostic_exact_exception_classes_never_export_messages_or_errno(self):
+        cases=((n.InventoryHold,'GUARD_REJECTED'),(FileNotFoundError,'MISSING'),(PermissionError,'PERMISSION'),(OSError,'OS_ERROR'),(ValueError,'UNKNOWN'))
+        for kind,reason in cases:
+            def fail():raise kind('PRIVATE_TOKEN\n\x1b[31m/home/private')
+            with self.subTest(kind=kind),self.assertRaises(n.DiagnosticHold) as caught:
+                n.boundary('public_file',fail,path_id='/usr/bin/gcc-11')
+            doc=json.loads(n.diagnostic(caught.exception))
+            self.assertEqual(doc,dict(schema='f07-public-builder-diagnostic-v1',status='HOLD',phase='public_file',reason=reason,path_id='/usr/bin/gcc-11'))
+            self.assertLessEqual(len(n.diagnostic(caught.exception)),512)
+            self.assertNotIn('PRIVATE',n.diagnostic(caught.exception));self.assertNotIn('errno',doc)
+
+    def test_diagnostic_untrusted_attributes_subclasses_and_unknown_values_are_closed(self):
+        class Forged(n.DiagnosticHold):pass
+        for error in (ValueError('SECRET'*100000),Forged('public_file','MISSING','/usr/bin/gcc-11')):
+            self.assertEqual(json.loads(n.diagnostic(error)),dict(schema='f07-public-builder-diagnostic-v1',status='HOLD',phase='unknown',reason='UNKNOWN',path_id=None))
+        for phase,reason,path_id in ((True,True,True),('/private','TOKEN','/home/private'),('context\nSECRET','MISSING\x1b','/usr/bin/../private')):
+            doc=json.loads(n.diagnostic(n.DiagnosticHold(phase,reason,path_id)))
+            self.assertEqual((doc['phase'],doc['reason'],doc['path_id']),('unknown','UNKNOWN',None))
+        for phase,path_id in (('private',None),('public_file','/etc/shadow'),(True,None)):
+            with self.assertRaises(n.InventoryHold):n.boundary(phase,lambda:None,path_id=path_id)
+
+    def test_nested_diagnostic_preserves_first_phase_and_does_not_run_later_effect(self):
+        effects=[]
+        def inner():
+            n.boundary('release',lambda:n.need(False),path_id='/etc/os-release')
+            effects.append('not reached')
+        with self.assertRaises(n.DiagnosticHold) as caught:n.boundary('publish',inner)
+        self.assertEqual(json.loads(n.diagnostic(caught.exception))['phase'],'release')
+        self.assertEqual(effects,[])
+        self.assertEqual(n.boundary('document',lambda:'ordinary return'),'ordinary return')
+
+    def test_inventory_diagnostic_reports_actual_synthetic_file_guard_without_accepting_it(self):
+        (self.public/'usr/bin/gcc').symlink_to('/home/private/SECRET')
+        with self.assertRaises(n.DiagnosticHold) as caught:self.document()
+        doc=json.loads(n.diagnostic(caught.exception))
+        self.assertEqual((doc['phase'],doc['reason'],doc['path_id']),('public_file','GUARD_REJECTED','/usr/bin/gcc'))
+        self.assertNotIn('SECRET',n.diagnostic(caught.exception));self.assertFalse(self.root().exists())
+        self.put(self.checkout/'.git/HEAD',b'c'*40+b'\n')
+        with self.assertRaises(n.DiagnosticHold) as caught:self.document()
+        self.assertEqual(json.loads(n.diagnostic(caught.exception))['phase'],'checkout_before')
+
+    def test_cli_diagnostic_is_separate_closed_stderr_preserving_legacy_stdout(self):
+        output=io.StringIO();errors=io.StringIO()
+        with patch.dict(os.environ,dict(self.values,GITHUB_REPOSITORY='PRIVATE'),clear=True),patch.object(__import__('sys'),'argv',['inventory','inventory','/private']),patch('sys.stdout',output),patch('sys.stderr',errors),self.assertRaises(SystemExit) as caught:
+            runpy.run_path(n.__file__,run_name='__main__')
+        self.assertEqual(caught.exception.code,1)
+        self.assertEqual(json.loads(output.getvalue()),dict(schema='f07-public-builder-status-v1',status='HOLD',reason='INVENTORY_BOUNDARY_HOLD'))
+        self.assertEqual(json.loads(errors.getvalue()),dict(schema='f07-public-builder-diagnostic-v1',status='HOLD',phase='context',reason='GUARD_REJECTED',path_id=None))
+        self.assertNotIn('PRIVATE',errors.getvalue());self.assertEqual(len(errors.getvalue().splitlines()),1)
+
+
 if __name__=='__main__':unittest.main()

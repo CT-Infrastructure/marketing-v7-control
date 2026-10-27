@@ -44,6 +44,40 @@ def need(value):
     if not value:raise InventoryHold('INVENTORY_BOUNDARY_HOLD')
 
 
+# Diagnostics identify the failed boundary, never the contents of an exception.
+PHASES=frozenset(('arguments','context','checkout_path','output_parent','self_binding','output_path',
+    'platform','checkout_before','release','public_file','public_verify','checkout_after','document','publish','cleanup','unknown'))
+REASONS=frozenset(('GUARD_REJECTED','MISSING','PERMISSION','OS_ERROR','DECODE_ERROR','UNKNOWN'))
+
+
+class DiagnosticHold(InventoryHold):
+    def __init__(self,phase,reason,path_id):
+        super().__init__('INVENTORY_BOUNDARY_HOLD')
+        self.phase=phase;self.reason=reason;self.path_id=path_id
+
+
+def boundary(phase,operation,*args,path_id=None):
+    need(type(phase) is str and phase in PHASES)
+    need(path_id is None or (type(path_id) is str and path_id in FILES))
+    try:return operation(*args)
+    except DiagnosticHold:raise
+    except Exception as error:
+        # Exact classes only: no errno, message, filename, repr or traceback export.
+        reason={InventoryHold:'GUARD_REJECTED',FileNotFoundError:'MISSING',PermissionError:'PERMISSION',
+            OSError:'OS_ERROR',UnicodeDecodeError:'DECODE_ERROR'}.get(type(error),'UNKNOWN')
+        raise DiagnosticHold(phase,reason,path_id) from None
+
+
+def diagnostic(error):
+    phase='unknown';reason='UNKNOWN';path_id=None
+    if type(error) is DiagnosticHold:
+        if type(error.phase) is str and error.phase in PHASES:phase=error.phase
+        if type(error.reason) is str and error.reason in REASONS:reason=error.reason
+        if type(error.path_id) is str and error.path_id in FILES:path_id=error.path_id
+    raw=canonical(dict(schema='f07-public-builder-diagnostic-v1',status='HOLD',phase=phase,reason=reason,path_id=path_id))
+    need(len(raw)<=512);return raw.decode('ascii')
+
+
 def canonical(doc):
     return (json.dumps(doc,sort_keys=True,separators=(',',':'),allow_nan=False)+'\n').encode('ascii')
 
@@ -189,16 +223,18 @@ class FixedFiles:
 
 
 def inventory(values,checkout,files=None):
-    ctx=context(values);before=checkout_binding(checkout,ctx['tested_git_sha'])
+    ctx=boundary('context',context,values);before=boundary('checkout_before',checkout_binding,checkout,ctx['tested_git_sha'])
     files=FixedFiles() if files is None else files
-    release=files.release();facts=[files.file(name) for name in FILES];files.verify()
-    need(checkout_binding(checkout,ctx['tested_git_sha'])==before)
+    release=boundary('release',files.release,path_id='/etc/os-release')
+    facts=[boundary('public_file',files.file,name,path_id=name) for name in FILES]
+    boundary('public_verify',files.verify)
+    boundary('checkout_after',need,boundary('checkout_after',checkout_binding,checkout,ctx['tested_git_sha'])==before)
     doc=dict(schema='f07-public-builder-inventory-v1',context=ctx,source_sha256=before,os_release=release,
         files=facts,closure_nodes=[files.public[name] for name in sorted(files.public)],
         disposition='HOLD_INVENTORY_ONLY_NOT_AUTHORITY',compiler_execution='NOT_RUN',build_adapter='NOT_QUALIFIED',
         full_toolchain_and_elf_runtime_closure='NOT_QUALIFIED',build='NOT_RUN',native_runtime='NOT_RUN',
         metadata_get='NOT_RUN_ROOT_READBACK_REQUIRED',service_job_metadata='NOT_RUN_ROOT_READBACK_REQUIRED',elapsed_seven_day_deletion='NOT_RUN')
-    validate_inventory(doc);return doc
+    boundary('document',validate_inventory,doc);return doc
 
 
 def validate_inventory(doc):
@@ -294,20 +330,22 @@ def cleanup(root,parent,ctx):
 
 
 def main():
-    need(len(sys.argv)==3 and sys.argv[1] in ('inventory','cleanup'))
-    values={name:os.environ.get(name) for name in CONTEXT_KEYS};ctx=context(values)
-    checkout=safe_directory(os.environ.get('GITHUB_WORKSPACE',''));parent=safe_directory(os.environ.get('RUNNER_TEMP',''))
-    need(Path(__file__).absolute()==checkout/'tests/harness/native_builder_inventory.py')
-    target=output_path(sys.argv[2],parent,ctx)
-    if sys.argv[1]=='cleanup':cleanup(target,parent,ctx)
+    boundary('arguments',need,len(sys.argv)==3 and sys.argv[1] in ('inventory','cleanup'))
+    values={name:os.environ.get(name) for name in CONTEXT_KEYS};ctx=boundary('context',context,values)
+    checkout=boundary('checkout_path',safe_directory,os.environ.get('GITHUB_WORKSPACE',''))
+    parent=boundary('output_parent',safe_directory,os.environ.get('RUNNER_TEMP',''))
+    boundary('self_binding',need,Path(__file__).absolute()==checkout/'tests/harness/native_builder_inventory.py')
+    target=boundary('output_path',output_path,sys.argv[2],parent,ctx)
+    if sys.argv[1]=='cleanup':boundary('cleanup',cleanup,target,parent,ctx)
     else:
-        need(os.uname().sysname=='Linux' and os.uname().machine=='x86_64')
-        publish(target,parent,inventory(values,checkout))
+        boundary('platform',need,os.uname().sysname=='Linux' and os.uname().machine=='x86_64')
+        boundary('publish',publish,target,parent,inventory(values,checkout))
     print('{"schema":"f07-public-builder-status-v1","status":"INVENTORY_ONLY_NOT_AUTHORITY"}')
 
 
 if __name__=='__main__':
     try:main()
-    except Exception:
+    except Exception as error:
+        sys.stderr.write(diagnostic(error))
         print('{"schema":"f07-public-builder-status-v1","status":"HOLD","reason":"INVENTORY_BOUNDARY_HOLD"}')
         sys.exit(1)
