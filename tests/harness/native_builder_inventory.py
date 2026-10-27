@@ -24,6 +24,7 @@ FILES=tuple(sorted({
     *('/usr/lib/x86_64-linux-gnu/'+p for p in ('crt1.o','Scrt1.o','crti.o','crtn.o','libc.so','libc_nonshared.a','libgcc_s.so.1','libc.so.6','libc-2.35.so','ld-linux-x86-64.so.2','ld-2.35.so')),
     *('/lib/x86_64-linux-gnu/'+p for p in ('libgcc_s.so.1','libc.so.6','libc-2.35.so','ld-linux-x86-64.so.2','ld-2.35.so')),
     '/lib64/ld-linux-x86-64.so.2','/usr/lib64/ld-linux-x86-64.so.2',
+    '/usr/share/pkg-config-crosswrapper',
 }))
 NODES=frozenset({p for name in FILES for p in (name,*map(str,Path(name).parents))})
 CONTEXT_KEYS=('GITHUB_REPOSITORY','GITHUB_SHA','F07_CANDIDATE_SHA','F07_TASK','GITHUB_RUN_ID','GITHUB_RUN_ATTEMPT',
@@ -69,6 +70,8 @@ def predicate(value,code):
 # Its hook conditionally creates this target; this is not hosted-file proof.
 WRAPPER_REQUEST='/usr/bin/x86_64-linux-gnu-pkg-config'
 PUBLIC_WRAPPER='/usr/share/pkg-config-crosswrapper'
+WRAPPER_BYTES=2235
+WRAPPER_SHA256='4d37004a6a285b0676073345752c42f8af20cc8ea7537772b8ea4249b9fc1001'
 WRAPPER_CLASSES=frozenset(('KNOWN_PUBLIC_WRAPPER','UNKNOWN'))
 
 
@@ -211,6 +214,7 @@ class FixedFiles:
                 self.observed[current]=None;predicate(len(self.observed)<=MAX_NODES,'OBSERVED_NODE_LIMIT');return None,links
             if stat.S_ISLNK(info.st_mode):
                 hops+=1;predicate(hops<=16,'SYMLINK_HOP_LIMIT');target=os.readlink(self.physical(current))
+                predicate(identity(self.observe(current))==identity(info),'OBSERVED_IDENTITY_STABLE')
                 predicate(type(target) is str and 0<len(target)<=240 and re.fullmatch('[A-Za-z0-9_+./-]+',target) is not None,'SYMLINK_TARGET_TYPE_SIZE_CHARACTERS')
                 rawparts=target.split('/');absolute=target.startswith('/')
                 if absolute:rawparts=rawparts[1:]
@@ -235,9 +239,12 @@ class FixedFiles:
 
     def file(self,name):
         resolved,links=self.resolve(name)
+        if name==PUBLIC_WRAPPER and resolved is not None:need(resolved==PUBLIC_WRAPPER and not links)
         if resolved is None:return dict(path=name,status='NOT_FOUND',resolved=None,bytes=None,sha256=None,mode=None,links=links)
         if resolved not in self.cache:
-            info=self.observe(resolved);predicate(info.st_size<=MAX_FILE and self.total+info.st_size<=MAX_BYTES,'FILE_AND_AGGREGATE_SIZE')
+            info=self.observe(resolved)
+            if resolved==PUBLIC_WRAPPER:need(info.st_size==WRAPPER_BYTES)
+            predicate(info.st_size<=MAX_FILE and self.total+info.st_size<=MAX_BYTES,'FILE_AND_AGGREGATE_SIZE')
             descriptor=os.open(self.physical(resolved),os.O_RDONLY|getattr(os,'O_NOFOLLOW',0)|getattr(os,'O_NONBLOCK',0))
             digest=hashlib.sha256();size=0
             with os.fdopen(descriptor,'rb') as stream:
@@ -252,6 +259,7 @@ class FixedFiles:
             self.cache[resolved]=dict(path=resolved,type='file',mode=stat.S_IMODE(info.st_mode),bytes=size,sha256=digest.hexdigest())
             self.public[resolved]=self.cache[resolved]
         fact=self.cache[resolved]
+        if resolved==PUBLIC_WRAPPER:need(fact['bytes']==WRAPPER_BYTES and fact['sha256']==WRAPPER_SHA256)
         return dict(path=name,status='OBSERVED',resolved=resolved,bytes=fact['bytes'],sha256=fact['sha256'],mode=fact['mode'],links=links)
 
     def verify(self):
@@ -324,6 +332,11 @@ def validate_inventory(doc):
         else:need(row['type']=='directory')
         need(set(row)==keys)
     nodes={row['path']:row for row in doc['closure_nodes']}
+    wrapper=next(row for row in doc['files'] if row['path']==PUBLIC_WRAPPER)
+    if wrapper['status']=='OBSERVED':
+        need(wrapper['resolved']==PUBLIC_WRAPPER and wrapper['links']==[])
+        need(wrapper['bytes']==WRAPPER_BYTES and wrapper['sha256']==WRAPPER_SHA256)
+        need(PUBLIC_WRAPPER in nodes and nodes[PUBLIC_WRAPPER]['type']=='file')
     need(sum(row['bytes'] for row in nodes.values() if row['type']=='file')<=MAX_BYTES)
     for fact in doc['files']:
         if fact['status']=='OBSERVED':

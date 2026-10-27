@@ -1,5 +1,6 @@
 """Synthetic private-filesystem inventory regressions; no host tools run."""
 import copy
+import functools
 import io
 import json
 import os
@@ -10,6 +11,18 @@ import tempfile
 import unittest
 from unittest.mock import patch
 import native_builder_inventory as n
+
+
+# These two retained tests exercise the historical restrictive classification
+# profile. Default policy admission is exercised separately below. Their entire
+# original method bodies/assertions remain unchanged; no global policy patch.
+def legacy_wrapper_denied(method):
+    @functools.wraps(method)
+    def restricted(self):
+        with patch.object(n,'FILES',tuple(path for path in n.FILES if path!=n.PUBLIC_WRAPPER)), \
+             patch.object(n,'NODES',frozenset(path for path in n.NODES if path!=n.PUBLIC_WRAPPER)):
+            return method(self)
+    return restricted
 
 
 class PublicBuilderInventoryTests(unittest.TestCase):
@@ -315,6 +328,7 @@ class PublicBuilderInventoryTests(unittest.TestCase):
         doc=json.loads(n.diagnostic(caught.exception));self.assertEqual(doc['predicate'],'REQUEST_ALLOWLIST');self.assertEqual(doc['phase'],'public_file')
 
 
+    @legacy_wrapper_denied
     def test_known_public_wrapper_enum_denies_without_opening_target(self):
         name=n.WRAPPER_REQUEST;link=self.public/name.lstrip('/');link.symlink_to(n.PUBLIC_WRAPPER)
         with patch.object(n.os,'open',side_effect=AssertionError('no target read')),self.assertRaises(n.DiagnosticHold) as caught:
@@ -325,6 +339,7 @@ class PublicBuilderInventoryTests(unittest.TestCase):
         self.assertEqual(detail,dict(schema='f07-public-wrapper-classification-v1',status='HOLD',path_id=name,target_class='KNOWN_PUBLIC_WRAPPER'))
         self.assertNotIn(n.PUBLIC_WRAPPER,n.NODES);self.assertNotIn(n.PUBLIC_WRAPPER,n.FILES);self.assertFalse(self.root().exists())
 
+    @legacy_wrapper_denied
     def test_normalized_relative_wrapper_uses_existing_grammar_without_follow(self):
         name=n.WRAPPER_REQUEST;link=self.public/name.lstrip('/');link.symlink_to('../share/pkg-config-crosswrapper')
         with self.assertRaises(n.DiagnosticHold) as caught:n.boundary('public_file',self.files().file,name,path_id=name)
@@ -368,6 +383,80 @@ class PublicBuilderInventoryTests(unittest.TestCase):
             error=kind(phase,'GUARD_REJECTED',path);error.wrapper_classification=classification
             self.assertEqual(n.wrapper_target_diagnostic(error),'')
         self.assertEqual(n.wrapper_target_diagnostic(ValueError('PRIVATE')),'')
+
+
+    def synthetic_wrapper(self):
+        # Harmless unit bytes; this is NOT authenticated wrapper/native proof.
+        # Only this unit fixture's expected fingerprint is patched. Root's
+        # separate unpatched2235/4d370... data proof and actual CI are required.
+        raw=b'synthetic public wrapper data; never execute\n'
+        self.put(self.public/n.PUBLIC_WRAPPER.lstrip('/'),raw)
+        return raw
+
+    def test_default_wrapper_membership_production_pins_and_synthetic_branch(self):
+        self.assertIn(n.PUBLIC_WRAPPER,n.FILES);self.assertIn(n.PUBLIC_WRAPPER,n.NODES)
+        self.assertEqual(n.WRAPPER_BYTES,2235);self.assertEqual(n.WRAPPER_SHA256,'4d37004a6a285b0676073345752c42f8af20cc8ea7537772b8ea4249b9fc1001')
+        raw=self.synthetic_wrapper();name=n.WRAPPER_REQUEST
+        (self.public/name.lstrip('/')).symlink_to(n.PUBLIC_WRAPPER)
+        with patch.object(n,'WRAPPER_BYTES',len(raw)),patch.object(n,'WRAPPER_SHA256',n.sha(raw)),patch.object(subprocess,'run',side_effect=AssertionError('never execute')):
+            files=self.files();fact=files.file(name);files.verify();doc=n.inventory(self.values,self.checkout,self.files())
+            n.validate_inventory(doc)
+        self.assertEqual(fact['resolved'],n.PUBLIC_WRAPPER);self.assertEqual(fact['sha256'],n.sha(raw))
+        self.assertEqual(next(row for row in doc['files'] if row['path']==n.PUBLIC_WRAPPER)['status'],'OBSERVED')
+        self.assertEqual(doc['disposition'],'HOLD_INVENTORY_ONLY_NOT_AUTHORITY')
+
+    def test_unpatched_real_fingerprint_refuses_synthetic_content_and_short_sizes(self):
+        path=self.public/n.PUBLIC_WRAPPER.lstrip('/');self.synthetic_wrapper()
+        for raw in (b'',b'x'*2234,b'x'*2235,b'x'*2236):
+            path.write_bytes(raw)
+            with self.subTest(size=len(raw)),self.assertRaises(n.InventoryHold):self.files().file(n.PUBLIC_WRAPPER)
+        with self.assertRaises(n.DiagnosticHold):self.document()
+        self.assertFalse(self.root().exists())
+
+    def test_wrapper_expected_length_and_hash_are_both_enforced_in_unit_fixture(self):
+        raw=self.synthetic_wrapper();path=self.public/n.PUBLIC_WRAPPER.lstrip('/')
+        with patch.object(n,'WRAPPER_BYTES',len(raw)),patch.object(n,'WRAPPER_SHA256',n.sha(raw)):
+            self.assertEqual(self.files().file(n.PUBLIC_WRAPPER)['bytes'],len(raw))
+            for changed in (raw[:-1],raw+b'x',b'x'*len(raw)):
+                path.write_bytes(changed)
+                with self.subTest(size=len(changed)),self.assertRaises(n.InventoryHold):self.files().file(n.PUBLIC_WRAPPER)
+
+    def test_wrapper_symlink_hardlink_special_and_missing_required_target_refuse(self):
+        raw=self.synthetic_wrapper();path=self.public/n.PUBLIC_WRAPPER.lstrip('/');path.unlink()
+        path.symlink_to('/usr/bin/gcc-11')
+        with self.assertRaises(n.InventoryHold):self.files().file(n.PUBLIC_WRAPPER)
+        path.unlink();path.write_bytes(raw);os.link(path,self.public/'usr/share/unrelated')
+        with self.assertRaises(n.InventoryHold):self.files().file(n.PUBLIC_WRAPPER)
+        (self.public/'usr/share/unrelated').unlink();path.unlink();os.mkfifo(path)
+        with self.assertRaises(n.InventoryHold):self.files().file(n.PUBLIC_WRAPPER)
+        path.unlink();(self.public/n.WRAPPER_REQUEST.lstrip('/')).symlink_to(n.PUBLIC_WRAPPER)
+        with self.assertRaises(n.InventoryHold):self.files().file(n.WRAPPER_REQUEST)
+        self.assertEqual(self.files().file(n.PUBLIC_WRAPPER)['status'],'NOT_FOUND')
+
+    def test_wrapper_read_mutation_and_unknown_private_target_remain_closed(self):
+        raw=self.synthetic_wrapper();path=self.public/n.PUBLIC_WRAPPER.lstrip('/');original=n.os.fstat;calls=0
+        def mutate(fd):
+            nonlocal calls
+            calls+=1
+            if calls==2:path.write_bytes(b'x'*len(raw))
+            return original(fd)
+        with patch.object(n,'WRAPPER_BYTES',len(raw)),patch.object(n,'WRAPPER_SHA256',n.sha(raw)),patch.object(n.os,'fstat',side_effect=mutate),self.assertRaises(n.InventoryHold):self.files().file(n.PUBLIC_WRAPPER)
+        link=self.public/n.WRAPPER_REQUEST.lstrip('/');link.symlink_to('/home/private/SECRET')
+        with self.assertRaises(n.DiagnosticHold) as caught:n.boundary('public_file',self.files().file,n.WRAPPER_REQUEST,path_id=n.WRAPPER_REQUEST)
+        detail=n.wrapper_target_diagnostic(caught.exception)
+        self.assertEqual(json.loads(detail)['target_class'],'UNKNOWN');self.assertNotIn('SECRET',detail);self.assertNotIn('sha256',detail)
+
+    def test_artifact_consumer_rechecks_wrapper_hash_size_and_regular_identity(self):
+        raw=self.synthetic_wrapper()
+        with patch.object(n,'WRAPPER_BYTES',len(raw)),patch.object(n,'WRAPPER_SHA256',n.sha(raw)):
+            doc=self.document();n.validate_inventory(doc)
+            for kind in ('hash','size','alias'):
+                bad=copy.deepcopy(doc);fact=next(row for row in bad['files'] if row['path']==n.PUBLIC_WRAPPER);node=next(row for row in bad['closure_nodes'] if row['path']==n.PUBLIC_WRAPPER)
+                if kind=='hash':fact['sha256']=node['sha256']='0'*64
+                elif kind=='size':fact['bytes']=node['bytes']=len(raw)-1
+                else:fact['resolved']='/usr/bin/gcc-11'
+                with self.subTest(kind=kind),self.assertRaises(n.InventoryHold):n.validate_inventory(bad)
+        with self.assertRaises(n.InventoryHold):n.validate_inventory(doc)
 
 
 if __name__=='__main__':unittest.main()
