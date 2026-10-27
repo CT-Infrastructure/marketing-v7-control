@@ -52,7 +52,7 @@ REASONS=frozenset(('GUARD_REJECTED','MISSING','PERMISSION','OS_ERROR','DECODE_ER
 
 
 # Fixed predicate identifiers describe source conditions, never observed data.
-PREDICATES=frozenset(('COMPONENT_ALLOWLIST', 'FILE_AND_AGGREGATE_SIZE', 'FINAL_REGULAR_SINGLE_LINK', 'INTERMEDIATE_DIRECTORY', 'MISSING_REMAINS_MISSING', 'OBSERVED_IDENTITY_STABLE', 'OBSERVED_NODE_LIMIT', 'OBSERVE_ALLOWLIST_AND_DEADLINE', 'OPEN_FILE_IDENTITY_STABLE', 'OPTIONAL_MISSING_STABLE', 'PARENT_WITHIN_ROOT', 'READ_DEADLINE', 'READ_SIZE_AND_PATH_IDENTITY', 'READ_SIZE_LIMIT', 'REQUEST_ALLOWLIST', 'RESOLVED_FILE_ALLOWLIST', 'SYMLINK_COMPONENT_GRAMMAR', 'SYMLINK_HOP_LIMIT', 'SYMLINK_TARGET_ALLOWLIST', 'SYMLINK_TARGET_TYPE_SIZE_CHARACTERS', 'VERIFY_IDENTITY_STABLE'))
+PREDICATES=frozenset(('COMPONENT_ALLOWLIST', 'FILE_AND_AGGREGATE_SIZE', 'FINAL_REGULAR_SINGLE_LINK', 'INTERMEDIATE_DIRECTORY', 'MISSING_REMAINS_MISSING', 'OBSERVED_IDENTITY_STABLE', 'OBSERVED_NODE_LIMIT', 'OBSERVE_ALLOWLIST_AND_DEADLINE', 'OPEN_FILE_IDENTITY_STABLE', 'OPTIONAL_MISSING_STABLE', 'PARENT_WITHIN_ROOT', 'READ_DEADLINE', 'READ_SIZE_AND_PATH_IDENTITY', 'READ_SIZE_LIMIT', 'REQUEST_ALLOWLIST', 'RESOLVED_FILE_ALLOWLIST', 'SYMLINK_COMPONENT_GRAMMAR', 'SYMLINK_HOP_LIMIT', 'SYMLINK_TARGET_ALLOWLIST', 'SYMLINK_TARGET_TYPE_SIZE_CHARACTERS', 'VERIFY_IDENTITY_STABLE')) | frozenset(('WRAPPER_DIRECT_IDENTITY_NO_LINKS', 'WRAPPER_EXACT_FILE_SIZE', 'WRAPPER_OBSERVED_SIZE_CONTENT_PIN', 'WRAPPER_CONSUMER_DIRECT_IDENTITY_NO_LINKS', 'WRAPPER_CONSUMER_SIZE_CONTENT_PIN', 'WRAPPER_CONSUMER_REGULAR_NODE'))
 
 
 class PredicateHold(InventoryHold):
@@ -122,7 +122,7 @@ def diagnostic(error):
     doc=dict(schema='f07-public-builder-diagnostic-v1',status='HOLD',phase=phase,reason=reason,path_id=path_id)
     if type(error) is DiagnosticHold:
         code=getattr(error,'predicate',None)
-        if type(code) is str and code in PREDICATES and reason=='GUARD_REJECTED' and phase in ('public_file','public_verify','release'):
+        if type(code) is str and code in PREDICATES and reason=='GUARD_REJECTED' and phase in ('public_file','public_verify','release','document'):
             doc['predicate']=code
     raw=canonical(doc)
     need(len(raw)<=512);return raw.decode('ascii')
@@ -239,11 +239,11 @@ class FixedFiles:
 
     def file(self,name):
         resolved,links=self.resolve(name)
-        if name==PUBLIC_WRAPPER and resolved is not None:need(resolved==PUBLIC_WRAPPER and not links)
+        if name==PUBLIC_WRAPPER and resolved is not None:predicate(resolved==PUBLIC_WRAPPER and not links,'WRAPPER_DIRECT_IDENTITY_NO_LINKS')
         if resolved is None:return dict(path=name,status='NOT_FOUND',resolved=None,bytes=None,sha256=None,mode=None,links=links)
         if resolved not in self.cache:
             info=self.observe(resolved)
-            if resolved==PUBLIC_WRAPPER:need(info.st_size==WRAPPER_BYTES)
+            if resolved==PUBLIC_WRAPPER:predicate(info.st_size==WRAPPER_BYTES,'WRAPPER_EXACT_FILE_SIZE')
             predicate(info.st_size<=MAX_FILE and self.total+info.st_size<=MAX_BYTES,'FILE_AND_AGGREGATE_SIZE')
             descriptor=os.open(self.physical(resolved),os.O_RDONLY|getattr(os,'O_NOFOLLOW',0)|getattr(os,'O_NONBLOCK',0))
             digest=hashlib.sha256();size=0
@@ -259,7 +259,7 @@ class FixedFiles:
             self.cache[resolved]=dict(path=resolved,type='file',mode=stat.S_IMODE(info.st_mode),bytes=size,sha256=digest.hexdigest())
             self.public[resolved]=self.cache[resolved]
         fact=self.cache[resolved]
-        if resolved==PUBLIC_WRAPPER:need(fact['bytes']==WRAPPER_BYTES and fact['sha256']==WRAPPER_SHA256)
+        if resolved==PUBLIC_WRAPPER:predicate(fact['bytes']==WRAPPER_BYTES and fact['sha256']==WRAPPER_SHA256,'WRAPPER_OBSERVED_SIZE_CONTENT_PIN')
         return dict(path=name,status='OBSERVED',resolved=resolved,bytes=fact['bytes'],sha256=fact['sha256'],mode=fact['mode'],links=links)
 
     def verify(self):
@@ -334,9 +334,9 @@ def validate_inventory(doc):
     nodes={row['path']:row for row in doc['closure_nodes']}
     wrapper=next(row for row in doc['files'] if row['path']==PUBLIC_WRAPPER)
     if wrapper['status']=='OBSERVED':
-        need(wrapper['resolved']==PUBLIC_WRAPPER and wrapper['links']==[])
-        need(wrapper['bytes']==WRAPPER_BYTES and wrapper['sha256']==WRAPPER_SHA256)
-        need(PUBLIC_WRAPPER in nodes and nodes[PUBLIC_WRAPPER]['type']=='file')
+        predicate(wrapper['resolved']==PUBLIC_WRAPPER and wrapper['links']==[],'WRAPPER_CONSUMER_DIRECT_IDENTITY_NO_LINKS')
+        predicate(wrapper['bytes']==WRAPPER_BYTES and wrapper['sha256']==WRAPPER_SHA256,'WRAPPER_CONSUMER_SIZE_CONTENT_PIN')
+        predicate(PUBLIC_WRAPPER in nodes and nodes[PUBLIC_WRAPPER]['type']=='file','WRAPPER_CONSUMER_REGULAR_NODE')
     need(sum(row['bytes'] for row in nodes.values() if row['type']=='file')<=MAX_BYTES)
     for fact in doc['files']:
         if fact['status']=='OBSERVED':

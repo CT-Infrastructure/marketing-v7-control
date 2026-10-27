@@ -459,4 +459,44 @@ class PublicBuilderInventoryTests(unittest.TestCase):
         with self.assertRaises(n.InventoryHold):n.validate_inventory(doc)
 
 
+    def test_wrapper_direct_alias_size_and_content_predicate_codes_match_conditions(self):
+        raw=self.synthetic_wrapper();path=self.public/n.PUBLIC_WRAPPER.lstrip('/')
+        with patch.object(n,'WRAPPER_BYTES',len(raw)),patch.object(n,'WRAPPER_SHA256',n.sha(raw)):
+            for value,code in ((raw[:-1],'WRAPPER_EXACT_FILE_SIZE'),(b'x'*len(raw),'WRAPPER_OBSERVED_SIZE_CONTENT_PIN')):
+                path.write_bytes(value)
+                with self.subTest(code=code),self.assertRaises(n.DiagnosticHold) as caught:n.boundary('public_file',self.files().file,n.PUBLIC_WRAPPER,path_id=n.PUBLIC_WRAPPER)
+                doc=json.loads(n.diagnostic(caught.exception));self.assertEqual(doc['predicate'],code)
+                self.assertEqual(set(doc),{'schema','status','phase','reason','path_id','predicate'})
+                self.assertNotIn('sha256',doc);self.assertNotIn('bytes',doc)
+            path.unlink();path.symlink_to('/usr/bin/gcc-11')
+            with self.assertRaises(n.DiagnosticHold) as caught:n.boundary('public_file',self.files().file,n.PUBLIC_WRAPPER,path_id=n.PUBLIC_WRAPPER)
+            self.assertEqual(json.loads(n.diagnostic(caught.exception))['predicate'],'WRAPPER_DIRECT_IDENTITY_NO_LINKS')
+
+    def test_all_wrapper_consumer_predicates_reject_closed_synthetic_document_changes(self):
+        raw=self.synthetic_wrapper()
+        with patch.object(n,'WRAPPER_BYTES',len(raw)),patch.object(n,'WRAPPER_SHA256',n.sha(raw)):
+            good=self.document();n.validate_inventory(good)
+            for kind,code in (('alias','WRAPPER_CONSUMER_DIRECT_IDENTITY_NO_LINKS'),('hash','WRAPPER_CONSUMER_SIZE_CONTENT_PIN'),('size','WRAPPER_CONSUMER_SIZE_CONTENT_PIN'),('node','WRAPPER_CONSUMER_REGULAR_NODE')):
+                doc=copy.deepcopy(good);fact=next(row for row in doc['files'] if row['path']==n.PUBLIC_WRAPPER);node=next(row for row in doc['closure_nodes'] if row['path']==n.PUBLIC_WRAPPER)
+                if kind=='alias':fact['resolved']='/usr/bin/gcc-11'
+                elif kind=='hash':fact['sha256']=node['sha256']='0'*64
+                elif kind=='size':fact['bytes']=node['bytes']=len(raw)-1
+                else:node.clear();node.update(path=n.PUBLIC_WRAPPER,type='directory',mode=0o755)
+                with self.subTest(kind=kind),self.assertRaises(n.DiagnosticHold) as caught:n.boundary('document',n.validate_inventory,doc)
+                diagnostic=json.loads(n.diagnostic(caught.exception));self.assertEqual(diagnostic['predicate'],code)
+                self.assertEqual(diagnostic['phase'],'document');self.assertIsNone(diagnostic['path_id'])
+
+    def test_wrapper_pin_codes_remain_fixed_bounded_and_forged_values_are_suppressed(self):
+        codes=('WRAPPER_DIRECT_IDENTITY_NO_LINKS','WRAPPER_EXACT_FILE_SIZE','WRAPPER_OBSERVED_SIZE_CONTENT_PIN','WRAPPER_CONSUMER_DIRECT_IDENTITY_NO_LINKS','WRAPPER_CONSUMER_SIZE_CONTENT_PIN','WRAPPER_CONSUMER_REGULAR_NODE')
+        for code in codes:
+            self.assertIn(code,n.PREDICATES)
+            with self.assertRaises(n.DiagnosticHold) as caught:n.boundary('document',lambda:n.predicate(False,code))
+            raw=n.diagnostic(caught.exception);self.assertEqual(json.loads(raw)['predicate'],code);self.assertLessEqual(len(raw.encode('ascii')),512)
+        for bad in (True,'PRIVATE_TOKEN','WRAPPER_EXACT_FILE_SIZE\nSECRET','x'*10000):
+            error=n.DiagnosticHold('document','GUARD_REJECTED',None);error.predicate=bad
+            doc=json.loads(n.diagnostic(error));self.assertNotIn('predicate',doc);self.assertNotIn('SECRET',n.diagnostic(error))
+        error=n.DiagnosticHold('context','GUARD_REJECTED',None);error.predicate=codes[0]
+        self.assertNotIn('predicate',json.loads(n.diagnostic(error)))
+
+
 if __name__=='__main__':unittest.main()
