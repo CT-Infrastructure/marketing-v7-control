@@ -50,6 +50,20 @@ PHASES=frozenset(('arguments','context','checkout_path','output_parent','self_bi
 REASONS=frozenset(('GUARD_REJECTED','MISSING','PERMISSION','OS_ERROR','DECODE_ERROR','UNKNOWN'))
 
 
+# Fixed predicate identifiers describe source conditions, never observed data.
+PREDICATES=frozenset(('COMPONENT_ALLOWLIST', 'FILE_AND_AGGREGATE_SIZE', 'FINAL_REGULAR_SINGLE_LINK', 'INTERMEDIATE_DIRECTORY', 'MISSING_REMAINS_MISSING', 'OBSERVED_IDENTITY_STABLE', 'OBSERVED_NODE_LIMIT', 'OBSERVE_ALLOWLIST_AND_DEADLINE', 'OPEN_FILE_IDENTITY_STABLE', 'OPTIONAL_MISSING_STABLE', 'PARENT_WITHIN_ROOT', 'READ_DEADLINE', 'READ_SIZE_AND_PATH_IDENTITY', 'READ_SIZE_LIMIT', 'REQUEST_ALLOWLIST', 'RESOLVED_FILE_ALLOWLIST', 'SYMLINK_COMPONENT_GRAMMAR', 'SYMLINK_HOP_LIMIT', 'SYMLINK_TARGET_ALLOWLIST', 'SYMLINK_TARGET_TYPE_SIZE_CHARACTERS', 'VERIFY_IDENTITY_STABLE'))
+
+
+class PredicateHold(InventoryHold):
+    def __init__(self,code):
+        super().__init__('INVENTORY_BOUNDARY_HOLD');self.code=code
+
+
+def predicate(value,code):
+    need(type(code) is str and code in PREDICATES)
+    if not value:raise PredicateHold(code)
+
+
 class DiagnosticHold(InventoryHold):
     def __init__(self,phase,reason,path_id):
         super().__init__('INVENTORY_BOUNDARY_HOLD')
@@ -65,7 +79,10 @@ def boundary(phase,operation,*args,path_id=None):
         # Exact classes only: no errno, message, filename, repr or traceback export.
         reason={InventoryHold:'GUARD_REJECTED',FileNotFoundError:'MISSING',PermissionError:'PERMISSION',
             OSError:'OS_ERROR',UnicodeDecodeError:'DECODE_ERROR'}.get(type(error),'UNKNOWN')
-        raise DiagnosticHold(phase,reason,path_id) from None
+        converted=DiagnosticHold(phase,reason,path_id)
+        if type(error) is PredicateHold and type(error.code) is str and error.code in PREDICATES:
+            converted.reason='GUARD_REJECTED';converted.predicate=error.code
+        raise converted from None
 
 
 def diagnostic(error):
@@ -74,7 +91,12 @@ def diagnostic(error):
         if type(error.phase) is str and error.phase in PHASES:phase=error.phase
         if type(error.reason) is str and error.reason in REASONS:reason=error.reason
         if type(error.path_id) is str and error.path_id in FILES:path_id=error.path_id
-    raw=canonical(dict(schema='f07-public-builder-diagnostic-v1',status='HOLD',phase=phase,reason=reason,path_id=path_id))
+    doc=dict(schema='f07-public-builder-diagnostic-v1',status='HOLD',phase=phase,reason=reason,path_id=path_id)
+    if type(error) is DiagnosticHold:
+        code=getattr(error,'predicate',None)
+        if type(code) is str and code in PREDICATES and reason=='GUARD_REJECTED' and phase in ('public_file','public_verify','release'):
+            doc['predicate']=code
+    raw=canonical(doc)
     need(len(raw)<=512);return raw.decode('ascii')
 
 
@@ -147,29 +169,29 @@ class FixedFiles:
     def physical(self,name):return self.root/name.lstrip('/')
 
     def observe(self,name):
-        need(name in NODES and time.monotonic()<self.deadline)
+        predicate(name in NODES and time.monotonic()<self.deadline,'OBSERVE_ALLOWLIST_AND_DEADLINE')
         info=self.physical(name).lstat();key=identity(info)
-        if name in self.observed:need(self.observed[name]==key)
-        self.observed[name]=key;need(len(self.observed)<=MAX_NODES);return info
+        if name in self.observed:predicate(self.observed[name]==key,'OBSERVED_IDENTITY_STABLE')
+        self.observed[name]=key;predicate(len(self.observed)<=MAX_NODES,'OBSERVED_NODE_LIMIT');return info
 
     def resolve(self,name):
-        need(name in FILES);parts=[];todo=[(p,False) for p in name.split('/')[1:]];hops=0;links=[]
+        predicate(name in FILES,'REQUEST_ALLOWLIST');parts=[];todo=[(p,False) for p in name.split('/')[1:]];hops=0;links=[]
         while todo:
             part,required=todo.pop(0)
-            if part=='..':need(bool(parts));parts.pop();continue
-            current='/'+('/'.join(parts+[part]));need(current in NODES)
+            if part=='..':predicate(bool(parts),'PARENT_WITHIN_ROOT');parts.pop();continue
+            current='/'+('/'.join(parts+[part]));predicate(current in NODES,'COMPONENT_ALLOWLIST')
             try:info=self.observe(current)
             except FileNotFoundError:
-                need(not required and (current not in self.observed or self.observed[current] is None))
-                self.observed[current]=None;need(len(self.observed)<=MAX_NODES);return None,links
+                predicate(not required and (current not in self.observed or self.observed[current] is None),'OPTIONAL_MISSING_STABLE')
+                self.observed[current]=None;predicate(len(self.observed)<=MAX_NODES,'OBSERVED_NODE_LIMIT');return None,links
             if stat.S_ISLNK(info.st_mode):
-                hops+=1;need(hops<=16);target=os.readlink(self.physical(current))
-                need(type(target) is str and 0<len(target)<=240 and re.fullmatch('[A-Za-z0-9_+./-]+',target) is not None)
+                hops+=1;predicate(hops<=16,'SYMLINK_HOP_LIMIT');target=os.readlink(self.physical(current))
+                predicate(type(target) is str and 0<len(target)<=240 and re.fullmatch('[A-Za-z0-9_+./-]+',target) is not None,'SYMLINK_TARGET_TYPE_SIZE_CHARACTERS')
                 rawparts=target.split('/');absolute=target.startswith('/')
                 if absolute:rawparts=rawparts[1:]
-                need(all(p not in ('','.') for p in rawparts))
+                predicate(all(p not in ('','.') for p in rawparts),'SYMLINK_COMPONENT_GRAMMAR')
                 lexical=os.path.normpath(target if absolute else os.path.join('/'+('/'.join(parts)),target))
-                need(lexical in NODES)
+                predicate(lexical in NODES,'SYMLINK_TARGET_ALLOWLIST')
                 links.append(dict(path=current,target=lexical,raw_target_sha256=sha(os.fsencode(target))))
                 self.public[current]=dict(path=current,type='symlink',mode=stat.S_IMODE(info.st_mode),target=lexical,raw_target_sha256=sha(os.fsencode(target)))
                 if absolute:parts=[]
@@ -177,26 +199,26 @@ class FixedFiles:
             else:
                 parts.append(part)
                 if todo:
-                    need(stat.S_ISDIR(info.st_mode));self.public[current]=dict(path=current,type='directory',mode=stat.S_IMODE(info.st_mode))
-                else:need(stat.S_ISREG(info.st_mode) and info.st_nlink==1)
-        result='/'+('/'.join(parts));need(result in FILES);return result,links
+                    predicate(stat.S_ISDIR(info.st_mode),'INTERMEDIATE_DIRECTORY');self.public[current]=dict(path=current,type='directory',mode=stat.S_IMODE(info.st_mode))
+                else:predicate(stat.S_ISREG(info.st_mode) and info.st_nlink==1,'FINAL_REGULAR_SINGLE_LINK')
+        result='/'+('/'.join(parts));predicate(result in FILES,'RESOLVED_FILE_ALLOWLIST');return result,links
 
     def file(self,name):
         resolved,links=self.resolve(name)
         if resolved is None:return dict(path=name,status='NOT_FOUND',resolved=None,bytes=None,sha256=None,mode=None,links=links)
         if resolved not in self.cache:
-            info=self.observe(resolved);need(info.st_size<=MAX_FILE and self.total+info.st_size<=MAX_BYTES)
+            info=self.observe(resolved);predicate(info.st_size<=MAX_FILE and self.total+info.st_size<=MAX_BYTES,'FILE_AND_AGGREGATE_SIZE')
             descriptor=os.open(self.physical(resolved),os.O_RDONLY|getattr(os,'O_NOFOLLOW',0)|getattr(os,'O_NONBLOCK',0))
             digest=hashlib.sha256();size=0
             with os.fdopen(descriptor,'rb') as stream:
-                need(identity(os.fstat(stream.fileno()))==identity(info))
+                predicate(identity(os.fstat(stream.fileno()))==identity(info),'OPEN_FILE_IDENTITY_STABLE')
                 while True:
-                    need(time.monotonic()<self.deadline)
+                    predicate(time.monotonic()<self.deadline,'READ_DEADLINE')
                     block=stream.read(min(65536,MAX_FILE-size+1))
                     if not block:break
-                    size+=len(block);need(size<=MAX_FILE);digest.update(block)
-                need(identity(os.fstat(stream.fileno()))==identity(info))
-            need(size==info.st_size and identity(self.observe(resolved))==identity(info));self.total+=size
+                    size+=len(block);predicate(size<=MAX_FILE,'READ_SIZE_LIMIT');digest.update(block)
+                predicate(identity(os.fstat(stream.fileno()))==identity(info),'OPEN_FILE_IDENTITY_STABLE')
+            predicate(size==info.st_size and identity(self.observe(resolved))==identity(info),'READ_SIZE_AND_PATH_IDENTITY');self.total+=size
             self.cache[resolved]=dict(path=resolved,type='file',mode=stat.S_IMODE(info.st_mode),bytes=size,sha256=digest.hexdigest())
             self.public[resolved]=self.cache[resolved]
         fact=self.cache[resolved]
@@ -207,8 +229,8 @@ class FixedFiles:
             if expected is None:
                 try:self.physical(name).lstat()
                 except FileNotFoundError:continue
-                raise InventoryHold('INVENTORY_BOUNDARY_HOLD')
-            need(identity(self.physical(name).lstat())==expected)
+                predicate(False,'MISSING_REMAINS_MISSING')
+            predicate(identity(self.physical(name).lstat())==expected,'VERIFY_IDENTITY_STABLE')
 
     def release(self):
         fact=self.file('/etc/os-release');need(fact['status']=='OBSERVED' and fact['bytes']<=8192)

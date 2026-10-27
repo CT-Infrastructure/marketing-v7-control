@@ -264,4 +264,55 @@ class PublicBuilderInventoryTests(unittest.TestCase):
         self.assertNotIn('PRIVATE',errors.getvalue());self.assertEqual(len(errors.getvalue().splitlines()),1)
 
 
+    def test_requested_pkg_config_predicate_diagnostic_keeps_unknown_target_closed(self):
+        name='/usr/bin/x86_64-linux-gnu-pkg-config';link=self.public/name.lstrip('/')
+        link.symlink_to('/home/private/DO_NOT_EXPORT')
+        with patch.object(n.os,'open',side_effect=AssertionError('must not read rejected target')),self.assertRaises(n.DiagnosticHold) as caught:
+            n.boundary('public_file',self.files().file,name,path_id=name)
+        doc=json.loads(n.diagnostic(caught.exception))
+        self.assertEqual(doc,dict(schema='f07-public-builder-diagnostic-v1',status='HOLD',phase='public_file',reason='GUARD_REJECTED',path_id=name,predicate='SYMLINK_TARGET_ALLOWLIST'))
+        self.assertNotIn('DO_NOT_EXPORT',n.diagnostic(caught.exception));self.assertNotIn('/home',n.diagnostic(caught.exception))
+        self.assertFalse(self.root().exists())
+
+    def test_predicate_codes_distinguish_link_grammar_missing_hops_and_file_type(self):
+        name='/usr/bin/x86_64-linux-gnu-pkg-config';link=self.public/name.lstrip('/')
+        for target,code in (('./pkg-config','SYMLINK_COMPONENT_GRAMMAR'),('pkgconf','OPTIONAL_MISSING_STABLE'),('x86_64-linux-gnu-pkg-config','SYMLINK_HOP_LIMIT'),('TOKEN\nPRIVATE','SYMLINK_TARGET_TYPE_SIZE_CHARACTERS')):
+            link.symlink_to(target)
+            with self.subTest(code=code),self.assertRaises(n.DiagnosticHold) as caught:n.boundary('public_file',self.files().file,name,path_id=name)
+            self.assertEqual(json.loads(n.diagnostic(caught.exception))['predicate'],code);link.unlink()
+        link.mkdir()
+        with self.assertRaises(n.DiagnosticHold) as caught:n.boundary('public_file',self.files().file,name,path_id=name)
+        self.assertEqual(json.loads(n.diagnostic(caught.exception))['predicate'],'FINAL_REGULAR_SINGLE_LINK')
+
+    def test_predicate_diagnostics_preserve_positive_missing_and_known_alias_facts(self):
+        name='/usr/bin/x86_64-linux-gnu-pkg-config';link=self.public/name.lstrip('/')
+        self.assertEqual(n.boundary('public_file',self.files().file,name,path_id=name)['status'],'NOT_FOUND')
+        self.put(self.public/'usr/bin/pkg-config',b'public fixture only');link.symlink_to('pkg-config')
+        files=self.files();fact=n.boundary('public_file',files.file,name,path_id=name);files.verify()
+        self.assertEqual(fact['resolved'],'/usr/bin/pkg-config');self.assertEqual(fact['sha256'],n.sha(b'public fixture only'))
+        self.assertEqual(n.predicate(True,'REQUEST_ALLOWLIST'),None)
+
+    def test_untrusted_predicate_fields_subclasses_and_nonpublic_phase_never_expand_export(self):
+        class Forged(n.PredicateHold):pass
+        for error in (n.PredicateHold('PRIVATE'*100000),n.PredicateHold(True),Forged('REQUEST_ALLOWLIST')):
+            def fail():raise error
+            with self.assertRaises(n.DiagnosticHold) as caught:n.boundary('public_file',fail,path_id='/usr/bin/pkg-config')
+            doc=json.loads(n.diagnostic(caught.exception));self.assertNotIn('predicate',doc)
+            self.assertEqual(doc['reason'],'UNKNOWN');self.assertLessEqual(len(n.diagnostic(caught.exception)),512)
+        for phase in ('context','publish','unknown'):
+            error=n.DiagnosticHold(phase,'GUARD_REJECTED','/usr/bin/pkg-config');error.predicate='REQUEST_ALLOWLIST'
+            self.assertNotIn('predicate',json.loads(n.diagnostic(error)))
+        for bad in (True,'PRIVATE','REQUEST_ALLOWLIST\nTOKEN'):
+            with self.assertRaises(n.InventoryHold):n.predicate(False,bad)
+
+    def test_every_closed_predicate_is_bounded_and_nested_failure_keeps_first_code(self):
+        for code in n.PREDICATES:
+            with self.assertRaises(n.DiagnosticHold) as caught:n.boundary('public_file',lambda:n.predicate(False,code),path_id='/usr/bin/x86_64-linux-gnu-pkg-config')
+            raw=n.diagnostic(caught.exception);self.assertEqual(json.loads(raw)['predicate'],code)
+            self.assertLessEqual(len(raw.encode('ascii')),512);self.assertEqual(len(raw.splitlines()),1)
+        def fail():n.boundary('public_file',lambda:n.predicate(False,'REQUEST_ALLOWLIST'),path_id='/usr/bin/pkg-config')
+        with self.assertRaises(n.DiagnosticHold) as caught:n.boundary('publish',fail)
+        doc=json.loads(n.diagnostic(caught.exception));self.assertEqual(doc['predicate'],'REQUEST_ALLOWLIST');self.assertEqual(doc['phase'],'public_file')
+
+
 if __name__=='__main__':unittest.main()
