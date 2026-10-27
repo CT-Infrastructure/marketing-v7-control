@@ -982,4 +982,93 @@ class DynamicLoadBindingTests(unittest.TestCase):
         with self.assertRaises(ValueError):s.elf_report(self.header(raw,offset=4080,vaddr=0x400ff0))
 
 
+
+
+class VersionNeedGraphTests(unittest.TestCase):
+    def elf_hash(self,text):
+        value=0
+        for byte in text.encode('ascii'):
+            value=(value<<4)+byte;high=value&0xf0000000
+            if high:value^=high>>24
+            value&=~high
+        return value
+
+    def fixture(self,version='GLIBC_2.35'):
+        raw=bytearray(SourceContractTests().elf(version));strings=b'\0libcap.so.2\0libselinux.so.1\0'+version.encode()+b'\0libc.so.6\0GLIBC_2.38\0'
+        raw[1100:1100+len(strings)]=strings
+        struct.pack_into('<qQ',raw,768+3*16,10,len(strings))
+        libc=strings.index(b'libc.so.6');name=strings.index(version.encode())
+        struct.pack_into('<qQ',raw,768+7*16,1,libc)
+        struct.pack_into('<HHIII',raw,1400,1,1,libc,16,0)
+        struct.pack_into('<IHHII',raw,1416,self.elf_hash(version),0,2,name,0)
+        return raw,strings
+
+    def test_coherent_libc_version_requirement_positive_and_newer_deny(self):
+        raw,_=self.fixture();report=s.elf_report(bytes(raw))
+        self.assertIn('libc.so.6',report['needed']);self.assertEqual(report['glibc_versions'],['GLIBC_2.35'])
+        raw,_=self.fixture('GLIBC_2.38')
+        with self.assertRaises(ValueError):s.elf_report(bytes(raw))
+
+    def test_zero_or_missing_outer_inner_counts_cannot_hide_new_glibc(self):
+        for kind in ('inner_zero','outer_zero','outer_missing','pointer_missing','both_missing','outer_excess','inner_excess'):
+            raw,_=self.fixture('GLIBC_2.38')
+            if kind=='inner_zero':struct.pack_into('<H',raw,1402,0)
+            elif kind=='outer_zero':struct.pack_into('<qQ',raw,768+6*16,0x6fffffff,0)
+            elif kind=='outer_missing':struct.pack_into('<qQ',raw,768+6*16,21,0)
+            elif kind=='pointer_missing':struct.pack_into('<qQ',raw,768+5*16,21,0)
+            elif kind=='both_missing':
+                struct.pack_into('<qQ',raw,768+5*16,21,0);struct.pack_into('<qQ',raw,768+6*16,22,0)
+            elif kind=='outer_excess':struct.pack_into('<qQ',raw,768+6*16,0x6fffffff,129)
+            else:struct.pack_into('<H',raw,1402,129)
+            with self.subTest(kind=kind),self.assertRaises(ValueError):s.elf_report(bytes(raw))
+
+    def test_hidden_auxiliary_tail_new_glibc_is_rejected_and_complete_old_versions_accept(self):
+        raw,strings=self.fixture();struct.pack_into('<I',raw,1428,16)
+        struct.pack_into('<IHHII',raw,1432,self.elf_hash('GLIBC_2.38'),0,3,strings.rindex(b'GLIBC_2.38'),0)
+        with self.assertRaises(ValueError):s.elf_report(bytes(raw))
+        struct.pack_into('<H',raw,1402,2)
+        with self.assertRaises(ValueError):s.elf_report(bytes(raw))
+        struct.pack_into('<IHHII',raw,1432,self.elf_hash('GLIBC_2.35'),0,3,strings.index(b'GLIBC_2.35'),0)
+        self.assertEqual(s.elf_report(bytes(raw))['glibc_versions'],['GLIBC_2.35'])
+
+    def test_hidden_outer_tail_and_exact_count_termination_are_consistent(self):
+        raw,strings=self.fixture();struct.pack_into('<I',raw,1412,32)
+        libc=strings.index(b'libc.so.6')
+        struct.pack_into('<HHIII',raw,1432,1,1,libc,16,0)
+        struct.pack_into('<IHHII',raw,1448,self.elf_hash('GLIBC_2.38'),0,3,strings.rindex(b'GLIBC_2.38'),0)
+        with self.assertRaises(ValueError):s.elf_report(bytes(raw))
+        struct.pack_into('<qQ',raw,768+6*16,0x6fffffff,2)
+        with self.assertRaises(ValueError):s.elf_report(bytes(raw))
+        struct.pack_into('<IHHII',raw,1448,self.elf_hash('GLIBC_2.35'),0,3,strings.index(b'GLIBC_2.35'),0)
+        self.assertEqual(s.elf_report(bytes(raw))['glibc_versions'],['GLIBC_2.35'])
+
+    def test_early_zero_links_reject_instead_of_revisiting_records(self):
+        for kind in ('outer','inner'):
+            raw,_=self.fixture()
+            if kind=='outer':struct.pack_into('<qQ',raw,768+6*16,0x6fffffff,2)
+            else:struct.pack_into('<H',raw,1402,2)
+            with self.subTest(kind=kind),self.assertRaises(ValueError):s.elf_report(bytes(raw))
+
+    def test_unsafe_auxiliary_and_outer_links_reject_boundedly(self):
+        for field,offset in (('aux',0),('aux',4),('aux',17),('aux',8192),('next',4),('next',17),('next',8192),('next',0xfffffff0)):
+            raw,_=self.fixture()
+            if field=='aux':struct.pack_into('<I',raw,1408,offset)
+            else:
+                struct.pack_into('<qQ',raw,768+6*16,0x6fffffff,2);struct.pack_into('<I',raw,1412,offset)
+            with self.subTest(field=field,offset=offset),self.assertRaises(ValueError):s.elf_report(bytes(raw))
+        raw,_=self.fixture();struct.pack_into('<H',raw,1402,2);struct.pack_into('<I',raw,1428,0xfffffff0)
+        with self.assertRaises(ValueError):s.elf_report(bytes(raw))
+        raw,_=self.fixture();struct.pack_into('<qQ',raw,768+5*16,0x6ffffffe,2**64-8)
+        with self.assertRaises(ValueError):s.elf_report(bytes(raw))
+
+    def test_record_overlap_string_dynamic_and_partial_extents_reject(self):
+        for address in (0x400000+768,0x400000+1100,0x400000+8192-8):
+            raw,_=self.fixture();struct.pack_into('<qQ',raw,768+5*16,0x6ffffffe,address)
+            with self.subTest(address=address),self.assertRaises(ValueError):s.elf_report(bytes(raw))
+        raw,strings=self.fixture();struct.pack_into('<qQ',raw,768+6*16,0x6fffffff,2)
+        struct.pack_into('<I',raw,1412,16)
+        # The second outer record aliases the first outer record's auxiliary.
+        with self.assertRaises(ValueError):s.elf_report(bytes(raw))
+
+
 if __name__=='__main__':unittest.main()

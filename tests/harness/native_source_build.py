@@ -678,17 +678,36 @@ def elf_report(raw):
     def string(index):
         check(0<=index<dynamic[10]);stop=raw.find(b'\0',strings+index,end);check(stop!=-1)
         return raw[strings+index:stop].decode('ascii')
-    versions=[]
-    if 0x6ffffffe in dynamic:
-        address=dynamic[0x6ffffffe];count=dynamic.get(0x6fffffff,0);check(count<=128)
-        for _ in range(count):
-            off=mapped(address,16);version,cnt,_,aux,nxt=struct.unpack_from('<HHIII',raw,off);check(version==1 and cnt<=128)
-            a=address+aux
-            for __ in range(cnt):
-                off=mapped(a,16);_,_,_,name,n=struct.unpack_from('<IHHII',raw,off);text=string(name)
-                if text.startswith('GLIBC_'):check(re.fullmatch(r'GLIBC_\d+(?:\.\d+){1,2}',text) is not None);versions.append(text)
-                a+=n
-            address+=nxt
+    # The supported output must declare its GLIBC requirements explicitly.
+    # glibc2.35 consumes next pointers until zero, not the count fields alone.
+    check(0x6ffffffe in dynamic and 0x6fffffff in dynamic)
+    versions=[];claimed=set()
+    def version_record(address):
+        check(address%4==0)
+        off=mapped(address,16);check(off%4==0)
+        check(off+16<=vector_offset or vector_offset+vector[5]<=off)
+        check(off+16<=strings or end<=off)
+        words=set(range(off,off+16,4));check(not claimed.intersection(words))
+        claimed.update(words);check(len(claimed)<=4*128*129)
+        return off
+    def version_link(address,offset):
+        check(offset>=16 and offset%4==0 and address+offset<2**64)
+        return address+offset
+    address=dynamic[0x6ffffffe];count=dynamic[0x6fffffff];check(0<count<=128)
+    for index in range(count):
+        off=version_record(address);version,cnt,file_name,aux,nxt=struct.unpack_from('<HHIII',raw,off)
+        check(version==1 and 0<cnt<=128);string(file_name)
+        a=version_link(address,aux)
+        for inner in range(cnt):
+            off=version_record(a);_,_,_,name,n=struct.unpack_from('<IHHII',raw,off);text=string(name)
+            check(0<len(text)<=128)
+            if text.startswith('GLIBC_'):
+                check(re.fullmatch(r'GLIBC_\d+(?:\.\d+){1,2}',text) is not None);versions.append(text)
+            if inner==cnt-1:check(n==0)
+            else:a=version_link(a,n)
+        if index==count-1:check(nxt==0)
+        else:address=version_link(address,nxt)
+    check(bool(versions))
     report=dict(machine='AMD64',elf_type='ET_DYN',interpreter=interpreter,
         pie=bool(dynamic.get(0x6ffffffb,0)&0x8000000),bind_now=bool(24 in dynamic or dynamic.get(30,0)&8 or dynamic.get(0x6ffffffb,0)&1),
         relro=True,nonexec_stack=True,expected_loader_policy=target_loader_policy(),
