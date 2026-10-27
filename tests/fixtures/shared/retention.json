@@ -1,0 +1,11 @@
+{
+  "schema_version":"1.0",
+  "fixture_database":"delete_on_context_exit",
+  "exported_test_artifact_max_age_days":7,
+  "exported_test_artifact_max_bytes":1048576,
+  "production_credentials_allowed":false,
+  "raw_payload_export_allowed":false,
+  "default_network_policy":"deny_all_real_network",
+  "retention_enforcement":"Temporary database cleanup is implemented; exported artifact expiry/size enforcement belongs to the trusted CI runner and is NOT_RUN here.",
+  "runtime_qualification":"NOT_RUN"
+}
