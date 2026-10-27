@@ -150,8 +150,8 @@ class SourceContractTests(unittest.TestCase):
         struct.pack_into('<16sHHIQQQIHHHHHH',raw,0,ident,3,62,1,0,64,0,0,64,56,5,0,0,0)
         interp=b'/lib64/ld-linux-x86-64.so.2\0';raw[512:512+len(interp)]=interp
         strings=b'\0libcap.so.2\0libselinux.so.1\0'+glibc.encode()+b'\0';raw[1100:1100+len(strings)]=strings
-        ph=[(1,4,0,0x400000,0,2048,2048,4096),(3,4,512,0x400200,0,len(interp),len(interp),1),
-            (2,4,768,0x400300,0,144,144,8),(0x6474e551,6 if stack else 7,0,0,0,0,0,16),(0x6474e552,4,0,0,0,0,0,1)]
+        ph=[(1,6,0,0x400000,0,2048,2048,4096),(3,4,512,0x400200,0,len(interp),len(interp),1),
+            (2,4,768,0x400300,0,144,144,8),(0x6474e551,6 if stack else 7,0,0,0,0,0,16),(0x6474e552,4,768,0x400300,0,144,144,1)]
         for i,p in enumerate(ph):struct.pack_into('<IIQQQQQQ',raw,64+i*56,*p)
         tags=[(1,strings.index(b'libcap')),(1,strings.index(b'libselinux')),(5,0x400000+1100),(10,len(strings)),
               (0x6ffffffb,0x8000000|(1 if now else 0)),(0x6ffffffe,0x400000+1400),(0x6fffffff,1),(0,0)]
@@ -817,6 +817,50 @@ class ElfSearchPathAndPhaseBudgetTests(unittest.TestCase):
         budget=self._budget(now=1010.0)
         self.assertLessEqual(budget,450);self.assertLessEqual(budget,1540.0-1010.0);self.assertLessEqual(budget,600)
         self.assertEqual(real['execution_seconds']+real['reserve_seconds'],real['job_seconds'])
+
+
+
+
+class EffectiveElfHardeningTests(unittest.TestCase):
+    def fixture(self):return bytearray(SourceContractTests().elf())
+
+    def header(self,raw,index,**changes):
+        names=('type','flags','offset','vaddr','paddr','filesz','memsz','align')
+        values=list(struct.unpack_from('<IIQQQQQQ',raw,64+index*56))
+        for key,value in changes.items():values[names.index(key)]=value
+        struct.pack_into('<IIQQQQQQ',raw,64+index*56,*values)
+        return bytes(raw)
+
+    def test_valid_nonempty_writable_mapped_relro_and_unique_stack(self):
+        raw=bytes(self.fixture());report=s.elf_report(raw)
+        self.assertTrue(report['relro']);self.assertTrue(report['nonexec_stack']);self.assertTrue(report['bind_now'])
+        self.assertEqual(struct.unpack_from('<IIQQQQQQ',raw,64+4*56)[2:7],(768,0x400300,0,144,144))
+
+    def test_empty_unmapped_and_mismatched_relro_are_rejected(self):
+        cases=({'offset':0,'vaddr':0,'filesz':0,'memsz':0},{'filesz':0},{'memsz':0},
+            {'vaddr':0x500300},{'offset':769},{'memsz':2048},{'filesz':145,'memsz':144},{'flags':6})
+        for changes in cases:
+            with self.subTest(changes=changes),self.assertRaises(ValueError):s.elf_report(self.header(self.fixture(),4,**changes))
+
+    def test_duplicate_missing_and_conflicting_hardening_headers_reject(self):
+        for source,flags in ((3,7),(3,6),(4,4)):
+            raw=self.fixture();struct.pack_into('<H',raw,56,6)
+            raw[64+5*56:64+6*56]=raw[64+source*56:64+(source+1)*56]
+            with self.subTest(source=source,flags=flags),self.assertRaises(ValueError):
+                s.elf_report(self.header(raw,5,flags=flags))
+        for index in (3,4):
+            with self.subTest(missing=index),self.assertRaises(ValueError):s.elf_report(self.header(self.fixture(),index,type=0))
+
+    def test_load_sizes_overflow_alignment_and_writability_reject(self):
+        for changes in ({'filesz':2048,'memsz':2047},{'vaddr':2**64-1024},{'align':3},
+            {'offset':1,'filesz':2047},{'flags':4},{'flags':14},{'memsz':0}):
+            with self.subTest(changes=changes),self.assertRaises(ValueError):s.elf_report(self.header(self.fixture(),0,**changes))
+
+    def test_overlapping_loads_and_executable_stack_cannot_mask_valid_header(self):
+        raw=self.fixture();struct.pack_into('<H',raw,56,6)
+        self.header(raw,5,type=1,flags=6,offset=512,vaddr=0x400200,filesz=16,memsz=16,align=1)
+        with self.assertRaises(ValueError):s.elf_report(bytes(raw))
+        with self.assertRaises(ValueError):s.elf_report(self.header(self.fixture(),3,flags=7))
 
 
 if __name__=='__main__':unittest.main()

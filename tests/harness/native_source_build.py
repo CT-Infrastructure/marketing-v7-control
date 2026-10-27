@@ -599,10 +599,28 @@ def elf_report(raw):
     for index in range(e[10]):
         offset=e[5]+index*56;check(offset+56<=len(raw));p=struct.unpack_from('<IIQQQQQQ',raw,offset)
         check(p[2]+p[5]<=len(raw));ph.append(p)
+    loads=[p for p in ph if p[0]==1]
+    check(bool(loads))
+    for p in loads:
+        check(0<p[6] and p[5]<=p[6] and p[3]+p[6]<2**64 and p[1]&~7==0)
+        check(p[7] in (0,1) or (p[7]&(p[7]-1)==0 and p[2]%p[7]==p[3]%p[7]))
+    ordered=sorted(loads,key=lambda p:p[3])
+    check(all(a[3]+a[6]<=b[3] for a,b in zip(ordered,ordered[1:])))
+    relros=[p for p in ph if p[0]==0x6474e552]
+    stacks=[p for p in ph if p[0]==0x6474e551]
+    check(len(relros)==len(stacks)==1)
+    relro=relros[0];stack=stacks[0]
+    check(0<relro[5]<=relro[6] and relro[3]+relro[6]<2**64 and relro[1]==4)
+    # The file-backed prefix and full protection range must share one writable
+    # load mapping; a header alone is not evidence of protected memory.
+    owners=[p for p in loads if p[1]&2 and p[3]<=relro[3] and relro[3]+relro[6]<=p[3]+p[6]
+        and relro[3]+relro[5]<=p[3]+p[5] and relro[2]==p[2]+relro[3]-p[3]]
+    check(len(owners)==1)
+    check(stack[1]&~7==0 and not stack[1]&1)
     def mapped(address,size):
-        for p in ph:
-            if p[0]==1 and p[3]<=address and address+size<=p[3]+p[5]:return p[2]+address-p[3]
-        raise ValueError('invalid ELF mapping')
+        check(0<size and address+size<2**64)
+        matches=[p for p in loads if p[3]<=address and address+size<=p[3]+p[5]]
+        check(len(matches)==1);p=matches[0];return p[2]+address-p[3]
     dynamic={};needed=[];interpreter=None
     for p in ph:
         if p[0]==3:
@@ -632,7 +650,7 @@ def elf_report(raw):
             address+=nxt
     report=dict(machine='AMD64',elf_type='ET_DYN',interpreter=interpreter,
         pie=bool(dynamic.get(0x6ffffffb,0)&0x8000000),bind_now=bool(24 in dynamic or dynamic.get(30,0)&8 or dynamic.get(0x6ffffffb,0)&1),
-        relro=any(p[0]==0x6474e552 for p in ph),nonexec_stack=any(p[0]==0x6474e551 and not p[1]&1 for p in ph),
+        relro=True,nonexec_stack=True,
         needed=[string(n) for n in needed],rpath=string(dynamic[15]) if 15 in dynamic else None,
         runpath=string(dynamic[29]) if 29 in dynamic else None,glibc_versions=sorted(set(versions)))
     check(report['interpreter'] in ('/lib64/ld-linux-x86-64.so.2','/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2'))
