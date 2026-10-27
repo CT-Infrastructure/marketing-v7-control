@@ -592,6 +592,23 @@ def validate_source_result(result, lock):
     hex64(result['post_source_model_sha256'])
 
 
+# Root-reviewed expected target policy, not a measurement of an executor.
+ELF_PAGE_BYTES=4096
+
+
+def target_loader_policy():
+    return dict(system='Linux',elf='ELF64_LSB',architecture='x86_64',glibc='2.35',
+        page_bytes=ELF_PAGE_BYTES,load_bias='PAGE_ALIGNED_REQUIRED',relro_rounding='DOWN_BOTH',
+        qualification='EXPECTED_ONLY_NOT_MEASURED')
+
+
+def require_measured_loader_policy():
+    # No measured adapter/loader/page/bias receipt exists in the current closed
+    # authorization schema. A future root-reviewed interface must bind it before
+    # any build or native launch; parser output cannot self-certify that fact.
+    hold('TARGET_LOADER_PAGE_POLICY_NOT_QUALIFIED')
+
+
 def elf_report(raw):
     check(type(raw) is bytes and 64<=len(raw)<=MAX_FILE and raw[:7]==b'\x7fELF\x02\x01\x01')
     e=struct.unpack_from('<16sHHIQQQIHHHHHH',raw);check(e[2]==62 and e[1]==3 and e[9]==56 and e[10]<=128)
@@ -606,6 +623,14 @@ def elf_report(raw):
         check(p[7] in (0,1) or (p[7]&(p[7]-1)==0 and p[2]%p[7]==p[3]%p[7]))
     ordered=sorted(loads,key=lambda p:p[3])
     check(all(a[3]+a[6]<=b[3] for a,b in zip(ordered,ordered[1:])))
+    page=ELF_PAGE_BYTES
+    down=lambda value:value-value%page
+    up=lambda value:(value+page-1)//page*page
+    # Page aliases, even apparently coherent ones, are outside this supported
+    # subset. Byte-disjoint segments may still replace one another's pages.
+    for p in loads:
+        check(p[2]%page==p[3]%page and up(p[3]+p[6])<2**64)
+    check(all(up(a[3]+a[6])<=down(b[3]) for a,b in zip(ordered,ordered[1:])))
     relros=[p for p in ph if p[0]==0x6474e552]
     stacks=[p for p in ph if p[0]==0x6474e551]
     check(len(relros)==len(stacks)==1)
@@ -616,6 +641,10 @@ def elf_report(raw):
     owners=[p for p in loads if p[1]&2 and p[3]<=relro[3] and relro[3]+relro[6]<=p[3]+p[6]
         and relro[3]+relro[5]<=p[3]+p[5] and relro[2]==p[2]+relro[3]-p[3]]
     check(len(owners)==1)
+    protected_start=down(relro[3]);protected_end=down(relro[3]+relro[6])
+    check(protected_start<protected_end)
+    owner=owners[0]
+    check(down(owner[3])<=protected_start and protected_end<=up(owner[3]+owner[5]))
     check(stack[1]&~7==0 and not stack[1]&1)
     def mapped(address,size):
         check(0<size and address+size<2**64)
@@ -650,7 +679,9 @@ def elf_report(raw):
             address+=nxt
     report=dict(machine='AMD64',elf_type='ET_DYN',interpreter=interpreter,
         pie=bool(dynamic.get(0x6ffffffb,0)&0x8000000),bind_now=bool(24 in dynamic or dynamic.get(30,0)&8 or dynamic.get(0x6ffffffb,0)&1),
-        relro=True,nonexec_stack=True,
+        relro=True,nonexec_stack=True,expected_loader_policy=target_loader_policy(),
+        effective_relro=dict(start=protected_start,end=protected_end,bytes=protected_end-protected_start),
+        full_got_plt_protection='FULL_GOT_PLT_UNQUALIFIED',
         needed=[string(n) for n in needed],rpath=string(dynamic[15]) if 15 in dynamic else None,
         runpath=string(dynamic[29]) if 29 in dynamic else None,glibc_versions=sorted(set(versions)))
     check(report['interpreter'] in ('/lib64/ld-linux-x86-64.so.2','/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2'))
@@ -796,7 +827,7 @@ def runtime_closure(root, expected):
 
 def build_unapproved(root, lock, auth, deadline=None):
     # No code/configure/process executes while unknown facts remain null.
-    build_gate(lock,auth);root=own_root(root)
+    build_gate(lock,auth);require_measured_loader_policy();root=own_root(root)
     deadline=time.monotonic()+90 if deadline is None else deadline
     validate_fingerprints(auth['toolchain'],deadline)
     validate_private_tree(root,lock['generated_output_model'],complete=False)
@@ -898,7 +929,7 @@ def runtime_budget(root):
 
 def runtime_prefix(root, expected_authorization):
     target=own_root(root)/'sourcebuild';lock=source_lock();auth=authorization(expected_authorization)
-    build_gate(lock,auth);validate_private_tree(target,lock['generated_output_model'],complete=False)
+    build_gate(lock,auth);require_measured_loader_policy();validate_private_tree(target,lock['generated_output_model'],complete=False)
     result_raw=read_file(target/'build-result.json',65536)
     result=json.loads(result_raw,object_pairs_hook=unique);check(result_raw==canonical(result))
     binary=read_file(target/'runtime/bin/bwrap');closure=runtime_closure(target,auth['runtime_closure'])

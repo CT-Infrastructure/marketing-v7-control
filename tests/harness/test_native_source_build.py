@@ -146,12 +146,12 @@ class SourceContractTests(unittest.TestCase):
             with self.assertRaises(ValueError):s.validate_private_tree(root,model,complete=False)
 
     def elf(self,glibc='GLIBC_2.35',now=True,stack=True):
-        raw=bytearray(2048);ident=b'\x7fELF\x02\x01\x01'+b'\0'*9
+        raw=bytearray(8192);ident=b'\x7fELF\x02\x01\x01'+b'\0'*9
         struct.pack_into('<16sHHIQQQIHHHHHH',raw,0,ident,3,62,1,0,64,0,0,64,56,5,0,0,0)
         interp=b'/lib64/ld-linux-x86-64.so.2\0';raw[512:512+len(interp)]=interp
         strings=b'\0libcap.so.2\0libselinux.so.1\0'+glibc.encode()+b'\0';raw[1100:1100+len(strings)]=strings
-        ph=[(1,6,0,0x400000,0,2048,2048,4096),(3,4,512,0x400200,0,len(interp),len(interp),1),
-            (2,4,768,0x400300,0,144,144,8),(0x6474e551,6 if stack else 7,0,0,0,0,0,16),(0x6474e552,4,768,0x400300,0,144,144,1)]
+        ph=[(1,6,0,0x400000,0,8192,8192,4096),(3,4,512,0x400200,0,len(interp),len(interp),1),
+            (2,4,768,0x400300,0,144,144,8),(0x6474e551,6 if stack else 7,0,0,0,0,0,16),(0x6474e552,4,768,0x400300,0,3328,3328,1)]
         for i,p in enumerate(ph):struct.pack_into('<IIQQQQQQ',raw,64+i*56,*p)
         tags=[(1,strings.index(b'libcap')),(1,strings.index(b'libselinux')),(5,0x400000+1100),(10,len(strings)),
               (0x6ffffffb,0x8000000|(1 if now else 0)),(0x6ffffffe,0x400000+1400),(0x6fffffff,1),(0,0)]
@@ -834,7 +834,7 @@ class EffectiveElfHardeningTests(unittest.TestCase):
     def test_valid_nonempty_writable_mapped_relro_and_unique_stack(self):
         raw=bytes(self.fixture());report=s.elf_report(raw)
         self.assertTrue(report['relro']);self.assertTrue(report['nonexec_stack']);self.assertTrue(report['bind_now'])
-        self.assertEqual(struct.unpack_from('<IIQQQQQQ',raw,64+4*56)[2:7],(768,0x400300,0,144,144))
+        self.assertEqual(struct.unpack_from('<IIQQQQQQ',raw,64+4*56)[2:7],(768,0x400300,0,3328,3328))
 
     def test_empty_unmapped_and_mismatched_relro_are_rejected(self):
         cases=({'offset':0,'vaddr':0,'filesz':0,'memsz':0},{'filesz':0},{'memsz':0},
@@ -861,6 +861,65 @@ class EffectiveElfHardeningTests(unittest.TestCase):
         self.header(raw,5,type=1,flags=6,offset=512,vaddr=0x400200,filesz=16,memsz=16,align=1)
         with self.assertRaises(ValueError):s.elf_report(bytes(raw))
         with self.assertRaises(ValueError):s.elf_report(self.header(self.fixture(),3,flags=7))
+
+
+
+
+class LoaderEffectiveRelroTests(unittest.TestCase):
+    def fixture(self):return bytearray(SourceContractTests().elf())
+
+    def header(self,raw,index,**changes):
+        return EffectiveElfHardeningTests().header(raw,index,**changes)
+
+    def test_down_both_page_boundaries_and_partial_ranges(self):
+        for end,accepted,protected in ((4095,False,0),(4096,True,4096),(4097,True,4096),(8191,True,4096),(8192,True,8192)):
+            raw=self.header(self.fixture(),4,filesz=end-768,memsz=end-768)
+            if accepted:
+                report=s.elf_report(raw);self.assertEqual(report['effective_relro'],dict(start=0x400000,end=0x400000+protected,bytes=protected))
+            else:
+                with self.assertRaises(ValueError):s.elf_report(raw)
+        with self.assertRaises(ValueError):s.elf_report(self.header(self.fixture(),4,filesz=144,memsz=144))
+        report=s.elf_report(self.header(self.fixture(),4,offset=4095,vaddr=0x400fff,filesz=2,memsz=2))
+        self.assertEqual(report['effective_relro']['bytes'],4096)
+
+    def test_page_conflicting_byte_disjoint_loads_reject(self):
+        for flags,offset in ((6,0x1800),(4,0x800),(6,0x800)):
+            raw=self.fixture();struct.pack_into('<H',raw,56,6)
+            self.header(raw,0,filesz=1536,memsz=1536)
+            self.header(raw,4,filesz=144,memsz=144)
+            self.header(raw,5,type=1,flags=flags,offset=offset,vaddr=0x400800,filesz=1024,memsz=1024,align=4096)
+            with self.subTest(flags=flags,offset=offset),self.assertRaises(ValueError):s.elf_report(bytes(raw))
+
+        # Independent alias counterexample keeps a genuinely protected RELRO
+        # page in the first LOAD; rejection cannot rely on empty RELRO alone.
+        for flags,offset in ((6,0x1800),(4,0x800),(6,0x800)):
+            raw=self.fixture();struct.pack_into('<H',raw,56,7)
+            self.header(raw,0,filesz=4096,memsz=4096)
+            self.header(raw,5,type=1,flags=6,offset=0,vaddr=0x402000,filesz=1536,memsz=1536,align=4096)
+            self.header(raw,6,type=1,flags=flags,offset=offset,vaddr=0x402800,filesz=1024,memsz=1024,align=4096)
+            with self.subTest(independent=True,flags=flags,offset=offset),self.assertRaises(ValueError):s.elf_report(bytes(raw))
+
+    def test_page_adjacent_loads_accept_but_coherent_shared_page_is_unsupported(self):
+        raw=self.fixture();struct.pack_into('<H',raw,56,6)
+        self.header(raw,0,filesz=4096,memsz=4096)
+        self.header(raw,5,type=1,flags=6,offset=4096,vaddr=0x401000,filesz=4096,memsz=4096,align=4096)
+        self.assertTrue(s.elf_report(bytes(raw))['relro'])
+        self.header(raw,0,filesz=4608,memsz=4608)
+        self.header(raw,5,offset=4608,vaddr=0x401200,filesz=3584,memsz=3584,align=4096)
+        with self.assertRaises(ValueError):s.elf_report(bytes(raw))
+
+    def test_page_congruence_and_top_page_overflow_reject(self):
+        raw=self.header(self.fixture(),0,align=1,vaddr=0x400001)
+        with self.assertRaises(ValueError):s.elf_report(raw)
+        raw=self.header(self.fixture(),0,align=1,offset=0,vaddr=2**64-4096,filesz=4095,memsz=4095)
+        with self.assertRaises(ValueError):s.elf_report(raw)
+
+    def test_expected_policy_and_full_got_plt_are_never_measurement_or_authority(self):
+        report=s.elf_report(bytes(self.fixture()))
+        self.assertEqual(report['expected_loader_policy'],dict(system='Linux',elf='ELF64_LSB',architecture='x86_64',glibc='2.35',page_bytes=4096,load_bias='PAGE_ALIGNED_REQUIRED',relro_rounding='DOWN_BOTH',qualification='EXPECTED_ONLY_NOT_MEASURED'))
+        self.assertEqual(report['full_got_plt_protection'],'FULL_GOT_PLT_UNQUALIFIED')
+        with self.assertRaises(s.QualificationHold) as caught:s.require_measured_loader_policy()
+        self.assertEqual(str(caught.exception),'TARGET_LOADER_PAGE_POLICY_NOT_QUALIFIED')
 
 
 if __name__=='__main__':unittest.main()
