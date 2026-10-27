@@ -1,0 +1,32 @@
+name: F07 public wrapper diagnostic
+on:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  f07-wrapper-diagnostic:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 3
+    env:
+      F07_CANDIDATE_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Collect fixed public wrapper facts without execution
+        run: bash .github/scripts/diagnose-f07-wrapper.sh collect
+      - name: Upload diagnostic only
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: f07-wrapper-diagnostic-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/f07-wrapper-diagnostic-${{ github.run_id }}-${{ github.run_attempt }}/diagnostic.json
+          archive: true
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 6
+          include-hidden-files: false
+          overwrite: false
+      - name: Clean owned diagnostic root
+        if: always()
+        run: bash .github/scripts/diagnose-f07-wrapper.sh cleanup
