@@ -209,7 +209,7 @@ def raw_tar_headers(raw, deadline):
                 while True:
                     trailer=read(512)
                     if not trailer:break
-                    padding+=len(trailer);check(len(trailer)==512 and not any(trailer) and padding<=10240)
+                    padding+=len(trailer);check(len(trailer)==512 and not any(trailer) and padding<=10752)
                 break
             try:info=tarfile.TarInfo.frombuf(block,'utf-8','strict')
             except (tarfile.HeaderError,UnicodeError) as exc:raise ValueError('invalid raw tar header') from exc

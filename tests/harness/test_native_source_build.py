@@ -705,4 +705,43 @@ class DebianMetadataLinkTests(unittest.TestCase):
         with self.assertRaises(ValueError):s.validate_input_model_result(dict(debian_input_model_sha256='c'*64),lock)
 
 
+class TarZeroTailBoundaryTests(unittest.TestCase):
+    def _tar(self,tail):
+        info=tarfile.TarInfo('file');info.size=1
+        return info.tobuf(format=tarfile.USTAR_FORMAT)+b's'+bytes(511)+bytes(tail)
+
+    def test_actual_21_block_zero_tail_is_accepted_without_trimming_or_member_changes(self):
+        # Exact observed tail length of authenticated libcap-dev data TAR;
+        # contents are synthetic and no package code is executed.
+        raw=self._tar(10752);before=s.digest(raw)
+        rows,data=s.archive_rows(raw,'tar')
+        self.assertEqual(rows,[dict(name='file',type='file',bytes=1,sha256=s.digest(b's'),link='')])
+        self.assertEqual(data,{'file':b's'});self.assertEqual(s.digest(raw),before)
+        self.assertEqual(len(raw)-1024,10752)
+
+    def test_20_and_21_block_zero_boundaries_preserve_identical_members(self):
+        expected=s.archive_rows(self._tar(10240),'tar')
+        self.assertEqual(s.archive_rows(self._tar(10752),'tar'),expected)
+        self.assertEqual(s.archive_rows(self._tar(1024),'tar'),expected)
+        with self.assertRaises(ValueError):s.archive_rows(self._tar(11264),'tar')
+
+    def test_zero_tail_exception_keeps_alignment_two_eoa_and_entire_zero_checks(self):
+        for count in (0,512,10751,10753,11264):
+            with self.subTest(count=count),self.assertRaises(ValueError):s.archive_rows(self._tar(count),'tar')
+        for index in (1024,1536,2048,-1,-512):
+            raw=bytearray(self._tar(10752));raw[index]=1
+            with self.subTest(index=index),self.assertRaises(ValueError):s.archive_rows(bytes(raw),'tar')
+
+    def test_nonzero_tar_structure_after_eoa_is_not_padding(self):
+        first=self._tar(1024);later=tarfile.TarInfo('later');later.size=0
+        raw=first+later.tobuf(format=tarfile.USTAR_FORMAT)+bytes(512)
+        with self.assertRaises(ValueError):s.archive_rows(raw,'tar')
+
+    def test_old_oversized_fixture_still_has_22_zero_blocks_and_rejects(self):
+        old=LocalMtimeMetadataTests()._archive()+bytes(10240)
+        self.assertEqual(len(old),13312)
+        self.assertEqual(len(old)-2048,11264)
+        with self.assertRaises(ValueError):s.archive_rows(old,'tar')
+
+
 if __name__=='__main__':unittest.main()
