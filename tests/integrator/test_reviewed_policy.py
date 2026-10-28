@@ -143,13 +143,28 @@ class GuardTests(unittest.TestCase):
         with self.assertRaisesRegex(g.Held,'TOTAL_BOUND'):g.observe(self.candidate,limits)
 
     def test_actual_export_race_is_rejected(self):
-        original=g.os.read;changed=[False]
+        original_read=g.os.read;original_write=Path.write_bytes
+        changed=[0];writes=[];target=self.candidate/OWNED
+        injected=b'changed during observation'
+        def write(path,data):
+            writes.append((path,data));return original_write(path,data)
         def read(fd,count):
-            data=original(fd,count)
-            if data and not changed[0]:
-                changed[0]=True;(self.candidate/OWNED).write_bytes(b'changed during observation')
+            data=original_read(fd,count)
+            if data and changed[0]==0:
+                changed[0]+=1;target.write_bytes(injected)
             return data
-        with patch.object(g.os,'read',side_effect=read):self.assert_held()
+        # This fixture deliberately changes input; the generic no-input-change
+        # helper is inappropriate. Assert the policy hold and only that one
+        # external write, without permitting guard restoration/additional writes.
+        with patch.object(g.os,'read',side_effect=read),patch.object(Path,'write_bytes',new=write):
+            answer=self.assess()
+        self.assertFalse(answer['consistent'],answer)
+        self.assertEqual(answer['decision'],'HOLD')
+        self.assertEqual(answer['effect_authority'],'NONE')
+        self.assertEqual(answer['reasons'],['OBSERVED_MANIFEST_CHANGED'])
+        self.assertEqual(changed,[1])
+        self.assertEqual(writes,[(target,injected)])
+        self.assertEqual(target.read_bytes(),injected)
 
     def test_head_base_tree_fence_and_input_changes_invalidate(self):
         for key,value in (('head','e'*40),('base','e'*40),('tree','e'*40),('fence',2),('input_sha256','f'*64)):
