@@ -1,0 +1,110 @@
+{
+  "schema": "reviewed-integration-policy-v1",
+  "task": "F13",
+  "route": "reviewed-policy-only",
+  "effect_authority": "NONE",
+  "decision": "HOLD",
+  "dependencies": [
+    "F02",
+    "F10"
+  ],
+  "limits": {
+    "files": 512,
+    "file_bytes": 2097152,
+    "total_bytes": 8388608,
+    "result_bytes": 262144,
+    "pages": 64,
+    "records": 4096
+  },
+  "protected_prefixes": [
+    ".github/",
+    "config/",
+    "contracts/",
+    "schemas/",
+    "policies/",
+    "orchestration/controller/",
+    "docs/security/"
+  ],
+  "protected_files": [
+    "AGENTS.md",
+    "docs/orchestration/EXECUTION_PROTOCOL.md",
+    "docs/orchestration/AGENT_ADAPTER_PROTOCOL.md"
+  ],
+  "required_sources": [
+    "reviews",
+    "issue_comments",
+    "inline_comments",
+    "threads",
+    "checks",
+    "native",
+    "history",
+    "findings"
+  ],
+  "review": {
+    "independent_author": true,
+    "fresh_whole_candidate_MAX": true,
+    "zero_open_severity": [
+      "P0",
+      "P1",
+      "P2",
+      "P3"
+    ],
+    "additional_codex": "deduplicated_actual_request; confirmed_unavailability_is_not_approval",
+    "max_age_seconds": 3600
+  },
+  "native": {
+    "actual_required_reviews_and_checks": true,
+    "no_fabricated_approval": true,
+    "no_self_approval": true
+  },
+  "invalidation": [
+    "head",
+    "base",
+    "tree",
+    "input_sha256",
+    "fence",
+    "manifest_sha256",
+    "test_sha256",
+    "review_sha256",
+    "checks_sha256",
+    "source_sha256",
+    "result_sha256",
+    "policy_sha256"
+  ],
+  "human_escalation": [
+    "protected",
+    "unowned",
+    "rename",
+    "delete",
+    "link",
+    "special",
+    "traversal"
+  ],
+  "trusted_sequence": [
+    "host_exports_and_diff",
+    "independent_fresh_review",
+    "exact_head_checks_and_native_rules",
+    "serialized_existing_owner_expected_head_merge",
+    "positive_merge_readback",
+    "trusted_acceptance"
+  ],
+  "effects_forbidden": [
+    "launch",
+    "queue",
+    "commit",
+    "push",
+    "PR",
+    "merge",
+    "adopt",
+    "SDK_accept",
+    "retire",
+    "unlock",
+    "deploy"
+  ],
+  "limitations": [
+    "Host guard verifies consistency only, not authenticity of caller JSON or UUID.",
+    "Existing trusted owner remains sole mutation authority.",
+    "No distributed queue or runtime qualification.",
+    "Stage25 retirement and authenticated wire compatibility remain unresolved in root intake."
+  ]
+}
