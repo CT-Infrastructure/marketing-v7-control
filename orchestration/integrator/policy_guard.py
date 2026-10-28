@@ -355,6 +355,6 @@ def assess(base_root, candidate_root, result_bytes, *, expected_binding, host_fa
         code = str(error)
         report['reasons'] = [code]
         report['human_escalation'] = any(word in code for word in ('ESCALATION', 'PATH_', 'LINK', 'SPECIAL', 'GIT_METADATA', 'AMBIGUOUS_PATH'))
-    except (OSError, TypeError, KeyError, ValueError, RecursionError):
+    except (OSError, TypeError, KeyError, ValueError, RecursionError, OverflowError):
         report['reasons'] = ['MALFORMED_OR_UNREADABLE_HOST_OBSERVATION']
     return report

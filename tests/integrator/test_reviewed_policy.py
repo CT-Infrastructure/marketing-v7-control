@@ -376,5 +376,39 @@ class GuardTests(unittest.TestCase):
         pages[-1]['next_page']=5;pages.append(page(self.binding,[],number=5))
         with self.assertRaisesRegex(g.Held,'SOURCE_TOTAL_BOUND'):g._pages({'reviews':pages},['reviews'],self.binding,POLICY['limits'])
 
+    def test_huge_integer_timestamps_return_redacted_malformed_hold(self):
+        # Real disposable exports and actual assess; all raw-review/page/digest
+        # bindings are rebuilt so every case reaches math.isfinite, not an
+        # incidental raw-source mismatch. Integers are 401 decimal digits.
+        ordinary = copy.deepcopy(self.facts)
+        ordinary_raw_review = copy.deepcopy(self.raw_review)
+        self.assert_consistent()
+        for field in ('now', 'reviewed_at', 'expires_at'):
+            for sign in (1, -1):
+                with self.subTest(field=field, sign=sign):
+                    self.facts = copy.deepcopy(ordinary)
+                    huge = sign * (10 ** 400)
+                    if field == 'now':
+                        self.facts['now'] = huge
+                    else:
+                        self.facts['review'][field] = huge
+                    review = self.facts['review']
+                    self.raw_review = dict({k:v for k,v in review.items()
+                        if k not in ('source_id','source_sha256')}, id=review['source_id'])
+                    review['source_sha256'] = g.digest(self.raw_review)
+                    self.facts['sources']['reviews'] = [page(self.binding, [self.raw_review])]
+                    self.seal()
+                    self.assert_held('MALFORMED_OR_UNREADABLE_HOST_OBSERVATION')
+                    answer = self.assess()
+                    self.assertFalse(answer['consistent'])
+                    self.assertEqual(answer['decision'], 'HOLD')
+                    self.assertEqual(answer['effect_authority'], 'NONE')
+                    self.assertEqual(answer['reasons'], ['MALFORMED_OR_UNREADABLE_HOST_OBSERVATION'])
+                    self.assertNotIn(str(huge), json.dumps(answer))
+                    self.facts = copy.deepcopy(ordinary)
+                    self.raw_review = copy.deepcopy(ordinary_raw_review)
+                    self.seal()
+                    self.assert_consistent()
+
 
 if __name__=='__main__':unittest.main()
