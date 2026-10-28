@@ -97,6 +97,21 @@ def _root_fd(root):
         raise
 
 
+def _bounded_names(fd, remaining):
+    """Consume at most remaining+1 entries, then sort only admitted names.
+
+    The extra entry is a refusal sentinel, never appended/materialized. Both
+    initial discovery and the final race reread use this descriptor-relative
+    iterator. The context manager closes it even when the cap refuses.
+    """
+    names = []
+    with os.scandir(fd) as entries:
+        for entry in entries:
+            need(len(names) < remaining, 'ENTRY_BOUND')
+            names.append(entry.name)
+    return sorted(names)
+
+
 def observe(root, limits):
     """Complete bounded regular-file inventory; no agent manifest is trusted.
 
@@ -111,14 +126,17 @@ def observe(root, limits):
     def walk(fd, prefix=''):
         nonlocal total
         before_dir = _identity(os.fstat(fd))
-        names = sorted(os.listdir(fd))
-        need(len(names) <= limits['files'], 'ENTRY_BOUND')
+        names = _bounded_names(fd, limits['files'] - len(seen))
+        # Reserve every discovered entry now, including pending siblings. This
+        # makes the global remaining cap bound all recursion stacks together.
         for name in names:
             relative = path_name(prefix + name)
             key = relative.casefold()
             need(key not in seen, 'AMBIGUOUS_PATH')
             seen.add(key)
             need(len(seen) <= limits['files'], 'ENTRY_BOUND')
+        for name in names:
+            relative = prefix + name
             named = os.stat(name, dir_fd=fd, follow_symlinks=False)
             need(not stat.S_ISLNK(named.st_mode), 'LINK_ESCALATION')
             if stat.S_ISDIR(named.st_mode):
@@ -157,7 +175,7 @@ def observe(root, limits):
                                  bytes=len(content), executable=bool(before.st_mode & 0o111)))
             finally:
                 os.close(file_fd)
-        need(names == sorted(os.listdir(fd)) and before_dir == _identity(os.fstat(fd)),
+        need(names == _bounded_names(fd, len(names)) and before_dir == _identity(os.fstat(fd)),
              'DIRECTORY_RACE')
     fd = _root_fd(root)
     try:

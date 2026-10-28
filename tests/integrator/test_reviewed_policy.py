@@ -25,6 +25,21 @@ def page(binding, records, number=1, next_page=None):
                 records=[dict(id=str(x['id']), sha256=g.digest(x)) for x in records])
 
 
+class _BoundedScan:
+    """Finite lazy stand-in for an enormous hostile directory, no allocation."""
+    def __init__(self, sentinel_count):
+        self.sentinel_count=sentinel_count;self.consumed=0;self.closed=False
+    def __enter__(self):return self
+    def __exit__(self,*args):self.closed=True
+    def __iter__(self):return self
+    def __next__(self):
+        if self.consumed>=self.sentinel_count:
+            raise AssertionError('Enumeration continued after refusal sentinel')
+        self.consumed+=1
+        entry=type('SyntheticEntry',(),{})();entry.name='synthetic-'+str(self.consumed)
+        return entry
+
+
 class GuardTests(unittest.TestCase):
     def setUp(self):
         self.scratch = tempfile.TemporaryDirectory()
@@ -238,6 +253,48 @@ class GuardTests(unittest.TestCase):
     def test_forged_caller_facts_can_never_mint_effect_authority(self):
         # The fixture is deliberately forgeable: this API authenticates nobody.
         answer=self.assert_consistent();self.assertEqual(answer['decision'],'HOLD');self.assertEqual(answer['effect_authority'],'NONE')
+
+
+    def test_initial_enumeration_stops_at_global_cap_plus_one(self):
+        self.assert_consistent()
+        scan=_BoundedScan(POLICY['limits']['files']+1)
+        with patch.object(g.os,'scandir',return_value=scan),patch.object(g.os,'listdir',side_effect=AssertionError('Unbounded listdir forbidden')):
+            answer=self.assess()
+        self.assertFalse(answer['consistent']);self.assertEqual(answer['decision'],'HOLD');self.assertEqual(answer['effect_authority'],'NONE')
+        self.assertEqual(answer['reasons'],['ENTRY_BOUND'])
+        self.assertEqual(scan.consumed,POLICY['limits']['files']+1);self.assertTrue(scan.closed)
+
+    def test_nested_enumeration_uses_remaining_global_cap(self):
+        self.assert_consistent()
+        original=g.os.scandir;calls=[0];scan=_BoundedScan(1)
+        limits=copy.deepcopy(POLICY['limits']);limits['files']=2
+        def scandir(fd):
+            self.assertIs(type(fd),int);calls[0]+=1
+            # Existing root/orchestration and integrator entries consume the
+            # entire two-entry global budget before the leaf is enumerated.
+            return scan if calls[0]==3 else original(fd)
+        with patch.object(g.os,'scandir',side_effect=scandir),patch.object(g.os,'listdir',side_effect=AssertionError('Unbounded listdir forbidden')):
+            with self.assertRaisesRegex(g.Held,'ENTRY_BOUND'):g.observe(self.candidate,limits)
+        self.assertEqual(calls,[3]);self.assertEqual(scan.consumed,1);self.assertTrue(scan.closed)
+
+    def test_final_reread_stops_at_original_count_plus_one(self):
+        self.assert_consistent()
+        original=g.os.scandir;calls=[0];scan=_BoundedScan(2)
+        def scandir(fd):
+            self.assertIs(type(fd),int);calls[0]+=1
+            # Three initial directory walks precede the first final reread:
+            # that leaf originally had exactly one entry. Two is the sentinel.
+            return scan if calls[0]==4 else original(fd)
+        with patch.object(g.os,'scandir',side_effect=scandir),patch.object(g.os,'listdir',side_effect=AssertionError('Unbounded listdir forbidden')):
+            answer=self.assess()
+        self.assertFalse(answer['consistent']);self.assertEqual(answer['decision'],'HOLD');self.assertEqual(answer['effect_authority'],'NONE')
+        self.assertEqual(answer['reasons'],['ENTRY_BOUND'])
+        self.assertEqual(calls,[4]);self.assertEqual(scan.consumed,2);self.assertTrue(scan.closed)
+
+    def test_positive_initial_and_final_reads_never_use_listdir(self):
+        self.assert_consistent()
+        with patch.object(g.os,'listdir',side_effect=AssertionError('Unbounded listdir forbidden')):
+            self.assert_consistent()
 
 
 if __name__=='__main__':unittest.main()
