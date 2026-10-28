@@ -9,12 +9,14 @@
     "F10"
   ],
   "limits": {
-    "files": 512,
-    "file_bytes": 2097152,
-    "total_bytes": 8388608,
+    "files": 2048,
+    "file_bytes": 8388608,
+    "total_bytes": 33554432,
     "result_bytes": 262144,
     "pages": 64,
-    "records": 4096
+    "records": 4096,
+    "source_page_bytes": 2097152,
+    "source_total_bytes": 8388608
   },
   "protected_prefixes": [
     ".github/",

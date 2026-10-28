@@ -210,10 +210,10 @@ def _pages(sources, required, binding, limits):
                  and page['next_page'] == (index + 2 if index + 1 < len(pages) else None),
                  'INCOMPLETE_PAGINATION')
             need(page['binding'] == binding and sha(page['raw_sha256']), 'SOURCE_BINDING')
-            need(type(page['raw_utf8']) is str and len(page['raw_utf8'].encode()) <= limits['file_bytes'] and raw_digest(page['raw_utf8'].encode()) == page['raw_sha256'], 'UNVERIFIED_RAW_SOURCE')
+            need(type(page['raw_utf8']) is str and len(page['raw_utf8'].encode()) <= limits['source_page_bytes'] and raw_digest(page['raw_utf8'].encode()) == page['raw_sha256'], 'UNVERIFIED_RAW_SOURCE')
             total_raw += len(page['raw_utf8'].encode())
-            need(total_raw <= limits['total_bytes'], 'SOURCE_TOTAL_BOUND')
-            raw = strict_json(page['raw_utf8'].encode(), limits['file_bytes'])
+            need(total_raw <= limits['source_total_bytes'], 'SOURCE_TOTAL_BOUND')
+            raw = strict_json(page['raw_utf8'].encode(), limits['source_page_bytes'])
             need(type(raw) is list and len(raw) <= limits['records'], 'RAW_SOURCE_RECORDS')
             observed = []
             for item in raw:
